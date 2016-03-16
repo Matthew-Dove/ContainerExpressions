@@ -9,8 +9,8 @@ Used in situations where you desire the value to be calulated the first time it'
 The value will only be calulated once, this container is thread safe.  
 
 In the example below `IUserService` is injected into other services using [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection), the code runs in the context of a web server.  
-So depending on what time the DI framework creates the `UserService`, and what time the user is authenticated (*and therefore set the thread's `CurrentPrincipal`*), reading the name may cause an error.  
-Using the later container, we know longer have to care about the execution order of the authentication, and the dependency injector.
+So depending on what time the DI framework creates the `UserService`, and what time the user is authenticated (*and therefore sets the thread's `CurrentPrincipal`*), reading the name may cause an error.  
+Using the later container we know longer have to care about the execution order of the authentication, and the dependency injector.
 ```cs
 public class UserService : IUserService
 {
@@ -37,7 +37,7 @@ public class CustomerService
 {
     public Response<Customer> LoadCustomer(int id)
     {
-        var response = new Response<Customer>(); // The response starts of in an invalid state.
+        var response = new Response<Customer>(); // The response starts off in an invalid state.
 
         try
         {
@@ -55,7 +55,7 @@ public class CustomerService
 }
 ```
 
-The comsuming code looks like:
+The consuming code looks like:
 ```cs
 CustomerService service = new CustomerService();
 Response<Customer> customer service.LoadCustomer(1337);
@@ -73,11 +73,11 @@ public class CustomerService
 {
     public Response SaveCustomer(Customer customer)
     {
-        var response = new Response(); // The response starts of in an invalid state.
+        var response = new Response(); // The response starts off in an invalid state.
 
         try
         {
-        	string json = JsonConvert.SerializeObject(customer);
+            string json = JsonConvert.SerializeObject(customer);
             File.WriteAllText($"~/Users/{id}.json", json);
             response = response.AsValid(); // The response is in a valid state.
         }
@@ -96,8 +96,8 @@ public class CustomerService
 ### Compose`<T>`
 
 Used to run dependant functions one after each other, such that the first function's output feeds into the second function's input.  
-This continues until the last function, when that type is returned, in the container `Response<T>`.
-If any of the functions fail, the whole chain will fail, and the final container's response will be invalid.
+This continues until the last function, when that type is returned in the container `Response<T>`.
+If any of the functions fail, the whole chain will fail and the final container's response will be invalid.
 
 In the example below `Download`, `Unzip`, and `Persist` are all functions with the return type of `Response<T>`.  
 The function `Download` retrieves a file from a server, the function `Unzip` decompresses the file, and the final function `Persist` saves data from that file to a database, returning the number of rows inserted. In this case the final function `Persist`, has a return type of `Response<int>`. If any one of these three functions fail, the end result of the expression will be an *invalid* response.
