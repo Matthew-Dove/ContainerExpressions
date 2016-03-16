@@ -3,12 +3,14 @@
 namespace MonadicExpressions.Containers
 {
     /// <summary>Loads the value only once, the first time it's accessed.</summary>
-    /// <remarks>This model is not thread safe.</remarks>
+    /// <remarks>This model is thread safe.</remarks>
     public struct Later<T>
     {
-        public T Value { get { if (_func != null) { _value = _func(); _func = null; } return _value; } }
+        public T Value { get { return GetValue(); } }
         private T _value;
         private Func<T> _func;
+
+        private readonly static object _lock = new object();
 
         /// <summary>Loads the value only once, the first time it's accessed.</summary>
         /// <param name="func">A function that will be called once (and only once) to generate a value.</param>
@@ -23,6 +25,23 @@ namespace MonadicExpressions.Containers
 
         /// <summary>When compared to T, the underlying value is returned.</summary>
         public static implicit operator T(Later<T> later) => later.Value;
+
+        private T GetValue()
+        {
+            if (_func != null)
+            {
+                lock (_lock)
+                {
+                    if (_func != null)
+                    {
+                        _value = _func();
+                        _func = null;
+                    }
+                }
+            }
+
+            return _value;
+        }
     }
 
     /// <summary>A helper class for the Later generic class.</summary>
