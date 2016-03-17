@@ -1,4 +1,4 @@
-﻿using MonadicExpressions.Containers;
+﻿using ContainerExpressions.Containers;
 using System;
 
 namespace ContainerExpressions.Expressions

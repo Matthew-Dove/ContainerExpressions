@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MonadicExpressions.Containers;
+using ContainerExpressions.Containers;
 using System;
 
-namespace Tests.MonadicExpressions.Containters
+namespace Tests.ContainerExpressions.Containters
 {
     [TestClass]
     public class LaterTests

@@ -1,4 +1,4 @@
-﻿using MonadicExpressions.Containers;
+﻿using ContainerExpressions.Containers;
 using System;
 
 namespace ContainerExpressions.Expressions.Core
@@ -7,7 +7,6 @@ namespace ContainerExpressions.Expressions.Core
     {
         public static Response<T> Evaluate<T>(Func<Response<T>> func)
         {
-            System.IO.File.WriteAllText
             return func();
         }
     }

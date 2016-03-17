@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MonadicExpressions.Containers
+namespace ContainerExpressions.Containers
 {
     /// <summary>
     /// A wrapper around the real value a method will return.
