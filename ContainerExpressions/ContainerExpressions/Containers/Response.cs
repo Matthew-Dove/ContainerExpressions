@@ -74,7 +74,7 @@ namespace ContainerExpressions.Containers
         /// <summary>When compared to a bool, the IsValid properties value will be used.</summary>
         public static implicit operator bool(Response response) => response.IsValid;
 
-        /// <summary>Gets teh string value for if this response is valid or not.</summary>
+        /// <summary>Gets the string value for if this response is valid or not.</summary>
         /// <returns>The bool string value for the IsValid Property.</returns>
         public override string ToString() => _isValid.ToString();
     }
