@@ -99,10 +99,10 @@ Used to run dependant functions one after each other, such that the first functi
 This continues until the last function, when that type is returned in the container `Response<T>`.
 If any of the functions fail, the whole chain will fail and the final container's response will be invalid.
 
-In the example below `Download`, `Unzip`, and `Persist` are all functions with the return type of `Response<T>`.  
-The function `Download` retrieves a file from a server, the function `Unzip` decompresses the file, and the final function `Persist` saves data from that file to a database, returning the number of rows inserted.  
-In this case the final function `Persist`, has a return type of `Response<int>`.  
-If any one of these three functions fail, the end result of the expression will be an invalid response.
+In the example below `DownloadHtml`, and `PersistHtml` are functions with the return type of `Response<T>`, in this case T is string for both functions.  
+The function `DownloadHtml` retrieves a webpage from a server, and the function `PersistHtml` saves that html to a file, returning the path to the new file.  
+In this case the final function `PersistHtml`, has a return type of `Response<string>`, so the return type of `Expression.Compose`, will also be `Response<string>`.  
+If either of these functions fail, the end result of the expression will be an invalid response.
 ```cs
-var rowsInserted = Expression.Compose<int>(Download, Unzip, Persist);
+var filepath = Expression.Compose(DownloadHtml, PersistHtml);
 ```

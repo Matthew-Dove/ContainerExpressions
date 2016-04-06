@@ -59,6 +59,7 @@
     <Compile Include="Containers\LaterTests.cs" />
     <Compile Include="Containers\ResponseTests.cs" />
     <Compile Include="Examples\BaseResponseExample.cs" />
+    <Compile Include="Examples\ComposeTExample.cs" />
     <Compile Include="Examples\LaterTExample.cs" />
     <Compile Include="Examples\ResponseTExample.cs" />
     <Compile Include="Expressions\Core\ComposeTests.cs" />
