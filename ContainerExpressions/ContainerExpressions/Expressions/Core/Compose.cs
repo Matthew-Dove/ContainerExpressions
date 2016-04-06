@@ -1,6 +1,5 @@
 ﻿using ContainerExpressions.Containers;
 using System;
-using System.Runtime.CompilerServices;
 
 namespace ContainerExpressions.Expressions.Core
 {
