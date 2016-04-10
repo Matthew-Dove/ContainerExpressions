@@ -63,6 +63,7 @@
     <Compile Include="Examples\LaterTExample.cs" />
     <Compile Include="Examples\ResponseTExample.cs" />
     <Compile Include="Expressions\Core\ComposeTests.cs" />
+    <Compile Include="Expressions\Core\ComposeAsyncTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
