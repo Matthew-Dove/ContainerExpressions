@@ -43,6 +43,7 @@
     <Compile Include="Containers\Later.cs" />
     <Compile Include="Containers\Response.cs" />
     <Compile Include="Expressions\Core\Compose.cs" />
+    <Compile Include="Expressions\Core\ComposeAsync.cs" />
     <Compile Include="Expressions\Expression.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

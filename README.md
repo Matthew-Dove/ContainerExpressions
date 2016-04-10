@@ -106,3 +106,5 @@ If either of these functions fail, the end result of the expression will be an i
 ```cs
 var filepath = Expression.Compose(DownloadHtml, PersistHtml);
 ```
+
+Note: there is also Expression.ComposeAsync() for composing asynchronous functions.
