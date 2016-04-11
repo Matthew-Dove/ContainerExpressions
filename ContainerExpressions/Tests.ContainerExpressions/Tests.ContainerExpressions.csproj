@@ -66,6 +66,7 @@
     <Compile Include="Expressions\Core\ComposeTests.cs" />
     <Compile Include="Expressions\Core\ComposeAsyncTests.cs" />
     <Compile Include="Expressions\Core\MatchTests.cs" />
+    <Compile Include="Expressions\Core\MatchAsyncTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
