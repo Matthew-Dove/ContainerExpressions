@@ -33,5 +33,19 @@ namespace Tests.ContainerExpressions.Expressions.Core
 
             Assert.IsFalse(pattern);
         }
+
+        [TestMethod]
+        public void TwoPatterns_SkipsPatternsUntil_MatchIsFound()
+        {
+            var guid = Guid.NewGuid();
+
+            var pattern = Expression.Match(10,
+                Pattern.Create<int, Guid>((x) => !_isEven(x), _ => Response.Create(Guid.NewGuid())), // Skips thi pattern.
+                Pattern.Create<int, Guid>(_isEven, _ => Response.Create(guid)) // Pattern match.
+            );
+
+            Assert.IsTrue(pattern);
+            Assert.AreEqual(guid, pattern);
+        }
     }
 }
