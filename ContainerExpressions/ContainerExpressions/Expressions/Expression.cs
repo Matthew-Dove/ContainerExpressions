@@ -33,10 +33,10 @@ namespace ContainerExpressions.Expressions
 
         #region Synchronous
 
-        public static Response<TResult> Match<TInput, TResult>(TInput input, Pattern<TInput, Response<TResult>> pattern) => Core.Match.Pattern(input, pattern);
-        public static Response<TResult> Match<TInput, TResult>(TInput input, Pattern<TInput, Response<TResult>> pattern1, Pattern<TInput, Response<TResult>> pattern2) => Core.Match.Pattern(input, pattern1, pattern2);
-        public static Response<TResult> Match<TInput, TResult>(TInput input, Pattern<TInput, Response<TResult>> pattern1, Pattern<TInput, Response<TResult>> pattern2, Pattern<TInput, Response<TResult>> pattern3) => Core.Match.Pattern(input, pattern1, pattern2, pattern3);
-        public static Response<TResult> Match<TInput, TResult>(TInput input, Pattern<TInput, Response<TResult>> pattern1, Pattern<TInput, Response<TResult>> pattern2, Pattern<TInput, Response<TResult>> pattern3, Pattern<TInput, Response<TResult>> pattern4) => Core.Match.Pattern(input, pattern1, pattern2, pattern3, pattern4);
+        public static Response<TResult> Match<TInput, TResult>(TInput input, Pattern<TInput, TResult> pattern) => Core.Match.Pattern(input, pattern);
+        public static Response<TResult> Match<TInput, TResult>(TInput input, Pattern<TInput, TResult> pattern1, Pattern<TInput, TResult> pattern2) => Core.Match.Pattern(input, pattern1, pattern2);
+        public static Response<TResult> Match<TInput, TResult>(TInput input, Pattern<TInput, TResult> pattern1, Pattern<TInput, TResult> pattern2, Pattern<TInput, TResult> pattern3) => Core.Match.Pattern(input, pattern1, pattern2, pattern3);
+        public static Response<TResult> Match<TInput, TResult>(TInput input, Pattern<TInput, TResult> pattern1, Pattern<TInput, TResult> pattern2, Pattern<TInput, TResult> pattern3, Pattern<TInput, TResult> pattern4) => Core.Match.Pattern(input, pattern1, pattern2, pattern3, pattern4);
 
         #endregion
 
