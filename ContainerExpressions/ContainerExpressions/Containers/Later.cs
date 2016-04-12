@@ -3,7 +3,6 @@
 namespace ContainerExpressions.Containers
 {
     /// <summary>Loads the value only once, the first time it's accessed.</summary>
-    /// <remarks>This model is not thread safe.</remarks>
     public struct Later<T>
     {
         public T Value { get { if (_func != null) { _value = _func(); _func = null; } return _value; } }
