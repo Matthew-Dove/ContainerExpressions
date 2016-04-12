@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers
 {
@@ -32,5 +33,8 @@ namespace ContainerExpressions.Containers
         /// <param name="func">A function that will be called once (and only once) to generate a value.</param>
         /// <returns></returns>
         public static Later<T> Create<T>(Func<T> func) => new Later<T>(func); // A little trick so the caller doesn't have to specify T.
+
+        /// <summary>Loads the value only once in a thread safe way, the first time it's accessed.</summary>
+        public static LaterAsync<T> CreateAsync<T>(Func<Task<T>> func) => new LaterAsync<T>(func);
     }
 }

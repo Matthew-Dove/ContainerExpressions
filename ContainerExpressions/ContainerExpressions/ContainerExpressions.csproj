@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Containers\Later.cs" />
+    <Compile Include="Containers\LaterAsync.cs" />
     <Compile Include="Containers\Response.cs" />
     <Compile Include="Containers\Try.cs" />
     <Compile Include="Containers\TryAsync.cs" />
