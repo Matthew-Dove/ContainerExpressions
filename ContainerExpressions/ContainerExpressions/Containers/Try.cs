@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ContainerExpressions.Expressions.Models;
+using System;
 
 namespace ContainerExpressions.Containers
 {
@@ -12,10 +13,11 @@ namespace ContainerExpressions.Containers
             if (func == null)
                 throw new ArgumentNullException(nameof(func));
 
-            _func = Later.Create(() => PaddedCage(func, Try.GetExceptionLogger()));
+            var exceptionLogger = Try.GetExceptionLogger(); // Grabs the current Exception Logger set at the time this instance is created (incase it's changed before the value is read).
+            _func = Later.Create(() => PaddedCage(func, ExceptionLogger.Create(exceptionLogger)));
         }
 
-        private static Response<T> PaddedCage(Func<T> func, Response<Action<Exception>> logger)
+        private static Response<T> PaddedCage(Func<T> func, ExceptionLogger exceptionLogger)
         {
             var response = new Response<T>();
 
@@ -26,33 +28,55 @@ namespace ContainerExpressions.Containers
             }
             catch (Exception ex)
             {
-                if (logger)
-                {
-                    Log(logger, ex);
-                }
+                exceptionLogger.Log(ex);
             }
 
             return response;
         }
 
-        private static void Log(Action<Exception> logger, Exception ex)
-        {
-            try
-            {
-                logger(ex);
-            }
-            catch
-            {
-
-            }
-        }
-
-        public static implicit operator Response<T>(Try<T> func) => func;
+        public static implicit operator Response<T>(Try<T> func) => func.Value;
     }
 
-    public static class Try
+    public struct Try
     {
+        public Response Value { get { return _action; } }
+
+        private static Response<Action<Exception>> _logger;
+        private readonly Later<Response> _action;
+
+        public Try(Action action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+
+            var logger = GetExceptionLogger(); // Grabs the current Exception Logger set at the time this instance is created (incase it's changed before the value is read).
+            _action = Later.Create(() => PaddedCage(action, ExceptionLogger.Create(logger)));
+        }
+
+        private static Response PaddedCage(Action action, ExceptionLogger exceptionLogger)
+        {
+            var response = new Response();
+
+            try
+            {
+                action();
+                response = response.AsValid();
+            }
+            catch (Exception ex)
+            {
+                exceptionLogger.Log(ex);
+            }
+
+            return response;
+        }
+
+        public static Try<T> Create<T>(Func<T> func) => new Try<T>(func);
+
+        public static implicit operator Response(Try action) => action.Value;
+
         internal static Response<Action<Exception>> GetExceptionLogger() => _logger;
+
+        public static void RemoveExceptionLogger() => _logger = Response.Create<Action<Exception>>();
 
         public static void SetExceptionLogger(Action<Exception> logger)
         {
@@ -61,14 +85,5 @@ namespace ContainerExpressions.Containers
 
             _logger = Response.Create(logger);
         }
-
-        public static void RemoveExceptionLogger()
-        {
-            _logger = Response.Create<Action<Exception>>();
-        }
-
-        private static Response<Action<Exception>> _logger;
-
-        public static Try<T> Create<T>(Func<T> func) => new Try<T>(func);
     }
 }

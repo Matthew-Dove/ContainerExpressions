@@ -48,6 +48,7 @@
     <Compile Include="Expressions\Core\Match.cs" />
     <Compile Include="Expressions\Core\MatchAsync.cs" />
     <Compile Include="Expressions\Expression.cs" />
+    <Compile Include="Expressions\Models\ExceptionLogger.cs" />
     <Compile Include="Expressions\Models\Pattern.cs" />
     <Compile Include="Expressions\Models\PatternAsync.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

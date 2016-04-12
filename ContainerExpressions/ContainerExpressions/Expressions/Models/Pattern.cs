@@ -20,21 +20,9 @@ namespace ContainerExpressions.Expressions.Models
             _execute = execute;
         }
 
-        public bool Evaluate(TInput input)
-        {
-            if (_evaluate == null)
-                throw new InvalidOperationException($"Invalid Pattern creation, do not call the default construtor.");
+        public bool Evaluate(TInput input) => _evaluate(input);
 
-            return _evaluate(input);
-        }
-
-        public Response<TResult> Execute(TInput input)
-        {
-            if (_execute == null)
-                throw new InvalidOperationException($"Invalid Pattern creation, do not call the default construtor.");
-
-            return _execute(input);
-        }
+        public Response<TResult> Execute(TInput input) => _execute(input);
     }
 
     public static class Pattern
