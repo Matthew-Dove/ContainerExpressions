@@ -113,15 +113,15 @@ Note: there is also Expression.ComposeAsync() for composing asynchronous functio
 
 Let's say you'd like to do different things based on the state of some input.  
 For example summing an array of integers, you have three states, the array is null, the array is empty, the array has more then zero elements.  
-You can have a pattern for each state (or a subset of the states), and have different behaviour for each pattern.
+You can have a pattern for each state (or a subset of the states), and have different behaviour for each pattern.  
 
-In the exmaple below if teh input is null, we return an invalid response, if the input has no elements, we return 0, otherwise we return the sum of the array's elements.
+In the example below when the input is null, we return an invalid response, when the input has no elements, we return 0, otherwise we return the sum of the array's elements.
 
 ```cs
 var input = new int[] { 1, 2, 3 };
 
 var result = Expression.Match(input,
-	Pattern.Create<int[], int>(x => x == null, _ => Response.Create<int>()), // When null, return an invalid  response.
+	Pattern.Create<int[], int>(x => x == null, _ => Response.Create<int>()), // When null, return an invalid response.
 	Pattern.Create<int[], int>(x => x.Length == 0, _ => Response.Create(0)), // When empty, return 0.
 	Pattern.Create<int[], int>(x => x.Length > 0, Sum) // When more then zero elements exist, sum them, and return that result.
 );

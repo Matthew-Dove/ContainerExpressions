@@ -1,5 +1,6 @@
 ﻿using ContainerExpressions.Expressions.Models;
 using System;
+using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers
 {
@@ -84,6 +85,10 @@ namespace ContainerExpressions.Containers
         public static Try<T> Create<T>(Func<T> func) => new Try<T>(func);
 
         public static Try Create(Action action) => new Try(action);
+
+        public static TryAsync<T> CreateAsync<T>(Func<Task<T>> func) => new TryAsync<T>(func);
+
+        public static TryAsync CreateAsync(Func<Task> func) => new TryAsync(func);
 
         public static implicit operator Response(Try action) => action.Value;
 
