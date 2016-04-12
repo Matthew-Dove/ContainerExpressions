@@ -23,6 +23,7 @@ class UserService : IUserService
 	}
 }
 ```
+Note: there is also Later.CreateAsync() for asynchronous values.
 
 ### Response`<T>`
 
@@ -123,7 +124,7 @@ var input = new int[] { 1, 2, 3 };
 var result = Expression.Match(input,
 	Pattern.Create<int[], int>(x => x == null, _ => Response.Create<int>()), // When null, return an invalid response.
 	Pattern.Create<int[], int>(x => x.Length == 0, _ => Response.Create(0)), // When empty, return 0.
-	Pattern.Create<int[], int>(x => x.Length > 0, Sum) // When more then zero elements exist, sum them, and return that result.
+	Pattern.Create<int[], int>(x => x.Length > 0, Sum) // When more than zero elements exist, sum them, and return that result.
 );
 
 // Sum all elements in the array.

@@ -8,7 +8,7 @@ namespace ContainerExpressions.Containers
     {
         /// <summary>Runs the function the first time this is accessed, returns a valid Response if the code ran without any errors.</summary>
         public Task<Response<T>> Value { get { return _func; } }
-        private readonly Later<Task<Response<T>>> _func;
+        private readonly LaterAsync<Response<T>> _func;
 
         /// <summary>Wraps a function in error protecting code.</summary>
         public TryAsync(Func<Task<T>> func)
@@ -17,7 +17,7 @@ namespace ContainerExpressions.Containers
                 throw new ArgumentNullException(nameof(func));
 
             var exceptionLogger = Try.GetExceptionLogger(); // Grabs the current Exception Logger set at the time this instance is created (incase it's changed before the value is read).
-            _func = Later.Create(() => PaddedCage(func, ExceptionLogger.Create(exceptionLogger)));
+            _func = Later.CreateAsync(() => PaddedCage(func, ExceptionLogger.Create(exceptionLogger)));
         }
 
         /// <summary>Run the code in a safe manner, optionally logging any errors as they occur.</summary>
@@ -47,7 +47,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Runs the function the first time this is accessed, returns a valid Response if the code ran without any errors.</summary>
         public Task<Response> Value { get { return _func; } }
 
-        private readonly Later<Task<Response>> _func;
+        private readonly LaterAsync<Response> _func;
 
         /// <summary>Wraps a function in error protecting code.</summary>
         public TryAsync(Func<Task> action)
@@ -56,7 +56,7 @@ namespace ContainerExpressions.Containers
                 throw new ArgumentNullException(nameof(action));
 
             var logger = Try.GetExceptionLogger();
-            _func = Later.Create(() => PaddedCage(action, ExceptionLogger.Create(logger)));
+            _func = Later.CreateAsync(() => PaddedCage(action, ExceptionLogger.Create(logger)));
         }
 
         private static async Task<Response> PaddedCage(Func<Task> func, ExceptionLogger exceptionLogger)
