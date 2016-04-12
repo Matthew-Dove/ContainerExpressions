@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Containers\Later.cs" />
     <Compile Include="Containers\Response.cs" />
+    <Compile Include="Containers\Try.cs" />
     <Compile Include="Expressions\Core\Compose.cs" />
     <Compile Include="Expressions\Core\ComposeAsync.cs" />
     <Compile Include="Expressions\Core\Match.cs" />
