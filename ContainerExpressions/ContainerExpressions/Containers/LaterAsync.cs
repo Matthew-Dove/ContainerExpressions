@@ -32,6 +32,10 @@ namespace ContainerExpressions.Containers
                     if (_value == null)
                     {
                         _value = _func();
+                        if (_value.Status == TaskStatus.Created)
+                        {
+                            _value.Start();
+                        }
                         _func = null;
                     }
                 }
