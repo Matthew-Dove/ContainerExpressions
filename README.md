@@ -3,28 +3,6 @@ Containers for types, and expressions for those containers, enabling code to hav
 
 ## Containers
 
-### Later`<T>`
-
-Used in situations where you desire the value to be calulated the first time it's accessed.  
-The value will only be calulated once, this container not thread safe.  
-
-In the example below `IUserService` is injected into other services using [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection), the code runs in the context of a web server.  
-So depending on what time the DI framework creates the `UserService`, and what time the user is authenticated (*and therefore sets the thread's `CurrentPrincipal`*), reading the name may cause an error.  
-Using the later container we no longer care about the execution order of the authentication, and the dependency injector.
-```cs
-class UserService : IUserService
-{
-	public string Name { get { return _username; } }
-	private readonly Later<string> _username;
-    
-    public UserService()
-    {
-    	_username = Later.Create(() => Thread.CurrentPrincipal.Identity.Name);
-	}
-}
-```
-Note: there is also Later.CreateAsync() for asynchronous values.
-
 ### Response`<T>`
 
 An enclosing type around a method's normal return type.  
@@ -91,6 +69,54 @@ class CustomerService
     }
 }
 ```
+
+### Later`<T>`
+
+Used in situations where you desire the value to be calulated the first time it's accessed.  
+
+In the example below `IUserService` is injected into other services using [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection), the code runs in the context of a web server.  
+So depending on what time the DI framework creates the `UserService`, and what time the user is authenticated (*and therefore sets the thread's `CurrentPrincipal`*), reading the name may cause an error.  
+Using the later container we no longer care about the execution order of the authentication, and the dependency injector.
+```cs
+class UserService : IUserService
+{
+	public string Name { get { return _username; } }
+	private readonly Later<string> _username;
+    
+    public UserService()
+    {
+    	_username = Later.Create(() => Thread.CurrentPrincipal.Identity.Name);
+	}
+}
+```
+Note: there is also Later.CreateAsync() for asynchronous values.
+
+### Try`<T>`
+
+Wrap an `Action` (a void function), or a `Func<T>` (a function returning a "real" type) in a Try Container to safely execute otherwise problematic code.  
+If the code in a function can throw errors, and those aren't handled internally the Try Container can help out.  
+This would be used in cases where the function doesn't return a `Response`, or `Response<T>`, and can throw exceptions. 
+It can make code clearer as the logic isn't clouded by error handling, however when to use this instead or handling the errors in the function itself is left to the implementer (you).  
+
+By default errors aren't logged, but you can add your own logger that'll be ran each time the Try Container encounters an error.  
+If you'd like to log any errors it's suggested you set up a logger at the start of the eprogram, however you're able to change, or remove the error logger at any point in the program.  
+Whatever logger is set at the time a Try container is created, is the logger that Container will use. It's suggested your logger is stateless to avoid runtime complications.  
+The custom logger is a simple 'Action' that takes an 'Exception' as an argument. For example a logger in a console app might look like: `Try.SetExceptionLogger((ex) => Console.WriteLine(ex));`.  
+
+In the example below a `Widget` is persisted to disk in a fire, and forget fashion.  
+Since the result of the save isn't used, the return type is `void`. The function lacks error handling, so it's lifted to a Try Container.
+````cs
+var result = Try.Create(() => Persist(widget));
+
+private static void Persist(Widget widget)
+{
+    var contents = JsonConvert.SerializeObject(widget);
+    var path = $"{RELATIVE_PATH}/{Path.GetRandomFileName()}.json";
+    File.WriteAllText(path, contents);
+}
+````
+
+Note: there is also Try.CreateAsync() for asynchronous functions.
 
 ## Expressions
 

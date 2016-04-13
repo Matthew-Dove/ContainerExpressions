@@ -65,6 +65,7 @@
     <Compile Include="Examples\LaterTExample.cs" />
     <Compile Include="Examples\MatchTExample.cs" />
     <Compile Include="Examples\ResponseTExample.cs" />
+    <Compile Include="Examples\TryExample.cs" />
     <Compile Include="Expressions\Core\ComposeTests.cs" />
     <Compile Include="Expressions\Core\ComposeAsyncTests.cs" />
     <Compile Include="Expressions\Core\MatchTests.cs" />
