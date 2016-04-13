@@ -24,18 +24,6 @@ namespace ContainerExpressions.Containers
             IsValid = true;
         }
 
-        /// <summary>Gets the value, unless the state is invalid, then the default value is returned.</summary>
-        /// <param name="defaultValue">The value to return when the container is in an invaild state.</param>
-        /// <returns>The value, or the specified default value.</returns>
-        public T GetValueOrDefault(T defaultValue) => IsValid ? _value : defaultValue;
-
-        /// <summary>Creates a valid container response.</summary>
-        /// <param name="value">The value for the response.</param>
-        public Response<T> WithValue(T value) => new Response<T>(value);
-
-        /// <summary>Creates an invalid container response</summary>
-        public Response<T> WithNoValue() => new Response<T>();
-
         /// <summary>When compared to a bool, the IsValid property value will be used.</summary>
         public static implicit operator bool(Response<T> response) => response.IsValid;
 
@@ -65,12 +53,6 @@ namespace ContainerExpressions.Containers
         /// <summary>Create a response container in an invalid state.</summary>
         public static Response<T> Create<T>() => new Response<T>(); // A little trick so the caller doesn't have to specify T.
 
-        /// <summary>Create a response container in an valid state.</summary>
-        public Response AsValid() => new Response(true);
-
-        /// <summary>Create a response container in an invalid state.</summary>
-        public Response AsInvalid() => new Response(false);
-
         /// <summary>When compared to a bool, the IsValid properties value will be used.</summary>
         public static implicit operator bool(Response response) => response.IsValid;
 
@@ -94,5 +76,23 @@ namespace ContainerExpressions.Containers
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         /// <param name="state">Some state that can be passed into the bind function.</param>
         public static Response<TResult> Bind<T, TState, TResult>(this Response<T> response, TState state, Func<TState, T, Response<TResult>> func) => response.IsValid ? func(state, response.Value) : Response.Create<TResult>();
+
+        /// <summary>Gets the value, unless the state is invalid, then the default value is returned.</summary>
+        /// <param name="defaultValue">The value to return when the container is in an invaild state.</param>
+        /// <returns>The value, or the specified default value.</returns>
+        public static T GetValueOrDefault<T>(this Response<T> response, T defaultValue) => response.IsValid ? response.Value : defaultValue;
+
+        /// <summary>Creates a valid container response.</summary>
+        /// <param name="value">The value for the response.</param>
+        public static Response<T> WithValue<T>(this Response<T> response, T value) => new Response<T>(value);
+
+        /// <summary>Creates an invalid container response.</summary>
+        public static Response<T> WithNoValue<T>(this Response<T> response) => new Response<T>();
+
+        /// <summary>Create a response container in an valid state.</summary>
+        public static Response AsValid(this Response response) => new Response(true);
+
+        /// <summary>Create a response container in an invalid state.</summary>
+        public static Response AsInvalid(this Response response) => new Response(false);
     }
 }
