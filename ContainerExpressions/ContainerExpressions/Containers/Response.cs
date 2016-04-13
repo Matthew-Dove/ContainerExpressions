@@ -4,12 +4,12 @@ namespace ContainerExpressions.Containers
 {
     /// <summary>
     /// A wrapper around the real value a method will return.
-    /// <para>Using this pattern you can tell if a returned value is the correct one, or if some error happened trying to get the real vlaue.</para>
+    /// <para>Using this pattern you can tell if a returned value is the correct one, or if some error happened trying to get the real value.</para>
     /// </summary>
     /// <typeparam name="T">The value to return.</typeparam>
     public struct Response<T>
     {
-        /// <summary>True if the value was set correctly, false if some error occurred getting the vlaue.</summary>
+        /// <summary>True if the value was set correctly, false if some error occurred getting the value.</summary>
         public bool IsValid { get; }
 
         /// <summary>The value that was calculated, with the guarantee it's in a valid state.</summary>
@@ -77,5 +77,22 @@ namespace ContainerExpressions.Containers
         /// <summary>Gets the string value for if this response is valid or not.</summary>
         /// <returns>The bool string value for the IsValid Property.</returns>
         public override string ToString() => _isValid.ToString();
+    }
+
+    public static class ResponseExtensions
+    {
+        /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
+        public static Response Bind<T>(this Response<T> response, Func<T, Response> func) => response.IsValid ? func(response.Value) : new Response();
+
+        /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
+        /// <param name="state">Some state that can be passed into the bind function.</param>
+        public static Response Bind<T, TState>(this Response<T> response, TState state, Func<TState, T, Response> func) => response.IsValid ? func(state, response.Value) : new Response();
+
+        /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
+        public static Response<TResult> Bind<T, TResult>(this Response<T> response, Func<T, Response<TResult>> func) => response.IsValid ? func(response.Value) : Response.Create<TResult>();
+
+        /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
+        /// <param name="state">Some state that can be passed into the bind function.</param>
+        public static Response<TResult> Bind<T, TState, TResult>(this Response<T> response, TState state, Func<TState, T, Response<TResult>> func) => response.IsValid ? func(state, response.Value) : Response.Create<TResult>();
     }
 }
