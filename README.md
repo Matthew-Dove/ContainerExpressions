@@ -95,11 +95,11 @@ Note: there is also Later.CreateAsync() for asynchronous values.
 
 Wrap an `Action` (a void function), or a `Func<T>` (a function returning a "real" type) in a Try Container to safely execute otherwise problematic code.  
 If the code in a function can throw errors, and those aren't handled internally the Try Container can help out.  
-This would be used in cases where the function doesn't return a `Response`, or `Response<T>`, and can throw exceptions. 
+This would be used in cases where the function doesn't return a `Response`, or `Response<T>`, and can throw exceptions.  
 It can make code clearer as the logic isn't clouded by error handling, however when to use this instead or handling the errors in the function itself is left to the implementer (you).  
 
 By default errors aren't logged, but you can add your own logger that'll be ran each time the Try Container encounters an error.  
-If you'd like to log any errors it's suggested you set up a logger at the start of the eprogram, however you're able to change, or remove the error logger at any point in the program.  
+If you'd like to log any errors it's suggested you set up a logger at the start of the program, however you're able to change, or remove the error logger at any point in the program.  
 Whatever logger is set at the time a Try container is created, is the logger that Container will use. It's suggested your logger is stateless to avoid runtime complications.  
 The custom logger is a simple 'Action' that takes an 'Exception' as an argument. For example a logger in a console app might look like: `Try.SetExceptionLogger((ex) => Console.WriteLine(ex));`.  
 

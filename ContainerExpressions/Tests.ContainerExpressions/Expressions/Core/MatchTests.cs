@@ -40,8 +40,23 @@ namespace Tests.ContainerExpressions.Expressions.Core
             var guid = Guid.NewGuid();
 
             var pattern = Expression.Match(10,
-                Pattern.Create<int, Guid>((x) => !_isEven(x), _ => Response.Create(Guid.NewGuid())), // Skips thi pattern.
+                Pattern.Create<int, Guid>(x => !_isEven(x), _ => Response.Create(Guid.NewGuid())), // Skips this pattern.
                 Pattern.Create<int, Guid>(_isEven, _ => Response.Create(guid)) // Pattern match.
+            );
+
+            Assert.IsTrue(pattern);
+            Assert.AreEqual(guid, pattern);
+        }
+
+        [TestMethod]
+        public void PivotMatch_ExecutesCorrectPattern()
+        {
+            var pivot = 1;
+            var guid = new Guid();
+
+            var pattern = Expression.Match(pivot, guid,
+                Pattern.Create<int, Guid, Guid>(x => x == 0, _ => Response.Create(Guid.NewGuid())),
+                Pattern.Create<int, Guid, Guid>(x => x == 1, id => Response.Create(id))
             );
 
             Assert.IsTrue(pattern);

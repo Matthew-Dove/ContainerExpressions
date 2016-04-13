@@ -54,5 +54,20 @@ namespace Tests.ContainerExpressions.Expressions.Core
             Assert.IsTrue(pattern);
             Assert.AreEqual(guid, pattern);
         }
+
+        [TestMethod]
+        public async Task PivotMatch_ExecutesCorrectPattern()
+        {
+            var pivot = 1;
+            var guid = new Guid();
+
+            var pattern = await Expression.MatchAsync(pivot, guid,
+                Pattern.CreateAsync<int, Guid, Guid>(x => x == 0, _ => Task.FromResult(Response.Create(Guid.NewGuid()))),
+                Pattern.CreateAsync<int, Guid, Guid>(x => x == 1, id => Task.FromResult(Response.Create(id)))
+            );
+
+            Assert.IsTrue(pattern);
+            Assert.AreEqual(guid, pattern);
+        }
     }
 }
