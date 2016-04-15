@@ -46,6 +46,7 @@
     <Compile Include="Containers\Later.cs" />
     <Compile Include="Containers\LaterAsync.cs" />
     <Compile Include="Containers\Response.cs" />
+    <Compile Include="Containers\Retry.cs" />
     <Compile Include="Containers\Try.cs" />
     <Compile Include="Expressions\Core\Compose.cs" />
     <Compile Include="Expressions\Core\ComposeAsync.cs" />
@@ -55,6 +56,7 @@
     <Compile Include="Expressions\Models\ExceptionLogger.cs" />
     <Compile Include="Expressions\Models\Pattern.cs" />
     <Compile Include="Expressions\Models\PatternAsync.cs" />
+    <Compile Include="Expressions\Models\RetryOptions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />
