@@ -106,7 +106,7 @@ The custom logger is a simple 'Action' that takes an 'Exception' as an argument.
 In the example below a `Widget` is persisted to disk in a fire, and forget fashion.  
 Since the result of the save isn't used, the return type is `void`. The function lacks error handling, so it's lifted to a Try Container.
 ````cs
-var result = Try.Create(() => Persist(widget));
+var result = Try.Run(() => Persist(widget));
 
 private static void Persist(Widget widget)
 {

@@ -17,7 +17,7 @@ namespace Tests.ContainerExpressions.Containers
             Action action = () => { isRan = true; };
             Try.SetExceptionLogger((ex) => { isErrorsLogged = true; });
 
-            var result = Try.Create(action);
+            var result = Try.Run(action);
 
             Assert.IsTrue(result);
             Assert.IsTrue(isRan);
@@ -29,7 +29,7 @@ namespace Tests.ContainerExpressions.Containers
         {
             Action errorMethod = () => { throw new Exception(); };
 
-            var result = Try.Create(errorMethod);
+            var result = Try.Run(errorMethod);
 
             Assert.IsFalse(result);
         }
@@ -41,22 +41,8 @@ namespace Tests.ContainerExpressions.Containers
             Try.SetExceptionLogger((ex) => loggerWasCalled = true);
             Action errorMethod = () => { throw new Exception(); };
 
-            var result = Try.Create(errorMethod);
+            var result = Try.Run(errorMethod);
 
-            Assert.IsFalse(result);
-            Assert.IsTrue(loggerWasCalled);
-        }
-
-        [TestMethod]
-        public void Base_CodeIsRanLazily()
-        {
-            var loggerWasCalled = false;
-            Try.SetExceptionLogger((ex) => loggerWasCalled = true);
-            Action errorMethod = () => { throw new Exception(); };
-
-            var result = Try.Create(errorMethod);
-
-            Assert.IsFalse(loggerWasCalled); // Won't take affect until Try's value is accessed.
             Assert.IsFalse(result);
             Assert.IsTrue(loggerWasCalled);
         }
@@ -68,10 +54,9 @@ namespace Tests.ContainerExpressions.Containers
             Try.SetExceptionLogger((ex) => loggerWasCalled = true);
             Action errorMethod = () => { throw new Exception(); };
 
-            var result = Try.Create(errorMethod);
-            Try.RemoveExceptionLogger();
+            var result = Try.Run(errorMethod);
+            Try.SetExceptionLogger((ex) => loggerWasCalled = false);
 
-            Assert.IsFalse(loggerWasCalled); // The wrapped action isn't called yet, so the exception logger hasn't ran; it'll run once the Try's value is read.
             Assert.IsFalse(result);
             Assert.IsTrue(loggerWasCalled);
         }
@@ -88,7 +73,7 @@ namespace Tests.ContainerExpressions.Containers
             Func<Guid> func = () => answer;
             Try.SetExceptionLogger((ex) => { isErrorsLogged = true; });
 
-            var result = Try.Create(func);
+            var result = Try.Run(func);
 
             Assert.IsTrue(result);
             Assert.AreEqual(answer, result);
@@ -100,7 +85,7 @@ namespace Tests.ContainerExpressions.Containers
         {
             Func<int> errorMethod = () => { throw new Exception(); };
 
-            var result = Try.Create(errorMethod);
+            var result = Try.Run(errorMethod);
 
             Assert.IsFalse(result);
         }
@@ -112,22 +97,8 @@ namespace Tests.ContainerExpressions.Containers
             Try.SetExceptionLogger((ex) => loggerWasCalled = true);
             Func<int> errorMethod = () => { throw new Exception(); };
 
-            var result = Try.Create(errorMethod);
+            var result = Try.Run(errorMethod);
 
-            Assert.IsFalse(result);
-            Assert.IsTrue(loggerWasCalled);
-        }
-
-        [TestMethod]
-        public void CodeIsRanLazily()
-        {
-            var loggerWasCalled = false;
-            Try.SetExceptionLogger((ex) => loggerWasCalled = true);
-            Func<int> errorMethod = () => { throw new Exception(); };
-
-            var result = Try.Create(errorMethod);
-
-            Assert.IsFalse(loggerWasCalled); // Won't take affect until Try's value is accessed.
             Assert.IsFalse(result);
             Assert.IsTrue(loggerWasCalled);
         }
@@ -139,10 +110,9 @@ namespace Tests.ContainerExpressions.Containers
             Try.SetExceptionLogger((ex) => loggerWasCalled = true);
             Func<int> errorMethod = () => { throw new Exception(); };
 
-            var result = Try.Create(errorMethod);
-            Try.RemoveExceptionLogger();
+            var result = Try.Run(errorMethod);
+            Try.SetExceptionLogger((ex) => loggerWasCalled = false);
 
-            Assert.IsFalse(loggerWasCalled); // The wrapped action isn't called yet, so the exception logger hasn't ran; it'll run once the Try's value is read.
             Assert.IsFalse(result);
             Assert.IsTrue(loggerWasCalled);
         }

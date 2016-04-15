@@ -37,7 +37,7 @@ namespace Tests.ContainerExpressions.Examples
             Try.SetExceptionLogger((_) => errorsLogged++);
 
             var widget = new Widget();
-            var result = Try.Create(() => Persist(widget));
+            var result = Try.Run(() => Persist(widget));
 
             Assert.IsTrue(result);
             Assert.AreEqual(0, errorsLogged);
