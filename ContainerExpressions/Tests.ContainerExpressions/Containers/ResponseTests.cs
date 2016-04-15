@@ -112,12 +112,62 @@ namespace Tests.ContainerExpressions.Containters
             Assert.IsFalse(responseWithNoValue);
         }
 
+        [TestMethod]
+        public void Response_IsValid_BindPropagates()
+        {
+            var answer = 42;
+            Func<int, Response<int>> @double = x => Response.Create(x * 2);
+
+            var response = Response.Create(answer).Bind(@double);
+
+            Assert.IsTrue(response);
+            Assert.AreEqual(@double(answer).Value, response);
+        }
+
+        [TestMethod]
+        public void Response_IsNotValid_BindDoesNotPropagates()
+        {
+            var isBindRan = false;
+            Func<int, Response<string>> binder = x => { isBindRan = true; return Response.Create<string>(); };
+
+            var response = Response.Create<int>().Bind(binder);
+
+            Assert.IsFalse(response);
+            Assert.IsFalse(isBindRan);
+        }
+
+        [TestMethod]
+        public void Response_IsValid_TransformPropagates()
+        {
+            var answer = 42;
+            var isInvoked = false;
+            Func<string, int> intParse = x => { isInvoked = true; return int.Parse(x); };
+
+            var response = Response.Create(answer.ToString()).Transform(intParse);
+
+            Assert.IsTrue(response);
+            Assert.AreEqual(answer, response);
+            Assert.IsTrue(isInvoked);
+        }
+
+        [TestMethod]
+        public void Response_IsNotValid_TransformDoesNotPropagates()
+        {
+            var isInvoked = false;
+            Func<string, int> intParse = x => { isInvoked = true; return int.Parse(x); };
+
+            var response = Response.Create<string>().Transform(intParse);
+
+            Assert.IsFalse(response);
+            Assert.IsFalse(isInvoked);
+        }
+
         #endregion
 
         #region BaseResponse
 
         [TestMethod]
-        public void Response_HasValue_IValid()
+        public void BaseResponse_HasValue_IValid()
         {
             var response = new Response(true);
 
