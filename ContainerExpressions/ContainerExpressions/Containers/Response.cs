@@ -53,6 +53,9 @@ namespace ContainerExpressions.Containers
         /// <summary>Create a response container in an invalid state.</summary>
         public static Response<T> Create<T>() => new Response<T>(); // A little trick so the caller doesn't have to specify T.
 
+        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
+        public static Func<T, Response<TResult>> Lift<T, TResult>(Func<T, TResult> func) => Create<Func<T, Response<TResult>>>(x => Create(func(x)));
+
         /// <summary>When compared to a bool, the IsValid properties value will be used.</summary>
         public static implicit operator bool(Response response) => response.IsValid;
 

@@ -116,12 +116,12 @@ namespace Tests.ContainerExpressions.Containters
         public void Response_IsValid_BindPropagates()
         {
             var answer = 42;
-            Func<int, Response<int>> @double = x => Response.Create(x * 2);
+            Func<int, int> @double = x => x * 2;
 
-            var response = Response.Create(answer).Bind(@double);
+            var response = Response.Create(answer).Bind(Response.Lift(@double));
 
             Assert.IsTrue(response);
-            Assert.AreEqual(@double(answer).Value, response);
+            Assert.AreEqual(@double(answer), response);
         }
 
         [TestMethod]
