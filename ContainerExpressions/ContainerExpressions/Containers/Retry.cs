@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers
 {
+    /// <summary>Keep retrying a function until is succeeds, or the number of allowed retries is exceeded.</summary>
     public static class Retry
     {
         public static Response Execute(Func<Response> func) => Execute(func, RetryOptions.Create());

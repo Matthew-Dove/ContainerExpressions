@@ -116,7 +116,7 @@ private static void Persist(Widget widget)
 }
 ````
 
-Note: there is also Try.CreateAsync() for asynchronous functions.
+Note: there is also Try.RunAsync() for asynchronous functions.
 
 ## Expressions
 
@@ -166,3 +166,40 @@ static Response<int> Sum(int[] numbers)
 ```
 
 Note: there is also Expression.MatchAsync() for asynchronous patterns.
+
+### Retry`<T>`
+
+Execute the same function until it's Response is valid, or you run out of Retries, as defined by the options.  
+By default the options are set to 1 retry, and a 100 millisecond delay before trying again.  
+There is a method overload to pass in your own options for a more customized Retry.  
+
+In the example below, we create a user in a database, and get their Id in return.
+
+```cs
+var userId = Retry.Execute(() => CreateUser(new UserModel { Name = "John Smith" })); // Using default options, this will try a second time if the first time fails.
+
+public Response<T> CreateUser(UserModel user)
+{
+	var response = new Response<int>();
+	
+	try
+	{
+		using (var connection = new SqlConnection(connectionString))
+		using (var command = new SqlCommand("usp_insert_createUser", connection))
+		{
+			command.CommandType = CommandType.StoredProcedure;
+			command.Parameters.Add("@Name" user.Name);
+			connection.Open();
+			
+			var userId = (int)command.ExecuteScalar();
+			response = response.WithValue(userId);
+		}
+	}
+	catch (exception ex)
+	{
+		// Log error here...
+	}
+	
+	return response;
+}
+```
