@@ -169,18 +169,19 @@ Note: there is also Expression.MatchAsync() for asynchronous patterns.
 
 ### Retry`<T>`
 
-Execute the same function until it's Response is valid, or you run out of Retries, as defined by the options.  
-By default the options are set to 1 retry, and a 100 millisecond delay before trying again.  
+Execute the same function until it's Response is valid, or you run out of retries as defined by the options.  
+By default the options are set to 1 retry, and a 100 milliseconds delay before trying again.  
 There is a method overload to pass in your own options for a more customized Retry.  
 
 In the example below, we create a user in a database, and get their Id in return.
 
 ```cs
-var userId = Retry.Execute(() => CreateUser(new UserModel { Name = "John Smith" })); // Using default options, this will try a second time if the first time fails.
+// Using default options, this will try a second time if the first time fails.
+var userId = Retry.Execute(() => CreateUser(new UserModel { Name = "John Smith" }));
 
 public Response<T> CreateUser(UserModel user)
 {
-	var response = new Response<int>();
+	var response = new Response<int>(); // Invalid state, indicates a Retry.
 	
 	try
 	{
@@ -192,7 +193,7 @@ public Response<T> CreateUser(UserModel user)
 			connection.Open();
 			
 			var userId = (int)command.ExecuteScalar();
-			response = response.WithValue(userId);
+			response = response.WithValue(userId); // State is now valid, no need to run the function again.
 		}
 	}
 	catch (exception ex)

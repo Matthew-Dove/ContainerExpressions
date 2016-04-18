@@ -8,6 +8,7 @@ namespace ContainerExpressions.Containers
     /// <summary>Keep retrying a function until is succeeds, or the number of allowed retries is exceeded.</summary>
     public static class Retry
     {
+        /// <summary>Execute a function, and retry (using default values) if the Response is invalid.</summary>
         public static Response Execute(Func<Response> func) => Execute(func, RetryOptions.Create());
 
         public static Response Execute(Func<Response> func, RetryOptions options)
