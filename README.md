@@ -1,5 +1,8 @@
 # ContainerExpressions
-Containers for types, and expressions for those containers, enabling code to have fewer branching conditions.
+Containers for types, and expressions for those containers, enabling code to have fewer branching conditions.  
+  
+[If you prefer slides, there is some documentation here too.](https://docs.google.com/presentation/d/1ma8E9YohW2clB_lrB0cklm2_AelkBrBcl2f9DMwu8T4/edit?usp=sharing)  
+[PM> Install-Package ContainerExpressions](https://www.nuget.org/packages/ContainerExpressions/)  
 
 ## Containers
 
@@ -170,7 +173,7 @@ Note: there is also Expression.MatchAsync() for asynchronous patterns.
 ### Retry`<T>`
 
 Execute the same function until it's Response is valid, or you run out of retries as defined by the options.  
-By default the options are set to 1 retry, and a 100 milliseconds delay before trying again.  
+By default the options are set to 1 retry, and a delay of 100 milliseconds before trying again.  
 There is a method overload to pass in your own options for a more customized Retry.  
 
 In the example below, we create a user in a database, and get their Id in return.
