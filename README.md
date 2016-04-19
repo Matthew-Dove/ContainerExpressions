@@ -207,3 +207,12 @@ public Response<T> CreateUser(UserModel user)
 	return response;
 }
 ```
+
+## Extension Methods
+
+Useful utilities for the `Response<T>` type.  
+
+* `T GetValueOrDefault<T>(T defaultValue)` Returns the default value when the Response is in an invalid state.
+* `Response<TResult> Bind<TResult>(Func<T, Response<TResult>> func)` Invokes a second function with the output of the first one.
+* `Response<TResult> Transform<T, TResult>(Func<T, TResult> func)` Changes type `T`, to type `TResult`.
+* `Func<T, Response<TResult>> Lift<T, TResult>(Func<T, TResult>)` Elevate the function’s type from `T`, to `Response<T>`

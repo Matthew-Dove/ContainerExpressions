@@ -11,6 +11,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
         public static Response Execute(Func<Response> func) => Execute(func, RetryOptions.Create());
 
+        /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
         public static Response Execute(Func<Response> func, RetryOptions options)
         {
             var response = func();
@@ -28,6 +29,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
         public static Response<T> Execute<T>(Func<Response<T>> func) => Execute(func, RetryOptions.Create());
 
+        /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
         public static Response<T> Execute<T>(Func<Response<T>> func, RetryOptions options)
         {
             var response = func();
