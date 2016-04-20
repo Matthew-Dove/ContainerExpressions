@@ -17,7 +17,7 @@ namespace ContainerExpressions.Containers
             var response = func();
             var retries = options.Retries;
 
-            while (!response.IsValid && retries-- > 0)
+            while (!response.IsValid && retries --> 0)
             {
                 Thread.Sleep(options.MillisecondsDelay);
                 response = func();
@@ -35,7 +35,7 @@ namespace ContainerExpressions.Containers
             var response = func();
             var retries = options.Retries;
 
-            while (!response.IsValid && --retries > 0)
+            while (!response.IsValid && retries --> 0)
             {
                 Thread.Sleep(options.MillisecondsDelay);
                 response = func();
@@ -53,7 +53,7 @@ namespace ContainerExpressions.Containers
             var response = await func();
             var retries = options.Retries;
 
-            while (!response.IsValid && --retries > 0)
+            while (!response.IsValid && retries --> 0)
             {
                 await Task.Delay(options.MillisecondsDelay);
                 response = await func();
@@ -71,7 +71,7 @@ namespace ContainerExpressions.Containers
             var response = await func();
             var retries = options.Retries;
 
-            while (!response.IsValid && --retries > 0)
+            while (!response.IsValid && retries --> 0)
             {
                 await Task.Delay(options.MillisecondsDelay);
                 response = await func();

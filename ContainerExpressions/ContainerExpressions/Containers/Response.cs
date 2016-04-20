@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers
 {
@@ -49,10 +50,16 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Create a response container in a valid state.</summary>
         /// <param name="value">The response's value.</param>
-        public static Response<T> Create<T>(T value) => new Response<T>(value); // A little trick so the caller doesn't have to specify T.
+        public static Response<T> Create<T>(T value) => new Response<T>(value);
 
         /// <summary>Create a response container in an invalid state.</summary>
-        public static Response<T> Create<T>() => new Response<T>(); // A little trick so the caller doesn't have to specify T.
+        public static Response<T> Create<T>() => new Response<T>();
+
+        /// <summary>Creates a function wrapper that will be invoked each time it's value is accessed.</summary>
+        public static ResponseFunc<T> Create<T>(Func<Response<T>> func) => new ResponseFunc<T>(func);
+
+        /// <summary>Creates a function wrapper that will be invoked each time it's value is accessed.</summary>
+        public static ResponseFuncTask<T> CreateAsync<T>(Func<Task<Response<T>>> func) => new ResponseFuncTask<T>(func);
 
         /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
         public static Func<T, Response<TResult>> Lift<T, TResult>(Func<T, TResult> func) => Create<Func<T, Response<TResult>>>(x => Create(func(x)));
