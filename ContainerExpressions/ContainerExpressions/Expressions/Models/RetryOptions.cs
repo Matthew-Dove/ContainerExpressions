@@ -11,6 +11,9 @@ namespace ContainerExpressions.Expressions.Models
         /// <summary>The amount of time to wait between calling the function again.</summary>
         public int MillisecondsDelay { get; }
 
+        /// <summary>Function replay, and cooldown options.</summary>
+        /// <param name="retries">The number of retries to make before giving up.</param>
+        /// <param name="millisecondsDelay">The time to wait in milliseconds before trying another attempt.</param>
         public RetryOptions(int retries, int millisecondsDelay)
         {
             if (retries < 1)

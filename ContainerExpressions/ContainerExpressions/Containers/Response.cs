@@ -37,6 +37,7 @@ namespace ContainerExpressions.Containers
     /// <summary>A helper class for the Response generic class.</summary>
     public struct Response
     {
+        /// <summary>True if the container is in a valid state, otherwise the operation didn't run successfully.</summary>
         public bool IsValid { get { return _isValid; } }
         private readonly bool _isValid;
 
@@ -64,10 +65,10 @@ namespace ContainerExpressions.Containers
         public override string ToString() => _isValid.ToString();
     }
 
+    /// <summary>Utility methods for the Response Container.</summary>
     public static class ResponseExtensions
     {
         /// <summary>Creates a valid container response.</summary>
-        /// <param name="value">The value for the response.</param>
         public static Response<T> WithValue<T>(this Response<T> response, T value) => new Response<T>(value);
 
         /// <summary>Creates an invalid container response.</summary>
@@ -83,19 +84,15 @@ namespace ContainerExpressions.Containers
         public static Response Bind<T>(this Response<T> response, Func<T, Response> func) => response.IsValid ? func(response.Value) : new Response();
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        /// <param name="state">Some state that can be passed into the bind function.</param>
         public static Response Bind<T, TState>(this Response<T> response, TState state, Func<TState, T, Response> func) => response.IsValid ? func(state, response.Value) : new Response();
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Response<TResult> Bind<T, TResult>(this Response<T> response, Func<T, Response<TResult>> func) => response.IsValid ? func(response.Value) : Response.Create<TResult>();
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        /// <param name="state">Some state that can be passed into the bind function.</param>
         public static Response<TResult> Bind<T, TState, TResult>(this Response<T> response, TState state, Func<TState, T, Response<TResult>> func) => response.IsValid ? func(state, response.Value) : Response.Create<TResult>();
 
         /// <summary>Gets the value, unless the state is invalid, then the default value is returned.</summary>
-        /// <param name="defaultValue">The value to return when the container is in an invaild state.</param>
-        /// <returns>The value, or the specified default value.</returns>
         public static T GetValueOrDefault<T>(this Response<T> response, T defaultValue) => response.IsValid ? response.Value : defaultValue;
 
         /// <summary>Map the underlying Response type, to another type.</summary>

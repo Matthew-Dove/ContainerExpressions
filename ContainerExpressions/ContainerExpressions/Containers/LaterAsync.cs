@@ -6,6 +6,7 @@ namespace ContainerExpressions.Containers
     /// <summary>Loads the value only once in a thread safe way, the first time it's accessed.</summary>
     public struct LaterAsync<T>
     {
+        /// <summary>Gets the value form the function, if this is the first time the value is read, the function will be invoked (in a thread-safe manner).</summary>
         public Task<T> Value { get { return GetValue(); } }
         private Task<T> _value;
         private Func<Task<T>> _func;

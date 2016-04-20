@@ -44,8 +44,10 @@ namespace ContainerExpressions.Containers
             return response;
         }
 
+        /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
         public static Task<Response> ExecuteAsync(Func<Task<Response>> func) => ExecuteAsync(func, RetryOptions.Create());
 
+        /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
         public static async Task<Response> ExecuteAsync(Func<Task<Response>> func, RetryOptions options)
         {
             var response = await func();
@@ -60,8 +62,10 @@ namespace ContainerExpressions.Containers
             return response;
         }
 
+        /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
         public static Task<Response<T>> ExecuteAsync<T>(Func<Task<Response<T>>> func) => ExecuteAsync(func, RetryOptions.Create());
 
+        /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
         public static async Task<Response<T>> ExecuteAsync<T>(Func<Task<Response<T>>> func, RetryOptions options)
         {
             var response = await func();

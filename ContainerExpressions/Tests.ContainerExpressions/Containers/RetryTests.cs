@@ -25,12 +25,12 @@ namespace Tests.ContainerExpressions.Containers
         {
             var attempts = 0;
             const int MAX_ATTEMPTS = 2;
-            Func<Response> func = () => new Response(++attempts == MAX_ATTEMPTS);
+            Func<Response> func = () => new Response(attempts++ == MAX_ATTEMPTS);
 
             var response = Retry.Execute(func, RetryOptions.Create(MAX_ATTEMPTS, 0));
 
             Assert.IsTrue(response);
-            Assert.AreEqual(MAX_ATTEMPTS, attempts);
+            Assert.AreEqual(MAX_ATTEMPTS + 1, attempts);
         }
     }
 }
