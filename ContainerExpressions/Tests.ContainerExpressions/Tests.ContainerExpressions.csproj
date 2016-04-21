@@ -58,7 +58,6 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Containers\LaterTests.cs" />
-    <Compile Include="Containers\ResponseFuncTests.cs" />
     <Compile Include="Containers\ResponseTests.cs" />
     <Compile Include="Containers\RetryTests.cs" />
     <Compile Include="Containers\TryTests.cs" />

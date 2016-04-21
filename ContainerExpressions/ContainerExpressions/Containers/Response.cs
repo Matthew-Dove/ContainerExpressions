@@ -55,12 +55,6 @@ namespace ContainerExpressions.Containers
         /// <summary>Create a response container in an invalid state.</summary>
         public static Response<T> Create<T>() => new Response<T>();
 
-        /// <summary>Creates a function wrapper that will be invoked each time it's value is accessed.</summary>
-        public static ResponseFunc<T> Create<T>(Func<Response<T>> func) => new ResponseFunc<T>(func);
-
-        /// <summary>Creates a function wrapper that will be invoked each time it's value is accessed.</summary>
-        public static ResponseFuncTask<T> CreateAsync<T>(Func<Task<Response<T>>> func) => new ResponseFuncTask<T>(func);
-
         /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
         public static Func<T, Response<TResult>> Lift<T, TResult>(Func<T, TResult> func) => Create<Func<T, Response<TResult>>>(x => Create(func(x)));
 

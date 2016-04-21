@@ -48,7 +48,6 @@
     <Compile Include="Containers\Later.cs" />
     <Compile Include="Containers\LaterAsync.cs" />
     <Compile Include="Containers\Response.cs" />
-    <Compile Include="Containers\ResponseFunc.cs" />
     <Compile Include="Containers\Retry.cs" />
     <Compile Include="Containers\Try.cs" />
     <Compile Include="Expressions\Core\Compose.cs" />
