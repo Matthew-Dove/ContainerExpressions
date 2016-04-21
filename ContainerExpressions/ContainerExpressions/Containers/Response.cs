@@ -85,13 +85,25 @@ namespace ContainerExpressions.Containers
         public static Response Bind<T>(this Response<T> response, Func<T, Response> func) => response.IsValid ? func(response.Value) : new Response();
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
+        public static Task<Response> BindAsync<T>(this Response<T> response, Func<T, Task<Response>> func) => response.IsValid ? func(response.Value) : Task.FromResult(new Response());
+
+        /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Response Bind<T, TState>(this Response<T> response, TState state, Func<TState, T, Response> func) => response.IsValid ? func(state, response.Value) : new Response();
+
+        /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
+        public static Task<Response> BindAsync<T, TState>(this Response<T> response, TState state, Func<TState, T, Task<Response>> func) => response.IsValid ? func(state, response.Value) : Task.FromResult(new Response());
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Response<TResult> Bind<T, TResult>(this Response<T> response, Func<T, Response<TResult>> func) => response.IsValid ? func(response.Value) : Response.Create<TResult>();
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
+        public static Task<Response<TResult>> BindAsync<T, TResult>(this Response<T> response, Func<T, Task<Response<TResult>>> func) => response.IsValid ? func(response.Value) : Task.FromResult(Response.Create<TResult>());
+
+        /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Response<TResult> Bind<T, TState, TResult>(this Response<T> response, TState state, Func<TState, T, Response<TResult>> func) => response.IsValid ? func(state, response.Value) : Response.Create<TResult>();
+
+        /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
+        public static Task<Response<TResult>> Bind<T, TState, TResult>(this Response<T> response, TState state, Func<TState, T, Task<Response<TResult>>> func) => response.IsValid ? func(state, response.Value) : Task.FromResult(Response.Create<TResult>());
 
         /// <summary>Gets the value, unless the state is invalid, then the default value is returned.</summary>
         public static T GetValueOrDefault<T>(this Response<T> response, T defaultValue) => response.IsValid ? response.Value : defaultValue;
