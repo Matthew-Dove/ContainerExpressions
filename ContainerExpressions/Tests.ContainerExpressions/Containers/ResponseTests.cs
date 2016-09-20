@@ -56,6 +56,16 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
+        public void ResponseT_Convert_ToResponse()
+        {
+            var response = new Response<int>(10);
+
+            Response value = response;
+
+            Assert.AreEqual(value.IsValid, response.IsValid);
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void Response_GetValueWithInValidState_Error()
         {
@@ -100,19 +110,6 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
-        public void Response_WithNoValue_IsNotValid()
-        {
-            var responseWithValue = new Response<int>(42);
-            var responseWithNoValue = new Response<int>();
-
-            responseWithValue = responseWithValue.WithNoValue();
-            responseWithNoValue = responseWithNoValue.WithNoValue();
-
-            Assert.IsFalse(responseWithValue);
-            Assert.IsFalse(responseWithNoValue);
-        }
-
-        [TestMethod]
         public void Response_IsValid_BindPropagates()
         {
             var answer = 42;
@@ -128,9 +125,9 @@ namespace Tests.ContainerExpressions.Containters
         public void Response_IsNotValid_BindDoesNotPropagates()
         {
             var isBindRan = false;
-            Func<int, Response<string>> binder = x => { isBindRan = true; return Response.Create<string>(); };
+            Func<int, Response<string>> binder = x => { isBindRan = true; return new Response<string>(); };
 
-            var response = Response.Create<int>().Bind(binder);
+            var response = new Response<int>().Bind(binder);
 
             Assert.IsFalse(response);
             Assert.IsFalse(isBindRan);
@@ -156,7 +153,7 @@ namespace Tests.ContainerExpressions.Containters
             var isInvoked = false;
             Func<string, int> intParse = x => { isInvoked = true; return int.Parse(x); };
 
-            var response = Response.Create<string>().Transform(intParse);
+            var response = new Response<string>().Transform(intParse);
 
             Assert.IsFalse(response);
             Assert.IsFalse(isInvoked);
@@ -205,22 +202,9 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
-        public void BaseResponse_AsInvalid_IsNotValid()
-        {
-            var responseTrue = new Response(true);
-            var responseFalse = new Response();
-
-            responseTrue = responseTrue.AsInvalid();
-            responseFalse = responseFalse.AsInvalid();
-
-            Assert.IsFalse(responseTrue);
-            Assert.IsFalse(responseFalse);
-        }
-
-        [TestMethod]
         public void BaseResponse_Create_InvalidResponseT()
         {
-            var response = Response.Create<int>();
+            var response = new Response<int>();
 
             Assert.IsFalse(response);
         }

@@ -24,7 +24,7 @@ namespace Tests.ContainerExpressions.Expressions.Core
         public void OneInValidFunction_ResultsInAnInvalidContainer()
         {
             Func<Response<float>> func1 = () => Response.Create(3.14f);
-            Func<float, Response<string>> func2 = (input) => Response.Create<string>(); // Invalid.
+            Func<float, Response<string>> func2 = (input) => new Response<string>(); // Invalid.
             Func<string, Response<string[]>> func3 = (input) => Response.Create(input.Split('.'));
 
             var result = Expression.Compose(func1, func2, func3);
@@ -39,7 +39,7 @@ namespace Tests.ContainerExpressions.Expressions.Core
             var id2 = id1;
 
             Func<Response<float>> func1 = () => Response.Create(3.14f);
-            Func<float, Response<string>> func2 = (input) => Response.Create<string>(); // Invalid.
+            Func<float, Response<string>> func2 = (input) => new Response<string>(); // Invalid.
             Func<string, Response<string[]>> func3 = (input) => {
                 id2 = Guid.NewGuid();
                 return Response.Create(input.Split('.'));

@@ -15,7 +15,7 @@ namespace Tests.ContainerExpressions.Examples
             var input = new int[] { 1, 2, 3 };
 
             var result = Expression.Match(input,
-                Pattern.Create<int[], int>(x => x == null, _ => Response.Create<int>()),
+                Pattern.Create<int[], int>(x => x == null, _ => new Response<int>()),
                 Pattern.Create<int[], int>(x => x.Length == 0, _ => Response.Create(0)),
                 Pattern.Create<int[], int>(x => x.Length > 0, Sum)
             );

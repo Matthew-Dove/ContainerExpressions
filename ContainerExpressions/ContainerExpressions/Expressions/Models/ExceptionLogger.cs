@@ -12,20 +12,19 @@ namespace ContainerExpressions.Expressions.Models
             _logger = logger;
         }
 
-        public void Log(Exception ex) => _logger.Bind(ex, RunLogger);
-
-        private static Response RunLogger(Exception ex, Action<Exception> logger)
+        public void Log(Exception ex)
         {
-            try
+            if (_logger.IsValid)
             {
-                logger(ex);
-            }
-            catch
-            {
+                try
+                {
+                    _logger.Value(ex);
+                }
+                catch
+                {
 
+                }
             }
-
-            return new Response(true);
         }
 
         public static ExceptionLogger Create(Response<Action<Exception>> logger) => new ExceptionLogger(logger);

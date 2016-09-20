@@ -31,7 +31,7 @@ namespace Tests.ContainerExpressions.Expressions.Core
         public async Task OneInValidFunction_ResultsInAnInvalidContainer()
         {
             Func<Task<Response<float>>> funcAsync1 = () => WaitThenDo(() => Response.Create(3.14f));
-            Func<float, Task<Response<string>>> funcAsync2 = (input) => WaitThenDo(() => Response.Create<string>()); // Invalid.
+            Func<float, Task<Response<string>>> funcAsync2 = (input) => WaitThenDo(() => new Response<string>()); // Invalid.
             Func<string, Task<Response<string[]>>> funcAsync3 = (input) => WaitThenDo(() => Response.Create(input.Split('.')));
 
             var result = await Expression.ComposeAsync(funcAsync1, funcAsync2, funcAsync3);
@@ -46,7 +46,7 @@ namespace Tests.ContainerExpressions.Expressions.Core
             var id2 = id1;
 
             Func<Task<Response<float>>> funcAsync1 = () => WaitThenDo(() => Response.Create(3.14f));
-            Func<float, Task<Response<string>>> funcAsync2 = (input) => WaitThenDo(() => Response.Create<string>()); // Invalid.
+            Func<float, Task<Response<string>>> funcAsync2 = (input) => WaitThenDo(() => new Response<string>()); // Invalid.
             Func<string, Task<Response<string[]>>> funcAsync3 = (input) => WaitThenDo(() => {
                 id2 = Guid.NewGuid();
                 return Response.Create(input.Split('.'));

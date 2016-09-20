@@ -31,8 +31,11 @@ namespace ContainerExpressions.Containers
         /// <summary>When compared to T, the Value property will be used.</summary>
         public static implicit operator T(Response<T> response) => response.Value;
 
+        /// <summary>When compared to Response, the IsValid property will be used to create the response model.</summary>
+        public static implicit operator Response(Response<T> response) => new Response(response.IsValid);
+
         /// <summary>Returns the underlying value's string representation.</summary>
-        public override string ToString() => _value == null ? string.Empty : _value.ToString();
+        public override string ToString() => _value?.ToString() ?? string.Empty;
     }
 
     /// <summary>A helper class for the Response generic class.</summary>
@@ -52,9 +55,6 @@ namespace ContainerExpressions.Containers
         /// <param name="value">The response's value.</param>
         public static Response<T> Create<T>(T value) => new Response<T>(value);
 
-        /// <summary>Create a response container in an invalid state.</summary>
-        public static Response<T> Create<T>() => new Response<T>();
-
         /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
         public static Func<T, Response<TResult>> Lift<T, TResult>(Func<T, TResult> func) => Create<Func<T, Response<TResult>>>(x => Create(func(x)));
 
@@ -72,38 +72,14 @@ namespace ContainerExpressions.Containers
         /// <summary>Creates a valid container response.</summary>
         public static Response<T> WithValue<T>(this Response<T> response, T value) => new Response<T>(value);
 
-        /// <summary>Creates an invalid container response.</summary>
-        public static Response<T> WithNoValue<T>(this Response<T> response) => new Response<T>();
-
         /// <summary>Create a response container in an valid state.</summary>
         public static Response AsValid(this Response response) => new Response(true);
 
-        /// <summary>Create a response container in an invalid state.</summary>
-        public static Response AsInvalid(this Response response) => new Response(false);
+        /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
+        public static Response<TResult> Bind<T, TResult>(this Response<T> response, Func<T, Response<TResult>> func) => response.IsValid ? func(response.Value) : new Response<TResult>();
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        public static Response Bind<T>(this Response<T> response, Func<T, Response> func) => response.IsValid ? func(response.Value) : new Response();
-
-        /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        public static Task<Response> BindAsync<T>(this Response<T> response, Func<T, Task<Response>> func) => response.IsValid ? func(response.Value) : Task.FromResult(new Response());
-
-        /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        public static Response Bind<T, TState>(this Response<T> response, TState state, Func<TState, T, Response> func) => response.IsValid ? func(state, response.Value) : new Response();
-
-        /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        public static Task<Response> BindAsync<T, TState>(this Response<T> response, TState state, Func<TState, T, Task<Response>> func) => response.IsValid ? func(state, response.Value) : Task.FromResult(new Response());
-
-        /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        public static Response<TResult> Bind<T, TResult>(this Response<T> response, Func<T, Response<TResult>> func) => response.IsValid ? func(response.Value) : Response.Create<TResult>();
-
-        /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        public static Task<Response<TResult>> BindAsync<T, TResult>(this Response<T> response, Func<T, Task<Response<TResult>>> func) => response.IsValid ? func(response.Value) : Task.FromResult(Response.Create<TResult>());
-
-        /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        public static Response<TResult> Bind<T, TState, TResult>(this Response<T> response, TState state, Func<TState, T, Response<TResult>> func) => response.IsValid ? func(state, response.Value) : Response.Create<TResult>();
-
-        /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        public static Task<Response<TResult>> Bind<T, TState, TResult>(this Response<T> response, TState state, Func<TState, T, Task<Response<TResult>>> func) => response.IsValid ? func(state, response.Value) : Task.FromResult(Response.Create<TResult>());
+        public static Task<Response<TResult>> BindAsync<T, TResult>(this Response<T> response, Func<T, Task<Response<TResult>>> func) => response.IsValid ? func(response.Value) : Task.FromResult(new Response<TResult>());
 
         /// <summary>Gets the value, unless the state is invalid, then the default value is returned.</summary>
         public static T GetValueOrDefault<T>(this Response<T> response, T defaultValue) => response.IsValid ? response.Value : defaultValue;
@@ -114,6 +90,6 @@ namespace ContainerExpressions.Containers
         /// <param name="response">The result of the last ran code.</param>
         /// <param name="func">An error free function that maps one type to another.</param>
         /// <returns>The mapped response, or an invalid response if the input was in an invalid state.</returns>
-        public static Response<TResult> Transform<T, TResult>(this Response<T> response, Func<T, TResult> func) => response ? Response.Create(func(response)) : Response.Create<TResult>();
+        public static Response<TResult> Transform<T, TResult>(this Response<T> response, Func<T, TResult> func) => response ? Response.Create(func(response)) : new Response<TResult>();
     }
 }
