@@ -208,6 +208,22 @@ public Response<T> CreateUser(UserModel user)
 }
 ```
 
+### Reduce`<T>`
+
+Combine many values of `T` to a single value of `T`.  
+Useful for any type that is associative.  
+
+In the example below we combine many  words into a sentence.  
+
+```cs
+Func<string, string, string> combine = (x, y) => string.Concat(x, " ", y);
+
+var words = new string[] { "world" };
+var arg1 = "hello";
+
+var sentence = Expression.Reduce(arg1, words, combine);
+```
+
 ## Extension Methods
 
 Useful utilities for the `Response<T>` type.  

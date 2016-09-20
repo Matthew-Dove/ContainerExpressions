@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Containers\Either.cs" />
     <Compile Include="Containers\Later.cs" />
     <Compile Include="Containers\LaterAsync.cs" />
     <Compile Include="Containers\Response.cs" />
@@ -54,6 +55,7 @@
     <Compile Include="Expressions\Core\ComposeAsync.cs" />
     <Compile Include="Expressions\Core\Match.cs" />
     <Compile Include="Expressions\Core\MatchAsync.cs" />
+    <Compile Include="Expressions\Core\Reduce.cs" />
     <Compile Include="Expressions\Expression.cs" />
     <Compile Include="Expressions\Models\ExceptionLogger.cs" />
     <Compile Include="Expressions\Models\Pattern.cs" />

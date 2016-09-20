@@ -1,6 +1,7 @@
 ﻿using ContainerExpressions.Containers;
 using ContainerExpressions.Expressions.Models;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ContainerExpressions.Expressions
@@ -8,6 +9,13 @@ namespace ContainerExpressions.Expressions
     /// <summary>Entry class for using Expressions.</summary>
     public static class Expression
     {
+        #region Reduce
+
+        /// <summary>Reduce many values of T, into a single value of T.</summary>
+        public static T Reduce<T>(T arg1, IEnumerable<T> values, Func<T, T, T> combine) => Core.Reduce.Fold(arg1, values, combine);
+
+        #endregion
+
         #region Compose
 
         #region Synchronous

@@ -66,12 +66,14 @@
     <Compile Include="Examples\ComposeTExample.cs" />
     <Compile Include="Examples\LaterTExample.cs" />
     <Compile Include="Examples\MatchTExample.cs" />
+    <Compile Include="Examples\ReduceTExample.cs" />
     <Compile Include="Examples\ResponseTExample.cs" />
     <Compile Include="Examples\TryExample.cs" />
     <Compile Include="Expressions\Core\ComposeTests.cs" />
     <Compile Include="Expressions\Core\ComposeAsyncTests.cs" />
     <Compile Include="Expressions\Core\MatchTests.cs" />
     <Compile Include="Expressions\Core\MatchAsyncTests.cs" />
+    <Compile Include="Expressions\Core\ReduceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
