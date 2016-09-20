@@ -13,6 +13,10 @@ namespace ContainerExpressions.Expressions
         #region Synchronous
 
         /// <summary>Compse functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Response<TResult> Compose<T1, TResult>(T1 arg1, Func<T1, Response<TResult>> funcResult) => Core.Compose.Evaluate(arg1, funcResult);
+        /// <summary>Compse functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Response<TResult> Compose<T1, TResult>(Response<T1> arg1, Func<T1, Response<TResult>> funcResult) => Core.Compose.Evaluate(arg1, funcResult);
+        /// <summary>Compse functions by giving the output of the first function, to the input of the second function.</summary>
         public static Response<TResult> Compose<T1, TResult>(Func<Response<T1>> func1, Func<T1, Response<TResult>> funcResult) => Core.Compose.Evaluate(func1, funcResult);
         /// <summary>Compse functions by giving the output of the first function, to the input of the second function.</summary>
         public static Response<TResult> Compose<T1, T2, TResult>(Func<Response<T1>> func1, Func<T1, Response<T2>> func2, Func<T2, Response<TResult>> funcResult) => Core.Compose.Evaluate(func1, func2, funcResult);
@@ -33,6 +37,12 @@ namespace ContainerExpressions.Expressions
 
         #region Asynchronous
 
+        /// <summary>Compse functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Task<Response<TResult>> ComposeAsync<T1, TResult>(T1 arg1, Func<T1, Task<Response<TResult>>> funcResult) => Core.ComposeAsync.EvaluateAsync(arg1, funcResult);
+        /// <summary>Compse functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Task<Response<TResult>> ComposeAsync<T1, TResult>(Response<T1> arg1, Func<T1, Task<Response<TResult>>> funcResult) => Core.ComposeAsync.EvaluateAsync(arg1, funcResult);
+        /// <summary>Compse functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Task<Response<TResult>> ComposeAsync<T1, TResult>(Task<Response<T1>> arg1, Func<T1, Task<Response<TResult>>> funcResult) => Core.ComposeAsync.EvaluateAsync(arg1, funcResult);
         /// <summary>Compse functions by giving the output of the first function, to the input of the second function.</summary>
         public static Task<Response<TResult>> ComposeAsync<T1, TResult>(Func<Task<Response<T1>>> func1, Func<T1, Task<Response<TResult>>> funcResult) => Core.ComposeAsync.EvaluateAsync(func1, funcResult);
         /// <summary>Compse functions by giving the output of the first function, to the input of the second function.</summary>
