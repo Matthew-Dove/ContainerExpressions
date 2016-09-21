@@ -57,6 +57,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Containers\EitherTests.cs" />
     <Compile Include="Containers\LaterTests.cs" />
     <Compile Include="Containers\ResponseTests.cs" />
     <Compile Include="Containers\RetryTests.cs" />
@@ -64,6 +65,7 @@
     <Compile Include="Containers\LaterAsyncTests.cs" />
     <Compile Include="Examples\BaseResponseExample.cs" />
     <Compile Include="Examples\ComposeTExample.cs" />
+    <Compile Include="Examples\EitherTExample.cs" />
     <Compile Include="Examples\LaterTExample.cs" />
     <Compile Include="Examples\MatchTExample.cs" />
     <Compile Include="Examples\ReduceTExample.cs" />

@@ -121,6 +121,39 @@ private static void Persist(Widget widget)
 
 Note: there is also Try.RunAsync() for asynchronous functions.
 
+### Either`<T>`
+
+If you have a function that can benefit from returning one type, from a selection of types, then Either is what you're looking for.  
+Either can change it's internal type during program execution similar to object, but in a type safe way. 
+
+A case where you might use Either is when you have a function, and you find yourself about to drastically change it's return type for an edge case.  
+Let's say you have a SaveCustomer function that takes a Customer, and returns a boolean indicating if the save was successful ot not.  
+A new requirement comes in, you must display a error message to the client if the customer's email is already in use by another client.  
+You can't just rely on the boolean's false, because you don't know if it was false from of a write error, or a duplicate email.  
+So you must change the return type from boolean to CustomerResponse, and CustomerResponse contains two fields, one for the boolean, and another string for the error message.  
+Alternatively you could modify the return type to be `Either<bool, string>`, and return a string in the case of a duplicate email.  
+
+In the example below we display different messages based off Either's internal type.  
+Here we see types used to indicate state, something that would normally be done with values of a type, not the type itself.  
+````cs
+// Given the two types:
+struct Ok { }
+struct Error { }
+
+// We can set Either to contain one of these two types at a time.
+Either<Ok, Error> either = new Ok();
+
+if (new Random().Next() % 2 == 0)
+{
+	either = new Error();
+}
+
+string message = either.Match(
+	ok => "Operation was successful.", // When Either's type is Ok, this string is returned.
+	error => "Internal error - try again later." // When Either's type is Error, this string is returned.
+);
+````
+
 ## Expressions
 
 ### Compose`<T>`
@@ -213,7 +246,7 @@ public Response<T> CreateUser(UserModel user)
 Combine many values of `T` to a single value of `T`.  
 Useful for any type that is associative.  
 
-In the example below we combine many  words into a sentence.  
+In the example below we combine many words into a sentence.  
 
 ```cs
 Func<string, string, string> combine = (x, y) => string.Concat(x, " ", y);
@@ -221,7 +254,7 @@ Func<string, string, string> combine = (x, y) => string.Concat(x, " ", y);
 var words = new string[] { "world" };
 var arg1 = "hello";
 
-var sentence = Expression.Reduce(arg1, words, combine);
+string sentence = Expression.Reduce(arg1, words, combine);
 ```
 
 ## Extension Methods

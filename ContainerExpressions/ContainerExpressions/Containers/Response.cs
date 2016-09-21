@@ -35,7 +35,7 @@ namespace ContainerExpressions.Containers
         public static implicit operator Response(Response<T> response) => new Response(response.IsValid);
 
         /// <summary>Returns the underlying value's string representation.</summary>
-        public override string ToString() => _value?.ToString() ?? string.Empty;
+        public override string ToString() => _value == null ? null : _value.ToString();
     }
 
     /// <summary>A helper class for the Response generic class.</summary>

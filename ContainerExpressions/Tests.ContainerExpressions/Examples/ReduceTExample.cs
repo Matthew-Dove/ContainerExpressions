@@ -15,7 +15,7 @@ namespace Tests.ContainerExpressions.Examples
             var words = new string[] { "world" };
             var arg1 = "hello";
 
-            var sentence = Expression.Reduce(arg1, words, combine);
+            string sentence = Expression.Reduce(arg1, words, combine);
 
             Assert.AreEqual("hello world", sentence);
         }
