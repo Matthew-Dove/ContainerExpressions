@@ -127,7 +127,7 @@ If you have a function that can benefit from returning one type, from a selectio
 Either can change it's internal type during program execution similar to object, but in a type safe way. 
 
 A case where you might use Either is when you have a function, and you find yourself about to drastically change it's return type for an edge case.  
-Let's say you have a SaveCustomer function that takes a Customer, and returns a boolean indicating if the save was successful ot not.  
+Let's say you have a SaveCustomer function that takes a Customer, and returns a boolean indicating if the save was successful or not.  
 A new requirement comes in, you must display a error message to the client if the customer's email is already in use by another client.  
 You can't just rely on the boolean's false, because you don't know if it was false from of a write error, or a duplicate email.  
 So you must change the return type from boolean to CustomerResponse, and CustomerResponse contains two fields, one for the boolean, and another string for the error message.  
@@ -140,7 +140,7 @@ Here we see types used to indicate state, something that would normally be done 
 struct Ok { }
 struct Error { }
 
-// We can set Either to contain one of these two types at a time.
+// We can set Either to contain one of these two types.
 Either<Ok, Error> either = new Ok();
 
 if (new Random().Next() % 2 == 0)
