@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ContainerExpressions.Containers;
 using System;
+using System.Threading.Tasks;
 
 namespace Tests.ContainerExpressions.Containters
 {
@@ -110,7 +111,7 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
-        public void Response_IsValid_BindPropagates()
+        public void Response_IsValid_BindPropagates_Lift()
         {
             var answer = 42;
             Func<int, int> @double = x => x * 2;
@@ -119,6 +120,18 @@ namespace Tests.ContainerExpressions.Containters
 
             Assert.IsTrue(response);
             Assert.AreEqual(@double(answer), response);
+        }
+
+        [TestMethod]
+        public async Task Response_IsValid_BindPropagates_LiftAsync()
+        {
+            var answer = 42;
+            Func<int, Task<int>> @double = x => Task.FromResult(x * 2);
+
+            var response = await Response.Create(answer).BindAsync(Response.LiftAsync(@double));
+
+            Assert.IsTrue(response);
+            Assert.AreEqual(await @double(answer), response);
         }
 
         [TestMethod]
