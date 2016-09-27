@@ -2,25 +2,6 @@
 
 namespace ContainerExpressions.Containers
 {
-
-
-
-
-    // TODO: Can copy type if left side takes all T's of right side.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /// <summary>
     /// This type holds a single instance of a selection of types.
     /// <para>While Either can take on more than one type, it is only ever a single type at a time.</para>
@@ -85,7 +66,7 @@ namespace ContainerExpressions.Containers
         }
     }
 
-    #region OtherTypes
+    #region Other Type Permutations
 
     /// <summary>
     /// This type holds a single instance of a selection of types.
@@ -149,6 +130,12 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Sets the current internal type to that of the value.</summary>
         public static implicit operator Either<T1, T2, T3>(T3 value) => new Either<T1, T2, T3>(value);
+
+        /// <summary>Converts a lower typed Either, into a higher typed Either.</summary>
+        public static implicit operator Either<T1, T2, T3>(Either<T1, T2> either) => either.Match<Either<T1, T2, T3>>(x => x, x => x);
+
+        /// <summary>Converts a lower typed Either, into a higher typed Either.</summary>
+        public static implicit operator Either<T1, T2, T3>(Either<T2, T1> either) => either.Match<Either<T1, T2, T3>>(x => x, x => x);
 
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
@@ -253,6 +240,30 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Sets the current internal type to that of the value.</summary>
         public static implicit operator Either<T1, T2, T3, T4>(T4 value) => new Either<T1, T2, T3, T4>(value);
+
+        /// <summary>Converts a lower typed Either, into a higher typed Either.</summary>
+        public static implicit operator Either<T1, T2, T3, T4>(Either<T1, T2> either) => either.Match<Either<T1, T2, T3, T4>>(x => x, x => x);
+
+        /// <summary>Converts a lower typed Either, into a higher typed Either.</summary>
+        public static implicit operator Either<T1, T2, T3, T4>(Either<T2, T1> either) => either.Match<Either<T1, T2, T3, T4>>(x => x, x => x);
+
+        /// <summary>Converts a lower typed Either, into a higher typed Either.</summary>
+        public static implicit operator Either<T1, T2, T3, T4>(Either<T1, T2, T3> either) => either.Match<Either<T1, T2, T3, T4>>(x => x, x => x, x => x);
+
+        /// <summary>Converts a lower typed Either, into a higher typed Either.</summary>
+        public static implicit operator Either<T1, T2, T3, T4>(Either<T1, T3, T2> either) => either.Match<Either<T1, T2, T3, T4>>(x => x, x => x, x => x);
+
+        /// <summary>Converts a lower typed Either, into a higher typed Either.</summary>
+        public static implicit operator Either<T1, T2, T3, T4>(Either<T2, T1, T3> either) => either.Match<Either<T1, T2, T3, T4>>(x => x, x => x, x => x);
+
+        /// <summary>Converts a lower typed Either, into a higher typed Either.</summary>
+        public static implicit operator Either<T1, T2, T3, T4>(Either<T2, T3, T1> either) => either.Match<Either<T1, T2, T3, T4>>(x => x, x => x, x => x);
+
+        /// <summary>Converts a lower typed Either, into a higher typed Either.</summary>
+        public static implicit operator Either<T1, T2, T3, T4>(Either<T3, T1, T2> either) => either.Match<Either<T1, T2, T3, T4>>(x => x, x => x, x => x);
+
+        /// <summary>Converts a lower typed Either, into a higher typed Either.</summary>
+        public static implicit operator Either<T1, T2, T3, T4>(Either<T3, T2, T1> either) => either.Match<Either<T1, T2, T3, T4>>(x => x, x => x, x => x);
 
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()

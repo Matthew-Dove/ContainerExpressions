@@ -48,6 +48,7 @@
     <Compile Include="Containers\Either.cs" />
     <Compile Include="Containers\Later.cs" />
     <Compile Include="Containers\LaterAsync.cs" />
+    <Compile Include="Containers\Log.cs" />
     <Compile Include="Containers\Response.cs" />
     <Compile Include="Containers\Retry.cs" />
     <Compile Include="Containers\Try.cs" />
