@@ -172,6 +172,50 @@ namespace Tests.ContainerExpressions.Containters
             Assert.IsFalse(isInvoked);
         }
 
+        [TestMethod]
+        public void Response_IsNotValid_PivotNotValid()
+        {
+            var input = new Response<string>();
+            Func<string, Response<int>> trueFunc = x => { throw new InvalidOperationException(); };
+            Func<string, Response<int>> falseFunc = x => { throw new InvalidOperationException(); };
+
+            var response = input.Pivot(true, trueFunc, falseFunc);
+
+            Assert.IsFalse(response);
+        }
+
+        [TestMethod]
+        public void Response_IsValid_ConditionIsTrue_Func1Invoked()
+        {
+            var isInvoked = false;
+            var answer = 42;
+            var input = Response.Create(answer.ToString());
+            Func<string, Response<int>> trueFunc = x => { isInvoked = true; return Response.Create(int.Parse(x)); };
+            Func<string, Response<int>> falseFunc = x => { throw new InvalidOperationException(); };
+
+            var response = input.Pivot(true, trueFunc, falseFunc);
+
+            Assert.IsTrue(isInvoked);
+            Assert.IsTrue(response);
+            Assert.AreEqual(answer, response);
+        }
+
+        [TestMethod]
+        public void Response_IsValid_ConditionIsTrue_Func2Invoked()
+        {
+            var isInvoked = false;
+            var answer = 42;
+            var input = Response.Create(answer.ToString());
+            Func<string, Response<int>> trueFunc = x => { throw new InvalidOperationException(); };
+            Func<string, Response<int>> falseFunc = x => { isInvoked = true; return Response.Create(int.Parse(x)); };
+
+            var response = input.Pivot(false, trueFunc, falseFunc);
+
+            Assert.IsTrue(isInvoked);
+            Assert.IsTrue(response);
+            Assert.AreEqual(answer, response);
+        }
+
         #endregion
 
         #region BaseResponse
