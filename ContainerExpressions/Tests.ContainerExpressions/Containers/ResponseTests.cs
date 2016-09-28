@@ -216,6 +216,31 @@ namespace Tests.ContainerExpressions.Containters
             Assert.AreEqual(answer, response);
         }
 
+        [TestMethod]
+        public void BothResponses_AreValid_FunnelFunc_IsInvoked()
+        {
+            var response1 = new Response<bool>(true);
+            var response2 = new Response<bool>(false);
+
+            var response = response1.Funnel(response2, (x, y) => Response.Create(false));
+
+            Assert.IsTrue(response.IsValid);
+            Assert.IsFalse(response.Value);
+        }
+
+        [TestMethod]
+        public void OneResponse_IsNotValid_FunnelFunc_IsNotInvoked()
+        {
+            var isInvoked = false;
+            var response1 = new Response<bool>(true);
+            var response2 = new Response<bool>();
+
+            var response = response1.Funnel(response2, (x, y) => { isInvoked = true; return Response.Create(false); });
+
+            Assert.IsFalse(response.IsValid);
+            Assert.IsFalse(isInvoked);
+        }
+
         #endregion
 
         #region BaseResponse
