@@ -46,6 +46,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Containers\Either.cs" />
+    <Compile Include="Containers\Extensions\FunnelExtensions.cs" />
+    <Compile Include="Containers\Extensions\ResponseExtensions.cs" />
     <Compile Include="Containers\Later.cs" />
     <Compile Include="Containers\LaterAsync.cs" />
     <Compile Include="Containers\Log.cs" />
