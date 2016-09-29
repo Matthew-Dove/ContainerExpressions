@@ -245,16 +245,35 @@ public Response<T> CreateUser(UserModel user)
 
 Combine many values of `T` to a single value of `T`.  
 Useful for any type that is associative.  
+Only valid states of `Response<T>` are combined in the reduce expression.  
 
 In the example below we combine many words into a sentence.  
 
 ```cs
 Func<string, string, string> combine = (x, y) => string.Concat(x, " ", y);
 
-var words = new string[] { "world" };
+var words = new Response<string>[] { Response.Create("world") };
 var arg1 = "hello";
 
-string sentence = Expression.Reduce(arg1, words, combine);
+string sentence = Expression.Reduce(combine, arg1, words);
+```
+
+### Funnel`<T>`
+
+Takes many `Response<T>`'s and invokes a function passing each `T` as an argument; if and only if each `Response<T>` is in a valid state.  
+If at least one input is in an invalid state, then an invalid `Response<T>` is returned instead of calling the function.  
+Useful when you'd like an operation to happen only when several previous operation completed successfully.  
+
+In the example below we only take the power of two numbers if they were calculated correctly.  
+
+```cs
+// Returns an Invalid Response<double> when the divisor argument is 0, otherwise the result is stored in a valid Response<double>.
+Func<double, double, Response<double>> divide = (dividend, divisor) => divisor == 0 ? new Response<double>() : Response.Create(dividend / divisor);
+
+var e = divide(150D, 55D);
+var pi = divide(22D, 7D);
+
+var answer = Expression.Funnel(e, pi, Math.Pow);
 ```
 
 ## Extension Methods

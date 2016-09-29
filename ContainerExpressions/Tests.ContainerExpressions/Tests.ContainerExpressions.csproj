@@ -66,6 +66,7 @@
     <Compile Include="Examples\BaseResponseExample.cs" />
     <Compile Include="Examples\ComposeTExample.cs" />
     <Compile Include="Examples\EitherTExample.cs" />
+    <Compile Include="Examples\FunnelTExample.cs" />
     <Compile Include="Examples\LaterTExample.cs" />
     <Compile Include="Examples\MatchTExample.cs" />
     <Compile Include="Examples\ReduceTExample.cs" />

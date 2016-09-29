@@ -2,6 +2,7 @@
 using ContainerExpressions.Containers;
 using System;
 using System.Threading.Tasks;
+using ContainerExpressions.Expressions;
 
 namespace Tests.ContainerExpressions.Containters
 {
@@ -217,12 +218,34 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
+        public void Response_IsValid_FuncIsInvoked()
+        {
+            var answer = 42;
+            var response = new Response<int>(answer);
+
+            var result = response.IsTrue(x => x == answer);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void Response_IsNotValid_FuncIsNotInvoked()
+        {
+            var answer = 42;
+            var response = new Response<int>();
+
+            var result = response.IsTrue(x => x == answer);
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
         public void BothResponses_AreValid_FunnelFunc_IsInvoked()
         {
             var response1 = new Response<bool>(true);
             var response2 = new Response<bool>(false);
 
-            var response = response1.Funnel(response2, (x, y) => Response.Create(false));
+            var response = Expression.Funnel(response1, response2, (x, y) => false);
 
             Assert.IsTrue(response.IsValid);
             Assert.IsFalse(response.Value);
@@ -235,7 +258,7 @@ namespace Tests.ContainerExpressions.Containters
             var response1 = new Response<bool>(true);
             var response2 = new Response<bool>();
 
-            var response = response1.Funnel(response2, (x, y) => { isInvoked = true; return Response.Create(false); });
+            var response = Expression.Funnel(response1, response2, (x, y) => { isInvoked = true; return Response.Create(false); });
 
             Assert.IsFalse(response.IsValid);
             Assert.IsFalse(isInvoked);

@@ -1,7 +1,6 @@
 ﻿using ContainerExpressions.Containers;
 using ContainerExpressions.Expressions.Models;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ContainerExpressions.Expressions
@@ -12,8 +11,33 @@ namespace ContainerExpressions.Expressions
         #region Reduce
 
         /// <summary>Reduce many values of T, into a single value of T.</summary>
-        public static T Reduce<T>(T arg1, IEnumerable<T> values, Func<T, T, T> combine) => Core.Reduce.Fold(arg1, values, combine);
+        public static T Reduce<T>(Func<T, T, T> combine, T arg1, params Response<T>[] values) => Core.Reduce.Fold(combine, arg1, values);
 
+        #endregion
+
+        #region Funnel
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Response<TResult> Funnel<T1, T2, TResult>(Response<T1> response1, Response<T2> response2, Func<T1, T2, TResult> func) => Core.Funnel.Converge(response1, response2, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Response<TResult> Funnel<T1, T2, T3, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Func<T1, T2, T3, TResult> func) => Core.Funnel.Converge(response1, response2, response3, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Response<TResult> Funnel<T1, T2, T3, T4, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Func<T1, T2, T3, T4, TResult> func) => Core.Funnel.Converge(response1, response2, response3, response4, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Response<TResult> Funnel<T1, T2, T3, T4, T5, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Response<T5> response5, Func<T1, T2, T3, T4, T5, TResult> func) => Core.Funnel.Converge(response1, response2, response3, response4, response5, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Response<TResult> Funnel<T1, T2, T3, T4, T5, T6, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Response<T5> response5, Response<T6> response6, Func<T1, T2, T3, T4, T5, T6, TResult> func) => Core.Funnel.Converge(response1, response2, response3, response4, response5, response6, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Response<TResult> Funnel<T1, T2, T3, T4, T5, T6, T7, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Response<T5> response5, Response<T6> response6, Response<T7> response7, Func<T1, T2, T3, T4, T5, T6, T7, TResult> func) => Core.Funnel.Converge(response1, response2, response3, response4, response5, response6, response7, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Response<TResult> Funnel<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Response<T5> response5, Response<T6> response6, Response<T7> response7, Response<T8> response8, Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> func) => Core.Funnel.Converge(response1, response2, response3, response4, response5, response6, response7, response8, func);
+        
         #endregion
 
         #region Compose

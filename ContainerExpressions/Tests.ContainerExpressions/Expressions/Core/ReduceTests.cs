@@ -1,4 +1,5 @@
-﻿using ContainerExpressions.Expressions;
+﻿using ContainerExpressions.Containers;
+using ContainerExpressions.Expressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
@@ -13,12 +14,12 @@ namespace Tests.ContainerExpressions.Expressions.Core
         {
             Func<int, int, int> sum = (x, y) => x + y;
 
-            var numbers = new int[] { 1, 3, 3, 7 };
+            var numbers = new Response<int>[] { Response.Create(1), Response.Create(3), Response.Create(3), Response.Create(7) };
             var firstNumber = 0;
 
-            var total = Expression.Reduce(firstNumber, numbers, sum);
+            var total = Expression.Reduce(sum, firstNumber, numbers);
 
-            Assert.AreEqual(numbers.Sum(), total);
+            Assert.AreEqual(numbers.Select(x => x.Value).Sum(), total);
         }
     }
 }

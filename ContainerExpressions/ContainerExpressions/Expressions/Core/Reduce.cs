@@ -1,17 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ContainerExpressions.Containers;
+using System;
 
 namespace ContainerExpressions.Expressions.Core
 {
     internal static class Reduce
     {
-        public static T Fold<T>(T arg1, IEnumerable<T> values, Func<T, T, T> combine)
+        public static T Fold<T>(Func<T, T, T> combine, T arg1, params Response<T>[] values)
         {
             T result = arg1;
 
-            foreach (var value in values)
+            for (int i = 0; i < values.Length; i++)
             {
-                result = combine(result, value);
+                if (values[i])
+                {
+                    result = combine(result, values[i]);
+                }
             }
 
             return result;

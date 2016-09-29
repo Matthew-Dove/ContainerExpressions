@@ -1,4 +1,5 @@
-﻿using ContainerExpressions.Expressions;
+﻿using ContainerExpressions.Containers;
+using ContainerExpressions.Expressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
@@ -12,10 +13,10 @@ namespace Tests.ContainerExpressions.Examples
         {
             Func<string, string, string> combine = (x, y) => string.Concat(x, " ", y);
 
-            var words = new string[] { "world" };
+            var words = new Response<string>[] { Response.Create("world") };
             var arg1 = "hello";
 
-            string sentence = Expression.Reduce(arg1, words, combine);
+            string sentence = Expression.Reduce(combine, arg1, words);
 
             Assert.AreEqual("hello world", sentence);
         }

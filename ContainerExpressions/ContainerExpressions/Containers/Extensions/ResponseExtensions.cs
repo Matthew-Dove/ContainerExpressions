@@ -41,5 +41,8 @@ namespace ContainerExpressions.Containers
         /// </summary>
         public static Task<Response<TResult>> PivotAsync<T, TResult>(this Response<T> response, bool condition, Func<T, Task<Response<TResult>>> func1, Func<T, Task<Response<TResult>>> func2) =>
             response.IsValid ? (condition ? func1(response) : func2(response)) : Task.FromResult(new Response<TResult>());
+
+        /// <summary>When the Response is in a valid state the Func's result is returned, otherwise false is returned.</summary>
+        public static bool IsTrue<T>(this Response<T> response, Func<T, bool> condition) => response.IsValid ? condition(response.Value) : false;
     }
 }
