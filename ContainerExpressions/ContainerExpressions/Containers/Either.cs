@@ -51,15 +51,15 @@ namespace ContainerExpressions.Containers
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
         {
-            string value = null;
+            string value = default(string);
 
-            if (_tag == 1 && _t1 != null)
+            if (_tag == 1)
             {
-                value = _t1.ToString();
+                value = _t1?.ToString();
             }
-            else if (_tag == 2 && _t2 != null)
+            else if (_tag == 2)
             {
-                value = _t2.ToString();
+                value = _t2?.ToString();
             }
 
             return value;
@@ -131,28 +131,22 @@ namespace ContainerExpressions.Containers
         /// <summary>Sets the current internal type to that of the value.</summary>
         public static implicit operator Either<T1, T2, T3>(T3 value) => new Either<T1, T2, T3>(value);
 
-        /// <summary>Converts a lower typed Either, into a higher typed Either.</summary>
-        public static implicit operator Either<T1, T2, T3>(Either<T1, T2> either) => either.Match<Either<T1, T2, T3>>(x => x, x => x);
-
-        /// <summary>Converts a lower typed Either, into a higher typed Either.</summary>
-        public static implicit operator Either<T1, T2, T3>(Either<T2, T1> either) => either.Match<Either<T1, T2, T3>>(x => x, x => x);
-
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
         {
-            string value = null;
+            string value = default(string);
 
-            if (_tag == 1 && _t1 != null)
+            if (_tag == 1)
             {
-                value = _t1.ToString();
+                value = _t1?.ToString();
             }
-            else if (_tag == 2 && _t2 != null)
+            else if (_tag == 2)
             {
-                value = _t2.ToString();
+                value = _t2?.ToString();
             }
-            else if (_tag == 3 && _t3 != null)
+            else if (_tag == 3)
             {
-                value = _t3.ToString();
+                value = _t3?.ToString();
             }
 
             return value;
@@ -241,55 +235,734 @@ namespace ContainerExpressions.Containers
         /// <summary>Sets the current internal type to that of the value.</summary>
         public static implicit operator Either<T1, T2, T3, T4>(T4 value) => new Either<T1, T2, T3, T4>(value);
 
-        /// <summary>Converts a lower typed Either, into a higher typed Either.</summary>
-        public static implicit operator Either<T1, T2, T3, T4>(Either<T1, T2> either) => either.Match<Either<T1, T2, T3, T4>>(x => x, x => x);
-
-        /// <summary>Converts a lower typed Either, into a higher typed Either.</summary>
-        public static implicit operator Either<T1, T2, T3, T4>(Either<T2, T1> either) => either.Match<Either<T1, T2, T3, T4>>(x => x, x => x);
-
-        /// <summary>Converts a lower typed Either, into a higher typed Either.</summary>
-        public static implicit operator Either<T1, T2, T3, T4>(Either<T1, T2, T3> either) => either.Match<Either<T1, T2, T3, T4>>(x => x, x => x, x => x);
-
-        /// <summary>Converts a lower typed Either, into a higher typed Either.</summary>
-        public static implicit operator Either<T1, T2, T3, T4>(Either<T1, T3, T2> either) => either.Match<Either<T1, T2, T3, T4>>(x => x, x => x, x => x);
-
-        /// <summary>Converts a lower typed Either, into a higher typed Either.</summary>
-        public static implicit operator Either<T1, T2, T3, T4>(Either<T2, T1, T3> either) => either.Match<Either<T1, T2, T3, T4>>(x => x, x => x, x => x);
-
-        /// <summary>Converts a lower typed Either, into a higher typed Either.</summary>
-        public static implicit operator Either<T1, T2, T3, T4>(Either<T2, T3, T1> either) => either.Match<Either<T1, T2, T3, T4>>(x => x, x => x, x => x);
-
-        /// <summary>Converts a lower typed Either, into a higher typed Either.</summary>
-        public static implicit operator Either<T1, T2, T3, T4>(Either<T3, T1, T2> either) => either.Match<Either<T1, T2, T3, T4>>(x => x, x => x, x => x);
-
-        /// <summary>Converts a lower typed Either, into a higher typed Either.</summary>
-        public static implicit operator Either<T1, T2, T3, T4>(Either<T3, T2, T1> either) => either.Match<Either<T1, T2, T3, T4>>(x => x, x => x, x => x);
-
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
         {
-            string value = null;
+            string value = default(string);
 
-            if (_tag == 1 && _t1 != null)
+            if (_tag == 1)
             {
-                value = _t1.ToString();
+                value = _t1?.ToString();
             }
-            else if (_tag == 2 && _t2 != null)
+            else if (_tag == 2)
             {
-                value = _t2.ToString();
+                value = _t2?.ToString();
             }
-            else if (_tag == 3 && _t3 != null)
+            else if (_tag == 3)
             {
-                value = _t3.ToString();
+                value = _t3?.ToString();
             }
-            else if (_tag == 4 && _t4 != null)
+            else if (_tag == 4)
             {
-                value = _t4.ToString();
+                value = _t4?.ToString();
             }
 
             return value;
         }
     }
+
+    /// <summary>
+    /// This type holds a single instance of a selection of types.
+    /// <para>While Either can take on more than one type, it is only ever a single type at a time.</para>
+    /// </summary>
+    public struct Either<T1, T2, T3, T4, T5>
+    {
+        private readonly int _tag;
+        private readonly T1 _t1;
+        private readonly T2 _t2;
+        private readonly T3 _t3;
+        private readonly T4 _t4;
+        private readonly T5 _t5;
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T1 t1)
+        {
+            _tag = 1;
+            _t1 = t1;
+            _t2 = default(T2);
+            _t3 = default(T3);
+            _t4 = default(T4);
+            _t5 = default(T5);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T2 t2)
+        {
+            _tag = 2;
+            _t1 = default(T1);
+            _t2 = t2;
+            _t3 = default(T3);
+            _t4 = default(T4);
+            _t5 = default(T5);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T3 t3)
+        {
+            _tag = 3;
+            _t1 = default(T1);
+            _t2 = default(T2);
+            _t3 = t3;
+            _t4 = default(T4);
+            _t5 = default(T5);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T4 t4)
+        {
+            _tag = 4;
+            _t1 = default(T1);
+            _t2 = default(T2);
+            _t3 = default(T3);
+            _t4 = t4;
+            _t5 = default(T5);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T5 t5)
+        {
+            _tag = 5;
+            _t1 = default(T1);
+            _t2 = default(T2);
+            _t3 = default(T3);
+            _t4 = default(T4);
+            _t5 = t5;
+        }
+
+        /// <summary>
+        /// Gets a type that each type of Either can transform to.
+        /// <para>Only one function will be invoked depending on what type is internally stored.</para>
+        /// </summary>
+        public TResult Match<TResult>(Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4, Func<T5, TResult> f5)
+        {
+            if (_tag == 1)
+                return f1(_t1);
+            if (_tag == 2)
+                return f2(_t2);
+            if (_tag == 3)
+                return f3(_t3);
+            if (_tag == 4)
+                return f4(_t4);
+            if (_tag == 5)
+                return f5(_t5);
+
+            throw new InvalidOperationException("The internal type was not set, you must assign Either a type at least once.");
+        }
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5>(T1 value) => new Either<T1, T2, T3, T4, T5>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5>(T2 value) => new Either<T1, T2, T3, T4, T5>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5>(T3 value) => new Either<T1, T2, T3, T4, T5>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5>(T4 value) => new Either<T1, T2, T3, T4, T5>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5>(T5 value) => new Either<T1, T2, T3, T4, T5>(value);
+
+        /// <summary>Returns the underlying type's value's string representation.</summary>
+        public override string ToString()
+        {
+            string value = default(string);
+
+            if (_tag == 1)
+            {
+                value = _t1?.ToString();
+            }
+            else if (_tag == 2)
+            {
+                value = _t2?.ToString();
+            }
+            else if (_tag == 3)
+            {
+                value = _t3?.ToString();
+            }
+            else if (_tag == 4)
+            {
+                value = _t4?.ToString();
+            }
+            else if (_tag == 5)
+            {
+                value = _t5?.ToString();
+            }
+
+            return value;
+        }
+    }
+
+    /// <summary>
+    /// This type holds a single instance of a selection of types.
+    /// <para>While Either can take on more than one type, it is only ever a single type at a time.</para>
+    /// </summary>
+    public struct Either<T1, T2, T3, T4, T5, T6>
+    {
+        private readonly int _tag;
+        private readonly T1 _t1;
+        private readonly T2 _t2;
+        private readonly T3 _t3;
+        private readonly T4 _t4;
+        private readonly T5 _t5;
+        private readonly T6 _t6;
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T1 t1)
+        {
+            _tag = 1;
+            _t1 = t1;
+            _t2 = default(T2);
+            _t3 = default(T3);
+            _t4 = default(T4);
+            _t5 = default(T5);
+            _t6 = default(T6);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T2 t2)
+        {
+            _tag = 2;
+            _t1 = default(T1);
+            _t2 = t2;
+            _t3 = default(T3);
+            _t4 = default(T4);
+            _t5 = default(T5);
+            _t6 = default(T6);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T3 t3)
+        {
+            _tag = 3;
+            _t1 = default(T1);
+            _t2 = default(T2);
+            _t3 = t3;
+            _t4 = default(T4);
+            _t5 = default(T5);
+            _t6 = default(T6);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T4 t4)
+        {
+            _tag = 4;
+            _t1 = default(T1);
+            _t2 = default(T2);
+            _t3 = default(T3);
+            _t4 = t4;
+            _t5 = default(T5);
+            _t6 = default(T6);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T5 t5)
+        {
+            _tag = 5;
+            _t1 = default(T1);
+            _t2 = default(T2);
+            _t3 = default(T3);
+            _t4 = default(T4);
+            _t5 = t5;
+            _t6 = default(T6);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T6 t6)
+        {
+            _tag = 6;
+            _t1 = default(T1);
+            _t2 = default(T2);
+            _t3 = default(T3);
+            _t4 = default(T4);
+            _t5 = default(T5);
+            _t6 = t6;
+        }
+
+        /// <summary>
+        /// Gets a type that each type of Either can transform to.
+        /// <para>Only one function will be invoked depending on what type is internally stored.</para>
+        /// </summary>
+        public TResult Match<TResult>(Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4, Func<T5, TResult> f5, Func<T6, TResult> f6)
+        {
+            if (_tag == 1)
+                return f1(_t1);
+            if (_tag == 2)
+                return f2(_t2);
+            if (_tag == 3)
+                return f3(_t3);
+            if (_tag == 4)
+                return f4(_t4);
+            if (_tag == 5)
+                return f5(_t5);
+            if (_tag == 6)
+                return f6(_t6);
+
+            throw new InvalidOperationException("The internal type was not set, you must assign Either a type at least once.");
+        }
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6>(T1 value) => new Either<T1, T2, T3, T4, T5, T6>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6>(T2 value) => new Either<T1, T2, T3, T4, T5, T6>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6>(T3 value) => new Either<T1, T2, T3, T4, T5, T6>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6>(T4 value) => new Either<T1, T2, T3, T4, T5, T6>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6>(T5 value) => new Either<T1, T2, T3, T4, T5, T6>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6>(T6 value) => new Either<T1, T2, T3, T4, T5, T6>(value);
+
+        /// <summary>Returns the underlying type's value's string representation.</summary>
+        public override string ToString()
+        {
+            string value = default(string);
+
+            if (_tag == 1)
+            {
+                value = _t1?.ToString();
+            }
+            else if (_tag == 2)
+            {
+                value = _t2?.ToString();
+            }
+            else if (_tag == 3)
+            {
+                value = _t3?.ToString();
+            }
+            else if (_tag == 4)
+            {
+                value = _t4?.ToString();
+            }
+            else if (_tag == 5)
+            {
+                value = _t5?.ToString();
+            }
+            else if (_tag == 6)
+            {
+                value = _t6?.ToString();
+            }
+
+            return value;
+        }
+    }
+
+    /// <summary>
+    /// This type holds a single instance of a selection of types.
+    /// <para>While Either can take on more than one type, it is only ever a single type at a time.</para>
+    /// </summary>
+    public struct Either<T1, T2, T3, T4, T5, T6, T7>
+    {
+        private readonly int _tag;
+        private readonly T1 _t1;
+        private readonly T2 _t2;
+        private readonly T3 _t3;
+        private readonly T4 _t4;
+        private readonly T5 _t5;
+        private readonly T6 _t6;
+        private readonly T7 _t7;
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T1 t1)
+        {
+            _tag = 1;
+            _t1 = t1;
+            _t2 = default(T2);
+            _t3 = default(T3);
+            _t4 = default(T4);
+            _t5 = default(T5);
+            _t6 = default(T6);
+            _t7 = default(T7);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T2 t2)
+        {
+            _tag = 2;
+            _t1 = default(T1);
+            _t2 = t2;
+            _t3 = default(T3);
+            _t4 = default(T4);
+            _t5 = default(T5);
+            _t6 = default(T6);
+            _t7 = default(T7);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T3 t3)
+        {
+            _tag = 3;
+            _t1 = default(T1);
+            _t2 = default(T2);
+            _t3 = t3;
+            _t4 = default(T4);
+            _t5 = default(T5);
+            _t6 = default(T6);
+            _t7 = default(T7);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T4 t4)
+        {
+            _tag = 4;
+            _t1 = default(T1);
+            _t2 = default(T2);
+            _t3 = default(T3);
+            _t4 = t4;
+            _t5 = default(T5);
+            _t6 = default(T6);
+            _t7 = default(T7);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T5 t5)
+        {
+            _tag = 5;
+            _t1 = default(T1);
+            _t2 = default(T2);
+            _t3 = default(T3);
+            _t4 = default(T4);
+            _t5 = t5;
+            _t6 = default(T6);
+            _t7 = default(T7);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T6 t6)
+        {
+            _tag = 6;
+            _t1 = default(T1);
+            _t2 = default(T2);
+            _t3 = default(T3);
+            _t4 = default(T4);
+            _t5 = default(T5);
+            _t6 = t6;
+            _t7 = default(T7);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T7 t7)
+        {
+            _tag = 7;
+            _t1 = default(T1);
+            _t2 = default(T2);
+            _t3 = default(T3);
+            _t4 = default(T4);
+            _t5 = default(T5);
+            _t6 = default(T6);
+            _t7 = t7;
+        }
+
+        /// <summary>
+        /// Gets a type that each type of Either can transform to.
+        /// <para>Only one function will be invoked depending on what type is internally stored.</para>
+        /// </summary>
+        public TResult Match<TResult>(Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4, Func<T5, TResult> f5, Func<T6, TResult> f6, Func<T7, TResult> f7)
+        {
+            if (_tag == 1)
+                return f1(_t1);
+            if (_tag == 2)
+                return f2(_t2);
+            if (_tag == 3)
+                return f3(_t3);
+            if (_tag == 4)
+                return f4(_t4);
+            if (_tag == 5)
+                return f5(_t5);
+            if (_tag == 6)
+                return f6(_t6);
+            if (_tag == 7)
+                return f7(_t7);
+
+            throw new InvalidOperationException("The internal type was not set, you must assign Either a type at least once.");
+        }
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7>(T1 value) => new Either<T1, T2, T3, T4, T5, T6, T7>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7>(T2 value) => new Either<T1, T2, T3, T4, T5, T6, T7>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7>(T3 value) => new Either<T1, T2, T3, T4, T5, T6, T7>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7>(T4 value) => new Either<T1, T2, T3, T4, T5, T6, T7>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7>(T5 value) => new Either<T1, T2, T3, T4, T5, T6, T7>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7>(T6 value) => new Either<T1, T2, T3, T4, T5, T6, T7>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7>(T7 value) => new Either<T1, T2, T3, T4, T5, T6, T7>(value);
+
+        /// <summary>Returns the underlying type's value's string representation.</summary>
+        public override string ToString()
+        {
+            string value = default(string);
+
+            if (_tag == 1)
+            {
+                value = _t1?.ToString();
+            }
+            else if (_tag == 2)
+            {
+                value = _t2?.ToString();
+            }
+            else if (_tag == 3)
+            {
+                value = _t3?.ToString();
+            }
+            else if (_tag == 4)
+            {
+                value = _t4?.ToString();
+            }
+            else if (_tag == 5)
+            {
+                value = _t5?.ToString();
+            }
+            else if (_tag == 6)
+            {
+                value = _t6?.ToString();
+            }
+            else if (_tag == 7)
+            {
+                value = _t7?.ToString();
+            }
+
+            return value;
+        }
+    }
+
+    /// <summary>
+    /// This type holds a single instance of a selection of types.
+    /// <para>While Either can take on more than one type, it is only ever a single type at a time.</para>
+    /// </summary>
+    public struct Either<T1, T2, T3, T4, T5, T6, T7, T8>
+    {
+        private readonly int _tag;
+        private readonly T1 _t1;
+        private readonly T2 _t2;
+        private readonly T3 _t3;
+        private readonly T4 _t4;
+        private readonly T5 _t5;
+        private readonly T6 _t6;
+        private readonly T7 _t7;
+        private readonly T8 _t8;
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T1 t1)
+        {
+            _tag = 1;
+            _t1 = t1;
+            _t2 = default(T2);
+            _t3 = default(T3);
+            _t4 = default(T4);
+            _t5 = default(T5);
+            _t6 = default(T6);
+            _t7 = default(T7);
+            _t8 = default(T8);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T2 t2)
+        {
+            _tag = 2;
+            _t1 = default(T1);
+            _t2 = t2;
+            _t3 = default(T3);
+            _t4 = default(T4);
+            _t5 = default(T5);
+            _t6 = default(T6);
+            _t7 = default(T7);
+            _t8 = default(T8);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T3 t3)
+        {
+            _tag = 3;
+            _t1 = default(T1);
+            _t2 = default(T2);
+            _t3 = t3;
+            _t4 = default(T4);
+            _t5 = default(T5);
+            _t6 = default(T6);
+            _t7 = default(T7);
+            _t8 = default(T8);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T4 t4)
+        {
+            _tag = 4;
+            _t1 = default(T1);
+            _t2 = default(T2);
+            _t3 = default(T3);
+            _t4 = t4;
+            _t5 = default(T5);
+            _t6 = default(T6);
+            _t7 = default(T7);
+            _t8 = default(T8);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T5 t5)
+        {
+            _tag = 5;
+            _t1 = default(T1);
+            _t2 = default(T2);
+            _t3 = default(T3);
+            _t4 = default(T4);
+            _t5 = t5;
+            _t6 = default(T6);
+            _t7 = default(T7);
+            _t8 = default(T8);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T6 t6)
+        {
+            _tag = 6;
+            _t1 = default(T1);
+            _t2 = default(T2);
+            _t3 = default(T3);
+            _t4 = default(T4);
+            _t5 = default(T5);
+            _t6 = t6;
+            _t7 = default(T7);
+            _t8 = default(T8);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T7 t7)
+        {
+            _tag = 7;
+            _t1 = default(T1);
+            _t2 = default(T2);
+            _t3 = default(T3);
+            _t4 = default(T4);
+            _t5 = default(T5);
+            _t6 = default(T6);
+            _t7 = t7;
+            _t8 = default(T8);
+        }
+
+        /// <summary>A container that internally holds one, of many possible types.</summary>
+        public Either(T8 t8)
+        {
+            _tag = 7;
+            _t1 = default(T1);
+            _t2 = default(T2);
+            _t3 = default(T3);
+            _t4 = default(T4);
+            _t5 = default(T5);
+            _t6 = default(T6);
+            _t7 = default(T7);
+            _t8 = t8;
+        }
+
+        /// <summary>
+        /// Gets a type that each type of Either can transform to.
+        /// <para>Only one function will be invoked depending on what type is internally stored.</para>
+        /// </summary>
+        public TResult Match<TResult>(Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4, Func<T5, TResult> f5, Func<T6, TResult> f6, Func<T7, TResult> f7, Func<T8, TResult> f8)
+        {
+            if (_tag == 1)
+                return f1(_t1);
+            if (_tag == 2)
+                return f2(_t2);
+            if (_tag == 3)
+                return f3(_t3);
+            if (_tag == 4)
+                return f4(_t4);
+            if (_tag == 5)
+                return f5(_t5);
+            if (_tag == 6)
+                return f6(_t6);
+            if (_tag == 7)
+                return f7(_t7);
+            if (_tag == 8)
+                return f8(_t8);
+
+            throw new InvalidOperationException("The internal type was not set, you must assign Either a type at least once.");
+        }
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T1 value) => new Either<T1, T2, T3, T4, T5, T6, T7, T8>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T2 value) => new Either<T1, T2, T3, T4, T5, T6, T7, T8>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T3 value) => new Either<T1, T2, T3, T4, T5, T6, T7, T8>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T4 value) => new Either<T1, T2, T3, T4, T5, T6, T7, T8>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T5 value) => new Either<T1, T2, T3, T4, T5, T6, T7, T8>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T6 value) => new Either<T1, T2, T3, T4, T5, T6, T7, T8>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T7 value) => new Either<T1, T2, T3, T4, T5, T6, T7, T8>(value);
+
+        /// <summary>Sets the current internal type to that of the value.</summary>
+        public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T8 value) => new Either<T1, T2, T3, T4, T5, T6, T7, T8>(value);
+
+        /// <summary>Returns the underlying type's value's string representation.</summary>
+        public override string ToString()
+        {
+            string value = default(string);
+
+            if (_tag == 1)
+            {
+                value = _t1?.ToString();
+            }
+            else if (_tag == 2)
+            {
+                value = _t2?.ToString();
+            }
+            else if (_tag == 3)
+            {
+                value = _t3?.ToString();
+            }
+            else if (_tag == 4)
+            {
+                value = _t4?.ToString();
+            }
+            else if (_tag == 5)
+            {
+                value = _t5?.ToString();
+            }
+            else if (_tag == 6)
+            {
+                value = _t6?.ToString();
+            }
+            else if (_tag == 7)
+            {
+                value = _t7?.ToString();
+            }
+            else if (_tag == 8)
+            {
+                value = _t8?.ToString();
+            }
+
+            return value;
+        }
+    }
+
 
     #endregion
 }

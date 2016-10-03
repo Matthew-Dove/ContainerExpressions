@@ -79,31 +79,5 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         #endregion
-
-        #region Lower Types To Higher Types
-
-        [TestMethod]
-        public void Type2_ConvertInto_Type3()
-        {
-            var answer = 42;
-            var type2 = new Either<int, bool>(answer);
-
-            Either<int, bool, string> type3 = type2;
-
-            Assert.AreEqual(answer, int.Parse(type3.ToString()));
-        }
-
-        [TestMethod]
-        public void Type2_ConvertInto_Type3_WithDifferentOrderedTypes()
-        {
-            var answer = 42;
-            var type2 = new Either<int, bool>(answer);
-
-            Either<bool, int, string> type3 = type2;
-
-            Assert.AreEqual(answer, int.Parse(type3.ToString()));
-        }
-
-        #endregion
     }
 }
