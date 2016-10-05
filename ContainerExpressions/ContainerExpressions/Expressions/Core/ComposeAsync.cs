@@ -6,17 +6,6 @@ namespace ContainerExpressions.Expressions.Core
 {
     internal static class ComposeAsync
     {
-        public static async Task<Response<TResult>> EvaluateAsync<T1, TResult>(Response<T1> arg1, Func<T1, Task<Response<TResult>>> funcResult)
-        {
-            return arg1 ? await funcResult(arg1) : new Response<TResult>();
-        }
-
-        public static async Task<Response<TResult>> EvaluateAsync<T1, TResult>(Task<Response<T1>> arg1, Func<T1, Task<Response<TResult>>> funcResult)
-        {
-            var result = await arg1;
-            return result ? await funcResult(result) : new Response<TResult>();
-        }
-
         public static async Task<Response<TResult>> EvaluateAsync<T1, TResult>(Func<Task<Response<T1>>> func1, Func<T1, Task<Response<TResult>>> funcResult)
         {
             var result = await func1();

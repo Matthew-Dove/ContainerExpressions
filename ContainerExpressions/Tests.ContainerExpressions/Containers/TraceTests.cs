@@ -157,6 +157,39 @@ namespace Tests.ContainerExpressions.Containers
             Assert.AreEqual(fail, _messages[0]);
         }
 
+        [TestMethod]
+        public void TraceWillComposeWithOtherFunctions()
+        {
+            var traceSteps = 0;
+            Func<Response<int>> identity = () => Response.Create(0);
+            Func<int, Response<int>> increment = x => Response.Create(x + 1);
+            Func<int, string> counter = x => { traceSteps++; return string.Format("The value of the int is {0}.", x); };
+
+            var count = Expression.Compose(identity.Log(counter), increment.Log(counter), increment.Log(counter));
+
+            Assert.IsTrue(count);
+            Assert.AreEqual(traceSteps, _messages.Count);
+            for (var i = 0; i < _messages.Count; i++)
+            {
+                Assert.AreEqual(counter(i), _messages[i]);
+            }
+        }
+
+        [TestMethod]
+        public void TraceWillComposeWithStringMessages()
+        {
+            string success = "All good", fail = "Woops";
+            Func<Response<int>> identity = () => Response.Create(0);
+            Func<int, Response<int>> increment = x => Response.Create(x + 1);
+            Func<int, Response<int>> stop = x => new Response<int>();
+
+            var count = Expression.Compose(identity.Log(success, fail), increment.Log(success, fail), stop.Log(success, fail), increment.Log(success, fail)); // The last increment won't be invoked.
+
+            Assert.IsFalse(count);
+            Assert.AreEqual(2, _messages.FindAll(x => x == success).Count);
+            Assert.AreEqual(1, _messages.FindAll(x => x == fail).Count);
+        }
+
         #endregion
     }
 }
