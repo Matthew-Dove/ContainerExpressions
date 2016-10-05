@@ -1,5 +1,6 @@
 ﻿using ContainerExpressions.Containers;
 using System;
+using System.Diagnostics;
 
 namespace ContainerExpressions.Expressions.Models
 {
@@ -20,9 +21,12 @@ namespace ContainerExpressions.Expressions.Models
                 {
                     _logger.Value(ex);
                 }
-                catch
+                catch (Exception logError)
                 {
-
+                    Debug.WriteLine("Error logging an exception in the Try Container.");
+                    Debug.WriteLine(logError);
+                    Debug.WriteLine("The original error that was attempting to be logged is below.");
+                    Debug.WriteLine(ex);
                 }
             }
         }

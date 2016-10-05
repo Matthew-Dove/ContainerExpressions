@@ -61,6 +61,7 @@
     <Compile Include="Containers\LaterTests.cs" />
     <Compile Include="Containers\ResponseTests.cs" />
     <Compile Include="Containers\RetryTests.cs" />
+    <Compile Include="Containers\TraceTests.cs" />
     <Compile Include="Containers\TryTests.cs" />
     <Compile Include="Containers\LaterAsyncTests.cs" />
     <Compile Include="Examples\BaseResponseExample.cs" />
