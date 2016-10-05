@@ -16,17 +16,6 @@ namespace Tests.ContainerExpressions.Expressions.Core
         }
 
         [TestMethod]
-        public async Task Single_Arg_Composes()
-        {
-            var arg1 = 10;
-            Func<int, Task<Response<int>>> triple = (input) => WaitThenDo(() => Response.Create(input * 3));
-
-            var result = await Expression.ComposeAsync(arg1, triple);
-
-            Assert.AreEqual(10 * 3, result);
-        }
-
-        [TestMethod]
         public async Task Single_ResponseArg_Composes()
         {
             var arg1 = Response.Create(10);

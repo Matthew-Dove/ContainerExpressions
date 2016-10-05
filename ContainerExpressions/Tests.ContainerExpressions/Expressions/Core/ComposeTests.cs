@@ -9,17 +9,6 @@ namespace Tests.ContainerExpressions.Expressions.Core
     public class ComposeTests
     {
         [TestMethod]
-        public void Single_Arg_Composes()
-        {
-            var arg1 = 10;
-            Func<int, Response<int>> triple = (input) => Response.Create(input * 3);
-
-            var result = Expression.Compose(arg1, triple);
-
-            Assert.AreEqual(10 * 3, result);
-        }
-
-        [TestMethod]
         public void Single_ResponseArg_Composes()
         {
             var arg1 = Response.Create(10);

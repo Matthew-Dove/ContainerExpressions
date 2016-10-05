@@ -5,8 +5,6 @@ namespace ContainerExpressions.Expressions.Core
 {
     internal static class Compose
     {
-        public static Response<TResult> Evaluate<T1, TResult>(T1 arg1, Func<T1, Response<TResult>> funcResult) => funcResult(arg1);
-
         public static Response<TResult> Evaluate<T1, TResult>(Response<T1> arg1, Func<T1, Response<TResult>> funcResult)
         {
             return arg1 ? funcResult(arg1) : new Response<TResult>();
