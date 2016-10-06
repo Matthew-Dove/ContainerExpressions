@@ -13,6 +13,12 @@ namespace ContainerExpressions.Expressions
         /// <summary>Reduce many values of T, into a single value of T.</summary>
         public static T Reduce<T>(Func<T, T, T> combine, T arg1, params Response<T>[] values) => Core.Reduce.Fold(combine, arg1, values);
 
+        /// <summary>Reduce many values of T, into a single value of T.</summary>
+        public static Task<T> ReduceAsync<T>(Func<T, T, T> combine, T arg1, params Task<Response<T>>[] values) => Core.Reduce.FoldAsync(combine, arg1, values);
+
+        /// <summary>Reduce many values of T, into a single value of T.</summary>
+        public static Task<T> ReduceAsync<T>(Func<T, T, T> combine, Task<T> arg1, params Task<Response<T>>[] values) => Core.Reduce.FoldAsync(combine, arg1, values);
+
         #endregion
 
         #region Funnel
