@@ -3,6 +3,7 @@ using ContainerExpressions.Expressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Tests.ContainerExpressions.Containers
 {
@@ -188,6 +189,35 @@ namespace Tests.ContainerExpressions.Containers
             Assert.IsFalse(count);
             Assert.AreEqual(2, _messages.FindAll(x => x == success).Count);
             Assert.AreEqual(1, _messages.FindAll(x => x == fail).Count);
+        }
+
+        #endregion
+
+        #region Async
+
+        [TestMethod]
+        public async Task ValidResponseTask_SuccesIsLogged()
+        {
+            var success = "All good";
+            var response = await Task.FromResult(new Response(true)).LogAsync(success);
+
+            Assert.IsTrue(response);
+            Assert.AreEqual(success, _messages[0]);
+        }
+
+        [TestMethod]
+        public async Task ChainOfTasksAreLogged()
+        {
+            string success = "All good";
+            Func<Task<Response<int>>> identityAsync = () => Task.FromResult(Response.Create(0));
+            Func<int, Task<Response<int>>> incrementAsync = x => Task.FromResult(Response.Create(x + 1));
+
+            var count = await Expression.ComposeAsync(identityAsync.LogAsync(success), incrementAsync.LogAsync(success), incrementAsync.LogAsync(success));
+
+            Assert.IsTrue(count);
+            Assert.AreEqual(2, count);
+            Assert.AreEqual(3, _messages.Count);
+            Assert.AreEqual(3, _messages.FindAll(x => x == success).Count);
         }
 
         #endregion
