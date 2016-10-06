@@ -2,7 +2,7 @@
 
 namespace ContainerExpressions.Containers
 {
-    /// <summary>Extension for the Trace Container.</summary>
+    /// <summary>Extensions for the Trace Container.</summary>
     public static class TraceExtensions
     {
         #region Response

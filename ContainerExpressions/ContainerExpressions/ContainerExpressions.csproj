@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Containers\Either.cs" />
+    <Compile Include="Containers\Extensions\TraceAsyncExtensions.cs" />
     <Compile Include="Containers\Extensions\TraceExtensions.cs" />
     <Compile Include="Containers\Extensions\ResponseExtensions.cs" />
     <Compile Include="Containers\Later.cs" />
@@ -57,6 +58,7 @@
     <Compile Include="Expressions\Core\Compose.cs" />
     <Compile Include="Expressions\Core\ComposeAsync.cs" />
     <Compile Include="Expressions\Core\Funnel.cs" />
+    <Compile Include="Expressions\Core\FunnelAsync.cs" />
     <Compile Include="Expressions\Core\Match.cs" />
     <Compile Include="Expressions\Core\MatchAsync.cs" />
     <Compile Include="Expressions\Core\Reduce.cs" />
