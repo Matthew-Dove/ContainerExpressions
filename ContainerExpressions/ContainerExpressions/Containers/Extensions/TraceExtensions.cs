@@ -142,7 +142,7 @@ namespace ContainerExpressions.Containers
 
         #endregion
 
-        #region ResponseTCompose WithInput
+        #region ResponseTCompose WithOutput
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="func">A function to the Response Container.</param>
@@ -172,5 +172,39 @@ namespace ContainerExpressions.Containers
 
         #endregion
 
+        #region ResponseTCompose WithInputAndOutput
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="func">A function to the Response Container.</param>
+        /// <param name="success">The message to trace of the response is in a valid state.</param>
+        /// <returns>The same response from the input.</returns>
+        public static Func<T, Response<TResult>> Log<T, TResult>(this Func<T, Response<TResult>> func, Func<T, TResult, string> success) => x => {
+            var result = func(x);
+            if (result)
+            {
+                Trace.Log(success(x, result));
+            }
+            return result;
+        };
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="func">A function to the Response Container.</param>
+        /// <param name="success">The message to trace of the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        /// <returns>The same response from the input.</returns>
+        public static Func<T, Response<TResult>> Log<T, TResult>(this Func<T, Response<TResult>> func, Func<T, TResult, string> success, string fail) => x => {
+            var result = func(x);
+            if (result)
+            {
+                Trace.Log(success(x, result));
+            }
+            else
+            {
+                Trace.Log(fail);
+            }
+            return result;
+        };
+
+        #endregion
     }
 }

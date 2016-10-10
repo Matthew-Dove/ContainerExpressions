@@ -54,6 +54,13 @@ namespace ContainerExpressions.Containers
         public static Task<Response<TResult>> PivotAsync<T, TResult>(this Response<T> response, bool condition, Func<T, Task<Response<TResult>>> func1, Func<T, Task<Response<TResult>>> func2) =>
             response.IsValid ? (condition ? func1(response) : func2(response)) : Task.FromResult(new Response<TResult>());
 
+        /// <summary>
+        /// Executes one of the functions when the input response is valid, otherwise an invalid response is returned.
+        /// <para>When the condition is true the first function is executed, otherwise the second function is executed.</para>
+        /// </summary>
+        public static Task<Response<TResult>> PivotAsync<T, TResult>(this Task<Response<T>> response, bool condition, Func<T, Task<Response<TResult>>> func1, Func<T, Task<Response<TResult>>> func2) =>
+          response.ContinueWith(x =>  x.Result.IsValid ? (condition ? func1(x.Result) : func2(x.Result)) : Task.FromResult(new Response<TResult>())).Unwrap();
+
         /// <summary>When the Response is in a valid state the Func's result is returned, otherwise false is returned.</summary>
         public static bool IsTrue<T>(this Response<T> response, Func<T, bool> condition) => response.IsValid ? condition(response.Value) : false;
     }

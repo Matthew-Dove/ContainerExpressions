@@ -191,6 +191,19 @@ namespace Tests.ContainerExpressions.Containers
             Assert.AreEqual(1, _messages.FindAll(x => x == fail).Count);
         }
 
+        [TestMethod]
+        public void TraceWithInputAndOutput()
+        {
+            Func<int, int, string> trace = (input, output) => $"Input: {input}, Output: {output}.";
+            Func<Response<int>> identity = () => Response.Create(0);
+            Func<int, Response<int>> increment = x => Response.Create(x + 1);
+
+            var count = Expression.Compose(identity, increment.Log(trace), increment.Log(trace), increment.Log(trace));
+
+            Assert.AreEqual(3, _messages.Count);
+            Assert.AreEqual(trace(0, 1), _messages[0]);
+        }
+
         #endregion
 
         #region Async
