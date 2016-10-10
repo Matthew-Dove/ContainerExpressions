@@ -136,6 +136,16 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
+        public async Task Response_IsValid_CallsBindAsync_OnTask()
+        {
+            var answer = Task.FromResult(Response.Create(42));
+
+            var doubleTheAnswer = await answer.BindAsync(x => Task.FromResult(Response.Create(x * 2)));
+
+            Assert.AreEqual(answer.Result * 2, doubleTheAnswer);
+        }
+
+        [TestMethod]
         public void Response_IsNotValid_BindDoesNotPropagates()
         {
             var isBindRan = false;
