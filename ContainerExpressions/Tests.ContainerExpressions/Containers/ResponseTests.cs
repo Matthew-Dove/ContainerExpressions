@@ -124,6 +124,16 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
+        public void LiftWillWorkInCompose()
+        {
+            Func<int> answer = () => 42;
+
+            var stringAnswer = Expression.Compose(Response.Lift(answer), x => Response.Create(x.ToString()));
+
+            Assert.AreEqual(answer().ToString(), stringAnswer);
+        }
+
+        [TestMethod]
         public async Task Response_IsValid_BindPropagates_LiftAsync()
         {
             var answer = 42;
