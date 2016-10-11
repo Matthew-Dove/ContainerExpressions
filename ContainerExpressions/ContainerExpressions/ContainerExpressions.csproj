@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Containers\Either.cs" />
+    <Compile Include="Containers\Extensions\RetryExtensions.cs" />
     <Compile Include="Containers\Extensions\TraceAsyncExtensions.cs" />
     <Compile Include="Containers\Extensions\TraceExtensions.cs" />
     <Compile Include="Containers\Extensions\ResponseExtensions.cs" />

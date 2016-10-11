@@ -45,6 +45,24 @@ namespace ContainerExpressions.Containers
         }
 
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
+        public static Response<TResult> Execute<T, TResult>(T arg, Func<T, Response<TResult>> func) => Execute(arg, func, RetryOptions.Create());
+
+        /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
+        public static Response<TResult> Execute<T, TResult>(T arg, Func<T, Response<TResult>> func, RetryOptions options)
+        {
+            var response = func(arg);
+            var retries = options.Retries;
+
+            while (!response.IsValid && retries-- > 0)
+            {
+                Thread.Sleep(options.MillisecondsDelay);
+                response = func(arg);
+            }
+
+            return response;
+        }
+
+        /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
         public static Task<Response> ExecuteAsync(Func<Task<Response>> func) => ExecuteAsync(func, RetryOptions.Create());
 
         /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>

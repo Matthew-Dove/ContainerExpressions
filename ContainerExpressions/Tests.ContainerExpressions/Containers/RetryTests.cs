@@ -1,4 +1,5 @@
 ﻿using ContainerExpressions.Containers;
+using ContainerExpressions.Expressions;
 using ContainerExpressions.Expressions.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -31,6 +32,18 @@ namespace Tests.ContainerExpressions.Containers
 
             Assert.IsTrue(response);
             Assert.AreEqual(MAX_ATTEMPTS + 1, attempts);
+        }
+
+        [TestMethod]
+        public void RetryWithComposeExpression()
+        {
+            int i = 1;
+            Func<Response<int>> identity = () => i++ % 2 == 0 ? Response.Create(0) : new Response<int>();
+            Func<int, Response<int>> increment = x => i++ % 2 == 0 ? Response.Create(x + 1) : new Response<int>();
+
+            var count = Expression.Compose(identity.Retry(), increment.Retry());
+
+            Assert.AreEqual(5, i);
         }
     }
 }
