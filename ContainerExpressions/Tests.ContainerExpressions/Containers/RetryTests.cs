@@ -3,6 +3,7 @@ using ContainerExpressions.Expressions;
 using ContainerExpressions.Expressions.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Threading.Tasks;
 
 namespace Tests.ContainerExpressions.Containers
 {
@@ -42,6 +43,18 @@ namespace Tests.ContainerExpressions.Containers
             Func<int, Response<int>> increment = x => i++ % 2 == 0 ? Response.Create(x + 1) : new Response<int>();
 
             var count = Expression.Compose(identity.Retry(), increment.Retry());
+
+            Assert.AreEqual(5, i);
+        }
+
+        [TestMethod]
+        public async Task RetryWithComposeExpression_Task()
+        {
+            int i = 1;
+            Func<Task<Response<int>>> identityAsync = () => i++ % 2 == 0 ? Task.FromResult(Response.Create(0)) : Task.FromResult(new Response<int>());
+            Func<int, Task<Response<int>>> incrementAsync = x => i++ % 2 == 0 ? Task.FromResult(Response.Create(x + 1)) : Task.FromResult(new Response<int>());
+
+            var count = await Expression.ComposeAsync(identityAsync.RetryAsync(), incrementAsync.RetryAsync());
 
             Assert.AreEqual(5, i);
         }

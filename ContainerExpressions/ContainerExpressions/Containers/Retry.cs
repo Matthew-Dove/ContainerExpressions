@@ -97,5 +97,23 @@ namespace ContainerExpressions.Containers
 
             return response;
         }
+
+        /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
+        public static Task<Response<TResult>> ExecuteAsync<T, TResult>(T arg, Func<T, Task<Response<TResult>>> func) => ExecuteAsync(arg, func, RetryOptions.Create());
+
+        /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
+        public static async Task<Response<TResult>> ExecuteAsync<T, TResult>(T arg, Func<T, Task<Response<TResult>>> func, RetryOptions options)
+        {
+            var response = await func(arg);
+            var retries = options.Retries;
+
+            while (!response.IsValid && retries-- > 0)
+            {
+                await Task.Delay(options.MillisecondsDelay);
+                response = await func(arg);
+            }
+
+            return response;
+        }
     }
 }
