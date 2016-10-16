@@ -72,6 +72,7 @@
     <Compile Include="Examples\MatchTExample.cs" />
     <Compile Include="Examples\ReduceTExample.cs" />
     <Compile Include="Examples\ResponseTExample.cs" />
+    <Compile Include="Examples\TraceExample.cs" />
     <Compile Include="Examples\TryExample.cs" />
     <Compile Include="Expressions\Core\ComposeTests.cs" />
     <Compile Include="Expressions\Core\ComposeAsyncTests.cs" />

@@ -154,6 +154,40 @@ string message = either.Match(
 );
 ````
 
+### Trace
+
+Logs function inputs, and outputs so you can save them to a trace file.  
+
+Tracing is necessary in any non-trivial program to determine production runtime bugs.  
+However these traces typically get in the way of the core code, and force you to break up code into pieces so you can log it's current state.  
+The trace container slots in with existing code by taking a type, and returning that same type.  
+
+Before you use Trace you must set a logger, an Action that takes a string (returns void), see below for an example.  
+
+`Trace.SetLogger(Console.WriteLine);`  
+
+See below for an example of logging the output of each function:  
+
+````cs
+// Initialize the Trace with a logger.
+var logs = new List<string>();
+Trace.SetLogger(log => logs.Add(log));
+
+// Create a function to trace the incrementing.
+Func<int, string> trace = x => string.Format("The value of the int is {0}.", x);
+
+// Some functions that keep incrementing their input.
+Func<Response<int>> identity = () => Response.Create(0);
+Func<int, Response<int>> increment = x => Response.Create(x + 1);
+
+var count = Expression.Compose(identity.Log(trace), increment.Log(trace), increment.Log(trace));
+
+// The follow is logged to Trace:
+// The value of the int is 0.
+// The value of the int is 1.
+// The value of the int is 2.
+````
+
 ## Expressions
 
 ### Compose`<T>`
@@ -284,3 +318,5 @@ Useful utilities for the `Response<T>` type.
 * `Response<TResult> Bind<TResult>(Func<T, Response<TResult>> func)` Invokes a second function with the output of the first one.
 * `Response<TResult> Transform<T, TResult>(Func<T, TResult> func)` Changes type `T`, to type `TResult`.
 * `Func<T, Response<TResult>> Lift<T, TResult>(Func<T, TResult>)` Elevate the function’s type from `T`, to `Response<T>`
+* `Response<TResult> Pivot<T, TResult>` Execute the first function if the condition is true, otherwise execute the second function.  
+* `bool IsTrue<T>` When the Response is in a valid state the func's bool result is returned, otherwise false is returned.  
