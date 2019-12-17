@@ -6,7 +6,7 @@ namespace ContainerExpressions.Containers
     /// This type holds a single instance of a selection of types.
     /// <para>While Either can take on more than one type, it is only ever a single type at a time.</para>
     /// </summary>
-    public struct Either<T1, T2>
+    public readonly struct Either<T1, T2>
     {
         private readonly int _tag;
         private readonly T1 _t1;
@@ -72,7 +72,7 @@ namespace ContainerExpressions.Containers
     /// This type holds a single instance of a selection of types.
     /// <para>While Either can take on more than one type, it is only ever a single type at a time.</para>
     /// </summary>
-    public struct Either<T1, T2, T3>
+    public readonly struct Either<T1, T2, T3>
     {
         private readonly int _tag;
         private readonly T1 _t1;
@@ -157,7 +157,7 @@ namespace ContainerExpressions.Containers
     /// This type holds a single instance of a selection of types.
     /// <para>While Either can take on more than one type, it is only ever a single type at a time.</para>
     /// </summary>
-    public struct Either<T1, T2, T3, T4>
+    public readonly struct Either<T1, T2, T3, T4>
     {
         private readonly int _tag;
         private readonly T1 _t1;
@@ -265,7 +265,7 @@ namespace ContainerExpressions.Containers
     /// This type holds a single instance of a selection of types.
     /// <para>While Either can take on more than one type, it is only ever a single type at a time.</para>
     /// </summary>
-    public struct Either<T1, T2, T3, T4, T5>
+    public readonly struct Either<T1, T2, T3, T4, T5>
     {
         private readonly int _tag;
         private readonly T1 _t1;
@@ -398,7 +398,7 @@ namespace ContainerExpressions.Containers
     /// This type holds a single instance of a selection of types.
     /// <para>While Either can take on more than one type, it is only ever a single type at a time.</para>
     /// </summary>
-    public struct Either<T1, T2, T3, T4, T5, T6>
+    public readonly struct Either<T1, T2, T3, T4, T5, T6>
     {
         private readonly int _tag;
         private readonly T1 _t1;
@@ -558,7 +558,7 @@ namespace ContainerExpressions.Containers
     /// This type holds a single instance of a selection of types.
     /// <para>While Either can take on more than one type, it is only ever a single type at a time.</para>
     /// </summary>
-    public struct Either<T1, T2, T3, T4, T5, T6, T7>
+    public readonly struct Either<T1, T2, T3, T4, T5, T6, T7>
     {
         private readonly int _tag;
         private readonly T1 _t1;
@@ -747,7 +747,7 @@ namespace ContainerExpressions.Containers
     /// This type holds a single instance of a selection of types.
     /// <para>While Either can take on more than one type, it is only ever a single type at a time.</para>
     /// </summary>
-    public struct Either<T1, T2, T3, T4, T5, T6, T7, T8>
+    public readonly struct Either<T1, T2, T3, T4, T5, T6, T7, T8>
     {
         private readonly int _tag;
         private readonly T1 _t1;

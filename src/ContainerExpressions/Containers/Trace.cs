@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace ContainerExpressions.Containers
 {
     /// <summary>Logs the result, and output of Response types.</summary>
-    public struct Trace
+    public readonly struct Trace
     {
         private static Action<string> _logger = x => { };
 

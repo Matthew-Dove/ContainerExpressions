@@ -3,7 +3,7 @@
 namespace ContainerExpressions.Expressions.Models
 {
     /// <summary>Function replay, and cooldown options.</summary>
-    public struct RetryOptions
+    public readonly struct RetryOptions
     {
         /// <summary>The number of times to retry the function.</summary>
         public int Retries { get; }

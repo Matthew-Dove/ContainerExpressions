@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace ContainerExpressions.Expressions.Models
 {
     /// <summary>Defines an input matcher, and a function to run, if that pattern matches.</summary>
-    public struct PatternAsync<TInput, TResult>
+    public readonly struct PatternAsync<TInput, TResult>
     {
         private readonly Func<TInput, bool> _evaluate;
         private readonly Func<TInput, Task<Response<TResult>>> _execute;
@@ -30,7 +30,7 @@ namespace ContainerExpressions.Expressions.Models
     }
 
     /// <summary>Defines an input matcher, and a function to run, if that pattern matches.</summary>
-    public struct PatternAsync<TPivot, TInput, TResult>
+    public readonly struct PatternAsync<TPivot, TInput, TResult>
     {
         private readonly Func<TPivot, bool> _evaluate;
         private readonly Func<TInput, Task<Response<TResult>>> _execute;

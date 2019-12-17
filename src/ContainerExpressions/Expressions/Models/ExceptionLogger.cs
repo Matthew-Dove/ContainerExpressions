@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace ContainerExpressions.Expressions.Models
 {
-    internal struct ExceptionLogger
+    internal readonly struct ExceptionLogger
     {
         private readonly Response<Action<Exception>> _logger;
 

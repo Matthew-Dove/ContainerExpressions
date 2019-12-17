@@ -8,7 +8,7 @@ namespace ContainerExpressions.Containers
     /// <para>Using this pattern you can tell if a returned value is the correct one, or if some error happened trying to get the real value.</para>
     /// </summary>
     /// <typeparam name="T">The value to return.</typeparam>
-    public struct Response<T>
+    public readonly struct Response<T>
     {
         /// <summary>True if the value was set correctly, false if some error occurred getting the value.</summary>
         public bool IsValid { get; }
@@ -39,16 +39,15 @@ namespace ContainerExpressions.Containers
     }
 
     /// <summary>A helper class for the Response generic class.</summary>
-    public struct Response
+    public readonly struct Response
     {
         /// <summary>True if the container is in a valid state, otherwise the operation didn't run successfully.</summary>
-        public bool IsValid { get { return _isValid; } }
-        private readonly bool _isValid;
+        public bool IsValid { get; }
 
         /// <summary>Create a response container in an valid state.</summary>
         public Response(bool isValid)
         {
-            _isValid = isValid;
+            IsValid = isValid;
         }
 
         /// <summary>Create a response container in a valid state.</summary>
@@ -72,6 +71,6 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Gets the string value for if this response is valid or not.</summary>
         /// <returns>The bool string value for the IsValid Property.</returns>
-        public override string ToString() => _isValid.ToString();
+        public override string ToString() => IsValid.ToString();
     }
 }
