@@ -17,14 +17,14 @@ namespace ContainerExpressions.Containers
         {
             _tag = 1;
             _t1 = t1;
-            _t2 = default(T2);
+            _t2 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T2 t2)
         {
             _tag = 2;
-            _t1 = default(T1);
+            _t1 = default;
             _t2 = t2;
         }
 
@@ -51,7 +51,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
         {
-            string value = default(string);
+            string value = null;
 
             if (_tag == 1)
             {
@@ -84,25 +84,25 @@ namespace ContainerExpressions.Containers
         {
             _tag = 1;
             _t1 = t1;
-            _t2 = default(T2);
-            _t3 = default(T3);
+            _t2 = default;
+            _t3 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T2 t2)
         {
             _tag = 2;
-            _t1 = default(T1);
+            _t1 = default;
             _t2 = t2;
-            _t3 = default(T3);
+            _t3 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T3 t3)
         {
             _tag = 3;
-            _t1 = default(T1);
-            _t2 = default(T2);
+            _t1 = default;
+            _t2 = default;
             _t3 = t3;
         }
 
@@ -134,7 +134,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
         {
-            string value = default(string);
+            string value = null;
 
             if (_tag == 1)
             {
@@ -170,38 +170,38 @@ namespace ContainerExpressions.Containers
         {
             _tag = 1;
             _t1 = t1;
-            _t2 = default(T2);
-            _t3 = default(T3);
-            _t4 = default(T4);
+            _t2 = default;
+            _t3 = default;
+            _t4 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T2 t2)
         {
             _tag = 2;
-            _t1 = default(T1);
+            _t1 = default;
             _t2 = t2;
-            _t3 = default(T3);
-            _t4 = default(T4);
+            _t3 = default;
+            _t4 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T3 t3)
         {
             _tag = 3;
-            _t1 = default(T1);
-            _t2 = default(T2);
+            _t1 = default;
+            _t2 = default;
             _t3 = t3;
-            _t4 = default(T4);
+            _t4 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T4 t4)
         {
             _tag = 4;
-            _t1 = default(T1);
-            _t2 = default(T2);
-            _t3 = default(T3);
+            _t1 = default;
+            _t2 = default;
+            _t3 = default;
             _t4 = t4;
         }
 
@@ -238,7 +238,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
         {
-            string value = default(string);
+            string value = null;
 
             if (_tag == 1)
             {
@@ -279,53 +279,53 @@ namespace ContainerExpressions.Containers
         {
             _tag = 1;
             _t1 = t1;
-            _t2 = default(T2);
-            _t3 = default(T3);
-            _t4 = default(T4);
-            _t5 = default(T5);
+            _t2 = default;
+            _t3 = default;
+            _t4 = default;
+            _t5 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T2 t2)
         {
             _tag = 2;
-            _t1 = default(T1);
+            _t1 = default;
             _t2 = t2;
-            _t3 = default(T3);
-            _t4 = default(T4);
-            _t5 = default(T5);
+            _t3 = default;
+            _t4 = default;
+            _t5 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T3 t3)
         {
             _tag = 3;
-            _t1 = default(T1);
-            _t2 = default(T2);
+            _t1 = default;
+            _t2 = default;
             _t3 = t3;
-            _t4 = default(T4);
-            _t5 = default(T5);
+            _t4 = default;
+            _t5 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T4 t4)
         {
             _tag = 4;
-            _t1 = default(T1);
-            _t2 = default(T2);
-            _t3 = default(T3);
+            _t1 = default;
+            _t2 = default;
+            _t3 = default;
             _t4 = t4;
-            _t5 = default(T5);
+            _t5 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T5 t5)
         {
             _tag = 5;
-            _t1 = default(T1);
-            _t2 = default(T2);
-            _t3 = default(T3);
-            _t4 = default(T4);
+            _t1 = default;
+            _t2 = default;
+            _t3 = default;
+            _t4 = default;
             _t5 = t5;
         }
 
@@ -367,7 +367,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
         {
-            string value = default(string);
+            string value = null;
 
             if (_tag == 1)
             {
@@ -413,70 +413,70 @@ namespace ContainerExpressions.Containers
         {
             _tag = 1;
             _t1 = t1;
-            _t2 = default(T2);
-            _t3 = default(T3);
-            _t4 = default(T4);
-            _t5 = default(T5);
-            _t6 = default(T6);
+            _t2 = default;
+            _t3 = default;
+            _t4 = default;
+            _t5 = default;
+            _t6 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T2 t2)
         {
             _tag = 2;
-            _t1 = default(T1);
+            _t1 = default;
             _t2 = t2;
-            _t3 = default(T3);
-            _t4 = default(T4);
-            _t5 = default(T5);
-            _t6 = default(T6);
+            _t3 = default;
+            _t4 = default;
+            _t5 = default;
+            _t6 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T3 t3)
         {
             _tag = 3;
-            _t1 = default(T1);
-            _t2 = default(T2);
+            _t1 = default;
+            _t2 = default;
             _t3 = t3;
-            _t4 = default(T4);
-            _t5 = default(T5);
-            _t6 = default(T6);
+            _t4 = default;
+            _t5 = default;
+            _t6 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T4 t4)
         {
             _tag = 4;
-            _t1 = default(T1);
-            _t2 = default(T2);
-            _t3 = default(T3);
+            _t1 = default;
+            _t2 = default;
+            _t3 = default;
             _t4 = t4;
-            _t5 = default(T5);
-            _t6 = default(T6);
+            _t5 = default;
+            _t6 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T5 t5)
         {
             _tag = 5;
-            _t1 = default(T1);
-            _t2 = default(T2);
-            _t3 = default(T3);
-            _t4 = default(T4);
+            _t1 = default;
+            _t2 = default;
+            _t3 = default;
+            _t4 = default;
             _t5 = t5;
-            _t6 = default(T6);
+            _t6 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T6 t6)
         {
             _tag = 6;
-            _t1 = default(T1);
-            _t2 = default(T2);
-            _t3 = default(T3);
-            _t4 = default(T4);
-            _t5 = default(T5);
+            _t1 = default;
+            _t2 = default;
+            _t3 = default;
+            _t4 = default;
+            _t5 = default;
             _t6 = t6;
         }
 
@@ -523,7 +523,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
         {
-            string value = default(string);
+            string value = null;
 
             if (_tag == 1)
             {
@@ -574,89 +574,89 @@ namespace ContainerExpressions.Containers
         {
             _tag = 1;
             _t1 = t1;
-            _t2 = default(T2);
-            _t3 = default(T3);
-            _t4 = default(T4);
-            _t5 = default(T5);
-            _t6 = default(T6);
-            _t7 = default(T7);
+            _t2 = default;
+            _t3 = default;
+            _t4 = default;
+            _t5 = default;
+            _t6 = default;
+            _t7 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T2 t2)
         {
             _tag = 2;
-            _t1 = default(T1);
+            _t1 = default;
             _t2 = t2;
-            _t3 = default(T3);
-            _t4 = default(T4);
-            _t5 = default(T5);
-            _t6 = default(T6);
-            _t7 = default(T7);
+            _t3 = default;
+            _t4 = default;
+            _t5 = default;
+            _t6 = default;
+            _t7 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T3 t3)
         {
             _tag = 3;
-            _t1 = default(T1);
-            _t2 = default(T2);
+            _t1 = default;
+            _t2 = default;
             _t3 = t3;
-            _t4 = default(T4);
-            _t5 = default(T5);
-            _t6 = default(T6);
-            _t7 = default(T7);
+            _t4 = default;
+            _t5 = default;
+            _t6 = default;
+            _t7 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T4 t4)
         {
             _tag = 4;
-            _t1 = default(T1);
-            _t2 = default(T2);
-            _t3 = default(T3);
+            _t1 = default;
+            _t2 = default;
+            _t3 = default;
             _t4 = t4;
-            _t5 = default(T5);
-            _t6 = default(T6);
-            _t7 = default(T7);
+            _t5 = default;
+            _t6 = default;
+            _t7 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T5 t5)
         {
             _tag = 5;
-            _t1 = default(T1);
-            _t2 = default(T2);
-            _t3 = default(T3);
-            _t4 = default(T4);
+            _t1 = default;
+            _t2 = default;
+            _t3 = default;
+            _t4 = default;
             _t5 = t5;
-            _t6 = default(T6);
-            _t7 = default(T7);
+            _t6 = default;
+            _t7 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T6 t6)
         {
             _tag = 6;
-            _t1 = default(T1);
-            _t2 = default(T2);
-            _t3 = default(T3);
-            _t4 = default(T4);
-            _t5 = default(T5);
+            _t1 = default;
+            _t2 = default;
+            _t3 = default;
+            _t4 = default;
+            _t5 = default;
             _t6 = t6;
-            _t7 = default(T7);
+            _t7 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T7 t7)
         {
             _tag = 7;
-            _t1 = default(T1);
-            _t2 = default(T2);
-            _t3 = default(T3);
-            _t4 = default(T4);
-            _t5 = default(T5);
-            _t6 = default(T6);
+            _t1 = default;
+            _t2 = default;
+            _t3 = default;
+            _t4 = default;
+            _t5 = default;
+            _t6 = default;
             _t7 = t7;
         }
 
@@ -708,7 +708,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
         {
-            string value = default(string);
+            string value = null;
 
             if (_tag == 1)
             {
@@ -764,110 +764,110 @@ namespace ContainerExpressions.Containers
         {
             _tag = 1;
             _t1 = t1;
-            _t2 = default(T2);
-            _t3 = default(T3);
-            _t4 = default(T4);
-            _t5 = default(T5);
-            _t6 = default(T6);
-            _t7 = default(T7);
-            _t8 = default(T8);
+            _t2 = default;
+            _t3 = default;
+            _t4 = default;
+            _t5 = default;
+            _t6 = default;
+            _t7 = default;
+            _t8 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T2 t2)
         {
             _tag = 2;
-            _t1 = default(T1);
+            _t1 = default;
             _t2 = t2;
-            _t3 = default(T3);
-            _t4 = default(T4);
-            _t5 = default(T5);
-            _t6 = default(T6);
-            _t7 = default(T7);
-            _t8 = default(T8);
+            _t3 = default;
+            _t4 = default;
+            _t5 = default;
+            _t6 = default;
+            _t7 = default;
+            _t8 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T3 t3)
         {
             _tag = 3;
-            _t1 = default(T1);
-            _t2 = default(T2);
+            _t1 = default;
+            _t2 = default;
             _t3 = t3;
-            _t4 = default(T4);
-            _t5 = default(T5);
-            _t6 = default(T6);
-            _t7 = default(T7);
-            _t8 = default(T8);
+            _t4 = default;
+            _t5 = default;
+            _t6 = default;
+            _t7 = default;
+            _t8 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T4 t4)
         {
             _tag = 4;
-            _t1 = default(T1);
-            _t2 = default(T2);
-            _t3 = default(T3);
+            _t1 = default;
+            _t2 = default;
+            _t3 = default;
             _t4 = t4;
-            _t5 = default(T5);
-            _t6 = default(T6);
-            _t7 = default(T7);
-            _t8 = default(T8);
+            _t5 = default;
+            _t6 = default;
+            _t7 = default;
+            _t8 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T5 t5)
         {
             _tag = 5;
-            _t1 = default(T1);
-            _t2 = default(T2);
-            _t3 = default(T3);
-            _t4 = default(T4);
+            _t1 = default;
+            _t2 = default;
+            _t3 = default;
+            _t4 = default;
             _t5 = t5;
-            _t6 = default(T6);
-            _t7 = default(T7);
-            _t8 = default(T8);
+            _t6 = default;
+            _t7 = default;
+            _t8 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T6 t6)
         {
             _tag = 6;
-            _t1 = default(T1);
-            _t2 = default(T2);
-            _t3 = default(T3);
-            _t4 = default(T4);
-            _t5 = default(T5);
+            _t1 = default;
+            _t2 = default;
+            _t3 = default;
+            _t4 = default;
+            _t5 = default;
             _t6 = t6;
-            _t7 = default(T7);
-            _t8 = default(T8);
+            _t7 = default;
+            _t8 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T7 t7)
         {
             _tag = 7;
-            _t1 = default(T1);
-            _t2 = default(T2);
-            _t3 = default(T3);
-            _t4 = default(T4);
-            _t5 = default(T5);
-            _t6 = default(T6);
+            _t1 = default;
+            _t2 = default;
+            _t3 = default;
+            _t4 = default;
+            _t5 = default;
+            _t6 = default;
             _t7 = t7;
-            _t8 = default(T8);
+            _t8 = default;
         }
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T8 t8)
         {
             _tag = 7;
-            _t1 = default(T1);
-            _t2 = default(T2);
-            _t3 = default(T3);
-            _t4 = default(T4);
-            _t5 = default(T5);
-            _t6 = default(T6);
-            _t7 = default(T7);
+            _t1 = default;
+            _t2 = default;
+            _t3 = default;
+            _t4 = default;
+            _t5 = default;
+            _t6 = default;
+            _t7 = default;
             _t8 = t8;
         }
 
@@ -924,7 +924,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
         {
-            string value = default(string);
+            string value = null;
 
             if (_tag == 1)
             {

@@ -7,10 +7,10 @@ namespace ContainerExpressions.Containers
     public static class ResponseExtensions
     {
         /// <summary>Creates a valid container response.</summary>
-        public static Response<T> WithValue<T>(this Response<T> response, T value) => new Response<T>(value);
+        public static Response<T> WithValue<T>(this Response<T> _, T value) => new Response<T>(value);
 
         /// <summary>Create a response container in an valid state.</summary>
-        public static Response AsValid(this Response response) => new Response(true);
+        public static Response AsValid(this Response _) => new Response(true);
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Response<TResult> Bind<T, TResult>(this Response<T> response, Func<T, Response<TResult>> func) => response.IsValid ? func(response.Value) : new Response<TResult>();

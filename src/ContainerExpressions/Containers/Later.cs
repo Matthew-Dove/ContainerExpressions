@@ -18,7 +18,7 @@ namespace ContainerExpressions.Containers
             if (func == null)
                 throw new ArgumentNullException(nameof(func));
 
-            _value = default(T);
+            _value = default;
             _func = func;
         }
 

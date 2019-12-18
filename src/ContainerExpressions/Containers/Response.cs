@@ -21,6 +21,9 @@ namespace ContainerExpressions.Containers
         /// <param name="value">The response's value.</param>
         public Response(T value)
         {
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+
             _value = value;
             IsValid = true;
         }
@@ -35,7 +38,7 @@ namespace ContainerExpressions.Containers
         public static implicit operator Response(Response<T> response) => new Response(response.IsValid);
 
         /// <summary>Returns the underlying value's string representation.</summary>
-        public override string ToString() => _value == null ? null : _value.ToString();
+        public override string ToString() => IsValid ? _value?.ToString() ?? string.Empty : string.Empty;
     }
 
     /// <summary>A helper class for the Response generic class.</summary>
