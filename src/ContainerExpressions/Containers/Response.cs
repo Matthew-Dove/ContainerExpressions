@@ -1,6 +1,22 @@
 ﻿using System;
 using System.Threading.Tasks;
 
+public static class ResponseExtensions
+{
+    public static async Task<Response<T>> TransformAsync<T>(this Task<Response> response, T value)
+    {
+        var result = await response;
+        if (result) return Response.Create(value);
+        return new Response<T>();
+    }
+
+    public static T Trace<T>(this T value, Func<T, string> format)
+    {
+        Response.Create(format(value)).Log(x => x);
+        return value;
+    }
+}
+
 namespace ContainerExpressions.Containers
 {
     /// <summary>
