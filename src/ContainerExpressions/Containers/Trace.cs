@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 
 namespace ContainerExpressions.Containers
 {
@@ -21,19 +20,6 @@ namespace ContainerExpressions.Containers
             _logger = logger;
         }
 
-        internal static void Log(string message)
-        {
-            var log = _logger;
-
-            try
-            {
-                log(message);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("Error in the Log Container calling the custom log function.");
-                Debug.WriteLine(ex);
-            }
-        }
+        internal static void Log(string message) => _logger(message);
     }
 }
