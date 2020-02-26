@@ -93,6 +93,13 @@ namespace ContainerExpressions.Containers
                 await func();
                 response = response.AsValid();
             }
+            catch (AggregateException ae)
+            {
+                foreach (var e in ae.Flatten().InnerExceptions)
+                {
+                    exceptionLogger.Log(e);
+                }
+            }
             catch (Exception ex)
             {
                 exceptionLogger.Log(ex);
@@ -119,6 +126,13 @@ namespace ContainerExpressions.Containers
             {
                 var result = await func();
                 response = response.WithValue(result);
+            }
+            catch (AggregateException ae)
+            {
+                foreach (var e in ae.Flatten().InnerExceptions)
+                {
+                    exceptionLogger.Log(e);
+                }
             }
             catch (Exception ex)
             {

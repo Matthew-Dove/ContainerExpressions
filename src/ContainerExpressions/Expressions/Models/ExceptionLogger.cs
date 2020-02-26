@@ -1,6 +1,5 @@
 ﻿using ContainerExpressions.Containers;
 using System;
-using System.Diagnostics;
 
 namespace ContainerExpressions.Expressions.Models
 {
@@ -21,12 +20,22 @@ namespace ContainerExpressions.Expressions.Models
                 {
                     _logger.Value(ex);
                 }
+                catch (AggregateException ae)
+                {
+                    Console.WriteLine("Error logging an exception in the Try Container.");
+                    foreach (var e in ae.Flatten().InnerExceptions)
+                    {
+                        Console.WriteLine(e);
+                    }
+                    Console.WriteLine("The original error that was attempting to be logged is below.");
+                    Console.WriteLine(ex);
+                }
                 catch (Exception logError)
                 {
-                    Debug.WriteLine("Error logging an exception in the Try Container.");
-                    Debug.WriteLine(logError);
-                    Debug.WriteLine("The original error that was attempting to be logged is below.");
-                    Debug.WriteLine(ex);
+                    Console.WriteLine("Error logging an exception in the Try Container.");
+                    Console.WriteLine(logError);
+                    Console.WriteLine("The original error that was attempting to be logged is below.");
+                    Console.WriteLine(ex);
                 }
             }
         }
