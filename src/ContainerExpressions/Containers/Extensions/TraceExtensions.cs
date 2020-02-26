@@ -5,6 +5,28 @@ namespace ContainerExpressions.Containers
     /// <summary>Extensions for the Trace Container.</summary>
     public static class TraceExtensions
     {
+        #region T
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="message">The message to trace.</param>
+        /// <returns>The initial value.</returns>
+        public static T Log<T>(this T value, string message)
+        {
+            Trace.Log(message);
+            return value;
+        }
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="format">The message to trace.</param>
+        /// <returns>The initial value.</returns>
+        public static T Log<T>(this T value, Func<T, string> format)
+        {
+            Trace.Log(format(value));
+            return value;
+        }
+
+        #endregion
+
         #region Response
 
         /// <summary>Logs a trace step.</summary>

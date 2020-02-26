@@ -1,15 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-public static class ResponseExtensions
-{
-    public static T Trace<T>(this T value, Func<T, string> format)
-    {
-        Response.Create(format(value)).Log(x => x);
-        return value;
-    }
-}
-
 namespace ContainerExpressions.Containers
 {
     /// <summary>
