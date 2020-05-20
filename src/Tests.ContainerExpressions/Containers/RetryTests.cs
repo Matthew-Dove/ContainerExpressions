@@ -3,6 +3,7 @@ using ContainerExpressions.Expressions;
 using ContainerExpressions.Expressions.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Tests.ContainerExpressions.Containers
@@ -57,6 +58,36 @@ namespace Tests.ContainerExpressions.Containers
             var count = await Expression.ComposeAsync(identityAsync.RetryAsync(), incrementAsync.RetryAsync());
 
             Assert.AreEqual(5, i);
+        }
+
+        [TestMethod]
+        public void ExponentialRetry_RetryAttempt_IsCorrect()
+        {
+            var attempts = 0;
+            const int MAX_ATTEMPTS = 5;
+            var retries = new List<int>();
+            Func<int, int> exponential = retryAttempt => { retries.Add(retryAttempt); return retryAttempt; };
+            Func<Response> func = () => new Response(attempts++ == MAX_ATTEMPTS);
+
+            var response = Retry.Execute(func, RetryOptions.CreateExponential(MAX_ATTEMPTS, exponential));
+
+            Assert.IsTrue(response);
+            for (int i = 0; i < MAX_ATTEMPTS; i++)
+            {
+                Assert.AreEqual(i + 1, retries[i]);
+            }
+        }
+
+        [TestMethod]
+        public void ExponentialRetry_DefaultImplementation()
+        {
+            var attempts = 0;
+            Func<Response> func = () => { attempts++; return new Response(false); };
+
+            var response = Retry.Execute(func, RetryOptions.CreateExponential());
+
+            Assert.IsFalse(response);
+            Assert.AreEqual(RetryOptions.DEFAULT_EXPONENTIAL_RETRIES + 1, attempts);
         }
     }
 }
