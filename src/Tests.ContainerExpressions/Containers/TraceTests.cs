@@ -19,6 +19,32 @@ namespace Tests.ContainerExpressions.Containers
             Trace.SetLogger(message => _messages.Add(message));
         }
 
+        #region T
+
+        [TestMethod]
+        public void T_LogsMessage()
+        {
+            var message = "story";
+
+            var response = true.Log(message);
+
+            Assert.AreEqual(true, response);
+            Assert.AreEqual(1, _messages.Count);
+            Assert.AreEqual(message, _messages[0]);
+        }
+
+        [TestMethod]
+        public void TFunc_LogsMessage()
+        {
+            var response = "Hello".Log(x => $"{x} World!");
+
+            Assert.AreEqual("Hello", response);
+            Assert.AreEqual(1, _messages.Count);
+            Assert.AreEqual("Hello World!", _messages[0]);
+        }
+
+        #endregion
+
         #region Response
 
         [TestMethod]
