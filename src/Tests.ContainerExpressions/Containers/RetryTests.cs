@@ -89,5 +89,60 @@ namespace Tests.ContainerExpressions.Containers
             Assert.IsFalse(response);
             Assert.AreEqual(RetryOptions.DEFAULT_EXPONENTIAL_RETRIES + 1, attempts);
         }
+
+        [TestMethod]
+        public void JitterIsEnabled_JitterIsApplied_RoundToZero_1()
+        {
+            var delay = 1;
+            var options = RetryOptions.Create(1, delay, true);
+
+            var result = options.GetMillisecondsDelay(1);
+
+            Assert.AreEqual(delay, result); // Jitter rounds to zero, so we always get the raw delay (lower egde case).
+        }
+
+        [TestMethod]
+        public void JitterIsEnabled_JitterIsApplied_RoundToZero_9()
+        {
+            var delay = 9;
+            var options = RetryOptions.Create(1, delay, true);
+
+            var result = options.GetMillisecondsDelay(1);
+
+            Assert.AreEqual(delay, result); // Jitter rounds to zero, so we always get the raw delay (upper edge case).
+        }
+
+        [TestMethod]
+        public void JitterIsEnabled_JitterIsApplied_10()
+        {
+            var delay = 10;
+            var options = RetryOptions.Create(1, delay, true);
+
+            var result = options.GetMillisecondsDelay(1);
+
+            Assert.IsTrue(result >= (delay - 1) && result <= (delay + 1)); // From 10 and above, we start getting non-zero jitter; in this case -1, 0, or +1 (to the original delay).
+        }
+
+        [TestMethod]
+        public void JitterIsEnabled_JitterIsApplied_1000()
+        {
+            int delay = 1000, jitterRange = (int)(delay * 0.1D);
+            var options = RetryOptions.Create(1, delay, true);
+
+            var result = options.GetMillisecondsDelay(1);
+
+            Assert.IsTrue(result >= (delay - jitterRange) && result <= (delay + jitterRange));
+        }
+
+        [TestMethod]
+        public void JitterIsNotEnabled_JitterIsNotApplied()
+        {
+            int delay = 999;
+            var options = RetryOptions.Create(1, delay, false);
+
+            var result = options.GetMillisecondsDelay(1);
+
+            Assert.AreEqual(delay, result);
+        }
     }
 }

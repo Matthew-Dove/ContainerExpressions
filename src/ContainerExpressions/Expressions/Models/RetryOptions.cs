@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace ContainerExpressions.Expressions.Models
 {
@@ -14,13 +15,19 @@ namespace ContainerExpressions.Expressions.Models
         /// <summary>The amount of time to wait between calling the function again.</summary>
         public int MillisecondsDelay { get; }
 
+        /// <summary>If true, then jitter will be applied to the milliseconds delay between retries.</summary>
+        public bool WithJitter { get; }
+
         private readonly Func<int, int> _getMillisecondsDelay;
         private readonly static Func<int, int> _exponential = x => (int)Math.Pow(2, x - 1) * 100;
+
+        private static readonly ThreadLocal<Random> _random = new ThreadLocal<Random>(() => new Random());
 
         /// <summary>Function replay, and cooldown options.</summary>
         /// <param name="retries">The number of retries to make before giving up.</param>
         /// <param name="millisecondsDelay">The time to wait in milliseconds before trying another attempt.</param>
-        public RetryOptions(int retries, int millisecondsDelay)
+        /// <param name="withJitter">If true, then jitter will be applied to the milliseconds delay between retries.</param>
+        public RetryOptions(int retries, int millisecondsDelay, bool withJitter)
         {
             if (retries < 1)
                 throw new ArgumentOutOfRangeException(nameof(retries), "Must be greater than 0.");
@@ -30,12 +37,14 @@ namespace ContainerExpressions.Expressions.Models
             Retries = retries;
             MillisecondsDelay = millisecondsDelay;
             _getMillisecondsDelay = _ => millisecondsDelay;
+            WithJitter = withJitter;
         }
 
         /// <summary>Function replay, and cooldown options.</summary>
         /// <param name="retries">The number of retries to make before giving up.</param>
         /// <param name="getMillisecondsDelay">A function that takes the current retry attempt [1 - n], and returns the time to wait in milliseconds before trying again.</param>
-        public RetryOptions(int retries, Func<int, int> getMillisecondsDelay)
+        /// <param name="withJitter">If true, then jitter will be applied to the milliseconds delay between retries.</param>
+        public RetryOptions(int retries, Func<int, int> getMillisecondsDelay, bool withJitter)
         {
             if (retries < 1)
                 throw new ArgumentOutOfRangeException(nameof(retries), "Must be greater than 0.");
@@ -45,6 +54,7 @@ namespace ContainerExpressions.Expressions.Models
             Retries = retries;
             MillisecondsDelay = 0;
             _getMillisecondsDelay = getMillisecondsDelay;
+            WithJitter = withJitter;
         }
 
         /// <summary>Gets the amount of milliseconds to wait until the next retry attempt.</summary>
@@ -55,9 +65,16 @@ namespace ContainerExpressions.Expressions.Models
                 throw new ArgumentOutOfRangeException(nameof(retryAttempt), "Must be greater than 0.");
 
             var millisecondsDelay = _getMillisecondsDelay(retryAttempt);
-
             if (millisecondsDelay < 0)
                 throw new ArgumentOutOfRangeException(nameof(millisecondsDelay), "Cannot be negative.");
+
+            if (WithJitter)
+            {
+                var jitter = (int)(millisecondsDelay * 0.1D);
+                jitter = _random.Value.Next(0, jitter + 1);
+                if (_random.Value.NextDouble() >= 0.5D) millisecondsDelay += jitter;
+                else millisecondsDelay -= jitter;
+            }
 
             return millisecondsDelay;
         }
@@ -68,7 +85,8 @@ namespace ContainerExpressions.Expressions.Models
         /// <summary>>Creates RetryOptions with custom values</summary>
         /// <param name="retries">The number of times to retry the function.</param>
         /// <param name="millisecondsDelay">The amount of time to wait between calling the function again</param>
-        public static RetryOptions Create(int retries, int millisecondsDelay) => new RetryOptions(retries, millisecondsDelay);
+        /// <param name="withJitter">If true, then jitter will be applied to the milliseconds delay between retries.</param>
+        public static RetryOptions Create(int retries, int millisecondsDelay, bool withJitter = true) => new RetryOptions(retries, millisecondsDelay, withJitter);
 
         /// <summary>Defines a retry strategy with an exponential backoff, and sensible default values.</summary>
         public static RetryOptions CreateExponential() => CreateExponential(DEFAULT_EXPONENTIAL_RETRIES);
@@ -94,11 +112,13 @@ namespace ContainerExpressions.Expressions.Models
         /// </list>
         /// </summary>
         /// <param name="retries">The number of attempts to make until the Response is in a valid state, before giving up.</param>
-        public static RetryOptions CreateExponential(int retries) => new RetryOptions(retries, _exponential);
+        /// <param name="withJitter">If true, then jitter will be applied to the milliseconds delay between retries.</param>
+        public static RetryOptions CreateExponential(int retries, bool withJitter = true) => CreateExponential(retries, _exponential, withJitter);
 
         /// <summary>Function replay, and cooldown options.</summary>
         /// <param name="retries">The number of retries to make before giving up.</param>
         /// <param name="getMillisecondsDelay">A function that takes the current retry attempt [1 - n], and returns the time to wait in milliseconds before trying again.</param>
-        public static RetryOptions CreateExponential(int retries, Func<int, int> getMillisecondsDelay) => new RetryOptions(retries, getMillisecondsDelay);
+        /// <param name="withJitter">If true, then jitter will be applied to the milliseconds delay between retries.</param>
+        public static RetryOptions CreateExponential(int retries, Func<int, int> getMillisecondsDelay, bool withJitter = true) => new RetryOptions(retries, getMillisecondsDelay, withJitter);
     }
 }
