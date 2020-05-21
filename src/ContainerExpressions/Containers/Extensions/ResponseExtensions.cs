@@ -28,6 +28,18 @@ namespace ContainerExpressions.Containers
         /// <summary>Turn an async function that doesn't return a task Response, into one that does.</summary>
         public static Func<T, Task<Response<TResult>>> LiftAsync<T, TResult>(Func<T, Task<TResult>> func) => Create<Func<T, Task<Response<TResult>>>>(async x => Create(await func(x)));
 
+        /// <summary>Executes the bind func, passing in T as an argument.</summary>
+        public static Response<TResult> Push<T, TResult>(this T value, Func<T, Response<TResult>> func) => func(value);
+
+        /// <summary>Executes the bind func, passing in T as an argument.</summary>
+        public static Task<Response<TResult>> Push<T, TResult>(this Task<T> value, Func<T, Response<TResult>> func) => value.ContinueWith(x => func(x.Result));
+
+        /// <summary>Executes the bind func, passing in T as an argument.</summary>
+        public static Task<Response<TResult>> PushAsync<T, TResult>(this T value, Func<T, Task<Response<TResult>>> func) => func(value);
+
+        /// <summary>Executes the bind func, passing in T as an argument.</summary>
+        public static Task<Response<TResult>> PushAsync<T, TResult>(this Task<T> value, Func<T, Task<Response<TResult>>> func) => value.ContinueWith(x => func(x.Result)).Unwrap();
+
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Response<T> Bind<T>(this Response response, Func<Response<T>> func) => response ? func() : new Response<T>();
 

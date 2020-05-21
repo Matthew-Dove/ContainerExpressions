@@ -168,6 +168,54 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
+        public void Bind_From_TValue()
+        {
+            var userId = 1337;
+            var username = "John Smith";
+            Func<int, Response<string>> getUsername = id => Response.Create(username);
+
+            var result = userId.Push(getUsername);
+
+            Assert.AreEqual(username, result);
+        }
+
+        [TestMethod]
+        public async Task Bind_From_AsyncTValue()
+        {
+            var userId = Task.FromResult(1337);
+            var username = "John Smith";
+            Func<int, Response<string>> getUsername = id => Response.Create(username);
+
+            var result = await userId.Push(getUsername);
+
+            Assert.AreEqual(username, result);
+        }
+
+        [TestMethod]
+        public async Task Bind_From_TValue_Async()
+        {
+            var userId = 1337;
+            var username = "John Smith";
+            Func<int, Task<Response<string>>> getUsername = id => Task.FromResult(Response.Create(username));
+
+            var result = await userId.PushAsync(getUsername);
+
+            Assert.AreEqual(username, result);
+        }
+
+        [TestMethod]
+        public async Task Bind_From_AsyncTValue_Async()
+        {
+            var userId = Task.FromResult(1337);
+            var username = "John Smith";
+            Func<int, Task<Response<string>>> getUsername = id => Task.FromResult(Response.Create(username));
+
+            var result = await userId.PushAsync(getUsername);
+
+            Assert.AreEqual(username, result);
+        }
+
+        [TestMethod]
         public void Response_IsValid_TransformPropagates()
         {
             var answer = 42;
