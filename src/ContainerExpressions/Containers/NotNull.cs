@@ -18,9 +18,11 @@ namespace ContainerExpressions.Containers
 
         public static implicit operator NotNull<T>(T value) => new NotNull<T>(value);
 
-        public bool Equals(NotNull<T> other) => other != null && other.Value.Equals(Value);
+        public bool Equals(NotNull<T> other) => (object)other != null && other.Value.Equals(Value);
 
-        public override bool Equals(object obj) => Equals(obj as NotNull<T>);
+        public bool Equals(T value) => value != null && Value.Equals(value);
+
+        public override bool Equals(object obj) => obj != null && Equals(obj as NotNull<T>);
 
         public override int GetHashCode() => Value.GetHashCode();
 
@@ -30,9 +32,15 @@ namespace ContainerExpressions.Containers
 
         public static bool operator ==(NotNull<T> x, NotNull<T> y)
         {
-            if (x == null && y == null) return true;
-            if (x == null || y == null) return false;
-            return x.Value.Equals(y.Value);
+            if ((object)x == y) return true;
+            if ((object)x == null) return false;
+            return x.Equals(y);
         }
+
+        public static bool operator !=(NotNull<T> x, T y) => !(x == y);
+        public static bool operator ==(NotNull<T> x, T y) => (object)x != null && x.Value.Equals(y);
+
+        public static bool operator !=(T x, NotNull<T> y) => !(x == y);
+        public static bool operator ==(T x, NotNull<T> y) => (object)y != null && y.Value.Equals(x);
     }
 }
