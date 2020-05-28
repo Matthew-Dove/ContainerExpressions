@@ -8,12 +8,12 @@ namespace ContainerExpressions.Containers
     /// <para>Using this pattern you can tell if a returned value is the correct one, or if some error happened trying to get the real value.</para>
     /// </summary>
     /// <typeparam name="T">The value to return.</typeparam>
-    public readonly struct Response<T>
+    public readonly struct Response<T> : IEquatable<Response<T>>
     {
         /// <summary>True if the value was set correctly, false if some error occurred getting the value.</summary>
         public bool IsValid { get; }
 
-        /// <summary>The value that was calculated, with the guarantee it's in a valid state.</summary>
+        /// <summary>The value that was calculated, with the guarantee it's in a valid state, throws InvalidOperationException if Response is in an invalid state.</summary>
         public T Value { get { if (!IsValid) throw new InvalidOperationException("Cannot access the value if the container is not valid."); return _value; } }
         private readonly T _value;
 
@@ -39,6 +39,41 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Returns the underlying value's string representation.</summary>
         public override string ToString() => IsValid ? _value?.ToString() ?? string.Empty : string.Empty;
+
+        /// <summary>If both response types are valid, then the values are compared, otherwise the IsValid property is compared.</summary>
+        public bool Equals(Response<T> other)
+        {
+            if (other.IsValid && IsValid)
+            {
+                if (_value == null) return other._value == null;
+                if (other._value == null) return _value == null;
+                return _value.Equals(other._value);
+            }
+            return other.IsValid == IsValid;
+        }
+
+        /// <summary>Compares the provided value, to the Response's Value, throws InvalidOperationException if Response is in an invalid state.</summary>
+        public bool Equals(T value)
+        {
+            if (!IsValid) throw new InvalidOperationException("Cannot access the value if the container is not valid.");
+            if (_value == null) return value == null;
+            return Value.Equals(value);
+        }
+
+        /// <summary>Compares obj if it is of type Response<T>, or of type T. Throws InvalidOperationException if Response is in an invalid state, and obj is a T value.</summary>
+        public override bool Equals(object obj) => obj is T value && Equals(value) || obj is Response<T> response && Equals(response);
+
+        /// <summary>Returns the Value's hash code (T), or IsValid's hash code (bool) if there is no value.</summary>
+        public override int GetHashCode() => IsValid ? Value.GetHashCode() : IsValid.GetHashCode();
+
+        public static bool operator !=(Response<T> x, Response<T> y) => !(x == y);
+        public static bool operator ==(Response<T> x, Response<T> y) => x.Equals(y);
+
+        public static bool operator !=(Response<T> x, T y) => !(x == y);
+        public static bool operator ==(Response<T> x, T y) => x.Equals(y);
+
+        public static bool operator !=(T x, Response<T> y) => !(x == y);
+        public static bool operator ==(T x, Response<T> y) => y.Equals(x);
     }
 
     /// <summary>A helper class for the Response generic class.</summary>

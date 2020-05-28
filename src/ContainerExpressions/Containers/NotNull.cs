@@ -36,7 +36,6 @@ namespace ContainerExpressions.Containers
         public override string ToString() => Value.ToString();
 
         public static bool operator !=(NotNull<T> x, NotNull<T> y) => !(x == y);
-
         public static bool operator ==(NotNull<T> x, NotNull<T> y)
         {
             if ((object)x == y) return true;
