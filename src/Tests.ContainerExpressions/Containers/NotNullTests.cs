@@ -52,6 +52,43 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
+        public void Equatable_Not_Equals()
+        {
+            var model1 = new Model();
+            var model2 = new Model();
+            var notNull1 = (NotNull<Model>)model1;
+            var notNull2 = (NotNull<Model>)model2;
+
+            var result0 = model1.Equals(model2);
+
+            var result1 = notNull1 != model2;
+            var result2 = model2 != notNull1;
+            var result3 = notNull1 != notNull2;
+            var result4 = notNull2 != notNull1;
+
+            var result5 = notNull1 == model2;
+            var result6 = model2 == notNull1;
+            var result7 = notNull1 == notNull2;
+            var result8 = notNull2 == notNull1;
+
+            var result9 = model1.Equals(model1);
+
+            Assert.IsFalse(result0);
+
+            Assert.IsTrue(result1);
+            Assert.IsTrue(result2);
+            Assert.IsTrue(result3);
+            Assert.IsTrue(result4);
+
+            Assert.IsFalse(result5);
+            Assert.IsFalse(result6);
+            Assert.IsFalse(result7);
+            Assert.IsFalse(result8);
+
+            Assert.IsTrue(result9);
+        }
+
+        [TestMethod]
         public void Equatable_ToString()
         {
             var model = new Model();

@@ -38,8 +38,8 @@ namespace ContainerExpressions.Containers
         public static bool operator !=(NotNull<T> x, NotNull<T> y) => !(x == y);
         public static bool operator ==(NotNull<T> x, NotNull<T> y)
         {
-            if ((object)x == y) return true;
-            if ((object)x == null) return false;
+            if ((object)x == null) return (object)y == null;
+            if ((object)y == null) return (object)x == null;
             return x.Equals(y);
         }
 
