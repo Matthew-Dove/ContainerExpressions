@@ -2,10 +2,17 @@
 
 namespace ContainerExpressions.Containers
 {
+    /// <summary>
+    /// A containter for a reference type T, that ensures the provided value of T is not null.
+    /// <para>Useful for wrapping method argument types, that always require a reference value.</para>
+    /// </summary>
     public sealed class NotNull<T> : IEquatable<NotNull<T>> where T : class
     {
+        /// <summary>The underlying value of T, which is not null.</summary>
         public T Value { get; }
 
+        /// <summary>Create a check for T, such that it is not null.</summary>
+        /// <param name="value">The reference you want to ensure is not null.</param>
         private NotNull(T value)
         {
             if (value == null)

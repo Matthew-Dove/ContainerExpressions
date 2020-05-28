@@ -15,6 +15,17 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
+        public void Equatable_Cast()
+        {
+            Model model = new Model();
+            NotNull<Model> notNull = model;
+
+            Model result = notNull;
+
+            Assert.AreEqual(model, result);
+        }
+
+        [TestMethod]
         public void Equatable_GetHashCode()
         {
             var model = new Model();
