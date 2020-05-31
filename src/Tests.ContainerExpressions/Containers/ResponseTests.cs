@@ -182,7 +182,7 @@ namespace Tests.ContainerExpressions.Containters
             var username = "John Smith";
             Func<int, Response<string>> getUsername = id => Response.Create(username);
 
-            var result = userId.Push(getUsername);
+            var result = userId.BindValue(getUsername);
 
             Assert.AreEqual(username, result);
         }
@@ -194,7 +194,7 @@ namespace Tests.ContainerExpressions.Containters
             var username = "John Smith";
             Func<int, Response<string>> getUsername = id => Response.Create(username);
 
-            var result = await userId.Push(getUsername);
+            var result = await userId.BindValue(getUsername);
 
             Assert.AreEqual(username, result);
         }
@@ -206,7 +206,7 @@ namespace Tests.ContainerExpressions.Containters
             var username = "John Smith";
             Func<int, Task<Response<string>>> getUsername = id => Task.FromResult(Response.Create(username));
 
-            var result = await userId.PushAsync(getUsername);
+            var result = await userId.BindValueAsync(getUsername);
 
             Assert.AreEqual(username, result);
         }
@@ -218,7 +218,7 @@ namespace Tests.ContainerExpressions.Containters
             var username = "John Smith";
             Func<int, Task<Response<string>>> getUsername = id => Task.FromResult(Response.Create(username));
 
-            var result = await userId.PushAsync(getUsername);
+            var result = await userId.BindValueAsync(getUsername);
 
             Assert.AreEqual(username, result);
         }
