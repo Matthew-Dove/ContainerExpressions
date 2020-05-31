@@ -29,6 +29,18 @@ namespace ContainerExpressions.Containers
         public static Func<T, Task<Response<TResult>>> LiftAsync<T, TResult>(Func<T, Task<TResult>> func) => Create<Func<T, Task<Response<TResult>>>>(async x => Create(await func(x)));
 
         /// <summary>Executes the bind func, passing in T as an argument.</summary>
+        public static Response BindValue<T>(this T value, Func<T, Response> func) => func(value);
+
+        /// <summary>Executes the bind func, passing in T as an argument.</summary>
+        public static Task<Response> BindValue<T>(this Task<T> value, Func<T, Response> func) => value.ContinueWith(x => func(x.Result));
+
+        /// <summary>Executes the bind func, passing in T as an argument.</summary>
+        public static Task<Response> BindValueAsync<T>(this T value, Func<T, Task<Response>> func) => func(value);
+
+        /// <summary>Executes the bind func, passing in T as an argument.</summary>
+        public static Task<Response> BindValueAsync<T>(this Task<T> value, Func<T, Task<Response>> func) => value.ContinueWith(x => func(x.Result)).Unwrap();
+
+        /// <summary>Executes the bind func, passing in T as an argument.</summary>
         public static Response<TResult> BindValue<T, TResult>(this T value, Func<T, Response<TResult>> func) => func(value);
 
         /// <summary>Executes the bind func, passing in T as an argument.</summary>
@@ -39,6 +51,12 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Executes the bind func, passing in T as an argument.</summary>
         public static Task<Response<TResult>> BindValueAsync<T, TResult>(this Task<T> value, Func<T, Task<Response<TResult>>> func) => value.ContinueWith(x => func(x.Result)).Unwrap();
+
+        // up to here!
+
+
+
+
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Response<T> Bind<T>(this Response response, Func<Response<T>> func) => response ? func() : new Response<T>();

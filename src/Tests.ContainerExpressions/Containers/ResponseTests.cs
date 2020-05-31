@@ -782,6 +782,50 @@ namespace Tests.ContainerExpressions.Containters
             Assert.AreEqual(value, response.IsValid);
         }
 
+        [TestMethod]
+        public void BaseResponse_Bind_From_TValue()
+        {
+            var username = "John Smith";
+            Response updateUser(string name) => new Response(name.Length > 0);
+
+            var result = username.BindValue(updateUser);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task BaseResponse_Bind_From_TaskValue()
+        {
+            var username = Task.FromResult("John Smith");
+            Response updateUser(string name) => new Response(name.Length > 0);
+
+            var result = await username.BindValue(updateUser);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task BaseResponse_BindAsync_From_Value()
+        {
+            var username = "John Smith";
+            Task<Response> updateUser(string name) => Task.FromResult(new Response(name.Length > 0));
+
+            var result = await username.BindValueAsync(updateUser);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task BaseResponse_BindAsync_From_TaskValue()
+        {
+            var username = Task.FromResult("John Smith");
+            Task<Response> updateUser(string name) => Task.FromResult(new Response(name.Length > 0));
+
+            var result = await username.BindValueAsync(updateUser);
+
+            Assert.IsTrue(result);
+        }
+
         #endregion
     }
 }
