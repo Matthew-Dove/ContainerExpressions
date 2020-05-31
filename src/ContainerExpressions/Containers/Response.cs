@@ -21,9 +21,6 @@ namespace ContainerExpressions.Containers
         /// <param name="value">The response's value.</param>
         public Response(T value)
         {
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-
             _value = value;
             IsValid = true;
         }

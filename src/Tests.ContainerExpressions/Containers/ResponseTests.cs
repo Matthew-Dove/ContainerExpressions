@@ -37,6 +37,14 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
+        public void Response_ToString_InvalidState_EmptyString()
+        {
+            var response = new Response<int>();
+
+            Assert.AreEqual(string.Empty, response.ToString());
+        }
+
+        [TestMethod]
         public void Response_Convert_ToT()
         {
             var value = 10;
@@ -330,6 +338,380 @@ namespace Tests.ContainerExpressions.Containters
 
             Assert.IsFalse(response.IsValid);
             Assert.IsFalse(isInvoked);
+        }
+
+        #endregion
+
+        #region Response IEquatable
+
+        private sealed class Model
+        {
+            public bool EqualsCalled { get; private set; } = false;
+            private readonly Guid _guid = Guid.NewGuid();
+
+            public override int GetHashCode() => _guid.GetHashCode();
+            public override bool Equals(object obj) => Equals(obj as Model);
+            public bool Equals(Model model)
+            {
+                EqualsCalled = true;
+                return model != null && _guid.Equals(model._guid);
+            }
+        }
+
+        [TestMethod]
+        public void Equatable_GetHashCode_Invalid()
+        {
+            var response = new Response<string>();
+
+            Assert.IsFalse(response);
+            Assert.IsFalse(response.IsValid);
+            Assert.AreEqual(false.GetHashCode(), response.GetHashCode());
+        }
+
+        [TestMethod]
+        public void Equatable_GetHashCode_Valid_Value()
+        {
+            var value = 1337;
+
+            var response = new Response<int>(value);
+
+            Assert.AreEqual(value.GetHashCode(), response.GetHashCode());
+        }
+
+        [TestMethod]
+        public void Equatable_GetHashCode_Valid_Reference()
+        {
+            var reference = new Model();
+
+            var response = Response.Create(reference);
+
+            Assert.AreEqual(reference.GetHashCode(), response.GetHashCode());
+        }
+
+        [TestMethod]
+        public void Equatable_Equals_Sign_SameValue()
+        {
+            var value = 10;
+            var response = Response.Create(value);
+
+            var result1 = response == value;
+            var result2 = value == response;
+
+            Assert.IsTrue(result1);
+            Assert.IsTrue(result2);
+        }
+
+        [TestMethod]
+        public void Equatable_Equals_Sign_NotSameValue()
+        {
+            var value = 10;
+            var response = Response.Create(value + 1);
+
+            var result1 = response == value;
+            var result2 = value == response;
+
+            Assert.IsFalse(result1);
+            Assert.IsFalse(result2);
+        }
+
+        [TestMethod]
+        public void Equatable_NotEquals_Sign_SameValue()
+        {
+            var value = 10;
+            var response = Response.Create(value );
+
+            var result1 = response != value;
+            var result2 = value != response;
+
+            Assert.IsFalse(result1);
+            Assert.IsFalse(result2);
+        }
+
+        [TestMethod]
+        public void Equatable_NotEquals_Sign_NotSameValue()
+        {
+            var value = 10;
+            var response = Response.Create(value + 1);
+
+            var result1 = response != value;
+            var result2 = value != response;
+
+            Assert.IsTrue(result1);
+            Assert.IsTrue(result2);
+        }
+
+        [TestMethod]
+        public void Equatable_Equals_Sign_Response_SameValue()
+        {
+            var value = 10;
+            var response1 = Response.Create(value);
+            var response2 = Response.Create(value);
+
+            var result1 = response1 == response2;
+            var result2 = response2 == response1;
+
+            Assert.IsTrue(result1);
+            Assert.IsTrue(result2);
+        }
+
+        [TestMethod]
+        public void Equatable_Equals_Sign_Response_NotSameValue()
+        {
+            var value = 10;
+            var response1 = Response.Create(value);
+            var response2 = Response.Create(value + 1);
+
+            var result1 = response1 == response2;
+            var result2 = response2 == response1;
+
+            Assert.IsFalse(result1);
+            Assert.IsFalse(result2);
+        }
+
+        [TestMethod]
+        public void Equatable_NotEquals_Sign_Response_SameValue()
+        {
+            var value = 10;
+            var response1 = Response.Create(value);
+            var response2 = Response.Create(value);
+
+            var result1 = response1 != response2;
+            var result2 = response2 != response1;
+
+            Assert.IsFalse(result1);
+            Assert.IsFalse(result2);
+        }
+
+        [TestMethod]
+        public void Equatable_NotEquals_Sign_Response_NotSameValue()
+        {
+            var value = 10;
+            var response1 = Response.Create(value);
+            var response2 = Response.Create(value + 1);
+
+            var result1 = response1 != response2;
+            var result2 = response2 != response1;
+
+            Assert.IsTrue(result1);
+            Assert.IsTrue(result2);
+        }
+
+        [TestMethod]
+        public void Equatable_Equals_Sign_SameValue_ReferenceComparison()
+        {
+            var value = new object();
+            var response = Response.Create(value);
+
+            var result1 = response == value;
+            var result2 = value == response;
+
+            Assert.IsTrue(result1);
+            Assert.IsTrue(result2);
+        }
+
+        [TestMethod]
+        public void Equatable_Equals_Sign_NotSameValue_ReferenceComparison()
+        {
+            var value = new object();
+            var response = Response.Create(new object());
+
+            var result1 = response == value;
+            var result2 = value == response;
+
+            Assert.IsFalse(result1);
+            Assert.IsFalse(result2);
+        }
+
+        [TestMethod]
+        public void Equatable_Equals_Sign_Response_SameValue_ReferenceComparison()
+        {
+            var value = new object();
+            var response1 = Response.Create(value);
+            var response2 = Response.Create(value);
+
+            var result1 = response1 == response2;
+            var result2 = response2 == response1;
+
+            Assert.IsTrue(result1);
+            Assert.IsTrue(result2);
+        }
+
+        [TestMethod]
+        public void Equatable_Equals_Sign__Response_NotSameValue_ReferenceComparison()
+        {
+            var response1 = Response.Create(new object());
+            var response2 = Response.Create(new object());
+
+            var result1 = response1 == response2;
+            var result2 = response2 == response1;
+
+            Assert.IsFalse(result1);
+            Assert.IsFalse(result2);
+        }
+
+        [TestMethod]
+        public void Equatable_Equals_Sign_SameValue_ReferenceComparison_OverrideEquals()
+        {
+            var value = new Model();
+            var response = Response.Create(value);
+
+            var result1 = response == value;
+            var result2 = value == response;
+
+            Assert.IsTrue(result1);
+            Assert.IsTrue(result2);
+            Assert.IsTrue(value.EqualsCalled);
+        }
+
+        [TestMethod]
+        public void Equatable_Equals_Sign_NotSameValue_ReferenceComparison_OverrideEquals()
+        {
+            var value = new Model();
+            var response = Response.Create(new Model());
+
+            var result1 = response == value;
+            var result2 = value == response;
+
+            Assert.IsFalse(result1);
+            Assert.IsFalse(result2);
+            Assert.IsTrue(response.Value.EqualsCalled);
+        }
+
+        [TestMethod]
+        public void Equatable_Equals_Sign_Response_SameValue_ReferenceComparison_OverrideEquals()
+        {
+            var value = new Model();
+            var response1 = Response.Create(value);
+            var response2 = Response.Create(value);
+
+            var result1 = response1 == response2;
+            var result2 = response2 == response1;
+
+            Assert.IsTrue(result1);
+            Assert.IsTrue(result2);
+            Assert.IsTrue(response1.Value.EqualsCalled);
+        }
+
+        [TestMethod]
+        public void Equatable_Equals_Sign__Response_NotSameValue_ReferenceComparison_OverrideEquals()
+        {
+            var response1 = Response.Create(new Model());
+            var response2 = Response.Create(new Model());
+
+            var result1 = response1 == response2;
+            var result2 = response2 == response1;
+
+            Assert.IsFalse(result1);
+            Assert.IsFalse(result2);
+            Assert.IsTrue(response1.Value.EqualsCalled);
+            Assert.IsTrue(response2.Value.EqualsCalled);
+        }
+
+        [TestMethod]
+        public void Equatable_Object_Cast_T_Equals()
+        {
+            var value = 10;
+            var response = Response.Create(value);
+
+            var result = response.Equals((object)value);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void Equatable_Object_T_Equals()
+        {
+            var value = 10;
+            var response = Response.Create(value);
+
+            var result = response.Equals(value);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void Equatable_Object_Cast_ResponseT_Equals()
+        {
+            var value = 10;
+            var response1 = Response.Create(value);
+            var response2 = Response.Create(value);
+
+            var result = response1.Equals((object)response2);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void Equatable_Object_ResponseT_Equals()
+        {
+            var value = 10;
+            var response1 = Response.Create(value);
+            var response2 = Response.Create(value);
+
+            var result = response1.Equals(response2);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void Equatable_BothResponseAreInvalid_DifferentT_AreNotEqual()
+        {
+            var response1 = new Response<int>();
+            var response2 = new Response<string>();
+
+            var result = response1.Equals(response2);
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void Equatable_BothResponseAreInvalid_AreEqual()
+        {
+            var response1 = new Response<int>();
+            var response2 = new Response<int>();
+
+            var result = response1.Equals(response2);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void Equatable_TwoResponses_OneIsNull_AreNotEqual()
+        {
+            var response1 = new Response<string>(null);
+            var response2 = new Response<string>("Hi!");
+
+            var result1 = response1.Equals(response2);
+            var result2 = response2.Equals(response1);
+
+            Assert.IsFalse(result1);
+            Assert.IsFalse(result2);
+        }
+
+        [TestMethod]
+        public void Equatable_TwoResponses_BothAreNull_AreEqual()
+        {
+            var response1 = new Response<string>(null);
+            var response2 = new Response<string>(null);
+
+            var result1 = response1.Equals(response2);
+            var result2 = response2.Equals(response1);
+
+            Assert.IsTrue(result1);
+            Assert.IsTrue(result2);
+        }
+
+        [TestMethod]
+        public void Equatable_TwoResponses_BothAreNull_DifferentT_AreNotEqual()
+        {
+            var response1 = new Response<string>(null);
+            var response2 = new Response<Model>(null);
+
+            var result1 = response1.Equals(response2);
+            var result2 = response2.Equals(response1);
+
+            Assert.IsFalse(result1);
+            Assert.IsFalse(result2);
         }
 
         #endregion
