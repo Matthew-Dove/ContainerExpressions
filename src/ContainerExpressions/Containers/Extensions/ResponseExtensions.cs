@@ -56,7 +56,7 @@ namespace ContainerExpressions.Containers
         public static Response<TResult> BindValue<T, TResult>(this T value, Func<T, Response<TResult>> func) => func(value);
 
         /// <summary>Executes the bind func, passing in T as an argument.</summary>
-        public static Task<Response<TResult>> BindValue<T, TResult>(this Task<T> value, Func<T, Response<TResult>> func) => value.ContinueWith(x => func(x.Result));
+        public static Task<Response<TResult>> BindValueAsync<T, TResult>(this Task<T> value, Func<T, Response<TResult>> func) => value.ContinueWith(x => func(x.Result));
 
         /// <summary>Executes the bind func, passing in T as an argument.</summary>
         public static Task<Response<TResult>> BindValueAsync<T, TResult>(this T value, Func<T, Task<Response<TResult>>> func) => func(value);
@@ -70,7 +70,7 @@ namespace ContainerExpressions.Containers
         public static Response BindValue<T>(this T value, Func<T, Response> func) => func(value);
 
         /// <summary>Executes the bind func, passing in T as an argument.</summary>
-        public static Task<Response> BindValue<T>(this Task<T> value, Func<T, Response> func) => value.ContinueWith(x => func(x.Result));
+        public static Task<Response> BindValueAsync<T>(this Task<T> value, Func<T, Response> func) => value.ContinueWith(x => func(x.Result));
 
         /// <summary>Executes the bind func, passing in T as an argument.</summary>
         public static Task<Response> BindValueAsync<T>(this T value, Func<T, Task<Response>> func) => func(value);
@@ -84,7 +84,7 @@ namespace ContainerExpressions.Containers
         public static Response<T> Bind<T>(this Response response, Func<Response<T>> func) => response ? func() : new Response<T>();
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        public static Task<Response<T>> Bind<T>(this Task<Response> response, Func<Response<T>> func) => response.ContinueWith(x => x.Result ? func() : new Response<T>());
+        public static Task<Response<T>> BindAsync<T>(this Task<Response> response, Func<Response<T>> func) => response.ContinueWith(x => x.Result ? func() : new Response<T>());
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Task<Response<T>> BindAsync<T>(this Response response, Func<Task<Response<T>>> func) => response ? func() : Task.FromResult(new Response<T>());
@@ -98,7 +98,7 @@ namespace ContainerExpressions.Containers
         public static Response Bind(this Response response, Func<Response> func) => response ? func() : new Response();
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        public static Task<Response> Bind(this Task<Response> response, Func<Response> func) => response.ContinueWith(x => x.Result ? func() : new Response());
+        public static Task<Response> BindAsync(this Task<Response> response, Func<Response> func) => response.ContinueWith(x => x.Result ? func() : new Response());
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Task<Response> BindAsync(this Response response, Func<Task<Response>> func) => response ? func() : Task.FromResult(new Response());
@@ -112,7 +112,7 @@ namespace ContainerExpressions.Containers
         public static Response<TResult> Bind<T, TResult>(this Response<T> response, Func<T, Response<TResult>> func) => response ? func(response) : new Response<TResult>();
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        public static Task<Response<TResult>> Bind<T, TResult>(this Task<Response<T>> response, Func<T, Response<TResult>> func) => response.ContinueWith(x => x.Result ? func(x.Result) : new Response<TResult>());
+        public static Task<Response<TResult>> BindAsync<T, TResult>(this Task<Response<T>> response, Func<T, Response<TResult>> func) => response.ContinueWith(x => x.Result ? func(x.Result) : new Response<TResult>());
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Task<Response<TResult>> BindAsync<T, TResult>(this Response<T> response, Func<T, Task<Response<TResult>>> func) => response ? func(response) : Task.FromResult(new Response<TResult>());
@@ -126,7 +126,7 @@ namespace ContainerExpressions.Containers
         public static Response Bind<T>(this Response<T> response, Func<T, Response> func) => response ? func(response) : new Response();
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        public static Task<Response> Bind<T>(this Task<Response<T>> response, Func<T, Response> func) => response.ContinueWith(x => x.Result ? func(x.Result) : new Response());
+        public static Task<Response> BindAsync<T>(this Task<Response<T>> response, Func<T, Response> func) => response.ContinueWith(x => x.Result ? func(x.Result) : new Response());
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Task<Response> BindAsync<T>(this Response<T> response, Func<T, Task<Response>> func) => response ? func(response) : Task.FromResult(new Response());

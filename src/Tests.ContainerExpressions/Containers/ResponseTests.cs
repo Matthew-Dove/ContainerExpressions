@@ -204,7 +204,7 @@ namespace Tests.ContainerExpressions.Containters
             var username = "John Smith";
             Func<int, Response<string>> getUsername = id => Response.Create(username);
 
-            var result = await userId.BindValue(getUsername);
+            var result = await userId.BindValueAsync(getUsername);
 
             Assert.AreEqual(username, result);
         }
@@ -470,7 +470,7 @@ namespace Tests.ContainerExpressions.Containters
             var response = Task.FromResult(answer.ToString().ToResponse());
             Func<string, Response<int>> func = x => int.Parse(x).ToResponse();
 
-            var result = await response.Bind(func);
+            var result = await response.BindAsync(func);
 
             Assert.AreEqual(answer, result);
         }
@@ -519,7 +519,7 @@ namespace Tests.ContainerExpressions.Containters
             var response = Task.FromResult(42.ToResponse());
             Func<int, Response> func = _ => { isCalled = true; return new Response(true); };
 
-            var result = await response.Bind(func);
+            var result = await response.BindAsync(func);
 
             Assert.IsTrue(result);
             Assert.IsTrue(isCalled);
@@ -1010,7 +1010,7 @@ namespace Tests.ContainerExpressions.Containters
             var username = Task.FromResult("John Smith");
             Response updateUser(string name) => new Response(name.Length > 0);
 
-            var result = await username.BindValue(updateUser);
+            var result = await username.BindValueAsync(updateUser);
 
             Assert.IsTrue(result);
         }
@@ -1061,7 +1061,7 @@ namespace Tests.ContainerExpressions.Containters
             var response = Task.FromResult(new Response(true));
             Func<Response<int>> func = () => answer.ToResponse();
 
-            var result = await response.Bind(func);
+            var result = await response.BindAsync(func);
 
             Assert.IsTrue(result);
             Assert.AreEqual(answer, result);
@@ -1113,7 +1113,7 @@ namespace Tests.ContainerExpressions.Containters
             var isCalled = false;
             Func<Response> func = () => { isCalled = true; return new Response(true); };
 
-            var result = await response.Bind(func);
+            var result = await response.BindAsync(func);
 
             Assert.IsTrue(isCalled);
             Assert.IsTrue(result);
