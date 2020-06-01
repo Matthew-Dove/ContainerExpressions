@@ -12,6 +12,16 @@ namespace Tests.ContainerExpressions.Containters
         #region Response
 
         [TestMethod]
+        public void Response_CreateFromTValue_IsValid()
+        {
+            var value = 42;
+
+            var response = value.ToResponse();
+
+            Assert.IsTrue(response);
+        }
+
+        [TestMethod]
         public void Response_HasValue_IsValid()
         {
             var response = Response.Create(10);
@@ -125,7 +135,7 @@ namespace Tests.ContainerExpressions.Containters
             var answer = 42;
             Func<int, int> @double = x => x * 2;
 
-            var response = Response.Create(answer).Bind(Response.Lift(@double));
+            var response = Response.Create(answer).Bind(@double.Lift());
 
             Assert.IsTrue(response);
             Assert.AreEqual(@double(answer), response);
@@ -136,7 +146,7 @@ namespace Tests.ContainerExpressions.Containters
         {
             Func<int> answer = () => 42;
 
-            var stringAnswer = Expression.Compose(Response.Lift(answer), x => Response.Create(x.ToString()));
+            var stringAnswer = Expression.Compose(answer.Lift(), x => Response.Create(x.ToString()));
 
             Assert.AreEqual(answer().ToString(), stringAnswer);
         }
@@ -147,7 +157,7 @@ namespace Tests.ContainerExpressions.Containters
             var answer = 42;
             Func<int, Task<int>> @double = x => Task.FromResult(x * 2);
 
-            var response = await Response.Create(answer).BindAsync(Response.LiftAsync(@double));
+            var response = await Response.Create(answer).BindAsync(@double.LiftAsync());
 
             Assert.IsTrue(response);
             Assert.AreEqual(await @double(answer), response);
@@ -338,6 +348,207 @@ namespace Tests.ContainerExpressions.Containters
 
             Assert.IsFalse(response.IsValid);
             Assert.IsFalse(isInvoked);
+        }
+
+        [TestMethod]
+        public void Response_Lift_Action()
+        {
+            var response = new Response();
+            var isCalled = false;
+            Action func = () => { isCalled = true; };
+
+            var lift = func.Lift();
+            Assert.IsFalse(isCalled);
+
+            var result = response.Bind(lift);
+            Assert.IsFalse(isCalled);
+
+            response = response.AsValid();
+            result = response.Bind(lift);
+            Assert.IsTrue(isCalled);
+        }
+
+        [TestMethod]
+        public void Response_Lift_Action_WithArg()
+        {
+            var isCalled = false;
+            Action<int> func = _ => { isCalled = true; };
+
+            var lift = func.Lift();
+            Assert.IsFalse(isCalled);
+
+            var result = lift(42);
+
+            Assert.IsTrue(result);
+            Assert.IsTrue(isCalled);
+        }
+
+        [TestMethod]
+        public void Response_Lift_Func()
+        {
+            var answer = 42;
+            var isCalled = false;
+            Func<int> func = () => { isCalled = true; return answer; };
+
+            var lift = func.Lift();
+            Assert.IsFalse(isCalled);
+
+            var result = lift();
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(answer, result);
+            Assert.IsTrue(isCalled);
+        }
+
+        [TestMethod]
+        public void Response_Lift_Func_WithArg()
+        {
+            var answer = 42;
+            var isCalled = false;
+            Func<int, int> func = x => { isCalled = true; return x; };
+
+            var lift = func.Lift();
+            Assert.IsFalse(isCalled);
+
+            var result = lift(answer);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(answer, result);
+            Assert.IsTrue(isCalled);
+        }
+
+        [TestMethod]
+        public async Task Response_Lift_Func_Async()
+        {
+            var answer = 42;
+            var isCalled = false;
+            Func<Task<int>> func = () => { isCalled = true; return Task.FromResult(answer); };
+
+            var lift = func.LiftAsync();
+            Assert.IsFalse(isCalled);
+
+            var result = await lift();
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(answer, result);
+            Assert.IsTrue(isCalled);
+        }
+
+        [TestMethod]
+        public async Task Response_Lift_Func_Async_WithArg()
+        {
+            var answer = 42;
+            var isCalled = false;
+            Func<int, Task<int>> func = x => { isCalled = true; return Task.FromResult(x); };
+
+            var lift = func.LiftAsync();
+            Assert.IsFalse(isCalled);
+
+            var result = await lift(answer);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(answer, result);
+            Assert.IsTrue(isCalled);
+        }
+
+        [TestMethod]
+        public void Response_Bind_ResponseT_ResponseTResult()
+        {
+            var answer = 42;
+            var response = answer.ToString().ToResponse();
+            Func<string, Response<int>> func = x => int.Parse(x).ToResponse();
+
+            var result = response.Bind(func);
+
+            Assert.AreEqual(answer, result);
+        }
+
+        [TestMethod]
+        public async Task Response_Bind_ResponseTAsync_ResponseTResult()
+        {
+            var answer = 42;
+            var response = Task.FromResult(answer.ToString().ToResponse());
+            Func<string, Response<int>> func = x => int.Parse(x).ToResponse();
+
+            var result = await response.Bind(func);
+
+            Assert.AreEqual(answer, result);
+        }
+
+        [TestMethod]
+        public async Task Response_Bind_ResponseT_ResponseTResultAsync()
+        {
+            var answer = 42;
+            var response = answer.ToString().ToResponse();
+            Func<string, Task<Response<int>>> func = x => Task.FromResult(int.Parse(x).ToResponse());
+
+            var result = await response.BindAsync(func);
+
+            Assert.AreEqual(answer, result);
+        }
+
+        [TestMethod]
+        public async Task Response_Bind_ResponseTAsync_ResponseTResultAsync()
+        {
+            var answer = 42;
+            var response = Task.FromResult(answer.ToString().ToResponse());
+            Func<string, Task<Response<int>>> func = x => Task.FromResult(int.Parse(x).ToResponse());
+
+            var result = await response.BindAsync(func);
+
+            Assert.AreEqual(answer, result);
+        }
+
+        [TestMethod]
+        public void Response_Bind_ResponseT_Response()
+        {
+            var isCalled = false;
+            var response = 42.ToResponse();
+            Func<int, Response> func = _ => { isCalled = true; return new Response(true); };
+
+            var result = response.Bind(func);
+
+            Assert.IsTrue(result);
+            Assert.IsTrue(isCalled);
+        }
+
+        [TestMethod]
+        public async Task Response_Bind_ResponseTAsync_Response()
+        {
+            var isCalled = false;
+            var response = Task.FromResult(42.ToResponse());
+            Func<int, Response> func = _ => { isCalled = true; return new Response(true); };
+
+            var result = await response.Bind(func);
+
+            Assert.IsTrue(result);
+            Assert.IsTrue(isCalled);
+        }
+
+        [TestMethod]
+        public async Task Response_Bind_ResponseT_ResponseAsync()
+        {
+            var isCalled = false;
+            var response = 42.ToResponse();
+            Func<int, Task<Response>> func = _ => { isCalled = true; return Task.FromResult(new Response(true)); };
+
+            var result = await response.BindAsync(func);
+
+            Assert.IsTrue(result);
+            Assert.IsTrue(isCalled);
+        }
+
+        [TestMethod]
+        public async Task Response_Bind_ResponseTAsync_ResponseTAsync()
+        {
+            var isCalled = false;
+            var response = Task.FromResult(42.ToResponse());
+            Func<int, Task<Response>> func = _ => { isCalled = true; return Task.FromResult(new Response(true)); };
+
+            var result = await response.BindAsync(func);
+
+            Assert.IsTrue(result);
+            Assert.IsTrue(isCalled);
         }
 
         #endregion
@@ -823,6 +1034,114 @@ namespace Tests.ContainerExpressions.Containters
 
             var result = await username.BindValueAsync(updateUser);
 
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void BaseResponse_Bind_ResponseT()
+        {
+            var answer = 42;
+            var response = new Response();
+            Func<Response<int>> func = () => answer.ToResponse();
+
+            var result = response.Bind(func);
+            Assert.IsFalse(result);
+
+            response = response.AsValid();
+            result = response.Bind(func);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(answer, result);
+        }
+
+        [TestMethod]
+        public async Task BaseResponse_BindAsync_ResponseT()
+        {
+            var answer = 42;
+            var response = Task.FromResult(new Response(true));
+            Func<Response<int>> func = () => answer.ToResponse();
+
+            var result = await response.Bind(func);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(answer, result);
+        }
+
+        [TestMethod]
+        public async Task BaseResponse_Bind_ResponseTAsync()
+        {
+            var answer = 42;
+            var response = new Response(true);
+            Func<Task<Response<int>>> func = () => Task.FromResult(answer.ToResponse());
+
+            var result = await response.BindAsync(func);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(answer, result);
+        }
+
+        [TestMethod]
+        public async Task BaseResponse_BindAsync_ResponseTAsync()
+        {
+            var answer = 42;
+            var response = Task.FromResult(new Response(true));
+            Func<Task<Response<int>>> func = () => Task.FromResult(answer.ToResponse());
+
+            var result = await response.BindAsync(func);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(answer, result);
+        }
+
+        [TestMethod]
+        public void BaseResponse_Bind_Response_Response()
+        {
+            var response = new Response(true);
+            var isCalled = false;
+            Func<Response> func = () => { isCalled = true; return new Response(true); };
+
+            var result = response.Bind(func);
+
+            Assert.IsTrue(isCalled);
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task BaseResponse_Bind_ResponseAsync_Response()
+        {
+            var response = Task.FromResult(new Response(true));
+            var isCalled = false;
+            Func<Response> func = () => { isCalled = true; return new Response(true); };
+
+            var result = await response.Bind(func);
+
+            Assert.IsTrue(isCalled);
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task BaseResponse_Bind_Response_ResponseAsync()
+        {
+            var response = new Response(true);
+            var isCalled = false;
+            Func<Task<Response>> func = () => { isCalled = true; return Task.FromResult(new Response(true)); };
+
+            var result = await response.BindAsync(func);
+
+            Assert.IsTrue(isCalled);
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task BaseResponse_Bind_ResponseAsync_ResponseAsync()
+        {
+            var response = Task.FromResult(new Response(true));
+            var isCalled = false;
+            Func<Task<Response>> func = () => { isCalled = true; return Task.FromResult(new Response(true)); };
+
+            var result = await response.BindAsync(func);
+
+            Assert.IsTrue(isCalled);
             Assert.IsTrue(result);
         }
 

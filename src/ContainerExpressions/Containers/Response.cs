@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers
 {
@@ -88,18 +87,6 @@ namespace ContainerExpressions.Containers
         /// <summary>Create a response container in a valid state.</summary>
         /// <param name="value">The response's value.</param>
         public static Response<T> Create<T>(T value) => new Response<T>(value);
-
-        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
-        public static Func<Response<T>> Lift<T>(Func<T> func) => () => Create(func());
-
-        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
-        public static Func<T, Response<TResult>> Lift<T, TResult>(Func<T, TResult> func) => Create<Func<T, Response<TResult>>>(x => Create(func(x)));
-
-        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
-        public static Func<Task<Response<T>>> LiftAsync<T>(Func<Task<T>> func) => () => func().ContinueWith(x => Create(x.Result));
-
-        /// <summary>Turn an async function that doesn't return a task Response, into one that does.</summary>
-        public static Func<T, Task<Response<TResult>>> LiftAsync<T, TResult>(Func<T, Task<TResult>> func) => Create<Func<T, Task<Response<TResult>>>>(async x => Create(await func(x)));
 
         /// <summary>When compared to a bool, the IsValid properties value will be used.</summary>
         public static implicit operator bool(Response response) => response.IsValid;
