@@ -89,6 +89,53 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
+        public void Equatable_NN_Equals_Self()
+        {
+            var answer = "42";
+            var notNull1 = new NN<string>(answer);
+            var notNull2 = NN.Create(answer);
+            NN<string> notNull3 = answer;
+
+            Assert.IsTrue(notNull1 == answer);
+            Assert.AreEqual(notNull1, notNull1);
+            Assert.AreEqual(notNull1, notNull2);
+            Assert.AreEqual(notNull1, notNull3);
+            Assert.IsTrue(notNull1.Equals(notNull3));
+        }
+
+        [TestMethod]
+        public void Equatable_NN_CompareToNull()
+        {
+            var @null = (string)null;
+            var notNull = NN.Create("John Smith");
+
+            Assert.IsFalse(notNull == @null);
+            Assert.IsFalse(@null == notNull);
+            Assert.IsFalse(notNull.Equals(@null));
+        }
+
+        [TestMethod]
+        public void Equatable_NN_ImplicitCast()
+        {
+            var userId = (string)null;
+            var answer = "1337";
+            void SaveUser(NN<string> id) { userId = id; }
+
+            SaveUser(answer);
+
+            Assert.AreEqual(answer, userId);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Equatable_NN_ImplicitCast_ThrowswhenNull()
+        {
+            void SaveUser(NN<string> id) { }
+
+            SaveUser(null);
+        }
+
+        [TestMethod]
         public void Equatable_ToString()
         {
             var model = new Model();

@@ -19,6 +19,18 @@ namespace ContainerExpressions.Containers
         /// <summary>Create a response container in a valid state.</summary>
         private static Response<T> Create<T>(T value) => new Response<T>(value);
 
+        /// <summary>Turn a Response into a function that wraps the initial Response.</summary>
+        public static Func<Response<T>> Lift<T>(this Response<T> value) => () => value;
+
+        /// <summary>Turn a Response into a function that wraps the initial Response.</summary>
+        public static Func<Task<Response<T>>> LiftAsync<T>(this Response<T> value) => () => Task.FromResult(value);
+
+        /// <summary>Turn a value into a function that wraps the initial value in a Response.</summary>
+        public static Func<Response<T>> Lift<T>(this T value) => () => Create(value);
+
+        /// <summary>Turn a value into a function that wraps the initial value in a Response.</summary>
+        public static Func<Task<Response<T>>> LiftAsync<T>(this T value) => () => Task.FromResult(Create(value));
+
         /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
         public static Func<Response> Lift(this Action func) { return () => { func(); return new Response(true); }; }
 
@@ -153,6 +165,18 @@ namespace ContainerExpressions.Containers
         public static Response<TResult> Transform<T, TResult>(this Response<T> response, Func<T, TResult> func) => response ? Response.Create(func(response)) : new Response<TResult>();
 
         /// <summary>Map the underlying Response type, to another type.</summary>
+        /// <typeparam name="T">The type of the input response.</typeparam>
+        /// <typeparam name="TResult">The type of the output response.</typeparam>
+        /// <param name="term">The result of the last ran code.</param>
+        /// <param name="func">An error free function that maps one type to another.</param>
+        /// <returns>The mapped response, or an invalid response if the input was in an invalid state.</returns>
+        public static Func<Response<TResult>> Transform<T, TResult>(this Func<Response<T>> term, Func<T, TResult> func) => () => {
+            var result = term();
+            if (result) return Response.Create(func(result));
+            return new Response<TResult>();
+        };
+
+        /// <summary>Map the underlying Response type, to another type.</summary>
         /// <typeparam name="T1">The type of the input response.</typeparam>
         /// <typeparam name="T2">The type of the output response.</typeparam>
         /// <typeparam name="TResult">The output type of the transform function.</typeparam>
@@ -184,6 +208,14 @@ namespace ContainerExpressions.Containers
         /// <param name="func">An error free function that maps one type to another.</param>
         /// <returns>The mapped response, or an invalid response if the input was in an invalid state.</returns>
         public static Func<T1, Task<Response<TResult>>> TransformAsync<T1, T2, TResult>(this Func<T1, Task<Response<T2>>> term, Func<T2, TResult> func) => x => term(x).TransformAsync(func);
+
+        /// <summary>Map the underlying Response type, to another type.</summary>
+        /// <typeparam name="T">The input type of the transform function.</typeparam>
+        /// <typeparam name="TResult">The output type of the transform function.</typeparam>
+        /// <param name="term">The result of the last ran code</param>
+        /// <param name="func">An error free function that maps one type to another.</param>
+        /// <returns>The mapped response, or an invalid response if the input was in an invalid state.</returns>
+        public static Func<Task<Response<TResult>>> TransformAsync<T, TResult>(this Func<Task<Response<T>>> term, Func<T, TResult> func) => () => term().ContinueWith(x => x.Result ? Response.Create(func(x.Result)) : new Response<TResult>());
 
         /// <summary>
         /// Executes one of the functions when the input response is valid, otherwise an invalid response is returned.

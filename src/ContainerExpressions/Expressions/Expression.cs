@@ -79,6 +79,8 @@ namespace ContainerExpressions.Expressions
 
         #region Synchronous
 
+        #region ResponseT
+
         /// <summary>Compose functions by giving the output of the first function, to the input of the second function.</summary>
         public static Response<TResult> Compose<T1, TResult>(Func<Response<T1>> func1, Func<T1, Response<TResult>> funcResult) => Core.Compose.Evaluate(func1, funcResult);
         /// <summary>Compose functions by giving the output of the first function, to the input of the second function.</summary>
@@ -98,7 +100,32 @@ namespace ContainerExpressions.Expressions
 
         #endregion
 
+        #region Response
+
+        /// <summary>Compose functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Response Compose<T1>(Func<Response<T1>> func1, Func<T1, Response> funcResult) => Core.Compose.Evaluate(func1, funcResult);
+        /// <summary>Compose functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Response Compose<T1, T2>(Func<Response<T1>> func1, Func<T1, Response<T2>> func2, Func<T2, Response> funcResult) => Core.Compose.Evaluate(func1, func2, funcResult);
+        /// <summary>Compose functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Response Compose<T1, T2, T3>(Func<Response<T1>> func1, Func<T1, Response<T2>> func2, Func<T2, Response<T3>> func3, Func<T3, Response> funcResult) => Core.Compose.Evaluate(func1, func2, func3, funcResult);
+        /// <summary>Compose functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Response Compose<T1, T2, T3, T4>(Func<Response<T1>> func1, Func<T1, Response<T2>> func2, Func<T2, Response<T3>> func3, Func<T3, Response<T4>> func4, Func<T4, Response> funcResult) => Core.Compose.Evaluate(func1, func2, func3, func4, funcResult);
+        /// <summary>Compose functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Response Compose<T1, T2, T3, T4, T5>(Func<Response<T1>> func1, Func<T1, Response<T2>> func2, Func<T2, Response<T3>> func3, Func<T3, Response<T4>> func4, Func<T4, Response<T5>> func5, Func<T5, Response> funcResult) => Core.Compose.Evaluate(func1, func2, func3, func4, func5, funcResult);
+        /// <summary>Compose functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Response Compose<T1, T2, T3, T4, T5, T6>(Func<Response<T1>> func1, Func<T1, Response<T2>> func2, Func<T2, Response<T3>> func3, Func<T3, Response<T4>> func4, Func<T4, Response<T5>> func5, Func<T5, Response<T6>> func6, Func<T6, Response> funcResult) => Core.Compose.Evaluate(func1, func2, func3, func4, func5, func6, funcResult);
+        /// <summary>Compose functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Response Compose<T1, T2, T3, T4, T5, T6, T7>(Func<Response<T1>> func1, Func<T1, Response<T2>> func2, Func<T2, Response<T3>> func3, Func<T3, Response<T4>> func4, Func<T4, Response<T5>> func5, Func<T5, Response<T6>> func6, Func<T6, Response<T7>> func7, Func<T7, Response> funcResult) => Core.Compose.Evaluate(func1, func2, func3, func4, func5, func6, func7, funcResult);
+        /// <summary>Compose functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Response Compose<T1, T2, T3, T4, T5, T6, T7, T8>(Func<Response<T1>> func1, Func<T1, Response<T2>> func2, Func<T2, Response<T3>> func3, Func<T3, Response<T4>> func4, Func<T4, Response<T5>> func5, Func<T5, Response<T6>> func6, Func<T6, Response<T7>> func7, Func<T7, Response<T8>> func8, Func<T8, Response> funcResult) => Core.Compose.Evaluate(func1, func2, func3, func4, func5, func6, func7, func8, funcResult);
+
+        #endregion
+
+        #endregion
+
         #region Asynchronous
+
+        #region ResponseT
 
         /// <summary>Compose functions by giving the output of the first function, to the input of the second function.</summary>
         public static Task<Response<TResult>> ComposeAsync<T1, TResult>(Func<Task<Response<T1>>> func1, Func<T1, Task<Response<TResult>>> funcResult) => Core.ComposeAsync.EvaluateAsync(func1, funcResult);
@@ -116,6 +143,29 @@ namespace ContainerExpressions.Expressions
         public static Task<Response<TResult>> ComposeAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(Func<Task<Response<T1>>> func1, Func<T1, Task<Response<T2>>> func2, Func<T2, Task<Response<T3>>> func3, Func<T3, Task<Response<T4>>> func4, Func<T4, Task<Response<T5>>> func5, Func<T5, Task<Response<T6>>> func6, Func<T6, Task<Response<T7>>> func7, Func<T7, Task<Response<TResult>>> funcResult) => Core.ComposeAsync.EvaluateAsync(func1, func2, func3, func4, func5, func6, func7, funcResult);
         /// <summary>Compose functions by giving the output of the first function, to the input of the second function.</summary>
         public static Task<Response<TResult>> ComposeAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(Func<Task<Response<T1>>> func1, Func<T1, Task<Response<T2>>> func2, Func<T2, Task<Response<T3>>> func3, Func<T3, Task<Response<T4>>> func4, Func<T4, Task<Response<T5>>> func5, Func<T5, Task<Response<T6>>> func6, Func<T6, Task<Response<T7>>> func7, Func<T7, Task<Response<T8>>> func8, Func<T8, Task<Response<TResult>>> funcResult) => Core.ComposeAsync.EvaluateAsync(func1, func2, func3, func4, func5, func6, func7, func8, funcResult);
+
+        #endregion
+
+        #region Response
+
+        /// <summary>Compose functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Task<Response> ComposeAsync<T1>(Func<Task<Response<T1>>> func1, Func<T1, Task<Response>> funcResult) => Core.ComposeAsync.EvaluateAsync(func1, funcResult);
+        /// <summary>Compose functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Task<Response> ComposeAsync<T1, T2>(Func<Task<Response<T1>>> func1, Func<T1, Task<Response<T2>>> func2, Func<T2, Task<Response>> funcResult) => Core.ComposeAsync.EvaluateAsync(func1, func2, funcResult);
+        /// <summary>Compose functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Task<Response> ComposeAsync<T1, T2, T3>(Func<Task<Response<T1>>> func1, Func<T1, Task<Response<T2>>> func2, Func<T2, Task<Response<T3>>> func3, Func<T3, Task<Response>> funcResult) => Core.ComposeAsync.EvaluateAsync(func1, func2, func3, funcResult);
+        /// <summary>Compose functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Task<Response> ComposeAsync<T1, T2, T3, T4>(Func<Task<Response<T1>>> func1, Func<T1, Task<Response<T2>>> func2, Func<T2, Task<Response<T3>>> func3, Func<T3, Task<Response<T4>>> func4, Func<T4, Task<Response>> funcResult) => Core.ComposeAsync.EvaluateAsync(func1, func2, func3, func4, funcResult);
+        /// <summary>Compose functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Task<Response> ComposeAsync<T1, T2, T3, T4, T5>(Func<Task<Response<T1>>> func1, Func<T1, Task<Response<T2>>> func2, Func<T2, Task<Response<T3>>> func3, Func<T3, Task<Response<T4>>> func4, Func<T4, Task<Response<T5>>> func5, Func<T5, Task<Response>> funcResult) => Core.ComposeAsync.EvaluateAsync(func1, func2, func3, func4, func5, funcResult);
+        /// <summary>Compose functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Task<Response> ComposeAsync<T1, T2, T3, T4, T5, T6>(Func<Task<Response<T1>>> func1, Func<T1, Task<Response<T2>>> func2, Func<T2, Task<Response<T3>>> func3, Func<T3, Task<Response<T4>>> func4, Func<T4, Task<Response<T5>>> func5, Func<T5, Task<Response<T6>>> func6, Func<T6, Task<Response>> funcResult) => Core.ComposeAsync.EvaluateAsync(func1, func2, func3, func4, func5, func6, funcResult);
+        /// <summary>Compose functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Task<Response> ComposeAsync<T1, T2, T3, T4, T5, T6, T7>(Func<Task<Response<T1>>> func1, Func<T1, Task<Response<T2>>> func2, Func<T2, Task<Response<T3>>> func3, Func<T3, Task<Response<T4>>> func4, Func<T4, Task<Response<T5>>> func5, Func<T5, Task<Response<T6>>> func6, Func<T6, Task<Response<T7>>> func7, Func<T7, Task<Response>> funcResult) => Core.ComposeAsync.EvaluateAsync(func1, func2, func3, func4, func5, func6, func7, funcResult);
+        /// <summary>Compose functions by giving the output of the first function, to the input of the second function.</summary>
+        public static Task<Response> ComposeAsync<T1, T2, T3, T4, T5, T6, T7, T8>(Func<Task<Response<T1>>> func1, Func<T1, Task<Response<T2>>> func2, Func<T2, Task<Response<T3>>> func3, Func<T3, Task<Response<T4>>> func4, Func<T4, Task<Response<T5>>> func5, Func<T5, Task<Response<T6>>> func6, Func<T6, Task<Response<T7>>> func7, Func<T7, Task<Response<T8>>> func8, Func<T8, Task<Response>> funcResult) => Core.ComposeAsync.EvaluateAsync(func1, func2, func3, func4, func5, func6, func7, func8, funcResult);
+
+        #endregion
 
         #endregion
 
