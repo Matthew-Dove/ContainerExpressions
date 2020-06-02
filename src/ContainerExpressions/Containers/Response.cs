@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ContainerExpressions.Containers
 {
@@ -43,7 +44,7 @@ namespace ContainerExpressions.Containers
             {
                 if (_value == null) return other._value == null;
                 if (other._value == null) return _value == null;
-                return _value.Equals(other._value);
+                return EqualityComparer<T>.Default.Equals(_value, other._value);
             }
             return other.IsValid == IsValid;
         }

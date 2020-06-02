@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ContainerExpressions.Containers
 {
@@ -26,9 +27,9 @@ namespace ContainerExpressions.Containers
 
         public static implicit operator NotNull<T>(T value) => new NotNull<T>(value);
 
-        public bool Equals(NotNull<T> other) => (object)other != null && other.Value.Equals(Value);
+        public bool Equals(NotNull<T> other) => (object)other != null && other.Equals(Value);
 
-        public bool Equals(T value) => value != null && Value.Equals(value);
+        public bool Equals(T value) => value != null && EqualityComparer<T>.Default.Equals(Value, value);
 
         public override bool Equals(object obj) => obj != null && Equals(obj as NotNull<T>);
 
@@ -45,10 +46,10 @@ namespace ContainerExpressions.Containers
         }
 
         public static bool operator !=(NotNull<T> x, T y) => !(x == y);
-        public static bool operator ==(NotNull<T> x, T y) => (object)x != null && x.Value.Equals(y);
+        public static bool operator ==(NotNull<T> x, T y) => (object)x != null && x.Equals(y);
 
         public static bool operator !=(T x, NotNull<T> y) => !(x == y);
-        public static bool operator ==(T x, NotNull<T> y) => (object)y != null && y.Value.Equals(x);
+        public static bool operator ==(T x, NotNull<T> y) => (object)y != null && y.Equals(x);
     }
 
     /// <summary>
@@ -75,9 +76,9 @@ namespace ContainerExpressions.Containers
 
         public static implicit operator NN<T>(T value) => new NN<T>(value);
 
-        public bool Equals(NN<T> other) => Value.Equals(other.Value);
+        public bool Equals(NN<T> other) => other.Equals(Value);
 
-        public bool Equals(T value) => value != null && Value.Equals(value);
+        public bool Equals(T value) => value != null && EqualityComparer<T>.Default.Equals(Value, value);
 
         public override bool Equals(object obj) => obj != null && obj is NN<T> notNull && Equals(notNull);
 
@@ -89,10 +90,10 @@ namespace ContainerExpressions.Containers
         public static bool operator ==(NN<T> x, NN<T> y) => x.Equals(y);
 
         public static bool operator !=(NN<T> x, T y) => !(x == y);
-        public static bool operator ==(NN<T> x, T y) => y != null && x.Value.Equals(y);
+        public static bool operator ==(NN<T> x, T y) => y != null && x.Equals(y);
 
         public static bool operator !=(T x, NN<T> y) => !(x == y);
-        public static bool operator ==(T x, NN<T> y) => x != null && y.Value.Equals(x);
+        public static bool operator ==(T x, NN<T> y) => x != null && y.Equals(x);
     }
 
     public static class NN
