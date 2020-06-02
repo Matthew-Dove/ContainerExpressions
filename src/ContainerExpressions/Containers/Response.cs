@@ -54,7 +54,7 @@ namespace ContainerExpressions.Containers
         {
             if (!IsValid) throw new InvalidOperationException("Cannot access the value if the container is not valid.");
             if (_value == null) return value == null;
-            return Value.Equals(value);
+            return EqualityComparer<T>.Default.Equals(_value, value);
         }
 
         /// <summary>Compares obj if it is of type Response<T>, or of type T. Throws InvalidOperationException if Response is in an invalid state, and obj is a T value.</summary>
