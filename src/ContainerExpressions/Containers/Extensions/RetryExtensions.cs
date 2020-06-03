@@ -8,6 +8,58 @@ namespace ContainerExpressions.Containers
     /// <summary>Utility methods for the Retry Container.</summary>
     public static class RetryExtensions
     {
+        #region () => Response
+
+        /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
+        public static Func<Response> Retry(this Func<Response> func) => () => Repeat.Execute(func, RetryOptions.Create());
+
+        /// <summary>Execute a function, and retries (using exponential default values) if the Response is invalid.</summary>
+        public static Func<Response> RetryExponential(this Func<Response> func) => () => Repeat.Execute(func, RetryOptions.CreateExponential());
+
+        /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
+        public static Func<Response> Retry(this Func<Response> func, RetryOptions options) => () => Repeat.Execute(func, options);
+
+        #endregion
+
+        #region T => Response
+
+        /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
+        public static Func<T, Response> Retry<T>(this Func<T, Response> func) => x => Repeat.Execute(x, func, RetryOptions.Create());
+
+        /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
+        public static Func<T, Response> RetryExponential<T>(this Func<T, Response> func) => x => Repeat.Execute(x, func, RetryOptions.CreateExponential());
+
+        /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
+        public static Func<T, Response> Retry<T>(this Func<T, Response> func, RetryOptions options) => x => Repeat.Execute(x, func, options);
+
+        #endregion
+
+        #region () => Task<Response>
+
+        /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
+        public static Func<Task<Response>> RetryAsync(this Func<Task<Response>> func) => () => Repeat.ExecuteAsync(func, RetryOptions.Create());
+
+        /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
+        public static Func<Task<Response>> RetryExponentialAsync(this Func<Task<Response>> func) => () => Repeat.ExecuteAsync(func, RetryOptions.CreateExponential());
+
+        /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
+        public static Func<Task<Response>> RetryAsync(this Func<Task<Response>> func, RetryOptions options) => () => Repeat.ExecuteAsync(func, options);
+
+        #endregion
+
+        #region T => Task<Response>
+
+        /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
+        public static Func<T, Task<Response>> RetryAsync<T>(this Func<T, Task<Response>> func) => x => Repeat.ExecuteAsync(x, func, RetryOptions.Create());
+
+        /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
+        public static Func<T, Task<Response>> RetryExponentialAsync<T>(this Func<T, Task<Response>> func) => x => Repeat.ExecuteAsync(x, func, RetryOptions.CreateExponential());
+
+        /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
+        public static Func<T, Task<Response>> RetryAsync<T>(this Func<T, Task<Response>> func, RetryOptions options) => x => Repeat.ExecuteAsync(x, func, options);
+
+        #endregion
+
         #region () => Response<T>
 
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>

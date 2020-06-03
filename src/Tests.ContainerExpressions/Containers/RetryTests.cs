@@ -144,5 +144,127 @@ namespace Tests.ContainerExpressions.Containers
 
             Assert.AreEqual(delay, result);
         }
+
+        [TestMethod]
+        public void Response_Retry()
+        {
+            var retries = 0;
+            Func<Response> response = () => { retries++;  return new Response(); };
+
+            var result = response.Retry()();
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(2, retries);
+        }
+
+        [TestMethod]
+        public void Response_RetryExponential()
+        {
+            const int max = 3;
+            var retries = 0;
+            Func<Response> response = () => { retries++; return new Response(retries == max); };
+
+            var result = response.RetryExponential()();
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(max, retries);
+        }
+
+        [TestMethod]
+        public void Response_RetryCustom()
+        {
+            const int max = 5;
+            var retries = 0;
+            Func<Response> response = () => { retries++; return new Response(); };
+
+            var result = response.Retry(RetryOptions.Create(max, 0))();
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(max + 1, retries);
+        }
+
+        [TestMethod]
+        public void Response_Retry_TArg()
+        {
+            var retries = 0;
+            Func<int, Response> response = x => { retries++; return new Response(); };
+
+            var result = response.Retry()(42);
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(2, retries);
+        }
+
+        [TestMethod]
+        public async Task Response_RetryAsync()
+        {
+            var retries = 0;
+            Func<Task<Response>> response = () => { retries++; return Task.FromResult(new Response()); };
+
+            var result = await response.RetryAsync()();
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(2, retries);
+        }
+
+        [TestMethod]
+        public async Task Response_RetryAsync_TArg()
+        {
+            var retries = 0;
+            Func<int, Task<Response>> response = x => { retries++; return Task.FromResult(new Response()); };
+
+            var result = await response.RetryAsync()(42);
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(2, retries);
+        }
+
+        [TestMethod]
+        public void ResponseT_Retry()
+        {
+            var retries = 0;
+            Func<Response<int>> response = () => { retries++; return new Response<int>(); };
+
+            var result = response.Retry()();
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(2, retries);
+        }
+
+        [TestMethod]
+        public void ResponseT_Retry_TArg()
+        {
+            var retries = 0;
+            Func<int, Response<string>> response = x => { retries++; return new Response<string>(); };
+
+            var result = response.Retry()(42);
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(2, retries);
+        }
+
+        [TestMethod]
+        public async Task ResponseT_RetryAsync()
+        {
+            var retries = 0;
+            Func<Task<Response<int>>> response = () => { retries++; return Task.FromResult(new Response<int>()); };
+
+            var result = await response.RetryAsync()();
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(2, retries);
+        }
+
+        [TestMethod]
+        public async Task ResponseT_RetryAsync_TArg()
+        {
+            var retries = 0;
+            Func<int, Task<Response<int>>> response = x => { retries++; return Task.FromResult(new Response<int>()); };
+
+            var result = await response.RetryAsync()(42);
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(2, retries);
+        }
     }
 }
