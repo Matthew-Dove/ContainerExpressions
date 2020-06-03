@@ -235,7 +235,29 @@ namespace Tests.ContainerExpressions.Containers
         #region Async
 
         [TestMethod]
-        public async Task ValidResponseTask_SuccesIsLogged()
+        public async Task Async_T_LogsMessage()
+        {
+            var message = "story";
+
+            var response = await Task.FromResult(true).LogAsync(message);
+
+            Assert.AreEqual(true, response);
+            Assert.AreEqual(1, _messages.Count);
+            Assert.AreEqual(message, _messages[0]);
+        }
+
+        [TestMethod]
+        public async Task Async_TFunc_LogsMessage()
+        {
+            var response = await Task.FromResult("Hello").LogAsync(x => $"{x} World!");
+
+            Assert.AreEqual("Hello", response);
+            Assert.AreEqual(1, _messages.Count);
+            Assert.AreEqual("Hello World!", _messages[0]);
+        }
+
+        [TestMethod]
+        public async Task Async_ValidResponseTask_SuccesIsLogged()
         {
             var success = "All good";
             var response = await Task.FromResult(new Response(true)).LogAsync(success);
@@ -245,7 +267,7 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        public async Task ChainOfTasksAreLogged()
+        public async Task Async_ChainOfTasksAreLogged()
         {
             string success = "All good";
             Func<Task<Response<int>>> identityAsync = () => Task.FromResult(Response.Create(0));

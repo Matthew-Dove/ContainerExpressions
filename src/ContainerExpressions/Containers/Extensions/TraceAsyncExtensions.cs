@@ -6,6 +6,20 @@ namespace ContainerExpressions.Containers
     /// <summary>Extensions for the Trace Container.</summary>
     public static class TraceAsyncExtensions
     {
+        #region T
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="message">The message to trace.</param>
+        /// <returns>The initial value.</returns>
+        public static Task<T> LogAsync<T>(this Task<T> value, string message) => value.ContinueWith(x => { Trace.Log(message); return x.Result; });
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="format">The message to trace.</param>
+        /// <returns>The initial value.</returns>
+        public static Task<T> LogAsync<T>(this Task<T> value, Func<T, string> format) => value.ContinueWith(x => { Trace.Log(format(x.Result)); return x.Result; });
+
+        #endregion
+
         #region Response
 
         /// <summary>Logs a trace step.</summary>
@@ -42,6 +56,7 @@ namespace ContainerExpressions.Containers
                 {
                     Trace.Log(fail);
                 }
+
                 return x.Result;
             });
         }
@@ -203,6 +218,7 @@ namespace ContainerExpressions.Containers
                 {
                     Trace.Log(success(x, y.Result));
                 }
+
                 return y.Result;
             });
 
@@ -222,6 +238,7 @@ namespace ContainerExpressions.Containers
                 {
                     Trace.Log(fail);
                 }
+
                 return y.Result;
             });
 
