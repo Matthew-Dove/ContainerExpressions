@@ -9,6 +9,8 @@ namespace Tests.ContainerExpressions.Containers
     [TestClass]
     public class ComposeTests
     {
+        #region Synchronous
+
         [TestMethod]
         public void Compose_Synchronous_ResponseT_2Funcs()
         {
@@ -77,6 +79,10 @@ namespace Tests.ContainerExpressions.Containers
             Assert.AreEqual(answer, result);
         }
 
+        #endregion
+
+        #region Asynchronous
+
         [TestMethod]
         public async Task Compose_Asynchronous_ResponseT_MaxFuncs()
         {
@@ -111,5 +117,7 @@ namespace Tests.ContainerExpressions.Containers
 
             Assert.IsTrue(result);
         }
+
+        #endregion
     }
 }
