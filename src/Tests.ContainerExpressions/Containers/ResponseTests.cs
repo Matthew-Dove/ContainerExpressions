@@ -1146,5 +1146,133 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         #endregion
+
+        [TestMethod]
+        public void MaybeError_DefaultCtor_IsError()
+        {
+            var maybe = new Maybe<int, string>();
+
+            Assert.IsFalse(maybe.Match(_ => true, _ => false));
+        }
+
+        [TestMethod]
+        public void MaybeError_ErrorCtor_IsError()
+        {
+            var maybe = new Maybe<int, string>();
+
+            Assert.IsFalse(maybe.Match(_ => true, _ => false));
+        }
+
+        [TestMethod]
+        public void MaybeError_ValueCtor_IsNotError()
+        {
+            var maybe = new Maybe<int, string>(0);
+
+            Assert.IsTrue(maybe.Match(_ => true, _ => false));
+        }
+
+        [TestMethod]
+        public void MaybeError_ValueCtor_ToString()
+        {
+            var answer = 42;
+
+            var maybe = new Maybe<int, string>(answer);
+
+            Assert.AreEqual(answer.ToString(), maybe.ToString());
+        }
+
+        [TestMethod]
+        public void MaybeError_ErrorCtor_ToString()
+        {
+            var answer = 42.ToString();
+
+            var maybe = new Maybe<int, string>(answer);
+
+            Assert.AreEqual(answer, maybe.ToString());
+        }
+
+        [TestMethod]
+        public void MaybeError_ResponseCtor_IsError()
+        {
+            var error = "error";
+            var response = new Response<int>();
+
+            var maybe = new Maybe<int, string>(response, error);
+
+            Assert.IsFalse(maybe.Match(_ => true, _ => false));
+            Assert.AreEqual(error, maybe.Match(x => x.ToString(), x => x));
+        }
+
+        [TestMethod]
+        public void MaybeError_ResponseCtor_IsNotError()
+        {
+            var error = "error";
+            var answer = 42;
+            var response = new Response<int>(answer);
+
+            var maybe = new Maybe<int, string>(response, error);
+
+            Assert.IsTrue(maybe.Match(_ => true, _ => false));
+            Assert.AreEqual(answer, maybe.Match(x => x, int.Parse));
+        }
+
+        [TestMethod]
+        public void MaybeError_BindValue()
+        {
+            var maybe = new Maybe<int, string>(1);
+            var bind = maybe.With(2);
+
+            var result = maybe.Bind(bind, (x, y) => maybe.With(x + y));
+
+            Assert.IsTrue(maybe.Match(x => x == 1, _ => false));
+            Assert.IsTrue(bind.Match(x => x == 2, _ => false));
+            Assert.IsTrue(result.Match(x => x == 3, _ => false));
+        }
+
+        [TestMethod]
+        public void MaybeError_BindError_FirstOnly()
+        {
+            var error = "error";
+            var maybe = new Maybe<int, string>(error);
+
+            var result = maybe.Bind(maybe.With(1), (x, y) => maybe.With(x + y));
+
+            Assert.IsTrue(result.Match(_ => false, x => x == error));
+        }
+
+        [TestMethod]
+        public void MaybeError_BindError_SecondOnly()
+        {
+            var error = "error";
+            var maybe = new Maybe<int, string>(1);
+
+            var result = maybe.Bind(maybe.With(error), (x, y) => maybe.With(x + y));
+
+            Assert.IsTrue(maybe.Match(x => x == 1, x => false));
+            Assert.IsTrue(result.Match(_ => false, x => x == error));
+        }
+
+        [TestMethod]
+        public void MaybeError_BindError_FirstAndSecond()
+        {
+            string error1 = "error1", error2 = "error2";
+            var maybe = new Maybe<int, string>(error1);
+
+            var result = maybe.Bind(maybe.With(error2), (x, y) => maybe.With(x + y));
+
+            Assert.IsTrue(maybe.Match(_ => false, x => x == error1));
+            Assert.IsTrue(result.Match(_ => false, x => x == error2));
+        }
+
+        [TestMethod]
+        public void MaybeError_Transform()
+        {
+            var maybe = new Maybe<int, string>(1);
+
+            var result = maybe.Transform(x => x + 1);
+
+            Assert.IsTrue(maybe.Match(x => x == 1, _ => false));
+            Assert.IsTrue(result.Match(x => x == 2, _ => false));
+        }
     }
 }

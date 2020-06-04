@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Containers\Extensions\" />
     <Folder Include="Expressions\Core\" />
     <Folder Include="Expressions\Models\" />
   </ItemGroup>

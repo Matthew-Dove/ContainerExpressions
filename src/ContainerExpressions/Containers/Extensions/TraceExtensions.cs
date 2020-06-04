@@ -228,5 +228,16 @@ namespace ContainerExpressions.Containers
         };
 
         #endregion
+
+        #region Maybe
+
+        public static Maybe<TValue, TError> Log<TValue, TError>(this Maybe<TValue, TError> maybe, Func<TValue, string> logValue, Func<TError, string> logError)
+        {
+            var message = maybe.Match(logValue, logError);
+            Trace.Log(message);
+            return maybe;
+        }
+
+        #endregion
     }
 }
