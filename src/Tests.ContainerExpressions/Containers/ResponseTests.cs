@@ -1238,6 +1238,7 @@ namespace Tests.ContainerExpressions.Containters
             var result = maybe.Bind(maybe.With(1), (x, y) => maybe.With(x + y));
 
             Assert.IsTrue(result.Match(_ => false, x => x == error));
+            Assert.AreEqual(result.AggregateErrors.Length, 0);
         }
 
         [TestMethod]
@@ -1250,6 +1251,7 @@ namespace Tests.ContainerExpressions.Containters
 
             Assert.IsTrue(maybe.Match(x => x == 1, x => false));
             Assert.IsTrue(result.Match(_ => false, x => x == error));
+            Assert.AreEqual(result.AggregateErrors.Length, 0);
         }
 
         [TestMethod]
@@ -1262,7 +1264,54 @@ namespace Tests.ContainerExpressions.Containters
 
             Assert.IsTrue(maybe.Match(_ => false, x => x == error1));
             Assert.IsTrue(result.Match(_ => false, x => x == error2));
+            Assert.AreEqual(maybe.AggregateErrors.Length, 0);
+            Assert.AreEqual(result.AggregateErrors.Length, 1);
+            Assert.AreEqual(result.AggregateErrors[0], error1);
         }
+
+        [TestMethod]
+        public void MaybeError_BindError_OneAggregate()
+        {
+            string error1 = "error1", error2 = "error2", error3 = "error3";
+            var maybe = new Maybe<int, string>(error1);
+
+            var result1 = maybe.Bind(maybe.With(error2), (x, y) => maybe.With(x + y));
+            var result2 = result1.Bind(maybe.With(error3), (x, y) => maybe.With(x + y));
+
+            Assert.IsTrue(maybe.Match(_ => false, x => x == error1));
+            Assert.IsTrue(result1.Match(_ => false, x => x == error2));
+            Assert.IsTrue(result2.Match(_ => false, x => x == error3));
+            Assert.AreEqual(maybe.AggregateErrors.Length, 0);
+            Assert.AreEqual(result1.AggregateErrors.Length, 1);
+            Assert.AreEqual(result1.AggregateErrors[0], error1);
+            Assert.AreEqual(result2.AggregateErrors.Length, 2);
+            Assert.AreEqual(result2.AggregateErrors[0], error1);
+            Assert.AreEqual(result2.AggregateErrors[1], error2);
+        }
+
+        [TestMethod]
+        public void MaybeError_BindError_BothAggregate()
+        {
+            string error1 = "error1", error2 = "error2", error3 = "error3", error4 = "error4";
+
+            var maybe1 = new Maybe<int, string>(error1);
+            var result1 = maybe1.Bind(maybe1.With(error2), (x, y) => maybe1.With(x + y));
+
+            var maybe2 = new Maybe<int, string>(error3);
+            var result2 = maybe2.Bind(maybe2.With(error4), (x, y) => maybe2.With(x + y));
+
+            var aggregate = result1.Bind(result2, (x, y) => new Maybe<int, string>(x + y));
+
+            Assert.IsTrue(aggregate.Match(_ => false, x => x == error4));
+            Assert.AreEqual(aggregate.AggregateErrors[0], error1);
+            Assert.AreEqual(aggregate.AggregateErrors[1], error2);
+            Assert.AreEqual(aggregate.AggregateErrors[2], error3);
+        }
+
+
+
+
+
 
         [TestMethod]
         public void MaybeError_Transform()

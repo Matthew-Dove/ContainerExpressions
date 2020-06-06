@@ -26,6 +26,9 @@ namespace ContainerExpressions.Containers
 
     public readonly struct Maybe<TValue, TError>
     {
+        public TError[] AggregateErrors { get; }
+        private readonly static TError[] _emptyAggregateErrors = new TError[0];
+
         private readonly bool _hasValue;
         private readonly TValue _value;
         private readonly TError _error;
@@ -35,6 +38,7 @@ namespace ContainerExpressions.Containers
             _value = value;
             _error = default;
             _hasValue = true;
+            AggregateErrors = _emptyAggregateErrors;
         }
 
         public Maybe(TError error)
@@ -42,6 +46,7 @@ namespace ContainerExpressions.Containers
             _value = default;
             _error = error;
             _hasValue = false;
+            AggregateErrors = _emptyAggregateErrors;
         }
 
         public Maybe(Response<TValue> value, TError error)
@@ -51,12 +56,14 @@ namespace ContainerExpressions.Containers
                 _value = value;
                 _error = default;
                 _hasValue = true;
+                AggregateErrors = _emptyAggregateErrors;
             }
             else
             {
                 _value = default;
                 _error = error;
                 _hasValue = false;
+                AggregateErrors = _emptyAggregateErrors;
             }
         }
 
@@ -69,20 +76,39 @@ namespace ContainerExpressions.Containers
                 _value = result.value;
                 _error = default;
                 _hasValue = true;
+                AggregateErrors = _emptyAggregateErrors;
             }
             else
             {
                 _value = default;
                 _error = result.error;
                 _hasValue = false;
+                AggregateErrors = _emptyAggregateErrors;
             }
         }
 
-        private Maybe(TError error, TError bindError)
+        private Maybe(TError error, TError[] aggregateErrors, TError bindError, TError[] bindAggregateErrors)
         {
             _value = default;
             _error = bindError;
             _hasValue = false;
+
+            int length = (aggregateErrors?.Length ?? 0), bindLength = (bindAggregateErrors?.Length ?? 0), totalLength = length + bindLength + 1;
+            var errors = new TError[totalLength];
+
+            int i;
+            for (i = 0; i < length; i++)
+            {
+                errors[i] = aggregateErrors[i];
+            }
+            errors[i] = error;
+
+            for (i = 0; i < bindLength; i++)
+            {
+                errors[i + length + 1] = bindAggregateErrors[i];
+            }
+
+            AggregateErrors = errors;
         }
 
         public TMatch Match<TMatch>(Func<TValue, TMatch> getValue, Func<TError, TMatch> getError) => _hasValue ? getValue(_value) : getError(_error);
@@ -92,7 +118,7 @@ namespace ContainerExpressions.Containers
         public Maybe<TResult, TError> Bind<TBind, TResult>(Maybe<TBind, TError> maybe, Func<TValue, TBind, Maybe<TResult, TError>> bind)
         {
             if (_hasValue && maybe._hasValue) return bind(_value, maybe._value);
-            if (!_hasValue && !maybe._hasValue) return new Maybe<TResult, TError>(_error, maybe._error);
+            if (!_hasValue && !maybe._hasValue) return new Maybe<TResult, TError>(_error, AggregateErrors, maybe._error, maybe.AggregateErrors);
             if (!maybe._hasValue) return new Maybe<TResult, TError>(maybe._error);
             return new Maybe<TResult, TError>(_error);
         }
