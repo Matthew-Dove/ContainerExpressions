@@ -115,31 +115,6 @@ namespace ContainerExpressions.Containers
 
         public Task<TMatch> MatchAsync<TMatch>(Func<TValue, Task<TMatch>> getValue, Func<TError, TMatch> getError) => _hasValue ? getValue(_value) : Task.FromResult(getError(_error));
 
-        public Maybe<TResult, TError> Bind<TBind, TResult>(Maybe<TBind, TError> maybe, Func<TValue, TBind, Maybe<TResult, TError>> bind)
-        {
-            if (_hasValue && maybe._hasValue) return bind(_value, maybe._value);
-            if (!_hasValue && !maybe._hasValue) return new Maybe<TResult, TError>(_error, AggregateErrors, maybe._error, maybe.AggregateErrors);
-            if (!maybe._hasValue) return new Maybe<TResult, TError>(maybe._error);
-            return new Maybe<TResult, TError>(_error);
-        }
-
-        public Task<Maybe<TResult, TError>> BindAsync<TBind, TResult>(Maybe<TBind, TError> maybe, Func<TValue, TBind, Task<Maybe<TResult, TError>>> bind)
-        {
-            if (_hasValue && maybe._hasValue) return bind(_value, maybe._value);
-            if (!_hasValue && !maybe._hasValue) return Task.FromResult(new Maybe<TResult, TError>(_error, AggregateErrors, maybe._error, maybe.AggregateErrors));
-            if (!maybe._hasValue) return Task.FromResult(new Maybe<TResult, TError>(maybe._error));
-            return Task.FromResult(new Maybe<TResult, TError>(_error));
-        }
-
-        public async Task<Maybe<TResult, TError>> BindAsync<TBind, TResult>(Task<Maybe<TBind, TError>> maybe, Func<TValue, TBind, Task<Maybe<TResult, TError>>> bind)
-        {
-            var result = await maybe;
-            if (_hasValue && result._hasValue) return await bind(_value, result._value);
-            if (!_hasValue && !result._hasValue) return new Maybe<TResult, TError>(_error, AggregateErrors, result._error, result.AggregateErrors);
-            if (!result._hasValue) return new Maybe<TResult, TError>(result._error);
-            return new Maybe<TResult, TError>(_error);
-        }
-
         public Maybe<TResult, TError> Transform<TResult>(Func<TValue, TResult> transform) => Match(x => new Maybe<TResult, TError>(transform(x)), x => new Maybe<TResult, TError>(x));
 
         public Task<Maybe<TResult, TError>> TransformAsync<TResult>(Func<TValue, Task<TResult>> transform) => Match(x => transform(x).ContinueWith(y => new Maybe<TResult, TError>(y.Result)), x => Task.FromResult(new Maybe<TResult, TError>(x)));
@@ -171,14 +146,37 @@ namespace ContainerExpressions.Containers
         public static implicit operator Maybe<TValue, TError>(TError error) => new Maybe<TValue, TError>(error);
     }
 
-    //public static class MaybeExtensions
-    //{
-    //    public static Maybe<TResult, TError> Bind<TValue, TError, TBind, TResult>(this Maybe<TValue, TError> value, Maybe<TBind, TError> maybe, Func<TValue, TBind, Maybe<TResult, TError>> bind)
-    //    {
-    //        if (value._hasValue && maybe._hasValue) return bind(value._value, maybe._value);
-    //        if (!value._hasValue && !maybe._hasValue) return new Maybe<TResult, TError>(value._error, value.AggregateErrors, maybe._error, maybe.AggregateErrors);
-    //        if (!maybe._hasValue) return new Maybe<TResult, TError>(maybe._error);
-    //        return new Maybe<TResult, TError>(value._error);
-    //    }
-    //}
+    public static class MaybeExtensions
+    {
+        public static Maybe<TResult, TError> Bind<TValue, TError, TBind, TResult>(this Maybe<TValue, TError> value, Maybe<TBind, TError> maybe, Func<TValue, TBind, Maybe<TResult, TError>> bind)
+        {
+            if (value._hasValue && maybe._hasValue) return bind(value._value, maybe._value);
+            if (!value._hasValue && !maybe._hasValue) return new Maybe<TResult, TError>(value._error, value.AggregateErrors, maybe._error, maybe.AggregateErrors);
+            if (!maybe._hasValue) return new Maybe<TResult, TError>(maybe._error);
+            return new Maybe<TResult, TError>(value._error);
+        }
+
+        public static Task<Maybe<TResult, TError>> BindAsync<TValue, TError, TBind, TResult>(this Maybe<TValue, TError> value, Maybe<TBind, TError> maybe, Func<TValue, TBind, Task<Maybe<TResult, TError>>> bind)
+        {
+            if (value._hasValue && maybe._hasValue) return bind(value._value, maybe._value);
+            if (!value._hasValue && !maybe._hasValue) return Task.FromResult(new Maybe<TResult, TError>(value._error, value.AggregateErrors, maybe._error, maybe.AggregateErrors));
+            if (!maybe._hasValue) return Task.FromResult(new Maybe<TResult, TError>(maybe._error));
+            return Task.FromResult(new Maybe<TResult, TError>(value._error));
+        }
+
+        public static Task<Maybe<TResult, TError>> BindAsync<TValue, TError, TBind, TResult>(this Maybe<TValue, TError> value, Task<Maybe<TBind, TError>> maybe, Func<TValue, TBind, Task<Maybe<TResult, TError>>> bind)
+        {
+            return maybe.ContinueWith(x => BindAsync(value, x.Result, bind)).Unwrap();
+        }
+
+        public static Task<Maybe<TResult, TError>> BindAsync<TValue, TError, TBind, TResult>(this Task<Maybe<TValue, TError>> value, Maybe<TBind, TError> maybe, Func<TValue, TBind, Task<Maybe<TResult, TError>>> bind)
+        {
+            return value.ContinueWith(x => BindAsync(x.Result, maybe, bind)).Unwrap();
+        }
+
+        public static Task<Maybe<TResult, TError>> BindAsync<TValue, TError, TBind, TResult>(this Task<Maybe<TValue, TError>> value, Task<Maybe<TBind, TError>> maybe, Func<TValue, TBind, Task<Maybe<TResult, TError>>> bind)
+        {
+            return Task.WhenAll(value, maybe).ContinueWith(_ => BindAsync(value.Result, maybe.Result, bind)).Unwrap();
+        }
+    }
 }
