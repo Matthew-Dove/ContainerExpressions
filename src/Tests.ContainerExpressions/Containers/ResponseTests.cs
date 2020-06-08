@@ -1147,6 +1147,8 @@ namespace Tests.ContainerExpressions.Containters
 
         #endregion
 
+        #region Maybe Error
+
         [TestMethod]
         public void MaybeError_DefaultCtor_IsError()
         {
@@ -1230,7 +1232,7 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
-        public void MaybeError_BindError_FirstOnly()
+        public void MaybeError_Bind_FirstOnly()
         {
             var error = "error";
             var maybe = new Maybe<int, string>(error);
@@ -1242,7 +1244,7 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
-        public void MaybeError_BindError_SecondOnly()
+        public void MaybeError_Bind_SecondOnly()
         {
             var error = "error";
             var maybe = new Maybe<int, string>(1);
@@ -1255,7 +1257,7 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
-        public void MaybeError_BindError_FirstAndSecond()
+        public void MaybeError_Bind_FirstAndSecond()
         {
             string error1 = "error1", error2 = "error2";
             var maybe = new Maybe<int, string>(error1);
@@ -1270,7 +1272,7 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
-        public void MaybeError_BindError_OneAggregate()
+        public void MaybeError_Bind_OneAggregate()
         {
             string error1 = "error1", error2 = "error2", error3 = "error3";
             var maybe = new Maybe<int, string>(error1);
@@ -1290,7 +1292,7 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
-        public void MaybeError_BindError_BothAggregate()
+        public void MaybeError_Bind_BothAggregate()
         {
             string error1 = "error1", error2 = "error2", error3 = "error3", error4 = "error4";
 
@@ -1308,20 +1310,164 @@ namespace Tests.ContainerExpressions.Containters
             Assert.AreEqual(aggregate.AggregateErrors[2], error3);
         }
 
+        [TestMethod]
+        public async Task MaybeError_BindAsync_BothNotValid()
+        {
+            var first = new Maybe<int, string>("error1");
+            var second = new Maybe<int, string>("error2");
 
+            var result = await first.BindAsync(second, (x, y) => Task.FromResult(new Maybe<int, string>(x + y)));
 
+            Assert.AreEqual("error2", result.Match(_ => string.Empty, x => x));
+            Assert.AreEqual("error1", result.AggregateErrors[0]);
+        }
 
+        [TestMethod]
+        public async Task MaybeError_BindAsync_FirstNotValid()
+        {
+            var first = new Maybe<int, string>("error1");
+            var second = new Maybe<int, string>(1);
 
+            var result = await first.BindAsync(second, (x, y) => Task.FromResult(new Maybe<int, string>(x + y)));
+
+            Assert.AreEqual("error1", result.Match(_ => string.Empty, x => x));
+            Assert.AreEqual(1, second.Match(x => x, _ => 0));
+        }
+
+        [TestMethod]
+        public async Task MaybeError_BindAsync_SecondNotValid()
+        {
+            var first = new Maybe<int, string>(1);
+            var second = new Maybe<int, string>("error1");
+
+            var result = await first.BindAsync(second, (x, y) => Task.FromResult(new Maybe<int, string>(x + y)));
+
+            Assert.AreEqual("error1", result.Match(_ => string.Empty, x => x));
+            Assert.AreEqual(1, first.Match(x => x, _ => 0));
+        }
+
+        [TestMethod]
+        public async Task MaybeTaskError_BindAsync_BothNotValid()
+        {
+            var first = new Maybe<int, string>("error1");
+            var second = Task.FromResult(new Maybe<int, string>("error2"));
+
+            var result = await first.BindAsync(second, (x, y) => Task.FromResult(new Maybe<int, string>(x + y)));
+
+            Assert.AreEqual("error2", result.Match(_ => string.Empty, x => x));
+            Assert.AreEqual("error1", result.AggregateErrors[0]);
+        }
+
+        [TestMethod]
+        public async Task MaybeTaskError_BindAsync_FirstNotValid()
+        {
+            var first = new Maybe<int, string>("error1");
+            var second = Task.FromResult(new Maybe<int, string>(1));
+
+            var result = await first.BindAsync(second, (x, y) => Task.FromResult(new Maybe<int, string>(x + y)));
+
+            Assert.AreEqual("error1", result.Match(_ => string.Empty, x => x));
+        }
+
+        [TestMethod]
+        public async Task MaybeTaskError_BindAsync_SecondNotValid()
+        {
+            var first = new Maybe<int, string>(1);
+            var second = Task.FromResult(new Maybe<int, string>("error1"));
+
+            var result = await first.BindAsync(second, (x, y) => Task.FromResult(new Maybe<int, string>(x + y)));
+
+            Assert.AreEqual("error1", result.Match(_ => string.Empty, x => x));
+            Assert.AreEqual(1, first.Match(x => x, _ => 0));
+        }
 
         [TestMethod]
         public void MaybeError_Transform()
         {
+            var wasCalled = false;
+            var maybe = new Maybe<int, string>("error");
+
+            var result = maybe.Transform(x => { wasCalled = true; return x + 1; });
+
+            Assert.IsFalse(wasCalled);
+            Assert.IsTrue(maybe.Match(_ => false, x => x == "error"));
+            Assert.IsTrue(result.Match(_ => false, x => x == "error"));
+        }
+
+        #endregion
+
+        #region Maybe Value
+
+        [TestMethod]
+        public void MaybeValue_Transform()
+        {
+            var wasCalled = false;
             var maybe = new Maybe<int, string>(1);
 
-            var result = maybe.Transform(x => x + 1);
+            var result = maybe.Transform(x => { wasCalled = true; return x + 1; });
 
+            Assert.IsTrue(wasCalled);
             Assert.IsTrue(maybe.Match(x => x == 1, _ => false));
             Assert.IsTrue(result.Match(x => x == 2, _ => false));
         }
+
+        [TestMethod]
+        public async Task MaybeValue_BindAsync_BothAreValid()
+        {
+            var first = new Maybe<int, string>(1);
+            var second = new Maybe<int, string>(2);
+
+            var result = await first.BindAsync(second, (x, y) => Task.FromResult(new Maybe<int, string>(x + y)));
+
+            Assert.AreEqual(3, result.Match(x => x, _ => 0));
+        }
+
+        [TestMethod]
+        public async Task MaybeTaskValue_BindAsync_BothAreValid()
+        {
+            var first = new Maybe<int, string>(1);
+            var second = Task.FromResult(new Maybe<int, string>(2));
+
+            var result = await first.BindAsync(second, (x, y) => Task.FromResult(new Maybe<int, string>(x + y)));
+
+            Assert.AreEqual(3, result.Match(x => x, _ => 0));
+        }
+
+        [TestMethod]
+        public void MaybeValue_Bind_FirstAndSecond()
+        {
+            var maybe = new Maybe<int, string>(1);
+
+            var result = maybe.Bind(maybe.With(1), (x, y) => maybe.With(x + y));
+
+            Assert.IsTrue(result.Match(x => x == 2, _ => false));
+        }
+
+        [TestMethod]
+        public void MaybeValue_Bind_OneAggregate()
+        {
+            var maybe = new Maybe<int, string>(1);
+
+            var result1 = maybe.Bind(maybe.With(1), (x, y) => maybe.With(x + y));
+            var result2 = result1.Bind(maybe.With(1), (x, y) => maybe.With(x + y));
+
+            Assert.IsTrue(result2.Match(x => x == 3, _ => false));
+        }
+
+        [TestMethod]
+        public void MaybeValue_Bind_BothAggregate()
+        {
+            var maybe1 = new Maybe<int, string>(1);
+            var result1 = maybe1.Bind(maybe1.With(1), (x, y) => maybe1.With(x + y));
+
+            var maybe2 = new Maybe<int, string>(1);
+            var result2 = maybe2.Bind(maybe2.With(1), (x, y) => maybe2.With(x + y));
+
+            var aggregate = result1.Bind(result2, (x, y) => new Maybe<int, string>(x + y));
+
+            Assert.IsTrue(aggregate.Match(x => x == 4, _ => false));
+        }
+
+        #endregion
     }
 }
