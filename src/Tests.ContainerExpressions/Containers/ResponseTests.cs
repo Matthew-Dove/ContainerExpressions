@@ -1347,6 +1347,41 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
+        public void MaybeError_BindAsync_FirstNotValid_DifferentErrorModels()
+        {
+            var first = new Maybe<int, (int, string)>((99, "error1"));
+            var second = new Maybe<int, string>(1);
+
+            var result = first.Bind(second, x => $"Code: {x.Item1}, Message: {x.Item2}", (x, y) => new Maybe<int, string>(x + y));
+
+            Assert.AreEqual("Code: 99, Message: error1", result.Match(_ => string.Empty, x => x));
+        }
+
+        [TestMethod]
+        public void MaybeError_Bind_FirstNotValid_DifferentErrorMModels_TupleItem1()
+        {
+            var error = (99, "error1");
+            var first = new Maybe<int, (int, string)>(error);
+            var second = new Maybe<int, string>(1);
+
+            var result = first.Bind(second, (x, y) => new Maybe<int, ((int, string), string)>(x + y));
+
+            Assert.AreEqual(error, result.Match(_ => default, x => x.Item1));
+        }
+
+        [TestMethod]
+        public void MaybeError_Bind_SecondNotValid_DifferentErrorMModels_TupleItem2()
+        {
+            var error = "error1";
+            var first = new Maybe<int, (int, string)>(1);
+            var second = new Maybe<int, string>(error);
+
+            var result = first.Bind(second, (x, y) => new Maybe<int, ((int, string), string)>(x + y));
+
+            Assert.AreEqual(error, result.Match(_ => default, x => x.Item2));
+        }
+
+        [TestMethod]
         public async Task MaybeTaskError_BindAsync_BothNotValid()
         {
             var first = new Maybe<int, string>("error1");
@@ -1379,6 +1414,17 @@ namespace Tests.ContainerExpressions.Containters
 
             Assert.AreEqual("error1", result.Match(_ => string.Empty, x => x));
             Assert.AreEqual(1, first.Match(x => x, _ => 0));
+        }
+
+        [TestMethod]
+        public async Task MaybeTaskError_BindAsync_FirstNotValid_DifferentErrorModels()
+        {
+            var first = new Maybe<int, (int, string)>((99, "error1"));
+            var second = Task.FromResult(new Maybe<int, string>(1));
+
+            var result = await first.BindAsync(second, x => $"Code: {x.Item1}, Message: {x.Item2}", (x, y) => Task.FromResult(new Maybe<int, string>(x + y)));
+
+            Assert.AreEqual("Code: 99, Message: error1", result.Match(_ => string.Empty, x => x));
         }
 
         [TestMethod]
