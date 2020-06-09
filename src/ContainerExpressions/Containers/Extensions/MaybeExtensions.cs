@@ -33,7 +33,15 @@ namespace ContainerExpressions.Containers
 
         public static TResult Match<TValue, TError, TResult>(this Maybe<TValue, TError> maybe, Func<TValue, TResult> getValue, Func<TError, TResult> getError) => maybe._hasValue ? getValue(maybe._value) : getError(maybe._error);
 
+        public static TResult Match<TValue, TError, TResult>(this Maybe<TValue, TError> maybe, Func<TValue, TResult> getValue, Func<TError, TError[], TResult> getError) => maybe._hasValue ? getValue(maybe._value) : getError(maybe._error, maybe.AggregateErrors);
+
         public static Task<TResult> MatchAsync<TValue, TError, TResult>(this Maybe<TValue, TError> maybe, Func<TValue, Task<TResult>> getValue, Func<TError, TResult> getError) => maybe._hasValue ? getValue(maybe._value) : Task.FromResult(getError(maybe._error));
+
+        public static Task<TResult> MatchAsync<TValue, TError, TResult>(this Maybe<TValue, TError> maybe, Func<TValue, Task<TResult>> getValue, Func<TError, TError[], TResult> getError) => maybe._hasValue ? getValue(maybe._value) : Task.FromResult(getError(maybe._error, maybe.AggregateErrors));
+
+        public static Task<TResult> MatchAsync<TValue, TError, TResult>(this Task<Maybe<TValue, TError>> maybe, Func<TValue, Task<TResult>> getValue, Func<TError, TResult> getError) => maybe.ContinueWith(x => x.Result._hasValue ? getValue(x.Result._value) : Task.FromResult(getError(x.Result._error))).Unwrap();
+
+        public static Task<TResult> MatchAsync<TValue, TError, TResult>(this Task<Maybe<TValue, TError>> maybe, Func<TValue, Task<TResult>> getValue, Func<TError, TError[], TResult> getError) => maybe.ContinueWith(x => x.Result._hasValue ? getValue(x.Result._value) : Task.FromResult(getError(x.Result._error, x.Result.AggregateErrors))).Unwrap();
 
         #endregion
 
@@ -42,6 +50,10 @@ namespace ContainerExpressions.Containers
         public static Maybe<TResult, TError> Transform<TValue, TError, TResult>(this Maybe<TValue, TError> maybe, Func<TValue, TResult> transform) => maybe.Match(x => new Maybe<TResult, TError>(transform(x)), x => new Maybe<TResult, TError>(x));
 
         public static Task<Maybe<TResult, TError>> TransformAsync<TValue, TError, TResult>(this Maybe<TValue, TError> maybe, Func<TValue, Task<TResult>> transform) => maybe.Match(x => transform(x).ContinueWith(y => new Maybe<TResult, TError>(y.Result)), x => Task.FromResult(new Maybe<TResult, TError>(x)));
+
+        public static Task<Maybe<TResult, TError>> TransformAsync<TValue, TError, TResult>(this Task<Maybe<TValue, TError>> maybe, Func<TValue, TResult> transform) => maybe.ContinueWith(x => x.Result.Match(y => new Maybe<TResult, TError>(transform(y)), y => new Maybe<TResult, TError>(y)));
+
+        public static Task<Maybe<TResult, TError>> TransformAsync<TValue, TError, TResult>(this Task<Maybe<TValue, TError>> maybe, Func<TValue, Task<TResult>> transform) => maybe.ContinueWith(x => x.Result.Match(y => transform(y).ContinueWith(z => new Maybe<TResult, TError>(z.Result)), y => Task.FromResult(new Maybe<TResult, TError>(y)))).Unwrap();
 
         #endregion
 
