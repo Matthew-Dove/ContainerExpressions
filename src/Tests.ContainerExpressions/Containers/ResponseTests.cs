@@ -1428,6 +1428,31 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
+        public async Task MaybeError_Bind_FirstAndSecondMaybeIsTask_TupleErrorModel()
+        {
+            var first = Task.FromResult(new Maybe<int, string>("error"));
+            var second = Task.FromResult(new Maybe<decimal, byte>(3.0M));
+            Func<int, decimal, Task<Maybe<double, (string, byte)>>> func = (x, y) => Task.FromResult(new Maybe<double, (string, byte)>((double)(x / y)));
+
+            var result = await first.BindAsync(second, func);
+
+            Assert.IsTrue(result.Match(_ => false, x => x.Item1 == "error"));
+        }
+
+        [TestMethod]
+        public async Task MaybeError_Bind_FirstAndSecondMaybeIsTask_ErrorModelConversion()
+        {
+            var first = Task.FromResult(new Maybe<int, string>("128"));
+            var second = Task.FromResult(new Maybe<decimal, byte>(3.0M));
+            Func<string, byte> convert = x => byte.Parse(x);
+            Func<int, decimal, Task<Maybe<double, byte>>> func = (x, y) => Task.FromResult(new Maybe<double, byte>((double)(x / y)));
+
+            var result = await first.BindAsync(second, convert, func);
+
+            Assert.IsTrue(result.Match(_ => false, x => x == 128));
+        }
+
+        [TestMethod]
         public void MaybeError_Transform()
         {
             var wasCalled = false;
@@ -1548,6 +1573,107 @@ namespace Tests.ContainerExpressions.Containters
             var result = await first.BindAsync(second, func);
 
             Assert.AreEqual((double)(2 / 3M), result.Match(x => x, _ => 0D));
+        }
+
+        #endregion
+
+        #region Maybe Miscellaneous
+
+        [TestMethod]
+        public void Maybe_Create_Value()
+        {
+            var value = 42;
+
+            var result = Maybe.Value(value).Error<string>();
+
+            Assert.IsTrue(result.Match(x => x == value, _ => false));
+        }
+
+        [TestMethod]
+        public void Maybe_Create_Error()
+        {
+            var error = "error";
+
+            var result = Maybe.Value<int>().Error(error);
+
+            Assert.IsTrue(result.Match(_ => false, x => x == error));
+        }
+
+        [TestMethod]
+        public void Maybe_GetValueOrDefault()
+        {
+            var answer = 42;
+            var maybe = Maybe.Value(answer).Error<string>();
+
+            var result = maybe.GetValueOrDefault(1);
+
+            Assert.AreEqual(answer, result);
+        }
+
+        [TestMethod]
+        public void Maybe_GetValueOrDefault_Invalid()
+        {
+            var @default = 1;
+            var maybe = Maybe.Value<int>().Error("error");
+
+            var result = maybe.GetValueOrDefault(@default);
+
+            Assert.AreEqual(@default, result);
+        }
+
+        [TestMethod]
+        public void Maybe_With_Response()
+        {
+            var response = new Response<int>(42);
+            var maybe = Maybe.Create<int, string>();
+
+            var result = maybe.With(response, "error");
+
+            Assert.AreEqual(response, result.Match(x => x, _ => new Response<int>()));
+        }
+
+        [TestMethod]
+        public void Maybe_With_Response_Invalid()
+        {
+            var response = new Response<int>();
+            var maybe = Maybe.Create<int, string>();
+
+            var result = maybe.With(response, "error");
+
+            Assert.AreEqual("error", result.Match(_ => string.Empty, x => x));
+        }
+
+        [TestMethod]
+        public void Maybe_With_Either()
+        {
+            var either = new Either<int, string>(42);
+            var maybe = Maybe.Create<int, string>();
+
+            var result = maybe.With(either);
+
+            Assert.AreEqual(either.Match(x => x, _ => -1), result.Match(x => x, _ => 1));
+        }
+
+        [TestMethod]
+        public void Maybe_With_Value()
+        {
+            var value = 42;
+            var maybe = Maybe.Create<int, string>();
+
+            var result = maybe.With(value);
+
+            Assert.AreEqual(value, result.Match(x => x, _ => 0));
+        }
+
+        [TestMethod]
+        public void Maybe_With_Error()
+        {
+            var error = "error";
+            var maybe = Maybe.Create<int, string>();
+
+            var result = maybe.With(error);
+
+            Assert.AreEqual(error, result.Match(_ => string.Empty, x => x));
         }
 
         #endregion

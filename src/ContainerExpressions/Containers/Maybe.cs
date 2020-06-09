@@ -124,16 +124,6 @@ namespace ContainerExpressions.Containers
 
         public Response<TValue> ToResponse() => Match(x => new Response<TValue>(x), _ => new Response<TValue>());
 
-        public TValue GetValueOrDefault(TValue @default) => Match(x => x, _ => @default);
-
-        public Maybe<TValue, TError> With(Response<TValue> value, TError error) => new Maybe<TValue, TError>(value, error);
-
-        public Maybe<TValue, TError> With(Either<TValue, TError> either) => new Maybe<TValue, TError>(either);
-
-        public Maybe<TValue, TError> With(TValue value) => new Maybe<TValue, TError>(value);
-
-        public Maybe<TValue, TError> With(TError error) => new Maybe<TValue, TError>(error);
-
         public override string ToString() => Match(x => x?.ToString(), x => x?.ToString()) ?? string.Empty;
 
         public static implicit operator Response<TValue>(Maybe<TValue, TError> maybe) => maybe.Match(x => new Response<TValue>(x), _ => new Response<TValue>());
@@ -147,8 +137,48 @@ namespace ContainerExpressions.Containers
         public static implicit operator Maybe<TValue, TError>(TError error) => new Maybe<TValue, TError>(error);
     }
 
+    public readonly struct ValueContainer<TValue>
+    {
+        private readonly TValue _value;
+
+        public ValueContainer(TValue value)
+        {
+            _value = value;
+        }
+
+        public Maybe<TValue, TError> Error<TError>() => new Maybe<TValue, TError>(_value);
+    }
+
+    public readonly struct ErrorContainer<TValue>
+    {
+        public Maybe<TValue, TError> Error<TError>(TError error) => new Maybe<TValue, TError>(error);
+    }
+
+    public static class Maybe
+    {
+        public static Maybe<TValue, TError> Create<TValue, TError>() => new Maybe<TValue, TError>();
+
+        public static ErrorContainer<TValue> Value<TValue>() => new ErrorContainer<TValue>();
+
+        public static ValueContainer<TValue> Value<TValue>(TValue value) => new ValueContainer<TValue>(value);
+    }
+
     public static class MaybeExtensions
     {
+        public static TValue GetValueOrDefault<TValue, TError>(this Maybe<TValue, TError> maybe, TValue @default) => maybe.Match(x => x, _ => @default);
+
+        #region With
+
+        public static Maybe<TValue, TError> With<TValue, TError>(this Maybe<TValue, TError> _, Response<TValue> value, TError error) => new Maybe<TValue, TError>(value, error);
+
+        public static Maybe<TValue, TError> With<TValue, TError>(this Maybe<TValue, TError> _, Either<TValue, TError> either) => new Maybe<TValue, TError>(either);
+
+        public static Maybe<TValue, TError> With<TValue, TError>(this Maybe<TValue, TError> _, TValue value) => new Maybe<TValue, TError>(value);
+
+        public static Maybe<TValue, TError> With<TValue, TError>(this Maybe<TValue, TError> _, TError error) => new Maybe<TValue, TError>(error);
+
+        #endregion
+
         #region Bind
 
         /** Maybe Bind implementation. **/
