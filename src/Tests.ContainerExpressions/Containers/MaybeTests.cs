@@ -517,28 +517,6 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        public void Maybe_GetValueOrDefault()
-        {
-            var answer = 42;
-            var maybe = Maybe.Value(answer).Error<string>();
-
-            var result = maybe.GetValueOrDefault(1);
-
-            Assert.AreEqual(answer, result);
-        }
-
-        [TestMethod]
-        public void Maybe_GetValueOrDefault_Invalid()
-        {
-            var @default = 1;
-            var maybe = Maybe.Value<int>().Error("error");
-
-            var result = maybe.GetValueOrDefault(@default);
-
-            Assert.AreEqual(@default, result);
-        }
-
-        [TestMethod]
         public void Maybe_With_Response()
         {
             var response = new Response<int>(42);
@@ -594,6 +572,28 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
+        public void Maybe_GetValueOrDefault_Valid()
+        {
+            var answer = 42;
+            var maybe = Maybe.Value(answer).Error<string>();
+
+            var result = maybe.GetValueOrDefault(1);
+
+            Assert.AreEqual(answer, result);
+        }
+
+        [TestMethod]
+        public void Maybe_GetValueOrDefault_Invalid()
+        {
+            var @default = 1;
+            var maybe = Maybe.Value<int>().Error("error");
+
+            var result = maybe.GetValueOrDefault(@default);
+
+            Assert.AreEqual(@default, result);
+        }
+
+        [TestMethod]
         public void Maybe_ToEither_Valid()
         {
             var maybe = Maybe.Value(42).Error<string>();
@@ -630,6 +630,69 @@ namespace Tests.ContainerExpressions.Containers
             var maybe = Maybe.Value<int>().Error("error");
 
             var result = maybe.ToResponse();
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Maybe_GetValueOrDefaultAsync_Valid()
+        {
+            var answer = 42;
+            var maybe = Task.FromResult(Maybe.Value(answer).Error<string>());
+
+            var result = await maybe.GetValueOrDefaultAsync(1);
+
+            Assert.AreEqual(answer, result);
+        }
+
+        [TestMethod]
+        public async Task Maybe_GetValueOrDefaultAsync_Invalid()
+        {
+            var @default = 1;
+            var maybe = Task.FromResult(Maybe.Value<int>().Error("error"));
+
+            var result = await maybe.GetValueOrDefaultAsync(@default);
+
+            Assert.AreEqual(@default, result);
+        }
+
+        [TestMethod]
+        public async Task Maybe_ToEitherAsync_Valid()
+        {
+            var maybe = Task.FromResult(Maybe.Value(42).Error<string>());
+
+            var result = await maybe.ToEitherAsync();
+
+            Assert.IsTrue(result.Match(x => x == 42, _ => false));
+        }
+
+        [TestMethod]
+        public async Task Maybe_ToEitherAsync_Invalid()
+        {
+            var maybe = Task.FromResult(Maybe.Value<int>().Error("error"));
+
+            var result = await maybe.ToEitherAsync();
+
+            Assert.IsTrue(result.Match(_ => false, x => x == "error"));
+        }
+
+        [TestMethod]
+        public async Task Maybe_ToResponseAsync_Valid()
+        {
+            var maybe = Task.FromResult(Maybe.Value(42).Error<string>());
+
+            var result = await maybe.ToResponseAsync();
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(42, result);
+        }
+
+        [TestMethod]
+        public async Task Maybe_ToResponseAsync_Invalid()
+        {
+            var maybe = Task.FromResult(Maybe.Value<int>().Error("error"));
+
+            var result = await maybe.ToResponseAsync();
 
             Assert.IsFalse(result);
         }

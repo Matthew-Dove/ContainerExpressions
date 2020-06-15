@@ -13,6 +13,12 @@ namespace ContainerExpressions.Containers
 
         public static Response<TValue> ToResponse<TValue, TError>(this Maybe<TValue, TError> maybe) => maybe.Match(x => new Response<TValue>(x), _ => new Response<TValue>());
 
+        public static Task<TValue> GetValueOrDefaultAsync<TValue, TError>(this Task<Maybe<TValue, TError>> maybe, TValue @default) => maybe.MatchAsync(x => x, _ => @default);
+
+        public static Task<Either<TValue, TError>> ToEitherAsync<TValue, TError>(this Task<Maybe<TValue, TError>> maybe) => maybe.MatchAsync(x => new Either<TValue, TError>(x), x => new Either<TValue, TError>(x));
+
+        public static Task<Response<TValue>> ToResponseAsync<TValue, TError>(this Task<Maybe<TValue, TError>> maybe) => maybe.MatchAsync(x => new Response<TValue>(x), _ => new Response<TValue>());
+
         #endregion
 
         #region With
