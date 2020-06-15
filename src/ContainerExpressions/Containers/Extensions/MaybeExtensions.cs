@@ -43,8 +43,6 @@ namespace ContainerExpressions.Containers
 
         #region Match
 
-        // TODO: Remove Maybe from Bind (or add option without bind) 
-
         /** maybe => sync, getValue => sync  **/
 
         public static TResult Match<TValue, TError, TResult>(this Maybe<TValue, TError> maybe, Func<TValue, TResult> getValue, Func<TError, TResult> getError) => maybe._hasValue ? getValue(maybe._value) : getError(maybe._error);
@@ -94,10 +92,26 @@ namespace ContainerExpressions.Containers
             if (!maybe._hasValue) return new Maybe<TResult, TError>(maybe._error);
             return new Maybe<TResult, TError>(value._error);
         }
+        
+        public static Maybe<TResult, TError> Bind<TValue, TError, TBindValue, TResult>(this Maybe<TValue, TError> value, Maybe<TBindValue, TError> maybe, Func<TValue, TBindValue, TResult> bind)
+        {
+            if (value._hasValue && maybe._hasValue) return new Maybe<TResult, TError>(bind(value._value, maybe._value));
+            if (!value._hasValue && !maybe._hasValue) return new Maybe<TResult, TError>(value._error, value.AggregateErrors, maybe._error, maybe.AggregateErrors);
+            if (!maybe._hasValue) return new Maybe<TResult, TError>(maybe._error);
+            return new Maybe<TResult, TError>(value._error);
+        }
 
         public static Task<Maybe<TResult, TError>> BindAsync<TValue, TError, TBindValue, TResult>(this Maybe<TValue, TError> value, Maybe<TBindValue, TError> maybe, Func<TValue, TBindValue, Task<Maybe<TResult, TError>>> bind)
         {
             if (value._hasValue && maybe._hasValue) return bind(value._value, maybe._value);
+            if (!value._hasValue && !maybe._hasValue) return Task.FromResult(new Maybe<TResult, TError>(value._error, value.AggregateErrors, maybe._error, maybe.AggregateErrors));
+            if (!maybe._hasValue) return Task.FromResult(new Maybe<TResult, TError>(maybe._error));
+            return Task.FromResult(new Maybe<TResult, TError>(value._error));
+        }
+
+        public static Task<Maybe<TResult, TError>> BindAsync<TValue, TError, TBindValue, TResult>(this Maybe<TValue, TError> value, Maybe<TBindValue, TError> maybe, Func<TValue, TBindValue, Task<TResult>> bind)
+        {
+            if (value._hasValue && maybe._hasValue) return bind(value._value, maybe._value).ContinueWith(x => new Maybe<TResult, TError>(x.Result));
             if (!value._hasValue && !maybe._hasValue) return Task.FromResult(new Maybe<TResult, TError>(value._error, value.AggregateErrors, maybe._error, maybe.AggregateErrors));
             if (!maybe._hasValue) return Task.FromResult(new Maybe<TResult, TError>(maybe._error));
             return Task.FromResult(new Maybe<TResult, TError>(value._error));
@@ -110,7 +124,19 @@ namespace ContainerExpressions.Containers
             return value.Match(x => new Maybe<TValue, TBindError>(x), x => new Maybe<TValue, TBindError>(convert(x))).Bind(maybe, bind);
         }
 
+        public static Maybe<TResult, TBindError> Bind<TValue, TError, TBindValue, TBindError, TResult>(this Maybe<TValue, TError> value, Maybe<TBindValue, TBindError> maybe, Func<TError, TBindError> convert, Func<TValue, TBindValue, TResult> bind)
+        {
+            return value.Match(x => new Maybe<TValue, TBindError>(x), x => new Maybe<TValue, TBindError>(convert(x))).Bind(maybe, bind);
+        }
+
         public static Maybe<TResult, (TError, TBindError)> Bind<TValue, TError, TBindValue, TBindError, TResult>(this Maybe<TValue, TError> value, Maybe<TBindValue, TBindError> maybe, Func<TValue, TBindValue, Maybe<TResult, (TError, TBindError)>> bind)
+        {
+            var valueMatch = value.Match(x => new Maybe<TValue, (TError, TBindError)>(x), x => new Maybe<TValue, (TError, TBindError)>((x, default)));
+            var maybeMatch = maybe.Match(x => new Maybe<TBindValue, (TError, TBindError)>(x), x => new Maybe<TBindValue, (TError, TBindError)>((default, x)));
+            return valueMatch.Bind(maybeMatch, bind);
+        }
+
+        public static Maybe<TResult, (TError, TBindError)> BindFunc<TValue, TError, TBindValue, TBindError, TResult>(this Maybe<TValue, TError> value, Maybe<TBindValue, TBindError> maybe, Func<TValue, TBindValue, TResult> bind)
         {
             var valueMatch = value.Match(x => new Maybe<TValue, (TError, TBindError)>(x), x => new Maybe<TValue, (TError, TBindError)>((x, default)));
             var maybeMatch = maybe.Match(x => new Maybe<TBindValue, (TError, TBindError)>(x), x => new Maybe<TBindValue, (TError, TBindError)>((default, x)));
@@ -122,7 +148,19 @@ namespace ContainerExpressions.Containers
             return value.Match(x => new Maybe<TValue, TBindError>(x), x => new Maybe<TValue, TBindError>(convert(x))).BindAsync(maybe, bind);
         }
 
+        public static Task<Maybe<TResult, TBindError>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Maybe<TValue, TError> value, Maybe<TBindValue, TBindError> maybe, Func<TError, TBindError> convert, Func<TValue, TBindValue, Task<TResult>> bind)
+        {
+            return value.Match(x => new Maybe<TValue, TBindError>(x), x => new Maybe<TValue, TBindError>(convert(x))).BindAsync(maybe, bind);
+        }
+
         public static Task<Maybe<TResult, (TError, TBindError)>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Maybe<TValue, TError> value, Maybe<TBindValue, TBindError> maybe, Func<TValue, TBindValue, Task<Maybe<TResult, (TError, TBindError)>>> bind)
+        {
+            var valueMatch = value.Match(x => new Maybe<TValue, (TError, TBindError)>(x), x => new Maybe<TValue, (TError, TBindError)>((x, default)));
+            var maybeMatch = maybe.Match(x => new Maybe<TBindValue, (TError, TBindError)>(x), x => new Maybe<TBindValue, (TError, TBindError)>((default, x)));
+            return valueMatch.BindAsync(maybeMatch, bind);
+        }
+
+        public static Task<Maybe<TResult, (TError, TBindError)>> BindFuncAsync<TValue, TError, TBindValue, TBindError, TResult>(this Maybe<TValue, TError> value, Maybe<TBindValue, TBindError> maybe, Func<TValue, TBindValue, Task<TResult>> bind)
         {
             var valueMatch = value.Match(x => new Maybe<TValue, (TError, TBindError)>(x), x => new Maybe<TValue, (TError, TBindError)>((x, default)));
             var maybeMatch = maybe.Match(x => new Maybe<TBindValue, (TError, TBindError)>(x), x => new Maybe<TBindValue, (TError, TBindError)>((default, x)));
@@ -136,7 +174,17 @@ namespace ContainerExpressions.Containers
             return value.ContinueWith(x => Bind(x.Result, maybe, bind));
         }
 
+        public static Task<Maybe<TResult, TError>> BindAsync<TValue, TError, TBindValue, TResult>(this Task<Maybe<TValue, TError>> value, Maybe<TBindValue, TError> maybe, Func<TValue, TBindValue, TResult> bind)
+        {
+            return value.ContinueWith(x => Bind(x.Result, maybe, bind));
+        }
+
         public static Task<Maybe<TResult, TError>> BindAsync<TValue, TError, TBindValue, TResult>(this Task<Maybe<TValue, TError>> value, Maybe<TBindValue, TError> maybe, Func<TValue, TBindValue, Task<Maybe<TResult, TError>>> bind)
+        {
+            return value.ContinueWith(x => BindAsync(x.Result, maybe, bind)).Unwrap();
+        }
+
+        public static Task<Maybe<TResult, TError>> BindAsync<TValue, TError, TBindValue, TResult>(this Task<Maybe<TValue, TError>> value, Maybe<TBindValue, TError> maybe, Func<TValue, TBindValue, Task<TResult>> bind)
         {
             return value.ContinueWith(x => BindAsync(x.Result, maybe, bind)).Unwrap();
         }
@@ -148,12 +196,27 @@ namespace ContainerExpressions.Containers
             return value.ContinueWith(x => Bind(x.Result, maybe, convert, bind));
         }
 
+        public static Task<Maybe<TResult, TBindError>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Task<Maybe<TValue, TError>> value, Maybe<TBindValue, TBindError> maybe, Func<TError, TBindError> convert, Func<TValue, TBindValue, TResult> bind)
+        {
+            return value.ContinueWith(x => Bind(x.Result, maybe, convert, bind));
+        }
+
         public static Task<Maybe<TResult, (TError, TBindError)>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Task<Maybe<TValue, TError>> value, Maybe<TBindValue, TBindError> maybe, Func<TValue, TBindValue, Maybe<TResult, (TError, TBindError)>> bind)
         {
             return value.ContinueWith(x => Bind(x.Result, maybe, bind));
         }
 
+        public static Task<Maybe<TResult, (TError, TBindError)>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Task<Maybe<TValue, TError>> value, Maybe<TBindValue, TBindError> maybe, Func<TValue, TBindValue, TResult> bind)
+        {
+            return value.ContinueWith(x => BindFunc(x.Result, maybe, bind));
+        }
+
         public static Task<Maybe<TResult, TBindError>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Task<Maybe<TValue, TError>> value, Maybe<TBindValue, TBindError> maybe, Func<TError, TBindError> convert, Func<TValue, TBindValue, Task<Maybe<TResult, TBindError>>> bind)
+        {
+            return value.ContinueWith(x => BindAsync(x.Result, maybe, convert, bind)).Unwrap();
+        }
+
+        public static Task<Maybe<TResult, TBindError>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Task<Maybe<TValue, TError>> value, Maybe<TBindValue, TBindError> maybe, Func<TError, TBindError> convert, Func<TValue, TBindValue, Task<TResult>> bind)
         {
             return value.ContinueWith(x => BindAsync(x.Result, maybe, convert, bind)).Unwrap();
         }
@@ -163,6 +226,11 @@ namespace ContainerExpressions.Containers
             return value.ContinueWith(x => BindAsync(x.Result, maybe, bind)).Unwrap();
         }
 
+        public static Task<Maybe<TResult, (TError, TBindError)>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Task<Maybe<TValue, TError>> value, Maybe<TBindValue, TBindError> maybe, Func<TValue, TBindValue, Task<TResult>> bind)
+        {
+            return value.ContinueWith(x => BindFuncAsync(x.Result, maybe, bind)).Unwrap();
+        }
+
         /** Maybe Bind second arg is Task. **/
 
         public static Task<Maybe<TResult, TError>> BindAsync<TValue, TError, TBindValue, TResult>(this Maybe<TValue, TError> value, Task<Maybe<TBindValue, TError>> maybe, Func<TValue, TBindValue, Maybe<TResult, TError>> bind)
@@ -170,7 +238,17 @@ namespace ContainerExpressions.Containers
             return maybe.ContinueWith(x => Bind(value, x.Result, bind));
         }
 
+        public static Task<Maybe<TResult, TError>> BindAsync<TValue, TError, TBindValue, TResult>(this Maybe<TValue, TError> value, Task<Maybe<TBindValue, TError>> maybe, Func<TValue, TBindValue, TResult> bind)
+        {
+            return maybe.ContinueWith(x => Bind(value, x.Result, bind));
+        }
+
         public static Task<Maybe<TResult, TError>> BindAsync<TValue, TError, TBindValue, TResult>(this Maybe<TValue, TError> value, Task<Maybe<TBindValue, TError>> maybe, Func<TValue, TBindValue, Task<Maybe<TResult, TError>>> bind)
+        {
+            return maybe.ContinueWith(x => BindAsync(value, x.Result, bind)).Unwrap();
+        }
+
+        public static Task<Maybe<TResult, TError>> BindAsync<TValue, TError, TBindValue, TResult>(this Maybe<TValue, TError> value, Task<Maybe<TBindValue, TError>> maybe, Func<TValue, TBindValue, Task<TResult>> bind)
         {
             return maybe.ContinueWith(x => BindAsync(value, x.Result, bind)).Unwrap();
         }
@@ -182,12 +260,27 @@ namespace ContainerExpressions.Containers
             return maybe.ContinueWith(x => Bind(value, x.Result, convert, bind));
         }
 
+        public static Task<Maybe<TResult, TBindError>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Maybe<TValue, TError> value, Task<Maybe<TBindValue, TBindError>> maybe, Func<TError, TBindError> convert, Func<TValue, TBindValue, TResult> bind)
+        {
+            return maybe.ContinueWith(x => Bind(value, x.Result, convert, bind));
+        }
+
         public static Task<Maybe<TResult, (TError, TBindError)>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Maybe<TValue, TError> value, Task<Maybe<TBindValue, TBindError>> maybe, Func<TValue, TBindValue, Maybe<TResult, (TError, TBindError)>> bind)
         {
             return maybe.ContinueWith(x => Bind(value, x.Result, bind));
         }
 
+        public static Task<Maybe<TResult, (TError, TBindError)>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Maybe<TValue, TError> value, Task<Maybe<TBindValue, TBindError>> maybe, Func<TValue, TBindValue, TResult> bind)
+        {
+            return maybe.ContinueWith(x => BindFunc(value, x.Result, bind));
+        }
+
         public static Task<Maybe<TResult, TBindError>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Maybe<TValue, TError> value, Task<Maybe<TBindValue, TBindError>> maybe, Func<TError, TBindError> convert, Func<TValue, TBindValue, Task<Maybe<TResult, TBindError>>> bind)
+        {
+            return maybe.ContinueWith(x => BindAsync(value, x.Result, convert, bind)).Unwrap();
+        }
+
+        public static Task<Maybe<TResult, TBindError>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Maybe<TValue, TError> value, Task<Maybe<TBindValue, TBindError>> maybe, Func<TError, TBindError> convert, Func<TValue, TBindValue, Task<TResult>> bind)
         {
             return maybe.ContinueWith(x => BindAsync(value, x.Result, convert, bind)).Unwrap();
         }
@@ -197,6 +290,11 @@ namespace ContainerExpressions.Containers
             return maybe.ContinueWith(x => BindAsync(value, x.Result, bind)).Unwrap();
         }
 
+        public static Task<Maybe<TResult, (TError, TBindError)>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Maybe<TValue, TError> value, Task<Maybe<TBindValue, TBindError>> maybe, Func<TValue, TBindValue, Task<TResult>> bind)
+        {
+            return maybe.ContinueWith(x => BindFuncAsync(value, x.Result, bind)).Unwrap();
+        }
+
         /** Maybe Bind first, and second args are Tasks. **/
 
         public static Task<Maybe<TResult, TError>> BindAsync<TValue, TError, TBindValue, TResult>(this Task<Maybe<TValue, TError>> value, Task<Maybe<TBindValue, TError>> maybe, Func<TValue, TBindValue, Maybe<TResult, TError>> bind)
@@ -204,7 +302,17 @@ namespace ContainerExpressions.Containers
             return Task.WhenAll(value, maybe).ContinueWith(_ => Bind(value.Result, maybe.Result, bind));
         }
 
+        public static Task<Maybe<TResult, TError>> BindAsync<TValue, TError, TBindValue, TResult>(this Task<Maybe<TValue, TError>> value, Task<Maybe<TBindValue, TError>> maybe, Func<TValue, TBindValue, TResult> bind)
+        {
+            return Task.WhenAll(value, maybe).ContinueWith(_ => Bind(value.Result, maybe.Result, bind));
+        }
+
         public static Task<Maybe<TResult, TError>> BindAsync<TValue, TError, TBindValue, TResult>(this Task<Maybe<TValue, TError>> value, Task<Maybe<TBindValue, TError>> maybe, Func<TValue, TBindValue, Task<Maybe<TResult, TError>>> bind)
+        {
+            return Task.WhenAll(value, maybe).ContinueWith(_ => BindAsync(value.Result, maybe.Result, bind)).Unwrap();
+        }
+
+        public static Task<Maybe<TResult, TError>> BindAsync<TValue, TError, TBindValue, TResult>(this Task<Maybe<TValue, TError>> value, Task<Maybe<TBindValue, TError>> maybe, Func<TValue, TBindValue, Task<TResult>> bind)
         {
             return Task.WhenAll(value, maybe).ContinueWith(_ => BindAsync(value.Result, maybe.Result, bind)).Unwrap();
         }
@@ -216,9 +324,19 @@ namespace ContainerExpressions.Containers
             return Task.WhenAll(value, maybe).ContinueWith(_ => Bind(value.Result, maybe.Result, convert, bind));
         }
 
+        public static Task<Maybe<TResult, TBindError>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Task<Maybe<TValue, TError>> value, Task<Maybe<TBindValue, TBindError>> maybe, Func<TError, TBindError> convert, Func<TValue, TBindValue, TResult> bind)
+        {
+            return Task.WhenAll(value, maybe).ContinueWith(_ => Bind(value.Result, maybe.Result, convert, bind));
+        }
+
         public static Task<Maybe<TResult, (TError, TBindError)>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Task<Maybe<TValue, TError>> value, Task<Maybe<TBindValue, TBindError>> maybe, Func<TValue, TBindValue, Maybe<TResult, (TError, TBindError)>> bind)
         {
             return Task.WhenAll(value, maybe).ContinueWith(_ => Bind(value.Result, maybe.Result, bind));
+        }
+
+        public static Task<Maybe<TResult, (TError, TBindError)>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Task<Maybe<TValue, TError>> value, Task<Maybe<TBindValue, TBindError>> maybe, Func<TValue, TBindValue, TResult> bind)
+        {
+            return Task.WhenAll(value, maybe).ContinueWith(_ => BindFunc(value.Result, maybe.Result, bind));
         }
 
         public static Task<Maybe<TResult, TBindError>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Task<Maybe<TValue, TError>> value, Task<Maybe<TBindValue, TBindError>> maybe, Func<TError, TBindError> convert, Func<TValue, TBindValue, Task<Maybe<TResult, TBindError>>> bind)
@@ -226,9 +344,19 @@ namespace ContainerExpressions.Containers
             return Task.WhenAll(value, maybe).ContinueWith(_ => BindAsync(value.Result, maybe.Result, convert, bind)).Unwrap();
         }
 
+        public static Task<Maybe<TResult, TBindError>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Task<Maybe<TValue, TError>> value, Task<Maybe<TBindValue, TBindError>> maybe, Func<TError, TBindError> convert, Func<TValue, TBindValue, Task<TResult>> bind)
+        {
+            return Task.WhenAll(value, maybe).ContinueWith(_ => BindAsync(value.Result, maybe.Result, convert, bind)).Unwrap();
+        }
+
         public static Task<Maybe<TResult, (TError, TBindError)>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Task<Maybe<TValue, TError>> value, Task<Maybe<TBindValue, TBindError>> maybe, Func<TValue, TBindValue, Task<Maybe<TResult, (TError, TBindError)>>> bind)
         {
             return Task.WhenAll(value, maybe).ContinueWith(_ => BindAsync(value.Result, maybe.Result, bind)).Unwrap();
+        }
+
+        public static Task<Maybe<TResult, (TError, TBindError)>> BindAsync<TValue, TError, TBindValue, TBindError, TResult>(this Task<Maybe<TValue, TError>> value, Task<Maybe<TBindValue, TBindError>> maybe, Func<TValue, TBindValue, Task<TResult>> bind)
+        {
+            return Task.WhenAll(value, maybe).ContinueWith(_ => BindFuncAsync(value.Result, maybe.Result, bind)).Unwrap();
         }
 
         #endregion
