@@ -117,37 +117,12 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        public void MaybeError_BindValue_T()
-        {
-            var maybe = new Maybe<int, string>(1);
-            var bind = maybe.With(2);
-
-            var result = maybe.Bind(bind, (x, y) => x + y);
-
-            Assert.IsTrue(maybe.Match(x => x == 1, _ => false));
-            Assert.IsTrue(bind.Match(x => x == 2, _ => false));
-            Assert.IsTrue(result.Match(x => x == 3, _ => false));
-        }
-
-        [TestMethod]
         public void MaybeError_Bind_FirstOnly()
         {
             var error = "error";
             var maybe = new Maybe<int, string>(error);
 
             var result = maybe.Bind(maybe.With(1), (x, y) => maybe.With(x + y));
-
-            Assert.IsTrue(result.Match(_ => false, x => x == error));
-            Assert.AreEqual(result.GetAggregateErrors().Length, 0);
-        }
-
-        [TestMethod]
-        public void MaybeError_Bind_FirstOnly_T()
-        {
-            var error = "error";
-            var maybe = new Maybe<int, string>(error);
-
-            var result = maybe.Bind(maybe.With(1), (x, y) => x + y);
 
             Assert.IsTrue(result.Match(_ => false, x => x == error));
             Assert.AreEqual(result.GetAggregateErrors().Length, 0);
@@ -167,40 +142,12 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        public void MaybeError_Bind_SecondOnly_T()
-        {
-            var error = "error";
-            var maybe = new Maybe<int, string>(1);
-
-            var result = maybe.Bind(maybe.With(error), (x, y) => x + y);
-
-            Assert.IsTrue(maybe.Match(x => x == 1, x => false));
-            Assert.IsTrue(result.Match(_ => false, x => x == error));
-            Assert.AreEqual(result.GetAggregateErrors().Length, 0);
-        }
-
-        [TestMethod]
         public void MaybeError_Bind_FirstAndSecond()
         {
             string error1 = "error1", error2 = "error2";
             var maybe = new Maybe<int, string>(error1);
 
             var result = maybe.Bind(maybe.With(error2), (x, y) => maybe.With(x + y));
-
-            Assert.IsTrue(maybe.Match(_ => false, x => x == error1));
-            Assert.IsTrue(result.Match(_ => false, x => x == error2));
-            Assert.AreEqual(maybe.GetAggregateErrors().Length, 0);
-            Assert.AreEqual(result.GetAggregateErrors().Length, 1);
-            Assert.AreEqual(result.GetAggregateErrors()[0], error1);
-        }
-
-        [TestMethod]
-        public void MaybeError_Bind_FirstAndSecond_T()
-        {
-            string error1 = "error1", error2 = "error2";
-            var maybe = new Maybe<int, string>(error1);
-
-            var result = maybe.Bind(maybe.With(error2), (x, y) => x + y);
 
             Assert.IsTrue(maybe.Match(_ => false, x => x == error1));
             Assert.IsTrue(result.Match(_ => false, x => x == error2));
@@ -249,43 +196,12 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        public void MaybeError_Bind_BothAggregate_T()
-        {
-            string error1 = "error1", error2 = "error2", error3 = "error3", error4 = "error4";
-
-            var maybe1 = new Maybe<int, string>(error1);
-            var result1 = maybe1.Bind(maybe1.With(error2), (x, y) => maybe1.With(x + y));
-
-            var maybe2 = new Maybe<int, string>(error3);
-            var result2 = maybe2.Bind(maybe2.With(error4), (x, y) => x + y);
-
-            var aggregate = result1.Bind(result2, (x, y) => new Maybe<int, string>(x + y));
-
-            Assert.IsTrue(aggregate.Match(_ => false, x => x == error4));
-            Assert.AreEqual(aggregate.GetAggregateErrors()[0], error1);
-            Assert.AreEqual(aggregate.GetAggregateErrors()[1], error2);
-            Assert.AreEqual(aggregate.GetAggregateErrors()[2], error3);
-        }
-
-        [TestMethod]
         public async Task MaybeError_BindAsync_BothNotValid()
         {
             var first = new Maybe<int, string>("error1");
             var second = new Maybe<int, string>("error2");
 
             var result = await first.BindAsync(second, (x, y) => Task.FromResult(new Maybe<int, string>(x + y)));
-
-            Assert.AreEqual("error2", result.Match(_ => string.Empty, x => x));
-            Assert.AreEqual("error1", result.GetAggregateErrors()[0]);
-        }
-
-        [TestMethod]
-        public async Task MaybeError_BindAsync_BothNotValid_T()
-        {
-            var first = new Maybe<int, string>("error1");
-            var second = new Maybe<int, string>("error2");
-
-            var result = await first.BindAsync(second, (x, y) => Task.FromResult(x + y));
 
             Assert.AreEqual("error2", result.Match(_ => string.Empty, x => x));
             Assert.AreEqual("error1", result.GetAggregateErrors()[0]);
@@ -304,18 +220,6 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        public async Task MaybeError_BindAsync_FirstNotValid_T()
-        {
-            var first = new Maybe<int, string>("error1");
-            var second = new Maybe<int, string>(1);
-
-            var result = await first.BindAsync(second, (x, y) => Task.FromResult(x + y));
-
-            Assert.AreEqual("error1", result.Match(_ => string.Empty, x => x));
-            Assert.AreEqual(1, second.Match(x => x, _ => 0));
-        }
-
-        [TestMethod]
         public async Task MaybeError_BindAsync_SecondNotValid()
         {
             var first = new Maybe<int, string>(1);
@@ -328,35 +232,12 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        public async Task MaybeError_BindAsync_SecondNotValid_T()
-        {
-            var first = new Maybe<int, string>(1);
-            var second = new Maybe<int, string>("error1");
-
-            var result = await first.BindAsync(second, (x, y) => Task.FromResult(x + y));
-
-            Assert.AreEqual("error1", result.Match(_ => string.Empty, x => x));
-            Assert.AreEqual(1, first.Match(x => x, _ => 0));
-        }
-
-        [TestMethod]
         public void MaybeError_BindAsync_FirstNotValid_DifferentErrorModels()
         {
             var first = new Maybe<int, (int, string)>((99, "error1"));
             var second = new Maybe<int, string>(1);
 
             var result = first.Bind(second, x => $"Code: {x.Item1}, Message: {x.Item2}", (x, y) => new Maybe<int, string>(x + y));
-
-            Assert.AreEqual("Code: 99, Message: error1", result.Match(_ => string.Empty, x => x));
-        }
-
-        [TestMethod]
-        public void MaybeError_BindAsync_FirstNotValid_DifferentErrorModels_T()
-        {
-            var first = new Maybe<int, (int, string)>((99, "error1"));
-            var second = new Maybe<int, string>(1);
-
-            var result = first.Bind(second, x => $"Code: {x.Item1}, Message: {x.Item2}", (x, y) => x + y);
 
             Assert.AreEqual("Code: 99, Message: error1", result.Match(_ => string.Empty, x => x));
         }
