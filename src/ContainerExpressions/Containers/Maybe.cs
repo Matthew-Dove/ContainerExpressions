@@ -25,7 +25,7 @@ namespace ContainerExpressions.Containers
 
     public readonly struct Maybe<TValue, TError>
     {
-        public TError[] AggregateErrors { get; }
+        internal TError[] AggregateErrors { get; }
         internal readonly static TError[] _emptyAggregateErrors = new TError[0];
 
         internal readonly bool _hasValue;

@@ -25,19 +25,39 @@ namespace ContainerExpressions.Containers
 
         public static Maybe<TValue, TError> With<TValue, TError>(this Maybe<TValue, TError> _, TError error) => new Maybe<TValue, TError>(error);
 
+        public static Maybe<TValue, TError> With<TValue, TError>(this Task<Maybe<TValue, TError>> _, Response<TValue> value, TError error) => new Maybe<TValue, TError>(value, error);
+
+        public static Maybe<TValue, TError> With<TValue, TError>(this Task<Maybe<TValue, TError>> _, Either<TValue, TError> either) => new Maybe<TValue, TError>(either);
+
+        public static Maybe<TValue, TError> With<TValue, TError>(this Task<Maybe<TValue, TError>> _, TValue value) => new Maybe<TValue, TError>(value);
+
+        public static Maybe<TValue, TError> With<TValue, TError>(this Task<Maybe<TValue, TError>> _, TError error) => new Maybe<TValue, TError>(error);
+
         #endregion
 
         #region Match
 
-        // TODO: Match Aggegate internal Error | Remove Maybe from Bind (or add option without bind) 
+        // TODO: Remove Maybe from Bind (or add option without bind) 
+
+        /** maybe => sync, getValue => sync  **/
 
         public static TResult Match<TValue, TError, TResult>(this Maybe<TValue, TError> maybe, Func<TValue, TResult> getValue, Func<TError, TResult> getError) => maybe._hasValue ? getValue(maybe._value) : getError(maybe._error);
 
         public static TResult Match<TValue, TError, TResult>(this Maybe<TValue, TError> maybe, Func<TValue, TResult> getValue, Func<TError, TError[], TResult> getError) => maybe._hasValue ? getValue(maybe._value) : getError(maybe._error, maybe.AggregateErrors);
 
-        public static Task<TResult> MatchAsync<TValue, TError, TResult>(this Maybe<TValue, TError> maybe, Func<TValue, Task<TResult>> getValue, Func<TError, TResult> getError) => maybe._hasValue ? getValue(maybe._value) : Task.FromResult(getError(maybe._error));
+        /** maybe => sync, getValue => async  **/
 
+        public static Task<TResult> MatchAsync<TValue, TError, TResult>(this Maybe<TValue, TError> maybe, Func<TValue, Task<TResult>> getValue, Func<TError, TResult> getError) => maybe._hasValue ? getValue(maybe._value) : Task.FromResult(getError(maybe._error));
+        
         public static Task<TResult> MatchAsync<TValue, TError, TResult>(this Maybe<TValue, TError> maybe, Func<TValue, Task<TResult>> getValue, Func<TError, TError[], TResult> getError) => maybe._hasValue ? getValue(maybe._value) : Task.FromResult(getError(maybe._error, maybe.AggregateErrors));
+
+        /** maybe => async, getValue => sync  **/
+
+        public static Task<TResult> MatchAsync<TValue, TError, TResult>(this Task<Maybe<TValue, TError>> maybe, Func<TValue, TResult> getValue, Func<TError, TResult> getError) => maybe.ContinueWith(x => x.Result._hasValue ? getValue(x.Result._value) : getError(x.Result._error));
+
+        public static Task<TResult> MatchAsync<TValue, TError, TResult>(this Task<Maybe<TValue, TError>> maybe, Func<TValue, TResult> getValue, Func<TError, TError[], TResult> getError) => maybe.ContinueWith(x => x.Result._hasValue ? getValue(x.Result._value) : getError(x.Result._error, x.Result.AggregateErrors));
+
+        /** maybe => async, getValue => async  **/
 
         public static Task<TResult> MatchAsync<TValue, TError, TResult>(this Task<Maybe<TValue, TError>> maybe, Func<TValue, Task<TResult>> getValue, Func<TError, TResult> getError) => maybe.ContinueWith(x => x.Result._hasValue ? getValue(x.Result._value) : Task.FromResult(getError(x.Result._error))).Unwrap();
 

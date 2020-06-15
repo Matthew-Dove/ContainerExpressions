@@ -125,7 +125,7 @@ namespace Tests.ContainerExpressions.Containers
             var result = maybe.Bind(maybe.With(1), (x, y) => maybe.With(x + y));
 
             Assert.IsTrue(result.Match(_ => false, x => x == error));
-            Assert.AreEqual(result.AggregateErrors.Length, 0);
+            Assert.AreEqual(result.GetAggregateErrors().Length, 0);
         }
 
         [TestMethod]
@@ -138,7 +138,7 @@ namespace Tests.ContainerExpressions.Containers
 
             Assert.IsTrue(maybe.Match(x => x == 1, x => false));
             Assert.IsTrue(result.Match(_ => false, x => x == error));
-            Assert.AreEqual(result.AggregateErrors.Length, 0);
+            Assert.AreEqual(result.GetAggregateErrors().Length, 0);
         }
 
         [TestMethod]
@@ -151,9 +151,9 @@ namespace Tests.ContainerExpressions.Containers
 
             Assert.IsTrue(maybe.Match(_ => false, x => x == error1));
             Assert.IsTrue(result.Match(_ => false, x => x == error2));
-            Assert.AreEqual(maybe.AggregateErrors.Length, 0);
-            Assert.AreEqual(result.AggregateErrors.Length, 1);
-            Assert.AreEqual(result.AggregateErrors[0], error1);
+            Assert.AreEqual(maybe.GetAggregateErrors().Length, 0);
+            Assert.AreEqual(result.GetAggregateErrors().Length, 1);
+            Assert.AreEqual(result.GetAggregateErrors()[0], error1);
         }
 
         [TestMethod]
@@ -168,12 +168,12 @@ namespace Tests.ContainerExpressions.Containers
             Assert.IsTrue(maybe.Match(_ => false, x => x == error1));
             Assert.IsTrue(result1.Match(_ => false, x => x == error2));
             Assert.IsTrue(result2.Match(_ => false, x => x == error3));
-            Assert.AreEqual(maybe.AggregateErrors.Length, 0);
-            Assert.AreEqual(result1.AggregateErrors.Length, 1);
-            Assert.AreEqual(result1.AggregateErrors[0], error1);
-            Assert.AreEqual(result2.AggregateErrors.Length, 2);
-            Assert.AreEqual(result2.AggregateErrors[0], error1);
-            Assert.AreEqual(result2.AggregateErrors[1], error2);
+            Assert.AreEqual(maybe.GetAggregateErrors().Length, 0);
+            Assert.AreEqual(result1.GetAggregateErrors().Length, 1);
+            Assert.AreEqual(result1.GetAggregateErrors()[0], error1);
+            Assert.AreEqual(result2.GetAggregateErrors().Length, 2);
+            Assert.AreEqual(result2.GetAggregateErrors()[0], error1);
+            Assert.AreEqual(result2.GetAggregateErrors()[1], error2);
         }
 
         [TestMethod]
@@ -190,9 +190,9 @@ namespace Tests.ContainerExpressions.Containers
             var aggregate = result1.Bind(result2, (x, y) => new Maybe<int, string>(x + y));
 
             Assert.IsTrue(aggregate.Match(_ => false, x => x == error4));
-            Assert.AreEqual(aggregate.AggregateErrors[0], error1);
-            Assert.AreEqual(aggregate.AggregateErrors[1], error2);
-            Assert.AreEqual(aggregate.AggregateErrors[2], error3);
+            Assert.AreEqual(aggregate.GetAggregateErrors()[0], error1);
+            Assert.AreEqual(aggregate.GetAggregateErrors()[1], error2);
+            Assert.AreEqual(aggregate.GetAggregateErrors()[2], error3);
         }
 
         [TestMethod]
@@ -204,7 +204,7 @@ namespace Tests.ContainerExpressions.Containers
             var result = await first.BindAsync(second, (x, y) => Task.FromResult(new Maybe<int, string>(x + y)));
 
             Assert.AreEqual("error2", result.Match(_ => string.Empty, x => x));
-            Assert.AreEqual("error1", result.AggregateErrors[0]);
+            Assert.AreEqual("error1", result.GetAggregateErrors()[0]);
         }
 
         [TestMethod]
@@ -275,7 +275,7 @@ namespace Tests.ContainerExpressions.Containers
             var result = await first.BindAsync(second, (x, y) => Task.FromResult(new Maybe<int, string>(x + y)));
 
             Assert.AreEqual("error2", result.Match(_ => string.Empty, x => x));
-            Assert.AreEqual("error1", result.AggregateErrors[0]);
+            Assert.AreEqual("error1", result.GetAggregateErrors()[0]);
         }
 
         [TestMethod]
@@ -461,7 +461,7 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        public async Task Maybe_MatchAsync_Valid()
+        public async Task Maybe_MatchAsync_Valid_sync_async()
         {
             var maybe = Maybe.Value(1).Error<string>();
 
@@ -471,13 +471,25 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        public async Task Maybe_MatchAsync_Invalid()
+        public async Task Maybe_MatchAsync_Invalid_sync_async()
         {
             var maybe = Maybe.Value<int>().Error("error");
 
             var result = await maybe.MatchAsync(_ => Task.FromResult(string.Empty), x => x);
 
             Assert.AreEqual("error", result);
+        }
+
+        [TestMethod]
+        public async Task Maybe_MatchAsync_Aggregate_sync_async()
+        {
+            var maybe = Maybe.Value<int>().Error("error1");
+
+            var result = await maybe.Bind(maybe.With("error2"), (x, y) => maybe.With(x + y)).MatchAsync(_ => Task.FromResult(default((string, string[]))), (x, y) => (x, y));
+
+            Assert.AreEqual("error2", result.Item1);
+            Assert.AreEqual("error1", result.Item2[0]);
+            Assert.AreEqual(1, result.Item2.Length);
         }
 
         #endregion
@@ -723,5 +735,164 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         #endregion
+
+        #region Maybe Match
+
+        [TestMethod]
+        public void Maybe_Match_Value_Sync_Sync()
+        {
+            var answer = 42;
+            var maybe = Maybe.Value(answer).Error<string>();
+
+            var result = maybe.Match(x => x, _ => 0);
+
+            Assert.AreEqual(answer, result);
+        }
+
+        [TestMethod]
+        public void Maybe_Match_Error_Sync_Sync()
+        {
+            var error = "error";
+            var maybe = Maybe.Value<int>().Error(error);
+
+            var result = maybe.Match(_ => string.Empty, x => x);
+
+            Assert.AreEqual(error, result);
+        }
+
+        [TestMethod]
+        public void Maybe_Match_Error_Aggregate_Sync_Sync()
+        {
+            string error1 = "error1", error2 = "error2", error = null;
+            var maybe = Maybe.Value<int>().Error(error1);
+
+            var aggregate = maybe.Bind(maybe.With(error2), (x, y) => maybe.With(x + y));
+            var result = aggregate.Match(_ => string.Empty, (x, y) => { error = y[0]; return x; });
+
+            Assert.AreEqual(error1, error);
+            Assert.AreEqual(error2, result);
+        }
+
+        [TestMethod]
+        public async Task Maybe_Match_Value_Sync_Async()
+        {
+            var answer = 42;
+            var maybe = Maybe.Value(answer).Error<string>();
+
+            var result = await maybe.MatchAsync(x => Task.FromResult(x), _ => 0);
+
+            Assert.AreEqual(answer, result);
+        }
+
+        [TestMethod]
+        public async Task Maybe_Match_Error_Sync_Async()
+        {
+            var error = "error";
+            var maybe = Maybe.Value<int>().Error(error);
+
+            var result = await maybe.MatchAsync(_ => Task.FromResult(string.Empty), x => x);
+
+            Assert.AreEqual(error, result);
+        }
+
+        [TestMethod]
+        public async Task Maybe_Match_Error_Aggregate_Sync_Async()
+        {
+            string error1 = "error1", error2 = "error2", error = null;
+            var maybe = Maybe.Value<int>().Error(error1);
+
+            var aggregate = maybe.Bind(maybe.With(error2), (x, y) => maybe.With(x + y));
+            var result = await aggregate.MatchAsync(_ => Task.FromResult(string.Empty), (x, y) => { error = y[0]; return x; });
+
+            Assert.AreEqual(error1, error);
+            Assert.AreEqual(error2, result);
+        }
+
+        [TestMethod]
+        public async Task Maybe_Match_Value_Async_Sync()
+        {
+            var answer = 42;
+            var maybe = Task.FromResult(Maybe.Value(answer).Error<string>());
+
+            var result = await maybe.MatchAsync(x => x, _ => 0);
+
+            Assert.AreEqual(answer, result);
+        }
+
+        [TestMethod]
+        public async Task Maybe_Match_Error_Async_Sync()
+        {
+            var error = "error";
+            var maybe = Task.FromResult(Maybe.Value<int>().Error(error));
+
+            var result = await maybe.MatchAsync(_ => string.Empty, x => x);
+
+            Assert.AreEqual(error, result);
+        }
+
+        [TestMethod]
+        public async Task Maybe_Match_Error_Aggregate_Async_Sync()
+        {
+            string error1 = "error1", error2 = "error2", error = null;
+            var maybe = Task.FromResult(Maybe.Value<int>().Error(error1));
+
+            var aggregate = maybe.BindAsync(maybe.With(error2), (x, y) => maybe.With(x + y));
+            var result = await aggregate.MatchAsync(_ => string.Empty, (x, y) => { error = y[0]; return x; });
+
+            Assert.AreEqual(error1, error);
+            Assert.AreEqual(error2, result);
+        }
+
+        [TestMethod]
+        public async Task Maybe_Match_Value_Async_Async()
+        {
+            var answer = 42;
+            var maybe = Task.FromResult(Maybe.Value(answer).Error<string>());
+
+            var result = await maybe.MatchAsync(x => Task.FromResult(x), _ => 0);
+
+            Assert.AreEqual(answer, result);
+        }
+
+        [TestMethod]
+        public async Task Maybe_Match_Error_Async_Async()
+        {
+            var error = "error";
+            var maybe = Task.FromResult(Maybe.Value<int>().Error(error));
+
+            var result = await maybe.MatchAsync(_ => Task.FromResult(string.Empty), x => x);
+
+            Assert.AreEqual(error, result);
+        }
+
+        [TestMethod]
+        public async Task Maybe_Match_Error_Aggregate_Async_Async()
+        {
+            string error1 = "error1", error2 = "error2", error = null;
+            var maybe = Task.FromResult(Maybe.Value<int>().Error(error1));
+
+            var aggregate = maybe.BindAsync(maybe.With(error2), (x, y) => maybe.With(x + y));
+            var result = await aggregate.MatchAsync(_ => Task.FromResult(string.Empty), (x, y) => { error = y[0]; return x; });
+
+            Assert.AreEqual(error1, error);
+            Assert.AreEqual(error2, result);
+        }
+
+        #endregion
+    }
+
+    public static class MaybeTestsExtensions
+    {
+        private static class Cache<TValue, TError>
+        {
+            private static readonly TError[] _errors = new TError[0];
+            public static TError[] WhenValue(TValue _) => _errors;
+            public static TError[] WhenError(TError _, TError[] aggregateErrors) => aggregateErrors;
+        }
+
+        public static TError[] GetAggregateErrors<TValue, TError>(this Maybe<TValue, TError> maybe)
+        {
+            return maybe.Match(Cache<TValue, TError>.WhenValue, Cache<TValue, TError>.WhenError);
+        }
     }
 }
