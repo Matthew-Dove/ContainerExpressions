@@ -337,35 +337,9 @@ namespace Tests.ContainerExpressions.Containers
             Assert.IsTrue(result.Match(_ => false, x => x == 128));
         }
 
-        [TestMethod]
-        public void MaybeError_Transform()
-        {
-            var wasCalled = false;
-            var maybe = new Maybe<int, string>("error");
-
-            var result = maybe.Transform(x => { wasCalled = true; return x + 1; });
-
-            Assert.IsFalse(wasCalled);
-            Assert.IsTrue(maybe.Match(_ => false, x => x == "error"));
-            Assert.IsTrue(result.Match(_ => false, x => x == "error"));
-        }
-
         #endregion
 
         #region Maybe Value
-
-        [TestMethod]
-        public void MaybeValue_Transform()
-        {
-            var wasCalled = false;
-            var maybe = new Maybe<int, string>(1);
-
-            var result = maybe.Transform(x => { wasCalled = true; return x + 1; });
-
-            Assert.IsTrue(wasCalled);
-            Assert.IsTrue(maybe.Match(x => x == 1, _ => false));
-            Assert.IsTrue(result.Match(x => x == 2, _ => false));
-        }
 
         [TestMethod]
         public async Task MaybeValue_BindAsync_BothAreValid()
@@ -939,6 +913,114 @@ namespace Tests.ContainerExpressions.Containers
 
             Assert.AreEqual(error1, error);
             Assert.AreEqual(error2, result);
+        }
+
+        #endregion
+
+        #region Transform
+
+        [TestMethod]
+        public void Maybe_Transform_Value()
+        {
+            var wasCalled = false;
+            var maybe = new Maybe<int, string>(1);
+
+            var result = maybe.Transform(x => { wasCalled = true; return x + 1; });
+
+            Assert.IsTrue(wasCalled);
+            Assert.IsTrue(maybe.Match(x => x == 1, _ => false));
+            Assert.IsTrue(result.Match(x => x == 2, _ => false));
+        }
+
+        [TestMethod]
+        public void Maybe_Transform_Error()
+        {
+            var wasCalled = false;
+            var maybe = new Maybe<int, string>("error");
+
+            var result = maybe.Transform(x => { wasCalled = true; return x + 1; });
+
+            Assert.IsFalse(wasCalled);
+            Assert.IsTrue(maybe.Match(_ => false, x => x == "error"));
+            Assert.IsTrue(result.Match(_ => false, x => x == "error"));
+        }
+
+        [TestMethod]
+        public async Task Maybe_TransformAsync_Func_Value()
+        {
+            var wasCalled = false;
+            var maybe = new Maybe<int, string>(1);
+
+            var result = await maybe.TransformAsync(x => { wasCalled = true; return Task.FromResult(x + 1); });
+
+            Assert.IsTrue(wasCalled);
+            Assert.IsTrue(maybe.Match(x => x == 1, _ => false));
+            Assert.IsTrue(result.Match(x => x == 2, _ => false));
+        }
+
+        [TestMethod]
+        public async Task Maybe_TransformAsync__Func_Error()
+        {
+            var wasCalled = false;
+            var maybe = new Maybe<int, string>("error");
+
+            var result = await maybe.TransformAsync(x => { wasCalled = true; return Task.FromResult(x + 1); });
+
+            Assert.IsFalse(wasCalled);
+            Assert.IsTrue(maybe.Match(_ => false, x => x == "error"));
+            Assert.IsTrue(result.Match(_ => false, x => x == "error"));
+        }
+
+        [TestMethod]
+        public async Task Maybe_Transform_Maybe_Value()
+        {
+            var wasCalled = false;
+            var maybe = Task.FromResult(new Maybe<int, string>(1));
+
+            var result = await maybe.TransformAsync(x => { wasCalled = true; return x + 1; });
+
+            Assert.IsTrue(wasCalled);
+            Assert.IsTrue(await maybe.MatchAsync(x => x == 1, _ => false));
+            Assert.IsTrue(result.Match(x => x == 2, _ => false));
+        }
+
+        [TestMethod]
+        public async Task Maybe_Transform_Maybe_Error()
+        {
+            var wasCalled = false;
+            var maybe = Task.FromResult(new Maybe<int, string>("error"));
+
+            var result = await maybe.TransformAsync(x => { wasCalled = true; return x + 1; });
+
+            Assert.IsFalse(wasCalled);
+            Assert.IsTrue(await maybe.MatchAsync(_ => false, x => x == "error"));
+            Assert.IsTrue(result.Match(_ => false, x => x == "error"));
+        }
+
+        [TestMethod]
+        public async Task Maybe_Transform_MaybeFunc_Value()
+        {
+            var wasCalled = false;
+            var maybe = Task.FromResult(new Maybe<int, string>(1));
+
+            var result = await maybe.TransformAsync(x => { wasCalled = true; return Task.FromResult(x + 1); });
+
+            Assert.IsTrue(wasCalled);
+            Assert.IsTrue(await maybe.MatchAsync(x => x == 1, _ => false));
+            Assert.IsTrue(result.Match(x => x == 2, _ => false));
+        }
+
+        [TestMethod]
+        public async Task Maybe_Transform_MaybeFunc_Error()
+        {
+            var wasCalled = false;
+            var maybe = Task.FromResult(new Maybe<int, string>("error"));
+
+            var result = await maybe.TransformAsync(x => { wasCalled = true; return Task.FromResult(x + 1); });
+
+            Assert.IsFalse(wasCalled);
+            Assert.IsTrue(await maybe.MatchAsync(_ => false, x => x == "error"));
+            Assert.IsTrue(result.Match(_ => false, x => x == "error"));
         }
 
         #endregion
