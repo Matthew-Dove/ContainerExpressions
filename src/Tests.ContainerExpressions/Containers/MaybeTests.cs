@@ -129,6 +129,30 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
+        public void MaybeError_BindT_FirstOnly()
+        {
+            var error = "error";
+            var maybe = new Maybe<int, string>(error);
+
+            var result = maybe.Bind(maybe.With(1), (x, y) => x + y);
+
+            Assert.IsTrue(result.Match(_ => false, x => x == error));
+            Assert.AreEqual(result.GetAggregateErrors().Length, 0);
+        }
+
+        [TestMethod]
+        public async Task MaybeError_BindT_FirstOnly_Task()
+        {
+            var error = "error";
+            var maybe = new Maybe<int, string>(error);
+
+            var result = await maybe.BindAsync(maybe.With(1), (x, y) => Task.FromResult(x + y));
+
+            Assert.IsTrue(result.Match(_ => false, x => x == error));
+            Assert.AreEqual(result.GetAggregateErrors().Length, 0);
+        }
+
+        [TestMethod]
         public void MaybeError_Bind_SecondOnly()
         {
             var error = "error";
@@ -243,6 +267,17 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
+        public void MaybeError_BindAsyncT_FirstNotValid_DifferentErrorModels()
+        {
+            var first = new Maybe<int, (int, string)>((99, "error1"));
+            var second = new Maybe<int, string>(1);
+
+            var result = first.BindAggregate(second, x => $"Code: {x.Item1}, Message: {x.Item2}", (x, y) => x + y);
+
+            Assert.AreEqual("Code: 99, Message: error1", result.Match(_ => string.Empty, x => x));
+        }
+
+        [TestMethod]
         public void MaybeError_Bind_FirstNotValid_DifferentErrorMModels_TupleItem1()
         {
             var error = (99, "error1");
@@ -250,6 +285,18 @@ namespace Tests.ContainerExpressions.Containers
             var second = new Maybe<int, string>(1);
 
             var result = first.BindAggregate(second, (x, y) => new Maybe<int, ((int, string), string)>(x + y));
+
+            Assert.AreEqual(error, result.Match(_ => default, x => x.Item1));
+        }
+
+        [TestMethod]
+        public void MaybeError_BindT_FirstNotValid_DifferentErrorMModels_TupleItem1()
+        {
+            var error = (99, "error1");
+            var first = new Maybe<int, (int, string)>(error);
+            var second = new Maybe<int, string>(1);
+
+            var result = first.BindAggregate(second, (x, y) => x + y);
 
             Assert.AreEqual(error, result.Match(_ => default, x => x.Item1));
         }
@@ -326,11 +373,36 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
+        public async Task MaybeError_BindT_SecondIsTask_ErrorModelConversion()
+        {
+            var first = new Maybe<int, string>("128");
+            var second = Task.FromResult(new Maybe<decimal, byte>(3.0M));
+            Func<string, byte> convert = x => byte.Parse(x);
+            Func<int, decimal, double> func = (x, y) => (double)(x / y);
+
+            var result = await first.BindAggregateAsync(second, convert, func);
+
+            Assert.IsTrue(result.Match(_ => false, x => x == 128));
+        }
+
+        [TestMethod]
         public async Task MaybeError_Bind_SecondIsTask_TupleErrorModel()
         {
             var first = new Maybe<int, string>("error");
             var second = Task.FromResult(new Maybe<decimal, byte>(3.0M));
             Func<int, decimal, Maybe<double, (string, byte)>> func = (x, y) => new Maybe<double, (string, byte)>((double)(x / y));
+
+            var result = await first.BindAggregateAsync(second, func);
+
+            Assert.IsTrue(result.Match(_ => false, x => x.Item1 == "error"));
+        }
+
+        [TestMethod]
+        public async Task MaybeError_BindT_SecondIsTask_TupleErrorModel()
+        {
+            var first = new Maybe<int, string>("error");
+            var second = Task.FromResult(new Maybe<decimal, byte>(3.0M));
+            Func<int, decimal, double> func = (x, y) => (double)(x / y);
 
             var result = await first.BindAggregateAsync(second, func);
 
@@ -351,11 +423,36 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
+        public async Task MaybeError_BindT_SecondIsTask_WithValue_ErrorModelConversion()
+        {
+            var first = new Maybe<int, string>("128");
+            var second = Task.FromResult(new Maybe<decimal, byte>(3.0M));
+            Func<string, byte> convert = x => byte.Parse(x);
+            Func<int, decimal, Task<double>> func = (x, y) => Task.FromResult((double)(x / y));
+
+            var result = await first.BindAggregateAsync(second, convert, func);
+
+            Assert.IsTrue(result.Match(_ => false, x => x == 128));
+        }
+
+        [TestMethod]
         public async Task MaybeError_Bind_SecondIsTask_WithValue_TupleErrorModel()
         {
             var first = new Maybe<int, string>("error");
             var second = Task.FromResult(new Maybe<decimal, byte>(3.0M));
             Func<int, decimal, Task<Maybe<double, (string, byte)>>> func = (x, y) => Task.FromResult(new Maybe<double, (string, byte)>((double)(x / y)));
+
+            var result = await first.BindAggregateAsync(second, func);
+
+            Assert.IsTrue(result.Match(_ => false, x => x.Item1 == "error"));
+        }
+
+        [TestMethod]
+        public async Task MaybeError_BindT_SecondIsTask_WithValue_TupleErrorModel()
+        {
+            var first = new Maybe<int, string>("error");
+            var second = Task.FromResult(new Maybe<decimal, byte>(3.0M));
+            Func<int, decimal, Task<double>> func = (x, y) => Task.FromResult((double)(x / y));
 
             var result = await first.BindAggregateAsync(second, func);
 
@@ -376,11 +473,49 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
+        public async Task MaybeError_BindT_FirstIsTask_ErrorModelConversion()
+        {
+            var first = Task.FromResult(new Maybe<int, string>("128"));
+            var second = new Maybe<decimal, byte>(3.0M);
+            Func<string, byte> convert = x => byte.Parse(x);
+            Func<int, decimal, double> func = (x, y) => (double)(x / y);
+
+            var result = await first.BindAggregateAsync(second, convert, func);
+
+            Assert.IsTrue(result.Match(_ => false, x => x == 128));
+        }
+
+        [TestMethod]
+        public async Task MaybeError_BindTT_FirstIsTask_ErrorModelConversion()
+        {
+            var first = Task.FromResult(new Maybe<int, string>("128"));
+            var second = new Maybe<decimal, byte>(3.0M);
+            Func<string, byte> convert = x => byte.Parse(x);
+            Func<int, decimal, double> func = (x, y) => (double)(x / y);
+
+            var result = await first.BindAggregateAsync(second, convert, func);
+
+            Assert.IsTrue(result.Match(_ => false, x => x == 128));
+        }
+
+        [TestMethod]
         public async Task MaybeError_Bind_FirstIsTask_TupleErrorModel()
         {
             var first = Task.FromResult(new Maybe<int, string>("error"));
             var second = new Maybe<decimal, byte>(3.0M);
             Func<int, decimal, Maybe<double, (string, byte)>> func = (x, y) => new Maybe<double, (string, byte)>((double)(x / y));
+
+            var result = await first.BindAggregateAsync(second, func);
+
+            Assert.IsTrue(result.Match(_ => false, x => x.Item1 == "error"));
+        }
+
+        [TestMethod]
+        public async Task MaybeError_BindT_FirstIsTask_TupleErrorModel()
+        {
+            var first = Task.FromResult(new Maybe<int, string>("error"));
+            var second = new Maybe<decimal, byte>(3.0M);
+            Func<int, decimal, double> func = (x, y) => (double)(x / y);
 
             var result = await first.BindAggregateAsync(second, func);
 
@@ -401,6 +536,19 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
+        public async Task MaybeError_BindT_FirstIsTask_WithValue_ErrorModelConversion()
+        {
+            var first = Task.FromResult(new Maybe<int, string>("128"));
+            var second = new Maybe<decimal, byte>(3.0M);
+            Func<string, byte> convert = x => byte.Parse(x);
+            Func<int, decimal, Task<double>> func = (x, y) => Task.FromResult((double)(x / y));
+
+            var result = await first.BindAggregateAsync(second, convert, func);
+
+            Assert.IsTrue(result.Match(_ => false, x => x == 128));
+        }
+
+        [TestMethod]
         public async Task MaybeError_Bind_FirstIsTask_WithValue_TupleErrorModel()
         {
             var first = Task.FromResult(new Maybe<int, string>("error"));
@@ -413,11 +561,35 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
+        public async Task MaybeError_BindT_FirstIsTask_WithValue_TupleErrorModel()
+        {
+            var first = Task.FromResult(new Maybe<int, string>("error"));
+            var second = new Maybe<decimal, byte>(3.0M);
+            Func<int, decimal, Task<double>> func = (x, y) => Task.FromResult((double)(x / y));
+
+            var result = await first.BindAggregateAsync(second, func);
+
+            Assert.IsTrue(result.Match(_ => false, x => x.Item1 == "error"));
+        }
+
+        [TestMethod]
         public async Task MaybeError_Bind_FirstAndSecondMaybe_TupleErrorModel()
         {
             var first = Task.FromResult(new Maybe<int, string>("error"));
             var second = Task.FromResult(new Maybe<decimal, byte>(3.0M));
             Func<int, decimal, Maybe<double, (string, byte)>> func = (x, y) => new Maybe<double, (string, byte)>((double)(x / y));
+
+            var result = await first.BindAggregateAsync(second, func);
+
+            Assert.IsTrue(result.Match(_ => false, x => x.Item1 == "error"));
+        }
+
+        [TestMethod]
+        public async Task MaybeError_BindT_FirstAndSecondMaybe_TupleErrorModel()
+        {
+            var first = Task.FromResult(new Maybe<int, string>("error"));
+            var second = Task.FromResult(new Maybe<decimal, byte>(3.0M));
+            Func<int, decimal, double> func = (x, y) => (double)(x / y);
 
             var result = await first.BindAggregateAsync(second, func);
 
@@ -438,12 +610,38 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
+        public async Task MaybeError_BindT_FirstAndSecondMaybe_ErrorModelConversion()
+        {
+            var first = Task.FromResult(new Maybe<int, string>("128"));
+            var second = Task.FromResult(new Maybe<decimal, byte>(3.0M));
+            Func<string, byte> convert = x => byte.Parse(x);
+            Func<int, decimal, double> func = (x, y) => (double)(x / y);
+
+            var result = await first.BindAggregateAsync(second, convert, func);
+
+            Assert.IsTrue(result.Match(_ => false, x => x == 128));
+        }
+
+        [TestMethod]
         public async Task MaybeError_Bind_FirstAndSecondMaybeIsTask_ErrorModelConversion()
         {
             var first = Task.FromResult(new Maybe<int, string>("128"));
             var second = Task.FromResult(new Maybe<decimal, byte>(3.0M));
             Func<string, byte> convert = x => byte.Parse(x);
             Func<int, decimal, Task<Maybe<double, byte>>> func = (x, y) => Task.FromResult(new Maybe<double, byte>((double)(x / y)));
+
+            var result = await first.BindAggregateAsync(second, convert, func);
+
+            Assert.IsTrue(result.Match(_ => false, x => x == 128));
+        }
+
+        [TestMethod]
+        public async Task MaybeError_BindT_FirstAndSecondMaybeIsTask_ErrorModelConversion()
+        {
+            var first = Task.FromResult(new Maybe<int, string>("128"));
+            var second = Task.FromResult(new Maybe<decimal, byte>(3.0M));
+            Func<string, byte> convert = x => byte.Parse(x);
+            Func<int, decimal, Task<double>> func = (x, y) => Task.FromResult((double)(x / y));
 
             var result = await first.BindAggregateAsync(second, convert, func);
 
@@ -462,9 +660,43 @@ namespace Tests.ContainerExpressions.Containers
             Assert.IsTrue(result.Match(_ => false, x => x.Item1 == "error"));
         }
 
+        [TestMethod]
+        public async Task MaybeError_BindTTT_FirstAndSecondMaybeIsTask_TupleErrorModel()
+        {
+            var first = Task.FromResult(new Maybe<int, string>("error"));
+            var second = Task.FromResult(new Maybe<decimal, byte>(3.0M));
+            Func<int, decimal, Task<double>> func = (x, y) => Task.FromResult((double)(x / y));
+
+            var result = await first.BindAggregateAsync(second, func);
+
+            Assert.IsTrue(result.Match(_ => false, x => x.Item1 == "error"));
+        }
+
         #endregion
 
         #region Maybe Value
+
+        [TestMethod]
+        public void MaybeValue_BindT_FirstOnly()
+        {
+            var value = 1336;
+            var maybe = new Maybe<int, string>(value);
+
+            var result = maybe.Bind(maybe.With(1), (x, y) => x + y);
+
+            Assert.AreEqual(1337, result.Match(x => x, _ => 0));
+        }
+
+        [TestMethod]
+        public async Task MaybeValue_BindT_FirstOnly_Task()
+        {
+            var value = 1336;
+            var maybe = new Maybe<int, string>(value);
+
+            var result = await maybe.BindAsync(maybe.With(1), (x, y) => Task.FromResult(x + y));
+
+            Assert.AreEqual(1337, result.Match(x => x, _ => 0));
+        }
 
         [TestMethod]
         public async Task MaybeValue_BindAsync_BothAreValid()
@@ -484,6 +716,17 @@ namespace Tests.ContainerExpressions.Containers
             var second = Task.FromResult(new Maybe<int, string>(2));
 
             var result = await first.BindAsync(second, (x, y) => new Maybe<int, string>(x + y));
+
+            Assert.AreEqual(3, result.Match(x => x, _ => 0));
+        }
+
+        [TestMethod]
+        public async Task MaybeValue_BindAsynT_BothAreValid()
+        {
+            var first = new Maybe<int, string>(1);
+            var second = Task.FromResult(new Maybe<int, string>(2));
+
+            var result = await first.BindAsync(second, (x, y) => x + y);
 
             Assert.AreEqual(3, result.Match(x => x, _ => 0));
         }
@@ -547,11 +790,35 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
+        public async Task MaybeValue_BindT_FirstMaybe()
+        {
+            var first = Task.FromResult(new Maybe<int, string>(2));
+            var second = new Maybe<int, string>(3);
+            Func<int, int, Maybe<int, string>> func = (x, y) => x + y;
+
+            var result = await first.BindAsync(second, func);
+
+            Assert.IsTrue(result.Match(x => x == 5, _ => false));
+        }
+
+        [TestMethod]
         public async Task MaybeValue_Bind_FirstMaybeIsTask()
         {
             var first = Task.FromResult(new Maybe<int, string>(2));
             var second = new Maybe<int, string>(3);
             Func<int, int, Task<Maybe<int, string>>> func = (x, y) => Task.FromResult(new Maybe<int, string>(x + y));
+
+            var result = await first.BindAsync(second, func);
+
+            Assert.IsTrue(result.Match(x => x == 5, _ => false));
+        }
+
+        [TestMethod]
+        public async Task MaybeValue_BindT_FirstMaybeIsTask()
+        {
+            var first = Task.FromResult(new Maybe<int, string>(2));
+            var second = new Maybe<int, string>(3);
+            Func<int, int, Task<int>> func = (x, y) => Task.FromResult(x + y);
 
             var result = await first.BindAsync(second, func);
 
@@ -571,6 +838,18 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
+        public async Task MaybeValue_BindT_SecondMaybeIsTask()
+        {
+            var first = new Maybe<int, string>(2);
+            var second = Task.FromResult(new Maybe<int, string>(3));
+            Func<int, int, Task<int>> func = (x, y) => Task.FromResult(x + y);
+
+            var result = await first.BindAsync(second, func);
+
+            Assert.IsTrue(result.Match(x => x == 5, _ => false));
+        }
+
+        [TestMethod]
         public async Task MaybeValue_Bind_FirstAndSecondMaybeIsTask_SyncFunc()
         {
             var first = Task.FromResult(new Maybe<int, string>(2));
@@ -583,11 +862,35 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
+        public async Task MaybeValue_BindT_FirstAndSecondMaybeIsTask_SyncFunc()
+        {
+            var first = Task.FromResult(new Maybe<int, string>(2));
+            var second = Task.FromResult(new Maybe<decimal, string>(3.0M));
+            Func<int, decimal, double> func = (x, y) => (double)(x / y);
+
+            var result = await first.BindAsync(second, func);
+
+            Assert.AreEqual((double)(2 / 3M), result.Match(x => x, _ => 0D));
+        }
+
+        [TestMethod]
         public async Task MaybeValue_Bind_FirstAndSecondMaybeIsTask()
         {
             var first = Task.FromResult(new Maybe<int, string>(2));
             var second = Task.FromResult(new Maybe<decimal, string>(3.0M));
             Func<int, decimal, Task<Maybe<double, string>>> func = (x, y) => Task.FromResult(new Maybe<double, string>((double)(x / y)));
+
+            var result = await first.BindAsync(second, func);
+
+            Assert.AreEqual((double)(2 / 3M), result.Match(x => x, _ => 0D));
+        }
+
+        [TestMethod]
+        public async Task MaybeValue_BindT_FirstAndSecondMaybeIsTask()
+        {
+            var first = Task.FromResult(new Maybe<int, string>(2));
+            var second = Task.FromResult(new Maybe<decimal, string>(3.0M));
+            Func<int, decimal, Task<double>> func = (x, y) => Task.FromResult((double)(x / y));
 
             var result = await first.BindAsync(second, func);
 
@@ -1060,6 +1363,18 @@ namespace Tests.ContainerExpressions.Containers
             var maybe = Task.FromResult(Maybe.Value(value1).Error<string>());
 
             var aggregate = maybe.BindAsync(maybe.With(value2), (x, y) => maybe.With(x + y));
+            var result = await aggregate.MatchAsync(x => x, (x, y) => 0);
+
+            Assert.AreEqual(value1 + value2, result);
+        }
+
+        [TestMethod]
+        public async Task Maybe_Match_ValueT_Aggregate_Async_Sync()
+        {
+            int value1 = 2, value2 = 3;
+            var maybe = Task.FromResult(Maybe.Value(value1).Error<string>());
+
+            var aggregate = maybe.BindAsync(maybe.With(value2), (x, y) => x + y);
             var result = await aggregate.MatchAsync(x => x, (x, y) => 0);
 
             Assert.AreEqual(value1 + value2, result);

@@ -81,7 +81,7 @@ namespace ContainerExpressions.Containers
 
         #endregion
 
-        // TODO: Apply(Func) Log Maybe | ConfirgeAwait false
+        // TODO: Log Maybe | ConfirgeAwait false
 
         #region Bind
 
