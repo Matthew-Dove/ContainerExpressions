@@ -237,7 +237,7 @@ namespace Tests.ContainerExpressions.Containers
             var first = new Maybe<int, (int, string)>((99, "error1"));
             var second = new Maybe<int, string>(1);
 
-            var result = first.Bind(second, x => $"Code: {x.Item1}, Message: {x.Item2}", (x, y) => new Maybe<int, string>(x + y));
+            var result = first.BindAggregate(second, x => $"Code: {x.Item1}, Message: {x.Item2}", (x, y) => new Maybe<int, string>(x + y));
 
             Assert.AreEqual("Code: 99, Message: error1", result.Match(_ => string.Empty, x => x));
         }
@@ -249,7 +249,7 @@ namespace Tests.ContainerExpressions.Containers
             var first = new Maybe<int, (int, string)>(error);
             var second = new Maybe<int, string>(1);
 
-            var result = first.Bind(second, (x, y) => new Maybe<int, ((int, string), string)>(x + y));
+            var result = first.BindAggregate(second, (x, y) => new Maybe<int, ((int, string), string)>(x + y));
 
             Assert.AreEqual(error, result.Match(_ => default, x => x.Item1));
         }
@@ -261,7 +261,7 @@ namespace Tests.ContainerExpressions.Containers
             var first = new Maybe<int, (int, string)>(1);
             var second = new Maybe<int, string>(error);
 
-            var result = first.Bind(second, (x, y) => new Maybe<int, ((int, string), string)>(x + y));
+            var result = first.BindAggregate(second, (x, y) => new Maybe<int, ((int, string), string)>(x + y));
 
             Assert.AreEqual(error, result.Match(_ => default, x => x.Item2));
         }
@@ -307,7 +307,7 @@ namespace Tests.ContainerExpressions.Containers
             var first = new Maybe<int, (int, string)>((99, "error1"));
             var second = Task.FromResult(new Maybe<int, string>(1));
 
-            var result = await first.BindAsync(second, x => $"Code: {x.Item1}, Message: {x.Item2}", (x, y) => Task.FromResult(new Maybe<int, string>(x + y)));
+            var result = await first.BindAggregateAsync(second, x => $"Code: {x.Item1}, Message: {x.Item2}", (x, y) => Task.FromResult(new Maybe<int, string>(x + y)));
 
             Assert.AreEqual("Code: 99, Message: error1", result.Match(_ => string.Empty, x => x));
         }
@@ -320,7 +320,7 @@ namespace Tests.ContainerExpressions.Containers
             Func<string, byte> convert = x => byte.Parse(x);
             Func<int, decimal, Maybe<double, byte>> func = (x, y) => new Maybe<double, byte>((double)(x / y));
 
-            var result = await first.BindAsync(second, convert, func);
+            var result = await first.BindAggregateAsync(second, convert, func);
 
             Assert.IsTrue(result.Match(_ => false, x => x == 128));
         }
@@ -332,7 +332,7 @@ namespace Tests.ContainerExpressions.Containers
             var second = Task.FromResult(new Maybe<decimal, byte>(3.0M));
             Func<int, decimal, Maybe<double, (string, byte)>> func = (x, y) => new Maybe<double, (string, byte)>((double)(x / y));
 
-            var result = await first.BindAsync(second, func);
+            var result = await first.BindAggregateAsync(second, func);
 
             Assert.IsTrue(result.Match(_ => false, x => x.Item1 == "error"));
         }
@@ -345,7 +345,7 @@ namespace Tests.ContainerExpressions.Containers
             Func<string, byte> convert = x => byte.Parse(x);
             Func<int, decimal, Task<Maybe<double, byte>>> func = (x, y) => Task.FromResult(new Maybe<double, byte>((double)(x / y)));
 
-            var result = await first.BindAsync(second, convert, func);
+            var result = await first.BindAggregateAsync(second, convert, func);
 
             Assert.IsTrue(result.Match(_ => false, x => x == 128));
         }
@@ -357,7 +357,7 @@ namespace Tests.ContainerExpressions.Containers
             var second = Task.FromResult(new Maybe<decimal, byte>(3.0M));
             Func<int, decimal, Task<Maybe<double, (string, byte)>>> func = (x, y) => Task.FromResult(new Maybe<double, (string, byte)>((double)(x / y)));
 
-            var result = await first.BindAsync(second, func);
+            var result = await first.BindAggregateAsync(second, func);
 
             Assert.IsTrue(result.Match(_ => false, x => x.Item1 == "error"));
         }
@@ -370,7 +370,7 @@ namespace Tests.ContainerExpressions.Containers
             Func<string, byte> convert = x => byte.Parse(x);
             Func<int, decimal, Maybe<double, byte>> func = (x, y) => new Maybe<double, byte>((double)(x / y));
 
-            var result = await first.BindAsync(second, convert, func);
+            var result = await first.BindAggregateAsync(second, convert, func);
 
             Assert.IsTrue(result.Match(_ => false, x => x == 128));
         }
@@ -382,7 +382,7 @@ namespace Tests.ContainerExpressions.Containers
             var second = new Maybe<decimal, byte>(3.0M);
             Func<int, decimal, Maybe<double, (string, byte)>> func = (x, y) => new Maybe<double, (string, byte)>((double)(x / y));
 
-            var result = await first.BindAsync(second, func);
+            var result = await first.BindAggregateAsync(second, func);
 
             Assert.IsTrue(result.Match(_ => false, x => x.Item1 == "error"));
         }
@@ -395,7 +395,7 @@ namespace Tests.ContainerExpressions.Containers
             Func<string, byte> convert = x => byte.Parse(x);
             Func<int, decimal, Task<Maybe<double, byte>>> func = (x, y) => Task.FromResult(new Maybe<double, byte>((double)(x / y)));
 
-            var result = await first.BindAsync(second, convert, func);
+            var result = await first.BindAggregateAsync(second, convert, func);
 
             Assert.IsTrue(result.Match(_ => false, x => x == 128));
         }
@@ -407,7 +407,7 @@ namespace Tests.ContainerExpressions.Containers
             var second = new Maybe<decimal, byte>(3.0M);
             Func<int, decimal, Task<Maybe<double, (string, byte)>>> func = (x, y) => Task.FromResult(new Maybe<double, (string, byte)>((double)(x / y)));
 
-            var result = await first.BindAsync(second, func);
+            var result = await first.BindAggregateAsync(second, func);
 
             Assert.IsTrue(result.Match(_ => false, x => x.Item1 == "error"));
         }
@@ -419,7 +419,7 @@ namespace Tests.ContainerExpressions.Containers
             var second = Task.FromResult(new Maybe<decimal, byte>(3.0M));
             Func<int, decimal, Maybe<double, (string, byte)>> func = (x, y) => new Maybe<double, (string, byte)>((double)(x / y));
 
-            var result = await first.BindAsync(second, func);
+            var result = await first.BindAggregateAsync(second, func);
 
             Assert.IsTrue(result.Match(_ => false, x => x.Item1 == "error"));
         }
@@ -432,7 +432,7 @@ namespace Tests.ContainerExpressions.Containers
             Func<string, byte> convert = x => byte.Parse(x);
             Func<int, decimal, Maybe<double, byte>> func = (x, y) => new Maybe<double, byte>((double)(x / y));
 
-            var result = await first.BindAsync(second, convert, func);
+            var result = await first.BindAggregateAsync(second, convert, func);
 
             Assert.IsTrue(result.Match(_ => false, x => x == 128));
         }
@@ -445,7 +445,7 @@ namespace Tests.ContainerExpressions.Containers
             Func<string, byte> convert = x => byte.Parse(x);
             Func<int, decimal, Task<Maybe<double, byte>>> func = (x, y) => Task.FromResult(new Maybe<double, byte>((double)(x / y)));
 
-            var result = await first.BindAsync(second, convert, func);
+            var result = await first.BindAggregateAsync(second, convert, func);
 
             Assert.IsTrue(result.Match(_ => false, x => x == 128));
         }
@@ -457,7 +457,7 @@ namespace Tests.ContainerExpressions.Containers
             var second = Task.FromResult(new Maybe<decimal, byte>(3.0M));
             Func<int, decimal, Task<Maybe<double, (string, byte)>>> func = (x, y) => Task.FromResult(new Maybe<double, (string, byte)>((double)(x / y)));
 
-            var result = await first.BindAsync(second, func);
+            var result = await first.BindAggregateAsync(second, func);
 
             Assert.IsTrue(result.Match(_ => false, x => x.Item1 == "error"));
         }
