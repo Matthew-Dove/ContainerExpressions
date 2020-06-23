@@ -954,6 +954,50 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
+        public void Maybe_Create_ValueT()
+        {
+            var value = 42;
+
+            var result = Maybe.Create<int, string>(value);
+
+            Assert.IsTrue(result.Match(x => x == value, _ => false));
+        }
+
+        [TestMethod]
+        public void Maybe_Create_ErrorT()
+        {
+            var error = "error";
+
+            var result = Maybe.Create<int, string>(error);
+
+            Assert.IsTrue(result.Match(_ => false, x => x == error));
+        }
+
+        [TestMethod]
+        public void Maybe_Create_Response()
+        {
+            var error = "error";
+            var answer = 42;
+            var response = new Response<int>(answer);
+
+            var result = Maybe.Create(response, error);
+
+            Assert.AreEqual(response, result.Match(x => x, _ => 0));
+            Assert.AreEqual(answer, result.Match(x => x, _ => 0));
+        }
+
+        [TestMethod]
+        public void Maybe_Create_Either()
+        {
+            var answer = 42;
+            var either = new Either<int, string>(answer);
+
+            var result = Maybe.Create(either);
+
+            Assert.AreEqual(either.Match(x => x, _ => -1), result.Match(x => x, _ => 1));
+        }
+
+        [TestMethod]
         public void Maybe_With_Response()
         {
             var response = new Response<int>(42);

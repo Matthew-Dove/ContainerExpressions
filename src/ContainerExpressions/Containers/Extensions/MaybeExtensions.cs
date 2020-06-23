@@ -81,8 +81,6 @@ namespace ContainerExpressions.Containers
 
         #endregion
 
-        // TODO: Log Maybe | ConfirgeAwait false
-
         #region Bind
 
         /** Maybe Bind implementation. **/
