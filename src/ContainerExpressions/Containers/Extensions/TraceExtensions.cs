@@ -231,9 +231,30 @@ namespace ContainerExpressions.Containers
 
         #region Maybe
 
-        public static Maybe<TValue, TError> Log<TValue, TError>(this Maybe<TValue, TError> maybe, Func<TValue, string> logValue, Func<TError, string> logError)
+        public static Maybe<TValue, TError> Log<TValue, TError>(this Maybe<TValue, TError> maybe, Func<TValue, string> value, Func<TError, string> error)
         {
-            var message = maybe.Match(logValue, logError);
+            var message = maybe.Match(value, error);
+            Trace.Log(message);
+            return maybe;
+        }
+
+        public static Maybe<TValue, TError> Log<TValue, TError>(this Maybe<TValue, TError> maybe, string value, string error)
+        {
+            var message = maybe._hasValue ? value : error;
+            Trace.Log(message);
+            return maybe;
+        }
+
+        public static Maybe<TValue> Log<TValue>(this Maybe<TValue> maybe, Func<TValue, string> value, Func<Exception, string> error)
+        {
+            var message = maybe.Match(value, error);
+            Trace.Log(message);
+            return maybe;
+        }
+
+        public static Maybe<TValue> Log<TValue>(this Maybe<TValue> maybe, string value, string error)
+        {
+            var message = maybe._hasValue ? value : error;
             Trace.Log(message);
             return maybe;
         }

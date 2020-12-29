@@ -243,5 +243,41 @@ namespace ContainerExpressions.Containers
             });
 
         #endregion
+
+        #region Maybe
+
+        public static Task<Maybe<TValue, TError>> LogAsync<TValue, TError>(this Task<Maybe<TValue, TError>> maybe, Func<TValue, string> value, Func<TError, string> error) =>
+            maybe.ContinueWith(x =>
+            {
+                var message = x.Result.Match(value, error);
+                Trace.Log(message);
+                return x.Result;
+            });
+
+        public static Task<Maybe<TValue, TError>> LogAsync<TValue, TError>(this Task<Maybe<TValue, TError>> maybe, string value, string error) =>
+            maybe.ContinueWith(x =>
+            {
+                var message = x.Result._hasValue ? value : error;
+                Trace.Log(message);
+                return x.Result;
+            });
+
+        public static Task<Maybe<TValue>> LogAsync<TValue>(this Task<Maybe<TValue>> maybe, Func<TValue, string> value, Func<Exception, string> error) =>
+            maybe.ContinueWith(x =>
+            {
+                var message = x.Result.Match(value, error);
+                Trace.Log(message);
+                return x.Result;
+            });
+
+        public static Task<Maybe<TValue>> LogAsync<TValue>(this Task<Maybe<TValue>> maybe, string value, string error) =>
+            maybe.ContinueWith(x =>
+            {
+                var message = x.Result._hasValue ? value : error;
+                Trace.Log(message);
+                return x.Result;
+            });
+
+        #endregion
     }
 }

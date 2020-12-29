@@ -3,6 +3,7 @@ using ContainerExpressions.Expressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Tests.ContainerExpressions.Containers
@@ -232,6 +233,87 @@ namespace Tests.ContainerExpressions.Containers
 
         #endregion
 
+        #region Maybe
+
+        [TestMethod]
+        public void Maybe_ValueError_Func_Valid()
+        {
+            var input = Guid.NewGuid();
+            Func<Guid, string> trace = x => x.ToString();
+
+            var maybe = new Maybe<Guid, string>(input).Log(trace, x => string.Empty);
+
+            Assert.AreEqual(input, Guid.Parse(_messages.Single()));
+        }
+
+        [TestMethod]
+        public void Maybe_ValueError_Func_NotValid()
+        {
+            var input = Guid.NewGuid();
+            Func<Guid, string> trace = x => x.ToString();
+
+            var maybe = new Maybe<string, Guid>(input).Log(x => string.Empty, trace);
+
+            Assert.AreEqual(input, Guid.Parse(_messages.Single()));
+        }
+
+        [TestMethod]
+        public void Maybe_ValueError_Const_Valid()
+        {
+            var maybe = new Maybe<string, int>("Input").Log("Value", "Error");
+
+            Assert.AreEqual("Value", _messages.Single());
+        }
+
+        [TestMethod]
+        public void Maybe_ValueError_Const_NotValid()
+        {
+            var maybe = new Maybe<int, string>("Input").Log("Value", "Error");
+
+            Assert.AreEqual("Error", _messages.Single());
+        }
+
+        [TestMethod]
+        public void Maybe_Value_Func_Valid()
+        {
+            var input = Guid.NewGuid();
+            Func<Guid, string> trace = x => x.ToString();
+
+            var maybe = new Maybe<Guid>(input).Log(trace, x => string.Empty);
+
+            Assert.AreEqual(input, Guid.Parse(_messages.Single()));
+        }
+
+        [TestMethod]
+        public void Maybe_Value_Func_NotValid()
+        {
+            var msg = "error";
+            var input = new Exception(msg);
+            Func<Exception, string> trace = x => x.Message;
+
+            var maybe = new Maybe<Guid>(input).Log(x => string.Empty, trace);
+
+            Assert.AreEqual(msg, _messages.Single());
+        }
+
+        [TestMethod]
+        public void Maybe_Value_Const_Valid()
+        {
+            var maybe = new Maybe<string>("Input").Log("Value", "Error");
+
+            Assert.AreEqual("Value", _messages.Single());
+        }
+
+        [TestMethod]
+        public void Maybe_Value_Const_NotValid()
+        {
+            var maybe = new Maybe<string>(new Exception("Input")).Log("Value", "Error");
+
+            Assert.AreEqual("Error", _messages.Single());
+        }
+
+        #endregion
+
         #region Async
 
         [TestMethod]
@@ -279,6 +361,51 @@ namespace Tests.ContainerExpressions.Containers
             Assert.AreEqual(2, count);
             Assert.AreEqual(3, _messages.Count);
             Assert.AreEqual(3, _messages.FindAll(x => x == success).Count);
+        }
+
+        [TestMethod]
+        public async Task Async_Maybe_ValueError_Func_Valid()
+        {
+            var input = Guid.NewGuid();
+            Func<Guid, string> trace = x => x.ToString();
+
+            var maybe = await Task.FromResult(new Maybe<Guid, string>(input)).LogAsync(trace, x => string.Empty);
+
+            Assert.AreEqual(input, Guid.Parse(_messages.Single()));
+        }
+
+        [TestMethod]
+        public async Task Async_Maybe_ValueError_Func_NotValid()
+        {
+            var input = Guid.NewGuid();
+            Func<Guid, string> trace = x => x.ToString();
+
+            var maybe = await Task.FromResult(new Maybe<string, Guid>(input)).LogAsync(x => string.Empty, trace);
+
+            Assert.AreEqual(input, Guid.Parse(_messages.Single()));
+        }
+
+        [TestMethod]
+        public async Task Async_Maybe_Value_Func_Valid()
+        {
+            var input = Guid.NewGuid();
+            Func<Guid, string> trace = x => x.ToString();
+
+            var maybe = await Task.FromResult(new Maybe<Guid>(input)).LogAsync(trace, x => string.Empty);
+
+            Assert.AreEqual(input, Guid.Parse(_messages.Single()));
+        }
+
+        [TestMethod]
+        public async Task Async_Maybe_Value_Func_NotValid()
+        {
+            var msg = "error";
+            var input = new Exception(msg);
+            Func<Exception, string> trace = x => x.Message;
+
+            var maybe = await Task.FromResult(new Maybe<Guid>(input)).LogAsync(x => string.Empty, trace);
+
+            Assert.AreEqual(msg, _messages.Single());
         }
 
         #endregion

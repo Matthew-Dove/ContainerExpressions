@@ -4,9 +4,9 @@ Containers for types, and expressions for those containers, enabling code to hav
 [If you prefer slides, there is some documentation here too.](https://docs.google.com/presentation/d/1ma8E9YohW2clB_lrB0cklm2_AelkBrBcl2f9DMwu8T4/edit?usp=sharing)  
 [PM> Install-Package ContainerExpressions](https://www.nuget.org/packages/ContainerExpressions/)  
 
-## Containers
+# Containers
 
-### Response`<T>`
+## Response`<T>`
 
 An enclosing type around a method's normal return type.  
 Used when methods may return an error beyond your control, the container signals if the method ran successfully or not.
@@ -47,7 +47,7 @@ if (customer.IsValid)
 }
 ```
 
-### Response
+## Response
 
 Similar to Response`<T>`, but used for methods that return void, instead of a *real* type.
 ```cs
@@ -73,7 +73,18 @@ class CustomerService
 }
 ```
 
-### Later`<T>`
+### Response Extension Methods
+
+Useful utilities for the `Response<T>` type.  
+
+* `T GetValueOrDefault<T>(T defaultValue)` Returns the default value when the Response is in an invalid state.
+* `Response<TResult> Bind<TResult>(Func<T, Response<TResult>> func)` Invokes a second function with the output of the first one.
+* `Response<TResult> Transform<T, TResult>(Func<T, TResult> func)` Changes type `T`, to type `TResult`.
+* `Func<T, Response<TResult>> Lift<T, TResult>(Func<T, TResult>)` Elevate the function’s type from `T`, to `Response<T>`
+* `Response<TResult> Pivot<T, TResult>` Execute the first function if the condition is true, otherwise execute the second function.  
+* `bool IsTrue<T>` When the Response is in a valid state the func's bool result is returned, otherwise false is returned.  
+
+## Later`<T>`
 
 Used in situations where you desire the value to be calulated the first time it's accessed.  
 
@@ -83,18 +94,18 @@ Using the later container we no longer care about the execution order of the aut
 ```cs
 class UserService : IUserService
 {
-	public string Name { get { return _username; } }
-	private readonly Later<string> _username;
+    public string Name { get { return _username; } }
+    private readonly Later<string> _username;
     
     public UserService()
     {
     	_username = Later.Create(() => Thread.CurrentPrincipal.Identity.Name);
-	}
+    }
 }
 ```
 Note: there is also Later.CreateAsync() for asynchronous values.
 
-### Try`<T>`
+## Try`<T>`
 
 Wrap an `Action` (a void function), or a `Func<T>` (a function returning a "real" type) in a Try Container to safely execute otherwise problematic code.  
 If the code in a function can throw errors, and those aren't handled internally the Try Container can help out.  
@@ -121,7 +132,7 @@ private static void Persist(Widget widget)
 
 Note: there is also Try.RunAsync() for asynchronous functions.
 
-### Either`<T>`
+## Either`<T>`
 
 If you have a function that can benefit from returning one type, from a selection of types, then Either is what you're looking for.  
 Either can change it's internal type during program execution similar to object, but in a type safe way. 
@@ -145,16 +156,16 @@ Either<Ok, Error> either = new Ok();
 
 if (new Random().Next() % 2 == 0)
 {
-	either = new Error();
+    either = new Error();
 }
 
 string message = either.Match(
-	ok => "Operation was successful.", // When Either's type is Ok, this string is returned.
-	error => "Internal error - try again later." // When Either's type is Error, this string is returned.
+    ok => "Operation was successful.", // When Either's type is Ok, this string is returned.
+    error => "Internal error - try again later." // When Either's type is Error, this string is returned.
 );
 ````
 
-### Trace
+## Trace
 
 Logs function inputs, and outputs so you can save them to a trace file.  
 
@@ -188,9 +199,74 @@ var count = Expression.Compose(identity.Log(trace), increment.Log(trace), increm
 // The value of the int is 2.
 ````
 
-## Expressions
+## NotNull`<T>`
 
-### Compose`<T>`
+A containter for a reference type `T`, that ensures the provided value of `T` is not null.  
+The constructor is private, therefore callers must cast from `T` to `NotNull<T>` (*an implicit cast is fine, and most appropriate*).  
+In essence this is the `ArgumentNullException` parameter check defined in a type.  
+
+A short demo below shows its use:  
+
+```cs
+// userId T (in this case string) is wrapped in NotNull, it will not allow a cast from T to NotNull<T> when T is null.
+string GetUserName(NotNull<string> userId)
+{
+    var service = new UserService();
+    var username = service.GetUsername(userId); // We can be confident that userId has a value, as passing null to this method results in a runtime exception.
+    return username;
+}
+
+class UserService
+{
+    public string GetUsername(string userId) => USER_NAME; // Observe userId is a normal string here, there is no need to explicitly extract the underlying value from NotNull<T>. 
+}
+```
+
+The method `GetUserName` would be called as if userId was a normal string:  
+
+```cs
+var username = GetUserName("87654321");
+```
+
+There is a struct version of `NotNull` described as `NN<T>`.  
+This was included as creating a reference for such a short lived type seemed wasteful.  
+You may select to use `NN<T>` when considering garbage collection, or if you need copy semantics.  
+A struct is harder to "lock down", as you cannot stop the caller from invoking the default constructor.  
+If you trust the caller enough to not break you on purpose, and pass in `T` letting the implicit cast occur, then using `NN<T>` is preferable in most cases.  
+
+## Maybe`<TValue, TError>`
+
+Maybe contains an optional `TError` type when the caller needs to make different decisions on error, and requires some (*or all*) of the low level details.  
+If you do not need the custom `TError` type overload, then the base `Exception` can be used from the type `Maybe<TValue>` (*as opposed to `Maybe<TValue, TError>`*).  
+Maybe will contain **one** of *either* the `TValue`, or the `TError` / `Exception` types (*never both value and error*).  
+
+Note that `Maybe` is very similar to that of `Response<T>`, and `Either<T1, T2>`.  
+However it deserves it's own container, as it hits a niche that neither  those containers would be good substitutes for.  
+
+`Response<T>` expects the low level code to handle errors, and only surfaces with a false result when an opperation fails (*i.e. containing no error details*).  
+This is by desgin, we do not want to encourage "leaky abstractions". The caller may know "creating a new user failed", but not "it failed because of a table lock".  
+Table locks can be fixed at the database, or user creation service level, not by the high level caller (*this is not their concern*).  
+The caller still has context to generate useful messages for the end client.  
+
+`Either<T1, T2>` can model the value / error types with it's `T2` implementation, but it is not specialized to account for aggregate errors; making it awkward to use at best.  
+For example `Either<T1, T2>` would be fine for a single use of some value / error, where the caller unwraps it right away, and handles the value, or error conditions then and there.  
+However this is only the very simplest of use cases, more likey the caller wants to invoke many of these in a row thoughout the course of fulfilling some incoming request.  
+
+When `Maybe` has a value, it is propagated to the next `Maybe` for further execution.  
+When `Maybe` has an error, and is combining its result with that of another `Maybe`; which also has an error, we need to store *both* errors, so they may be presented to the top level caller together.  
+
+`Either` is not capable of storing the aggregated errors, so the user would be forced to do it manually (*or lose all errors besides the final one, which would not have been the initial cause*).  
+We cannot provide a general solution for `Either`, as values do not need to be stored (*they are used, then thrown away*); in addition any `Either` with 3 or more types would not benefit from such a design.  
+Lastly `Either` does not have the concept of one of the `<T>`'s being an error. They can be anything at all, so would `T1`, or `T2` be the error type?  This question does not make sense to ask `Either`.  
+
+This `Maybe` preamble has gone on long enough, but I foresee the existence of this type being confusing, when there are two others that *can almost* do the same thing. In summary use...  
+`Response` when you do not need to know the details of *how* some operation failed (*just that it did*).  
+`Either` when you have a range of values that can be produced from some action (*one of the values could still be an error, but doesn't have to be*).  
+`Maybe` when you want low level error details propagated up to the caller, so they can make better decisions with the provided data.  
+
+# Expressions
+
+## Compose`<T>`
 
 Used to run dependant functions one after each other, such that the first function's output feeds into the second function's input.  
 This continues until the last function, when that type is returned in the container `Response<T>`.
@@ -206,7 +282,7 @@ var filepath = Expression.Compose(DownloadHtml, PersistHtml);
 
 Note: there is also Expression.ComposeAsync() for composing asynchronous functions.
 
-### Match`<T>`
+## Match`<T>`
 
 Let's say you'd like to do different things based on the state of some input.  
 For example summing an array of integers, you have three states, the array is null, the array is empty, the array has more then zero elements.  
@@ -218,9 +294,9 @@ In the example below when the input is null, we return an invalid response, when
 var input = new int[] { 1, 2, 3 };
 
 var result = Expression.Match(input,
-	Pattern.Create<int[], int>(x => x == null, _ => Response.Create<int>()), // When null, return an invalid response.
-	Pattern.Create<int[], int>(x => x.Length == 0, _ => Response.Create(0)), // When empty, return 0.
-	Pattern.Create<int[], int>(x => x.Length > 0, Sum) // When more than zero elements exist, sum them, and return that result.
+    Pattern.Create<int[], int>(x => x == null, _ => Response.Create<int>()), // When null, return an invalid response.
+    Pattern.Create<int[], int>(x => x.Length == 0, _ => Response.Create(0)), // When empty, return 0.
+    Pattern.Create<int[], int>(x => x.Length > 0, Sum) // When more than zero elements exist, sum them, and return that result.
 );
 
 // Sum all elements in the array.
@@ -237,7 +313,7 @@ static Response<int> Sum(int[] numbers)
 
 Note: there is also Expression.MatchAsync() for asynchronous patterns.
 
-### Retry`<T>`
+## Retry`<T>`
 
 Execute the same function until it's Response is valid, or you run out of retries as defined by the options.  
 By default the options are set to 1 retry, and a delay of 100 milliseconds before trying again.  
@@ -275,7 +351,7 @@ public Response<T> CreateUser(UserModel user)
 }
 ```
 
-### Reduce`<T>`
+## Reduce`<T>`
 
 Combine many values of `T` to a single value of `T`.  
 Useful for any type that is associative.  
@@ -292,7 +368,7 @@ var arg1 = "hello";
 string sentence = Expression.Reduce(combine, arg1, words);
 ```
 
-### Funnel`<T>`
+## Funnel`<T>`
 
 Takes many `Response<T>`'s and invokes a function passing each `T` as an argument; if and only if each `Response<T>` is in a valid state.  
 If at least one input is in an invalid state, then an invalid `Response<T>` is returned instead of calling the function.  
@@ -310,13 +386,20 @@ var pi = divide(22D, 7D);
 var answer = Expression.Funnel(e, pi, Math.Pow);
 ```
 
-## Extension Methods
+# Changelog
 
-Useful utilities for the `Response<T>` type.  
+## 6.0.0
 
-* `T GetValueOrDefault<T>(T defaultValue)` Returns the default value when the Response is in an invalid state.
-* `Response<TResult> Bind<TResult>(Func<T, Response<TResult>> func)` Invokes a second function with the output of the first one.
-* `Response<TResult> Transform<T, TResult>(Func<T, TResult> func)` Changes type `T`, to type `TResult`.
-* `Func<T, Response<TResult>> Lift<T, TResult>(Func<T, TResult>)` Elevate the function’s type from `T`, to `Response<T>`
-* `Response<TResult> Pivot<T, TResult>` Execute the first function if the condition is true, otherwise execute the second function.  
-* `bool IsTrue<T>` When the Response is in a valid state the func's bool result is returned, otherwise false is returned.  
+* Started a changelog (*i.e. pre version 6 you need to check the raw git commits*).  
+* `Bind` and `Transform` now take any `T` off some `Response` instead of only a `Response<T>`.  
+* You can now `Log` off any `T`, previously it was only for `Response<T>`.  
+* Async `Try` container now handles `AggregateException` separately from the standard `Exception` type.  
+* The `Retry` container now accepts an exponential backoff algorithm, with optional jitter.  
+* Any `T` value can now initiate a `Response` chain using the `Push` extension.  
+* Introduced `NotNull<T>` as a way to counter reference types being null.  
+* Lots of small method signature changes to flesh out `Bind`, `Transform`, and `Log`; allowing more combinations of `T`, `Response<T>`, and `Task<Response<T>>` in chains.  
+* New container `Maybe<TResult, TError>` with operations for `Match`, `Apply`, and `Transform` (*Apply is Bind by a different name, for compiler reasons*).  
+
+There is nothing "major" in this release, most of he changes are quality of life around logging: "anything anywhere"; and composing varied functions via `Bind` and `Transform` that were missing.  
+The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backwards incompatible changes to some signatures that weren't quite right before.  
+
