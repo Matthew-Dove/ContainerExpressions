@@ -1,7 +1,5 @@
 # ContainerExpressions
 Containers for types, and expressions for those containers, enabling code to have fewer branching conditions.  
-  
-[If you prefer slides, there is some documentation here too.](https://docs.google.com/presentation/d/1ma8E9YohW2clB_lrB0cklm2_AelkBrBcl2f9DMwu8T4/edit?usp=sharing)  
 [PM> Install-Package ContainerExpressions](https://www.nuget.org/packages/ContainerExpressions/)  
 
 # Containers
@@ -264,7 +262,68 @@ This `Maybe` preamble has gone on long enough, but I foresee the existence of th
 `Either` when you have a range of values that can be produced from some action (*one of the values could still be an error, but doesn't have to be*).  
 `Maybe` when you want low level error details propagated up to the caller, so they can make better decisions with the provided data.  
 
+Below we find a contrived example of how one would use `Maybe`:  
 
+We attempt to parse a integer from a string input.  
+Maybe we will get a integer from the operation, or maybe we will get some domain specific error type instead.  
+
+```cs
+class ParseService
+{
+    public enum ParseError { InputNull, InputNotInteger }
+    
+    private static readonly Maybe<int, ParseError> _maybe = default;
+    
+    public Maybe<int, ParseError> Integer(string input)
+    {
+        if (input == null) return _maybe.With(ParseError.InputNull);
+        
+        if (!int.TryParse(input, out int number)) return _maybe.With(ParseError.InputNotInteger);
+        
+        return _maybe.With(number);
+    }
+}
+```
+
+The calling code is as follows:  
+```cs
+var parse = new ParseService();
+
+var number = parse.Integer("1234");
+var nan = parse.Integer("hello world");
+
+var result1 = number.Match(value => $"{value} is a integer!", error => $"Error: {error}.");
+var result2 = nan.Match(value => $"{value} is a integer!", error => $"Error: {error}.");
+
+// [Output]
+// result1: "1234 is a integer!"
+// result2: "Error: InputNotInteger."
+```
+
+If a custom error type is not required, then ParseService would be implemented as follows:  
+```cs
+class ParseService
+{
+    public Maybe<int> Integer(string input)
+    {
+        var maybe = new Maybe<int>();
+        
+        try
+        {
+            var result = int.Parse(input); // Will throw Exception when format is not valid.
+            maybe = maybe.With(result);
+        }
+        catch (Exception ex)
+        {
+            maybe = maybe.With(ex);
+        }
+        
+        return maybe;
+    }
+}
+```
+
+When you don't define a type for `TError`, then `Exception` is used by default.  
 
 # Expressions
 

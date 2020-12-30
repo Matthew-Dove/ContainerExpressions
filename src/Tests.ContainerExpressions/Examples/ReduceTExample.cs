@@ -9,6 +9,7 @@ namespace Tests.ContainerExpressions.Examples
     public class ReduceTExample
     {
         /// <summary>https://github.com/Matthew-Dove/ContainerExpressions#reducet</summary>
+        [TestMethod]
         public void ReduceT_Example()
         {
             Func<string, string, string> combine = (x, y) => string.Concat(x, " ", y);
