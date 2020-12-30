@@ -246,6 +246,10 @@ namespace ContainerExpressions.Containers
 
         #region Maybe
 
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="value">A function that takes some TValue instance, and returns a message for tracing.</param>
+        /// <param name="error">A function that takes some TError instance, and returns a message for tracing.</param>
+        /// <returns>The same Maybe as the input.</returns>
         public static Task<Maybe<TValue, TError>> LogAsync<TValue, TError>(this Task<Maybe<TValue, TError>> maybe, Func<TValue, string> value, Func<TError, string> error) =>
             maybe.ContinueWith(x =>
             {
@@ -254,6 +258,10 @@ namespace ContainerExpressions.Containers
                 return x.Result;
             });
 
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="value">A message to trace when Maybe contains some instance of TValue.</param>
+        /// <param name="error">A message to trace when Maybe contains some instance of TError.</param>
+        /// <returns>The same Maybe as the input.</returns>
         public static Task<Maybe<TValue, TError>> LogAsync<TValue, TError>(this Task<Maybe<TValue, TError>> maybe, string value, string error) =>
             maybe.ContinueWith(x =>
             {
@@ -262,6 +270,10 @@ namespace ContainerExpressions.Containers
                 return x.Result;
             });
 
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="value">A function that takes some TValue instance, and returns a message for tracing.</param>
+        /// <param name="error">A function that takes some Exception instance, and returns a message for tracing.</param>
+        /// <returns>The same Maybe as the input.</returns>
         public static Task<Maybe<TValue>> LogAsync<TValue>(this Task<Maybe<TValue>> maybe, Func<TValue, string> value, Func<Exception, string> error) =>
             maybe.ContinueWith(x =>
             {
@@ -270,6 +282,10 @@ namespace ContainerExpressions.Containers
                 return x.Result;
             });
 
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="value">A message to trace when Maybe contains some instance of TValue.</param>
+        /// <param name="error">A message to trace when Maybe contains some instance of Exception.</param>
+        /// <returns>The same Maybe as the input.</returns>
         public static Task<Maybe<TValue>> LogAsync<TValue>(this Task<Maybe<TValue>> maybe, string value, string error) =>
             maybe.ContinueWith(x =>
             {

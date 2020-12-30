@@ -264,6 +264,8 @@ This `Maybe` preamble has gone on long enough, but I foresee the existence of th
 `Either` when you have a range of values that can be produced from some action (*one of the values could still be an error, but doesn't have to be*).  
 `Maybe` when you want low level error details propagated up to the caller, so they can make better decisions with the provided data.  
 
+
+
 # Expressions
 
 ## Compose`<T>`
@@ -398,7 +400,7 @@ var answer = Expression.Funnel(e, pi, Math.Pow);
 * Any `T` value can now initiate a `Response` chain using the `Push` extension.  
 * Introduced `NotNull<T>` as a way to counter reference types being null.  
 * Lots of small method signature changes to flesh out `Bind`, `Transform`, and `Log`; allowing more combinations of `T`, `Response<T>`, and `Task<Response<T>>` in chains.  
-* New container `Maybe<TResult, TError>` with operations for `Match`, `Apply`, and `Transform` (*Apply is Bind by a different name, for compiler reasons*).  
+* New container `Maybe<TResult, TError>` with operations for `Match`, `Bind`, and `Transform`.  
 
 There is nothing "major" in this release, most of he changes are quality of life around logging: "anything anywhere"; and composing varied functions via `Bind` and `Transform` that were missing.  
 The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backwards incompatible changes to some signatures that weren't quite right before.  

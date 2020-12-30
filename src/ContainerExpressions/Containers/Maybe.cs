@@ -2,6 +2,11 @@
 
 namespace ContainerExpressions.Containers
 {
+    /// <summary>
+    /// Maybe<TValue> contains either an instance of TValue, or an instance of Exception.
+    /// <para>When two (or more) Maybe's Bind, their distinct errors are aggregated into a new Maybe.</para>
+    /// <para>When both Maybes have some instance of TValue, the provided binding function will be invoked with said values.</para>
+    /// </summary>
     public readonly struct Maybe<TValue>
     {
         internal Exception[] AggregateErrors { get; }
@@ -11,6 +16,8 @@ namespace ContainerExpressions.Containers
         internal readonly TValue _value;
         internal readonly Exception _error;
 
+        /// <summary>Create a Maybe container, with an instance of TValue.</summary>
+        /// <param name="value"></param>
         public Maybe(TValue value)
         {
             _value = value;
@@ -19,6 +26,7 @@ namespace ContainerExpressions.Containers
             AggregateErrors = _emptyAggregateErrors;
         }
 
+        /// <summary>Create a Maybe container, with an instance of Exception.</summary>
         public Maybe(Exception error)
         {
             _value = default;
@@ -27,6 +35,7 @@ namespace ContainerExpressions.Containers
             AggregateErrors = _emptyAggregateErrors;
         }
 
+        /// <summary>Create a Maybe container, with an instance of TValue when the Response is valid; otherwise an instance of Exception.</summary>
         public Maybe(Response<TValue> value, Exception error)
         {
             if (value)
@@ -45,6 +54,7 @@ namespace ContainerExpressions.Containers
             }
         }
 
+        /// <summary>Create a Maybe container, with an instance of TValue when Either is also TValue;; otherwise an instance of Exception.</summary>
         public Maybe(Either<TValue, Exception> either)
         {
             var result = either.Match(x => (isValue: true, value: x, error: default(Exception)), x => (isValue: false, value: default(TValue), error: x));
@@ -67,11 +77,14 @@ namespace ContainerExpressions.Containers
 
         internal Maybe(Exception error, Exception[] aggregateErrors, Exception bindError, Exception[] bindAggregateErrors)
         {
+            if (aggregateErrors == null) aggregateErrors = _emptyAggregateErrors;
+            if (bindAggregateErrors == null) aggregateErrors = _emptyAggregateErrors;
+
             _value = default;
             _error = bindError;
             _hasValue = false;
 
-            int length = (aggregateErrors?.Length ?? 0), bindLength = (bindAggregateErrors?.Length ?? 0), totalLength = length + bindLength + 1;
+            int length = aggregateErrors.Length, bindLength = bindAggregateErrors.Length, totalLength = length + bindLength + 1;
             var errors = new Exception[totalLength];
 
             int i;
@@ -102,6 +115,11 @@ namespace ContainerExpressions.Containers
         public static implicit operator Maybe<TValue>(Exception error) => new Maybe<TValue>(error);
     }
 
+    /// <summary>
+    /// Maybe<TValue, TError> contains either an instance of TValue, or an instance of TError.
+    /// <para>When two (or more) Maybe's Bind, their distinct errors are aggregated into a new Maybe.</para>
+    /// <para>When both Maybes have some instance of TValue, the provided binding function will be invoked with said values.</para>
+    /// </summary>
     public readonly struct Maybe<TValue, TError>
     {
         internal TError[] AggregateErrors { get; }
@@ -111,6 +129,7 @@ namespace ContainerExpressions.Containers
         internal readonly TValue _value;
         internal readonly TError _error;
 
+        /// <summary>Create a Maybe container, with an instance of TValue.</summary>
         public Maybe(TValue value)
         {
             _value = value;
@@ -119,6 +138,7 @@ namespace ContainerExpressions.Containers
             AggregateErrors = _emptyAggregateErrors;
         }
 
+        /// <summary>Create a Maybe container, with an instance of TError.</summary>
         public Maybe(TError error)
         {
             _value = default;
@@ -127,6 +147,7 @@ namespace ContainerExpressions.Containers
             AggregateErrors = _emptyAggregateErrors;
         }
 
+        /// <summary>Create a Maybe container, with an instance of TValue when the Response is valid; otherwise an instance of TError.</summary>
         public Maybe(Response<TValue> value, TError error)
         {
             if (value)
@@ -145,6 +166,7 @@ namespace ContainerExpressions.Containers
             }
         }
 
+        /// <summary>Create a Maybe container, with an instance of TValue when Either is also TValue;; otherwise an instance of TError.</summary>
         public Maybe(Either<TValue, TError> either)
         {
             var result = either.Match(x => (isValue: true, value: x, error: default(TError)), x => (isValue: false, value: default(TValue), error: x));
@@ -167,11 +189,14 @@ namespace ContainerExpressions.Containers
 
         internal Maybe(TError error, TError[] aggregateErrors, TError bindError, TError[] bindAggregateErrors)
         {
+            if (aggregateErrors == null) aggregateErrors = _emptyAggregateErrors;
+            if (bindAggregateErrors == null) bindAggregateErrors = _emptyAggregateErrors;
+
             _value = default;
             _error = bindError;
             _hasValue = false;
 
-            int length = (aggregateErrors?.Length ?? 0), bindLength = (bindAggregateErrors?.Length ?? 0), totalLength = length + bindLength + 1;
+            int length = aggregateErrors.Length, bindLength = bindAggregateErrors.Length, totalLength = length + bindLength + 1;
             var errors = new TError[totalLength];
 
             int i;
@@ -202,43 +227,57 @@ namespace ContainerExpressions.Containers
         public static implicit operator Maybe<TValue, TError>(TError error) => new Maybe<TValue, TError>(error);
     }
 
+    /// <summary>A helper class of static methods used to created Maybe types.</summary>
     public class Maybe
     {
         private Maybe() { }
 
         #region Maybe<TValue>
 
+        /// <summary>Creates a Maybe with no provided instance, on match a null Exception will be passed to the error function.</summary>
         public static Maybe<TValue> Create<TValue>() => new Maybe<TValue>();
 
+        /// <summary>Creates a Maybe with the provided TValue instance.</summary>
         public static Maybe<TValue> Create<TValue>(TValue value) => new Maybe<TValue>(value);
 
+        /// <summary>Creates a Maybe with the provided Exception instance.</summary>
         public static Maybe<TValue> Create<TValue>(Exception error) => new Maybe<TValue>(error);
 
+        /// <summary>Creates a Maybe from a T2 Either.</summary>
         public static Maybe<TValue> Create<TValue>(Either<TValue, Exception> either) => new Maybe<TValue>(either);
 
+        /// <summary>Creates a Maybe from the Response value when valid, otherwise the Exception will be used to create the Maybe.</summary>
         public static Maybe<TValue> Create<TValue>(Response<TValue> response, Exception ex) => new Maybe<TValue>(response, ex);
 
         #endregion
 
         #region Maybe<TValue, TError>
 
+        /// <summary>Creates a ErrorContainer for the specified TValue, TError can be added later at anytime to create a Maybe.</summary>
         public static ErrorContainer<TValue> Value<TValue>() => new ErrorContainer<TValue>();
 
+        /// <summary>Creates a ValueContainer for the specified TValue, TError can be added later at anytime to create a Maybe.</summary>
         public static ValueContainer<TValue> Value<TValue>(TValue value) => new ValueContainer<TValue>(value);
 
+        /// <summary>Creates a Maybe with no provided instance, on match a default TError will be passed to the error function.</summary>
         public static Maybe<TValue, TError> Create<TValue, TError>() => new Maybe<TValue, TError>();
 
+        /// <summary>Creates a Maybe with the provided TValue instance.</summary>
         public static Maybe<TValue, TError> Create<TValue, TError>(TValue value) => new Maybe<TValue, TError>(value);
 
+        /// <summary>Creates a Maybe with the provided TError instance.</summary>
         public static Maybe<TValue, TError> Create<TValue, TError>(TError error) => new Maybe<TValue, TError>(error);
 
+        /// <summary>Creates a Maybe from a T2 Either.</summary>
         public static Maybe<TValue, TError> Create<TValue, TError>(Either<TValue, TError> either) => new Maybe<TValue, TError>(either);
 
+        /// <summary>Creates a Maybe from the Response value when valid, otherwise the TError will be used to create the Maybe.</summary>
         public static Maybe<TValue, TError> Create<TValue, TError>(Response<TValue> response, TError error) => new Maybe<TValue, TError>(response, error);
 
         #endregion
     }
 
+    /// <summary>Helper constructor class for Maybe, when you know the instance will be of type TValue.</summary>
     public readonly struct ValueContainer<TValue>
     {
         private readonly TValue _value;
@@ -248,11 +287,14 @@ namespace ContainerExpressions.Containers
             _value = value;
         }
 
+        /// <summary>Creates a Maybe with a TValue instance, TError is required only for type matching.</summary>
         public Maybe<TValue, TError> Error<TError>() => new Maybe<TValue, TError>(_value);
     }
 
+    /// <summary>Helper constructor class for Maybe, when you know the instance will be of type TError.</summary>
     public readonly struct ErrorContainer<TValue>
     {
+        /// <summary>Creates a Maybe with a TError instance.</summary>
         public Maybe<TValue, TError> Error<TError>(TError error) => new Maybe<TValue, TError>(error);
     }
 }

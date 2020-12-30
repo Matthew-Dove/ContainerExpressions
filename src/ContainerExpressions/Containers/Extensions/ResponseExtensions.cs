@@ -58,7 +58,7 @@ namespace ContainerExpressions.Containers
          * T        => Task<Response<TResult>>
          * Task<T>  => Task<Response<TResult>>
          * 
-         * While above is the main use case, we also want to cover void scenarios where and Response<TResult> is replaced with Response.
+         * While above is the main use case, we also want to cover void scenarios where Response<TResult> is replaced with Response.
          * i.e. T => Task<Response<TResult>> becomes T => Task<Response>.
         **/
 

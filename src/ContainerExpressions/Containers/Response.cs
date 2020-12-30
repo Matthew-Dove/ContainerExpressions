@@ -14,7 +14,7 @@ namespace ContainerExpressions.Containers
         public bool IsValid { get; }
 
         /// <summary>The value that was calculated, with the guarantee it's in a valid state, throws InvalidOperationException if Response is in an invalid state.</summary>
-        public T Value { get { if (!IsValid) throw new InvalidOperationException("Cannot access the value if the container is not valid."); return _value; } }
+        public T Value { get { if (!IsValid) throw new InvalidOperationException("Cannot access the value when the container is not valid."); return _value; } }
         private readonly T _value;
 
         /// <summary>Create a response container in a valid state.</summary>
@@ -52,7 +52,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Compares the provided value, to the Response's Value, throws InvalidOperationException if Response is in an invalid state.</summary>
         public bool Equals(T value)
         {
-            if (!IsValid) throw new InvalidOperationException("Cannot access the value if the container is not valid.");
+            if (!IsValid) throw new InvalidOperationException("Cannot access the value when the container is not valid.");
             if (_value == null) return value == null;
             return EqualityComparer<T>.Default.Equals(_value, value);
         }
