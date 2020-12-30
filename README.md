@@ -323,7 +323,7 @@ class ParseService
 }
 ```
 
-When you don't define a type for `TError`, then `Exception` is used by default.  
+When you don't define a type for `TError`, then `Exception` is the default.  
 
 # Expressions
 
