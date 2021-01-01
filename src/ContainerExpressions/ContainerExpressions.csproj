@@ -8,6 +8,18 @@
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <id>ContainerExpressions</id>
+    <Authors>Matthew Dove</Authors>
+    <Description>Containers for types, and expressions for those containers, enabling code to have fewer branching conditions.</Description>
+    <Version>6.0.1</Version>
+    <Copyright>Matthew Dove. All rights reserved.</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/Matthew-Dove/ContainerExpressions</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
   <ItemGroup>
     <Folder Include="Expressions\Core\" />
     <Folder Include="Expressions\Models\" />

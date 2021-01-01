@@ -464,3 +464,6 @@ var answer = Expression.Funnel(e, pi, Math.Pow);
 There is nothing "major" in this release, most of he changes are quality of life around logging: "anything anywhere"; and composing varied functions via `Bind` and `Transform` that were missing.  
 The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backwards incompatible changes to some signatures that weren't quite right before.  
 
+## 6.0.1
+
+ * Nuget package metadata added to the project file, allowing easy releases via the Visual Studio Pack command.  
