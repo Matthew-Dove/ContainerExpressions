@@ -122,8 +122,8 @@ namespace Tests.ContainerExpressions.Containters
             var responseWithNoValue = new Response<int>();
             var responseWithValue = new Response<int>(42);
 
-            responseWithNoValue = responseWithNoValue.WithValue(42);
-            responseWithValue = responseWithValue.WithValue(42);
+            responseWithNoValue = responseWithNoValue.With(42);
+            responseWithValue = responseWithValue.With(42);
 
             Assert.IsTrue(responseWithNoValue);
             Assert.IsTrue(responseWithValue);

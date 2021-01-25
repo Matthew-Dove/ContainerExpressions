@@ -69,7 +69,7 @@ namespace Tests.ContainerExpressions.Examples
                 {
                     string json = File.ReadAllText($"{RELATIVE_PATH}/{id}.json");
                     Customer customer = JsonConvert.DeserializeObject<Customer>(json);
-                    response = response.WithValue(customer); // The response is in a valid state.
+                    response = response.With(customer); // The response is in a valid state.
                 }
                 catch (Exception ex)
                 {

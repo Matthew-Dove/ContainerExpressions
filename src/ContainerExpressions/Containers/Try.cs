@@ -64,7 +64,7 @@ namespace ContainerExpressions.Containers
             try
             {
                 var result = func();
-                response = response.WithValue(result);
+                response = response.With(result);
             }
             catch (Exception ex)
             {
@@ -125,7 +125,7 @@ namespace ContainerExpressions.Containers
             try
             {
                 var result = await func();
-                response = response.WithValue(result);
+                response = response.With(result);
             }
             catch (AggregateException ae)
             {

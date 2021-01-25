@@ -467,3 +467,7 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 ## 6.0.1
 
  * Nuget package metadata added to the project file, allowing easy releases via the Visual Studio Pack command.  
+
+ ## 7.0.0
+
+ * Breaking change: renamed extension method `Response.WithValue(Any<T>)` to `Response.With(Any<T>)` to follow the conventions of other containers.  
