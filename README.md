@@ -325,6 +325,100 @@ class ParseService
 
 When you don't define a type for `TError`, then `Exception` is the default.  
 
+## Alias`<T>`
+
+Alias allows you to *"name"* existing types, without changing their underlying behaviour.  
+For example, you may find yourself returning a `string` from a method, but it is not clear to the caller what this `string` value is used for.  
+Alias provides some clarity to the type's purpose, in the same vein as a property or field name would (*i.e. "string email" is more descriptive than "string" alone*).  
+
+Take the method `Task<Response<string>> GetBearerToken(Authentication model)`.  
+This method's name, argument, and return type tells us a lot of information.  
+It's clear from the method name that the `string` returned will be a bearer token, the argument will house the username / password + grant type etc.  
+`Task` tells us that the method will run over the network asynchronously, and `Response` let's us know the method *can* fail while retrieving the bearer token.  
+In this scenario *"naming"* the return type from `string` to something else provides little to no clarification, than what the method already signals to the caller.  
+
+Often when integrating with third party APIs, you need only one value from endpoint A, to then invoke endpoint B.  
+A common pattern is to **search** by some client reference, then  gather more **detail** using the search Id.  
+Let's say we're getting customer details using a third party API from "**Acme Corporation**".  
+Such methods might look like the following (*Task / Response removed for brevity*): 
+
+* `string SearchFor(string email)`
+* `Customer DetailFor(string acmeRequestId)`
+
+In this example, the `string` returned from `SearchFor` is the acmeRequestId, but that is somewhat ambiguous.  
+It might be obvious when these methods are next to each other on some service / interface, but what if these methods are surrounded by 10 others?  
+What if you came to the project a year later, found you need to call the **detail** API, and you must to determine what the acmeRequestId is?  
+Since it's a string it really could be anything, it doesn't give you much help in finding what you should be passing in.  
+There are other solutions here of course, you could:
+* Examine unit tests for examples of the **detail** API usage.
+* Check the method's comments.
+* Consult the project's documentation.
+* Ask a colleague.  
+
+These solutions work, but the answers are found too far away from the code you're trying to write.  
+Instead have the types tell the story, be the documentation.  
+So we introduce a custom domain model, and change the method signatures to clear up all uncertainty.  
+
+```cs
+class SearchModel
+{
+    public string AcmeRequestId { get; set; }
+}
+```
+
+* `SearchModel SearchFor(string email)`
+* `Customer DetailFor(SearchModel acmeRequest)`
+
+This is pretty good, it's clear if we want to invoke the **detail** API, we must first invoke the **search** API to retrieve a `SearchModel`.  
+*But...* look at the verbosity we have introduced for something so simple.  
+If `SearchModel` had additional required business values it would be great, as we could justify the POCO.  
+There is now more for the developer to understand (*an extra model*), and they may be surpised if they look at the definition, that it only contains a single string.  
+
+Of course you could create an abstraction over the two methods that you expose to the rest of the codebase so you only deal with the "*complexity*" once:  
+i.e. `Customer GetCustomerDetails(string email)` > `SearchFor(email)` > `DetailFor(acmeRequest)`.  
+That's just an inconvenient truth of the example I've chosen, so let's ignore that for now; and stretch your imagination such that the "low level" search method is commonly used.  
+You could also argue adding *another* layer of abstraction here (*i.e. layers of indirection*) needlessly complicates the overall architecture, so you opt to not "combine" these methods.  
+
+I like the `SearchModel` solution, but I didn't want to have a new class, in a new file, that I had to create for one value.  
+I like the "abstract two methods into one method" solution, now "acmeRequest" is hidden from me; but it's harder to see what is happening, as the "real" work is deep down in abstractions.  
+Leaving the return type for the **search** API as a `string` is an option, but then developers have to read the method's implementations, or rely on the comments / documentation staying up to date with the code.  
+
+Enter `Alias<T>`.  
+When you want to give a name to a type.  
+
+```cs
+class AcmeRequestId : Alias<string> { }
+```
+
+Now let's rewrite our initial methods that used raw strings:  
+
+* `AcmeRequestId SearchFor(string email)`
+* `Customer DetailFor(AcmeRequestId acmeRequestId)`
+
+`AcmeRequestId` is just a normal string - with a name!  
+Since this is a one liner (*won't add extra properties, or methods to this type*), I'm happy to define this inline with my service code (*instead of creating a new file for it*).  
+The alias has helped me document the argument for Acme's **detail** API too (*with very little effort*).  
+
+Another use case for `Alias<T>` is overloaded methods:  
+
+* `string SearchFor(string email)`
+* `string SearchFor(string name)`
+* `string SearchFor(string mobile)`
+
+This is not possible, as the runtime can't determine which method you're trying to invoke; you may end up creating `SearchByMobile(string value)` x 3 instead.  
+
+```cs
+class Email : Alias<string> { }
+class Name : Alias<string> { }
+class Mobile : Alias<string> { }
+```
+
+Now we can have the same method name for all search terms (*some casting may be necessary*):  
+
+* `string SearchFor(Email email)`
+* `string SearchFor(Name name)`
+* `string SearchFor(Mobile mobile)`
+
 # Expressions
 
 ## Compose`<T>`
@@ -471,3 +565,4 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
  ## 7.0.0
 
  * Breaking change: renamed extension method `Response.WithValue(Any<T>)` to `Response.With(Any<T>)` to follow the conventions of other containers.  
+ * New container `Alias<T>` allows you to give names to types, while retaining the behavior of the underlying type.  
