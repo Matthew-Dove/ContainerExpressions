@@ -54,7 +54,7 @@ namespace Tests.ContainerExpressions.Examples
                 using (var wc = new WebClient())
                 {
                     var html = wc.DownloadString("https://example.com/");
-                    response = response.WithValue(html);
+                    response = response.With(html);
                 }
             }
             catch
@@ -73,7 +73,7 @@ namespace Tests.ContainerExpressions.Examples
             {
                 var path = $"{RELATIVE_PATH}/{Path.GetRandomFileName()}.html";
                 File.WriteAllText(path, html);
-                response = response.WithValue(path);
+                response = response.With(path);
             }
             catch
             {

@@ -7,7 +7,7 @@ namespace ContainerExpressions.Containers
     public static class ResponseExtensions
     {
         /// <summary>Creates a valid container response.</summary>
-        public static Response<T> WithValue<T>(this Response<T> _, T value) => new Response<T>(value);
+        public static Response<T> With<T>(this Response<T> _, T value) => new Response<T>(value);
 
         /// <summary>Create a response container in a valid state.</summary>
         /// <param name="value">The response's value.</param>

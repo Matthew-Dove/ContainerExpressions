@@ -1,5 +1,5 @@
 # ContainerExpressions
-Containers for types, and expressions for those containers, enabling code to have fewer branching conditions.  
+ContainerExpressions provides generic abstractions to remove boilerplate code needed by all programs.  
 [PM> Install-Package ContainerExpressions](https://www.nuget.org/packages/ContainerExpressions/)  
 
 # Containers
@@ -163,40 +163,6 @@ string message = either.Match(
 );
 ````
 
-## Trace
-
-Logs function inputs, and outputs so you can save them to a trace file.  
-
-Tracing is necessary in any non-trivial program to determine production runtime bugs.  
-However these traces typically get in the way of the core code, and force you to break up code into pieces so you can log it's current state.  
-The trace container slots in with existing code by taking a type, and returning that same type.  
-
-Before you use Trace you must set a logger, an Action that takes a string (returns void), see below for an example.  
-
-`Trace.SetLogger(Console.WriteLine);`  
-
-See below for an example of logging the output of each function:  
-
-````cs
-// Initialize the Trace with a logger.
-var logs = new List<string>();
-Trace.SetLogger(log => logs.Add(log));
-
-// Create a function to trace the incrementing.
-Func<int, string> trace = x => string.Format("The value of the int is {0}.", x);
-
-// Some functions that keep incrementing their input.
-Func<Response<int>> identity = () => Response.Create(0);
-Func<int, Response<int>> increment = x => Response.Create(x + 1);
-
-var count = Expression.Compose(identity.Log(trace), increment.Log(trace), increment.Log(trace));
-
-// The follow is logged to Trace:
-// The value of the int is 0.
-// The value of the int is 1.
-// The value of the int is 2.
-````
-
 ## NotNull`<T>`
 
 A containter for a reference type `T`, that ensures the provided value of `T` is not null.  
@@ -257,7 +223,7 @@ When `Maybe` has an error, and is combining its result with that of another `May
 We cannot provide a general solution for `Either`, as values do not need to be stored (*they are used, then thrown away*); in addition any `Either` with 3 or more types would not benefit from such a design.  
 Lastly `Either` does not have the concept of one of the `<T>`'s being an error. They can be anything at all, so would `T1`, or `T2` be the error type?  This question does not make sense to ask `Either`.  
 
-This `Maybe` preamble has gone on long enough, but I foresee the existence of this type being confusing, when there are two others that *can almost* do the same thing. In summary use...  
+In summary use...  
 `Response` when you do not need to know the details of *how* some operation failed (*just that it did*).  
 `Either` when you have a range of values that can be produced from some action (*one of the values could still be an error, but doesn't have to be*).  
 `Maybe` when you want low level error details propagated up to the caller, so they can make better decisions with the provided data.  
@@ -325,6 +291,130 @@ class ParseService
 
 When you don't define a type for `TError`, then `Exception` is the default.  
 
+## Alias`<T>`
+
+Alias allows you to *"name"* existing types, without changing their underlying behaviour.  
+For example, you may find yourself returning a `string` from a method, but it is not clear to the caller what this `string` value is used for.  
+`Alias` provides some clarity as to the type's purpose, in the same vein as a property or field name would (*i.e. "string email" is more descriptive than "string" alone*).  
+
+Take the method `Task<Response<string>> GetBearerToken(Authentication model)`.  
+This method's name, argument, and return type tells us a lot of information.  
+It's clear from the method name that the `string` returned will be a bearer token, the argument will house the username / password + grant type etc.  
+`Task` tells us that the method will run over the network asynchronously, and `Response` let's us know the method *can* fail while retrieving the bearer token.  
+In this scenario *"naming"* the return type from `string` to something else provides little to no clarification, than what the method already signals to the caller.  
+
+Often when integrating with third party APIs, you need only one value from endpoint A, to then invoke endpoint B.  
+A common pattern is to **search** by some client reference, then  gather more **detail** using the search Id.  
+Let's say we're getting customer details using a third party API from "**Acme Corporation**".  
+Such methods might look like the following (*Task / Response removed for brevity*): 
+
+* `string SearchFor(string email)`
+* `Customer DetailFor(string acmeRequestId)`
+
+In this example, the `string` returned from `SearchFor` is the acmeRequestId, but that is somewhat ambiguous.  
+It might be obvious when these methods are next to each other on some service / interface, but what if these methods are surrounded by 10 others?  
+What if you came to the project a year later, found you need to call the **detail** API, and you must to determine what the acmeRequestId is?  
+Since it's a string it really could be anything, it doesn't give you much help in finding what you should be passing in.  
+There are other solutions here of course, you could:
+* Examine unit tests for examples of the **detail** API usage.
+* Check the method's comments.
+* Consult the project's documentation.
+* Ask a colleague.  
+
+These solutions work, but the answers are found too far away from the code you're trying to write.  
+Instead have the types tell the story, be the documentation.  
+So we introduce a custom domain model, and change the method signatures to clear up all uncertainty.  
+
+```cs
+class SearchModel
+{
+    public string AcmeRequestId { get; set; }
+}
+```
+
+* `SearchModel SearchFor(string email)`
+* `Customer DetailFor(SearchModel acmeRequest)`
+
+This is pretty good, it's clear if we want to invoke the **detail** API, we must first invoke the **search** API to retrieve a `SearchModel`.  
+*But...* look at the verbosity we have introduced for something so simple.  
+If `SearchModel` had additional required business values it would be great, as we could justify the POCO.  
+There is now more for the developer to understand (*an extra model*), and they may be surpised if they look at the definition, that it only contains a single string.  
+
+Of course you could create an abstraction over the two methods that you expose to the rest of the codebase so you only deal with the "*complexity*" once:  
+i.e. `Customer GetCustomerDetails(string email) => DetailFor(SearchFor(email))`.  
+That's just an inconvenient truth of the example I've chosen, so let's ignore that for now; and stretch your imagination such that the "low level" search method is commonly used.  
+You could also argue adding *another* layer of abstraction here (*i.e. layers of indirection*) needlessly complicates the overall architecture, so you opt to not "combine" these methods.  
+
+I like the `SearchModel` solution, but I didn't want to have a new class, in a different file, that I had to create for one single value.  
+I like the "abstract two methods into one method" solution, now "acmeRequest" is hidden from me; but it's harder to see what is happening, as the "real" work is deep down in abstractions.  
+While the so called "complexity" of the abstraction is not yet evident, as the codebase grows over time it will be introduced.  
+The space between these two methods will widen, as they are split into different services, and the mental leap required to join these two methods adds to your 99 other problems.  
+Leaving the return type for the **search** API as a `string` is an option, but then developers have to read the method's implementations, or rely on the comments / documentation staying up to date with the code.  
+
+Enter `Alias<T>`.  
+When you want to give a name to a type.  
+
+```cs
+class AcmeRequestId : Alias<string> { public AcmeRequestId(string value) : base(value) { } }
+```
+
+To define our own `Alias` we start with a class, inhert from `Alias<T>`, and provide a constructor.  
+
+Let's rewrite our initial methods that used raw strings:  
+
+* `AcmeRequestId SearchFor(string email)`
+* `Customer DetailFor(AcmeRequestId acmeRequestId)`
+
+`AcmeRequestId` is more or less a normal string - with a name!  
+Since this is a one liner (*won't be adding extra properties, or methods to this type*), I'm happy to define this inline with my service code (*instead of creating a new file for it*).  
+`Alias` has helped me document the argument for Acme's **detail** API (*with little effort*).  
+`AcmeRequestId` will implicitly cast to a `string` (*or any T*), making it easy to use with existing code that expects a string (*or T*) type; no need to manually convert it back to a `string` / `T`.  
+
+Another use case for `Alias<T>` is overloaded methods:  
+
+* `string SearchFor(string email)`
+* `string SearchFor(string name)`
+* `string SearchFor(string mobile)`
+
+This is not possible, as the runtime can't determine which method you're trying to invoke; you may end up creating different names such as `SearchByMobile(string value)` x 3.  
+Let's create an `Alias` for them instead:  
+
+```cs
+class Email : Alias<string> { public Email(string value) : base(value) { } }
+class Name : Alias<string> { public Name(string value) : base(value) { } }
+class Mobile : Alias<string> { public Mobile(string value) : base(value) { } }
+```
+
+Now we can have the same method name for all search terms (*even though they are all essentially strings*):  
+
+* `string SearchFor(Email email)`
+* `string SearchFor(Name name)`
+* `string SearchFor(Mobile mobile)`
+
+Lastly `Alias<T>` can be used for simple value transformations.  
+For example, let's say you wanted a string to always be uppercase. Instead of adding validation to ensure it is (*or doing it yourself*), you could create an `Alias<string>`:  
+
+```cs
+class UpperCase : Alias<string> { public UpperCase(string value) : base(value?.ToUpper()) { } }
+```
+
+As you see we transfom the value in the constructor before passing it down to the base class.  
+The type would then be used in place of a string:  
+
+```cs
+void Save(UpperCase username)
+{
+    // username is guaranteed to be upper case (assuming it's not null).
+}
+```
+
+You could make the argument that new C# language features such as a properties' init accessor, or record types make this `Alias` container obsolete.  
+They dramatically cut down on the red tape required when creating new types, which is the same goal as `Alias`.  
+In the long term I imagine that will be the ultimate fate of this library, every addition here will slowly be eaten away as C# adopts similar concepts into it's specification.  
+That is already the fate of the `Match` expression, as C# now has some pretty powerful pattern matching built into the standard kit.  
+If you think the language has a better implementation than the types here, you should definitely use them.  
+Honesty, if C# ever got some level of Monad support (*not counting Task or LINQ*), that would be the end for this library.  
+
 # Expressions
 
 ## Compose`<T>`
@@ -342,6 +432,40 @@ var filepath = Expression.Compose(DownloadHtml, PersistHtml);
 ```
 
 Note: there is also Expression.ComposeAsync() for composing asynchronous functions.
+
+## Trace
+
+Logs function inputs, and outputs so you can save them to a trace file.  
+
+Tracing is necessary in any non-trivial program to determine production runtime bugs.  
+However these traces typically get in the way of the core code, and force you to break up code into pieces so you can log it's current state.  
+The trace container slots in with existing code by taking a type, and returning that same type.  
+
+Before you use Trace you must set a logger, an Action that takes a string (returns void), see below for an example.  
+
+`Trace.SetLogger(Console.WriteLine);`  
+
+See below for an example of logging the output of each function:  
+
+````cs
+// Initialize the Trace with a logger.
+var logs = new List<string>();
+Trace.SetLogger(log => logs.Add(log));
+
+// Create a function to trace the incrementing.
+Func<int, string> trace = x => string.Format("The value of the int is {0}.", x);
+
+// Some functions that keep incrementing their input.
+Func<Response<int>> identity = () => Response.Create(0);
+Func<int, Response<int>> increment = x => Response.Create(x + 1);
+
+var count = Expression.Compose(identity.Log(trace), increment.Log(trace), increment.Log(trace));
+
+// The follow is logged to Trace:
+// The value of the int is 0.
+// The value of the int is 1.
+// The value of the int is 2.
+````
 
 ## Match`<T>`
 
@@ -447,6 +571,9 @@ var pi = divide(22D, 7D);
 var answer = Expression.Funnel(e, pi, Math.Pow);
 ```
 
+# Credits
+* [Icon](https://www.flaticon.com/free-icon/bird_2630452) made by [Vitaly Gorbachev](https://www.flaticon.com/authors/vitaly-gorbachev) from [Flaticon](https://www.flaticon.com/).
+
 # Changelog
 
 ## 6.0.0
@@ -467,3 +594,8 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 ## 6.0.1
 
  * Nuget package metadata added to the project file, allowing easy releases via the Visual Studio Pack command.  
+
+ ## 7.0.0
+
+ * Breaking change: renamed extension method `Response.WithValue(Any<T>)` to `Response.With(Any<T>)` to follow the conventions of other containers.  
+ * New container `Alias<T>` allows you to give names to types, while retaining the behavior of the underlying type.  
