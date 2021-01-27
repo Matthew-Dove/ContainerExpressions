@@ -15,7 +15,7 @@ namespace Tests.ContainerExpressions.Examples
 
             var search = acme.SearchFor("john.smith@example.com");
             var detail = acme.DetailFor(search);
-
+            
             Assert.AreEqual(search, detail.Id); // Note the type AcmeRequestId has been implicitly cast to string.
         }
 
@@ -25,16 +25,19 @@ namespace Tests.ContainerExpressions.Examples
         {
             public AcmeRequestId SearchFor(string email) => new AcmeRequestId(Guid.NewGuid().ToString()); // Mock network calls to the ACME API.
 
-            public Customer DetailFor(AcmeRequestId acmeRequestId) => new Customer(acmeRequestId);
+            public Customer DetailFor(AcmeRequestId acmeRequestId) => new Customer(acmeRequestId, "John Smith");
         }
 
         private class Customer
         {
             public string Id { get; }
 
-            public Customer(string id)
+            public string Name { get; }
+
+            public Customer(string id, string name)
             {
                 Id = id;
+                Name = name;
             }
         }
 
