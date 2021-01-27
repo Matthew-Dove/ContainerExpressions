@@ -30,6 +30,7 @@ The expression Retry will attempt to get the T value after x time delay for n at
 New container Alias allows you to give names to types, while retaining the behavior of the underlying type.</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageIcon>dove.png</PackageIcon>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
