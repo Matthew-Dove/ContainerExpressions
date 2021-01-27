@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2046
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContainerExpressions", "ContainerExpressions\ContainerExpressions.csproj", "{30BBB877-DA09-42C8-84B0-50A135C75999}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.ContainerExpressions", "Tests.ContainerExpressions\Tests.ContainerExpressions.csproj", "{D3E1219C-989F-427C-BFF0-C0B43BFD31DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests.ContainerExpressions", "Tests.ContainerExpressions\Tests.ContainerExpressions.csproj", "{D3E1219C-989F-427C-BFF0-C0B43BFD31DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

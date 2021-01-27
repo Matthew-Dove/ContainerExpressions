@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -18,6 +18,7 @@
     <RepositoryUrl>https://github.com/Matthew-Dove/ContainerExpressions</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/Matthew-Dove/ContainerExpressions</PackageProjectUrl>
+    <Title>Container Expressions</Title>
     <Description>ContainerExpressions provides generic abstractions to remove boilerplate code needed by all programs.
 
 Containers have some utility that extends the underlying type (any T).
@@ -27,7 +28,7 @@ For example the Response container's "utility" is to let the caller know if some
 The expression Retry will attempt to get the T value after x time delay for n attempts, a good combo for intermittent networking errors.</Description>
     <PackageReleaseNotes>Breaking change: renamed extension method Response.WithValue(Any T) to Response.With(Any T) to follow the conventions of other containers.
 New container Alias allows you to give names to types, while retaining the behavior of the underlying type.</PackageReleaseNotes>
-    <PackageLicenseFile>README.md</PackageLicenseFile>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageIcon>dove.png</PackageIcon>
   </PropertyGroup>
 
@@ -41,7 +42,7 @@ New container Alias allows you to give names to types, while retaining the behav
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
-    <None Include="..\..\README.md">
+    <None Include="..\..\LICENSE.txt">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
