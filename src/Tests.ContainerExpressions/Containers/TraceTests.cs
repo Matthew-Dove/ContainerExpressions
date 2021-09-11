@@ -37,7 +37,7 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public void TFunc_LogsMessage()
         {
-            var response = "Hello".Log(x => $"{x} World!");
+            var response = "Hello".LogValue(x => $"{x} World!");
 
             Assert.AreEqual("Hello", response);
             Assert.AreEqual(1, _messages.Count);
@@ -407,6 +407,43 @@ namespace Tests.ContainerExpressions.Containers
 
             Assert.AreEqual(msg, _messages.Single());
         }
+
+        #endregion
+
+        #region Regressions
+
+        [TestMethod]
+        public void Ambiguous_Call_Between_T_And_ResponseT_For_Func_T_String()
+        {
+            /**
+             * The call is ambiguous between these two functions when trying to log with a func that takes T, and returns string:
+             * 
+             * - T Log<T>(this T value, Func<T, string> format);
+             * - Response<T> Log<T>(this Response<T> response, Func<T, string> success);
+             * 
+             * This was not caught in testing, as locally defined functions i.e. "Func<T, string>", have no such ambiguous problems.
+             * It's only when the function is on a class (a standard method), i.e. "string Format<T>(T value) {...}".
+             * 
+             * Suggestion 1: Rename "T Log<T>", to "T LogFormat<T>".
+             * Suggestion 2: Drop support for "T Log<T>".
+             * Suggestion 3: Name all T functions "Value", all Task functions "Task", and leave Response functions as they are.
+             *   Example: Bind / BindValue / BindTask / BindValueTask + BindAsync / BindValueAsync / BindTaskAsync / BindValueTaskAsync.
+             * 
+             * I'll go with suggestion 3, as other extension methods are bound to have the same issue.
+             * I considered dropping all support for standard "T", but it has useful utility for converting between T, and Response<T>.
+             * Task<T> will also have the same problems, and I don't want to drop support for Task<Response<T>> either.
+            **/
+
+            var target = 8;
+
+            var log = target.ToResponse().Log(Format);
+            var logValue = target.LogValue(Format);
+
+            Assert.AreEqual(Format(target), _messages[0]);
+            Assert.AreEqual(Format(target), _messages[1]);
+        }
+
+        private static string Format(int x) => $"Value is: {x}.";
 
         #endregion
     }

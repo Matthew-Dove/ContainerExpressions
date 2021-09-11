@@ -19,7 +19,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Logs a trace step.</summary>
         /// <param name="format">The message to trace.</param>
         /// <returns>The initial value.</returns>
-        public static T Log<T>(this T value, Func<T, string> format)
+        public static T LogValue<T>(this T value, Func<T, string> format)
         {
             Trace.Log(format(value));
             return value;
