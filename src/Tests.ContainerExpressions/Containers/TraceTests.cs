@@ -27,7 +27,7 @@ namespace Tests.ContainerExpressions.Containers
         {
             var message = "story";
 
-            var response = true.Log(message);
+            var response = true.LogValue(message);
 
             Assert.AreEqual(true, response);
             Assert.AreEqual(1, _messages.Count);
@@ -321,7 +321,7 @@ namespace Tests.ContainerExpressions.Containers
         {
             var message = "story";
 
-            var response = await Task.FromResult(true).LogAsync(message);
+            var response = await Task.FromResult(true).LogValueAsync(message);
 
             Assert.AreEqual(true, response);
             Assert.AreEqual(1, _messages.Count);
@@ -331,7 +331,7 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public async Task Async_TFunc_LogsMessage()
         {
-            var response = await Task.FromResult("Hello").LogAsync(x => $"{x} World!");
+            var response = await Task.FromResult("Hello").LogValueAsync(x => $"{x} World!");
 
             Assert.AreEqual("Hello", response);
             Assert.AreEqual(1, _messages.Count);
@@ -427,7 +427,7 @@ namespace Tests.ContainerExpressions.Containers
              * Suggestion 1: Rename "T Log<T>", to "T LogFormat<T>".
              * Suggestion 2: Drop support for "T Log<T>".
              * Suggestion 3: Name all T functions "Value", all Task functions "Task", and leave Response functions as they are.
-             *   Example: Bind / BindValue / BindTask / BindValueTask + BindAsync / BindValueAsync / BindTaskAsync / BindValueTaskAsync.
+             *   Example: Bind / BindValue / BindTask / BindValueTask / BindAsync / BindValueAsync / BindTaskAsync / BindValueTaskAsync.
              * 
              * I'll go with suggestion 3, as other extension methods are bound to have the same issue.
              * I considered dropping all support for standard "T", but it has useful utility for converting between T, and Response<T>.
@@ -439,11 +439,48 @@ namespace Tests.ContainerExpressions.Containers
             var log = target.ToResponse().Log(Format);
             var logValue = target.LogValue(Format);
 
+            Assert.AreEqual(2, _messages.Count);
             Assert.AreEqual(Format(target), _messages[0]);
             Assert.AreEqual(Format(target), _messages[1]);
         }
 
         private static string Format(int x) => $"Value is: {x}.";
+
+        [TestMethod]
+        public async Task Ambiguous_Call_Between_Task_T_And_Task_ResponseT_For_Func_T_String()
+        {
+            /**
+             * The call is ambiguous between:
+             * - Task<T> LogAsync<Task<T>>(this Task<T> value, Func<T, string> format);
+             * - Task<Response<T>> LogAsync<T>(this Task<Response<T>> response, Func<T, string> success);
+            **/
+
+            var target = Task.FromResult(8);
+
+            var log = await target.ToResponseTaskAsync().LogAsync(Format);
+            var logValue = await target.LogValueAsync(Format);
+
+            Assert.AreEqual(2, _messages.Count);
+            Assert.AreEqual(Format(target.Result), _messages[0]);
+            Assert.AreEqual(Format(target.Result), _messages[1]);
+        }
+
+        [TestMethod]
+        public void MyTestMethod()
+        {
+            /**
+             * In an attempt to not have an explosion of different extension methods, I am going to try limiting to the following:
+             *   - Bind:            Response        Response<T>
+             *   - BindValue:       T
+             *   - BindAsync:       Task<Response>  Task<Response<T>>
+             *   - BindValueAsync:  Task            Task<T>
+             * 
+             * My concern is this might not be good enough.
+             * So I will test with local, and class functions for T, Response, Maybe, and their async equivalents.
+            **/
+
+
+        }
 
         #endregion
     }

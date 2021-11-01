@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ContainerExpressions.Expressions.Models;
+using System;
 using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers
@@ -12,6 +13,54 @@ namespace ContainerExpressions.Containers
         /// <summary>Create a response container in a valid state.</summary>
         /// <param name="value">The response's value.</param>
         public static Response<T> ToResponse<T>(this T value) => new Response<T>(value);
+
+        /// <summary>Creates a task, that wraps a response container in a valid state.</summary>
+        /// <param name="value">The response's value.</param>
+        public static Task<Response<T>> ToResponseAsync<T>(this T value) => Task.FromResult(new Response<T>(value));
+
+        /// <summary>Creates a task, that wraps a response container in a valid state.</summary>
+        /// <param name="value">The response's value.</param>
+        public static Task<Response> ToResponseTaskAsync<T>(this Task value) => value.ContinueWith(TaskToResponse);
+
+        /// <summary>Creates a task, that wraps a response container in a valid state.</summary>
+        /// <param name="value">The response's value.</param>
+        public static Task<Response<T>> ToResponseTaskAsync<T>(this Task<T> value) => value.ContinueWith(TaskToResponse);
+
+        /// <summary>
+        /// Extracts the value produced by a task, and puts it in a response container.
+        /// <para>Aggregate errors are logged (if any), the task is expected to be completed (i.e. from a continuation).</para>
+        /// </summary>
+        /// <returns>A valid response, when the task produces a value; otherwise an invalid response.</returns>
+        private static Response<T> TaskToResponse<T>(Task<T> value)
+        {
+            if (value.Status == TaskStatus.Faulted)
+            {
+                var logger = ExceptionLogger.Create(Try.GetExceptionLogger());
+                foreach (var e in value.Exception.Flatten().InnerExceptions)
+                {
+                    logger.Log(e);
+                }
+            }
+            return value.Status == TaskStatus.RanToCompletion ? new Response<T>(value.Result) : new Response<T>();
+        }
+
+        /// <summary>
+        /// Takes a task's result, and puts it in a response container.
+        /// <para>Aggregate errors are logged (if any), the task is expected to be completed (i.e. from a continuation).</para>
+        /// </summary>
+        /// <returns>A valid response, when the task runs to completion; otherwise an invalid response.</returns>
+        private static Response TaskToResponse(Task value)
+        {
+            if (value.Status == TaskStatus.Faulted)
+            {
+                var logger = ExceptionLogger.Create(Try.GetExceptionLogger());
+                foreach (var e in value.Exception.Flatten().InnerExceptions)
+                {
+                    logger.Log(e);
+                }
+            }
+            return new Response(value.Status == TaskStatus.RanToCompletion);
+        }
 
         /// <summary>Create a response container in an valid state.</summary>
         public static Response AsValid(this Response _) => new Response(true);
@@ -44,10 +93,10 @@ namespace ContainerExpressions.Containers
         public static Func<T, Response<TResult>> Lift<T, TResult>(this Func<T, TResult> func) => Create<Func<T, Response<TResult>>>(x => Create(func(x)));
 
         /// <summary>Turn an async function that doesn't return a Response, into one that does.</summary>
-        public static Func<Task<Response<T>>> LiftAsync<T>(this Func<Task<T>> func) => () => func().ContinueWith(x => Create(x.Result));
+        public static Func<Task<Response<T>>> LiftAsync<T>(this Func<Task<T>> func) => () => func().ContinueWith(TaskToResponse);
 
         /// <summary>Turn an async function that doesn't return a task Response, into one that does.</summary>
-        public static Func<T, Task<Response<TResult>>> LiftAsync<T, TResult>(this Func<T, Task<TResult>> func) => Create<Func<T, Task<Response<TResult>>>>(async x => Create(await func(x)));
+        public static Func<T, Task<Response<TResult>>> LiftAsync<T, TResult>(this Func<T, Task<TResult>> func) => Create<Func<T, Task<Response<TResult>>>>(x => func(x).ContinueWith(TaskToResponse));
 
         /**
          * For bind we have the following input => output scenarios.
@@ -68,13 +117,13 @@ namespace ContainerExpressions.Containers
         public static Response<TResult> BindValue<T, TResult>(this T value, Func<T, Response<TResult>> func) => func(value);
 
         /// <summary>Executes the bind func, passing in T as an argument.</summary>
-        public static Task<Response<TResult>> BindValueAsync<T, TResult>(this Task<T> value, Func<T, Response<TResult>> func) => value.ContinueWith(x => func(x.Result));
+        public static Task<Response<TResult>> BindValueAsync<T, TResult>(this Task<T> value, Func<T, Response<TResult>> func) => value.ContinueWith(TaskToResponse).ContinueWith(x => x.Result ? func(x.Result) : new Response<TResult>());
 
         /// <summary>Executes the bind func, passing in T as an argument.</summary>
         public static Task<Response<TResult>> BindValueAsync<T, TResult>(this T value, Func<T, Task<Response<TResult>>> func) => func(value);
 
         /// <summary>Executes the bind func, passing in T as an argument.</summary>
-        public static Task<Response<TResult>> BindValueAsync<T, TResult>(this Task<T> value, Func<T, Task<Response<TResult>>> func) => value.ContinueWith(x => func(x.Result)).Unwrap();
+        public static Task<Response<TResult>> BindValueAsync<T, TResult>(this Task<T> value, Func<T, Task<Response<TResult>>> func) => value.ContinueWith(TaskToResponse).ContinueWith(x => x.Result ? func(x.Result) : Task.FromResult(new Response<TResult>())).Unwrap();
 
         /** T => Response **/
 
@@ -82,13 +131,13 @@ namespace ContainerExpressions.Containers
         public static Response BindValue<T>(this T value, Func<T, Response> func) => func(value);
 
         /// <summary>Executes the bind func, passing in T as an argument.</summary>
-        public static Task<Response> BindValueAsync<T>(this Task<T> value, Func<T, Response> func) => value.ContinueWith(x => func(x.Result));
+        public static Task<Response> BindValueAsync<T>(this Task<T> value, Func<T, Response> func) => value.ContinueWith(TaskToResponse).ContinueWith(x => x.Result ? func(x.Result) : new Response());
 
         /// <summary>Executes the bind func, passing in T as an argument.</summary>
         public static Task<Response> BindValueAsync<T>(this T value, Func<T, Task<Response>> func) => func(value);
 
         /// <summary>Executes the bind func, passing in T as an argument.</summary>
-        public static Task<Response> BindValueAsync<T>(this Task<T> value, Func<T, Task<Response>> func) => value.ContinueWith(x => func(x.Result)).Unwrap();
+        public static Task<Response> BindValueAsync<T>(this Task<T> value, Func<T, Task<Response>> func) => value.ContinueWith(TaskToResponse).ContinueWith(x => x.Result ? func(x.Result) : Task.FromResult(new Response())).Unwrap();
 
         /** Response => Response<TResult> **/
 

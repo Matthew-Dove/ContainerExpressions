@@ -10,7 +10,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Logs a trace step.</summary>
         /// <param name="message">The message to trace.</param>
         /// <returns>The initial value.</returns>
-        public static T Log<T>(this T value, string message)
+        public static T LogValue<T>(this T value, string message)
         {
             Trace.Log(message);
             return value;

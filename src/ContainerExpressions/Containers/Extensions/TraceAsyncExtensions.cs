@@ -11,12 +11,12 @@ namespace ContainerExpressions.Containers
         /// <summary>Logs a trace step.</summary>
         /// <param name="message">The message to trace.</param>
         /// <returns>The initial value.</returns>
-        public static Task<T> LogAsync<T>(this Task<T> value, string message) => value.ContinueWith(x => { Trace.Log(message); return x.Result; });
+        public static Task<T> LogValueAsync<T>(this Task<T> value, string message) => value.ContinueWith(x => { Trace.Log(message); return x.Result; });
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="format">The message to trace.</param>
         /// <returns>The initial value.</returns>
-        public static Task<T> LogAsync<T>(this Task<T> value, Func<T, string> format) => value.ContinueWith(x => { Trace.Log(format(x.Result)); return x.Result; });
+        public static Task<T> LogValueAsync<T>(this Task<T> value, Func<T, string> format) => value.ContinueWith(x => { Trace.Log(format(x.Result)); return x.Result; });
 
         #endregion
 
