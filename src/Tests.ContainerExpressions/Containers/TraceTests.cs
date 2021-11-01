@@ -423,15 +423,6 @@ namespace Tests.ContainerExpressions.Containers
              * 
              * This was not caught in testing, as locally defined functions i.e. "Func<T, string>", have no such ambiguous problems.
              * It's only when the function is on a class (a standard method), i.e. "string Format<T>(T value) {...}".
-             * 
-             * Suggestion 1: Rename "T Log<T>", to "T LogFormat<T>".
-             * Suggestion 2: Drop support for "T Log<T>".
-             * Suggestion 3: Name all T functions "Value", all Task functions "Task", and leave Response functions as they are.
-             *   Example: Bind / BindValue / BindTask / BindValueTask / BindAsync / BindValueAsync / BindTaskAsync / BindValueTaskAsync.
-             * 
-             * I'll go with suggestion 3, as other extension methods are bound to have the same issue.
-             * I considered dropping all support for standard "T", but it has useful utility for converting between T, and Response<T>.
-             * Task<T> will also have the same problems, and I don't want to drop support for Task<Response<T>> either.
             **/
 
             var target = 8;
@@ -463,23 +454,6 @@ namespace Tests.ContainerExpressions.Containers
             Assert.AreEqual(2, _messages.Count);
             Assert.AreEqual(Format(target.Result), _messages[0]);
             Assert.AreEqual(Format(target.Result), _messages[1]);
-        }
-
-        [TestMethod]
-        public void MyTestMethod()
-        {
-            /**
-             * In an attempt to not have an explosion of different extension methods, I am going to try limiting to the following:
-             *   - Bind:            Response        Response<T>
-             *   - BindValue:       T
-             *   - BindAsync:       Task<Response>  Task<Response<T>>
-             *   - BindValueAsync:  Task            Task<T>
-             * 
-             * My concern is this might not be good enough.
-             * So I will test with local, and class functions for T, Response, Maybe, and their async equivalents.
-            **/
-
-
         }
 
         #endregion
