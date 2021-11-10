@@ -18,6 +18,7 @@ namespace Tests.ContainerExpressions.Containers
             public OverrideEquals(string value) : base(value) { }
             private readonly Guid _guid = Guid.NewGuid();
             public override bool Equals(object obj) => obj is OverrideEquals && (((OverrideEquals)obj)._guid == _guid);
+            public override int GetHashCode() => _guid.GetHashCode();
         }
 
         class OverrideHashCode : Alias<string> {
