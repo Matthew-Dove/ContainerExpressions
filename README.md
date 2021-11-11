@@ -593,14 +593,18 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 
 ## 6.0.1
 
- * Nuget package metadata added to the project file, allowing easy releases via the Visual Studio Pack command.  
+* Nuget package metadata added to the project file, allowing easy releases via the Visual Studio Pack command.  
 
- ## 7.0.0
+## 7.0.0
 
- * Breaking change: renamed extension method `Response.WithValue(Any<T>)` to `Response.With(Any<T>)` to follow the conventions of other containers.  
- * New container `Alias<T>` allows you to give names to types, while retaining the behavior of the underlying type.  
+* Breaking change: renamed extension method `Response.WithValue(Any<T>)` to `Response.With(Any<T>)` to follow the conventions of other containers.  
+* New container `Alias<T>` allows you to give names to types, while retaining the behavior of the underlying type.  
 
-  ## 8.0.0
+## 8.0.0
 
-  * Breaking change: some methods have been renamed, as the complier had some issues working out the overloaded types (`T` / `Response` / `Response<T>` / `Task` / `Task<T>` / `Task<Response>` / `Task<Response<T>>`).  
-  * When a raw `Task`, or `Task<T>` are passed into extension methods; they will now be safely unwrapped, and any errors will be logged out.  
+* Breaking change: some methods have been renamed, as the complier had some issues working out the overloaded types (`T` / `Response` / `Response<T>` / `Task` / `Task<T>` / `Task<Response>` / `Task<Response<T>>`).  
+* When a raw `Task`, or `Task<T>` are passed into extension methods; they will now be safely unwrapped, and any errors will be logged out.  
+
+## 8.0.1
+
+ * Added readme file to nuget.

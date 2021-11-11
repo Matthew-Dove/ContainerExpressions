@@ -12,7 +12,7 @@
     <PackageOutputPath>./nupkg</PackageOutputPath>
     <id>ContainerExpressions</id>
     <Authors>Matthew Dove</Authors>
-    <Version>8.0.0</Version>
+    <Version>8.0.1</Version>
     <Copyright>Matthew Dove. All rights reserved.</Copyright>
     <PackageLicenseExpression></PackageLicenseExpression>
     <RepositoryUrl>https://github.com/Matthew-Dove/ContainerExpressions</RepositoryUrl>
