@@ -228,10 +228,8 @@ namespace ContainerExpressions.Containers
     }
 
     /// <summary>A helper class of static methods used to created Maybe types.</summary>
-    public class Maybe
+    public static class Maybe
     {
-        private Maybe() { }
-
         #region Maybe<TValue>
 
         /// <summary>Creates a Maybe with no provided instance, on match a null Exception will be passed to the error function.</summary>

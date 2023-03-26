@@ -1,10 +1,67 @@
-﻿using System;
+﻿using ContainerExpressions.Expressions.Models;
+using System;
+using System.Linq;
 
 namespace ContainerExpressions.Containers
 {
     /// <summary>Extensions for the Trace Container.</summary>
     public static class TraceExtensions
     {
+        /// <summary>Logs an exception, will check for aggregate exceptions, and log them out individually.</summary>
+        internal static void LogException(Exception ex)
+        {
+            if (ex == null) return; // Null when no exception was thrown for tasks.
+            var logger = ExceptionLogger.Create(Try.GetExceptionLogger());
+            if (ex is AggregateException ae) { LogAggregatedExceptions(logger, ae); }
+            else { logger.Log(ex); }
+        }
+
+        /// <summary>Recursively walks through an AggregateException, and logs out all the "real" exceptions.</summary>
+        private static void LogAggregatedExceptions(ExceptionLogger logger, AggregateException ae)
+        {
+            if (ae == null) return; // Null when no exception was thrown for tasks.
+            foreach (var e in ae.Flatten().InnerExceptions)
+            {
+                if (e is AggregateException ex) { LogAggregatedExceptions(logger, ex); } // Flattened exceptions can still contain aggregate exceptions.
+                else { logger.Log(e); }
+            }
+        }
+
+        #region TError
+
+        /// <summary>Logs an exception.</summary>
+        /// <param name="ex">The exception to log.</param>
+        /// <returns>The initial exception.</returns>
+        public static TError LogError<TError>(this TError ex) where TError : Exception
+        {
+            LogException(ex);
+            return ex;
+        }
+
+        /// <summary>Logs an exception.</summary>
+        /// <param name="ex">The exception to log.</param>
+        /// <param name="message">The message to trace.</param>
+        /// <returns>The initial exception.</returns>
+        public static TError LogError<TError>(this TError ex, string message) where TError : Exception
+        {
+            Trace.Log(message);
+            LogException(ex);
+            return ex;
+        }
+
+        /// <summary>Logs an exception.</summary>
+        /// <param name="ex">The exception to log.</param>
+        /// <param name="format">The message to trace.</param>
+        /// <returns>The initial exception.</returns>
+        public static TError LogError<TError>(this TError ex, Func<TError, string> format) where TError : Exception
+        {
+            Trace.Log(format(ex));
+            LogException(ex);
+            return ex;
+        }
+
+        #endregion
+
         #region T
 
         /// <summary>Logs a trace step.</summary>
@@ -239,6 +296,13 @@ namespace ContainerExpressions.Containers
         {
             var message = maybe.Match(value, error);
             Trace.Log(message);
+
+            if (!maybe._hasValue && maybe._error is Exception ex)
+            {
+                LogException(ex);
+                foreach (var ae in maybe.AggregateErrors.Select(x => x as Exception)) { LogException(ae); }
+            }
+
             return maybe;
         }
 
@@ -250,6 +314,13 @@ namespace ContainerExpressions.Containers
         {
             var message = maybe._hasValue ? value : error;
             Trace.Log(message);
+
+            if (!maybe._hasValue && maybe._error is Exception ex)
+            {
+                LogException(ex);
+                foreach (var ae in maybe.AggregateErrors.Select(x => x as Exception)) { LogException(ae); }
+            }
+
             return maybe;
         }
 
@@ -261,6 +332,13 @@ namespace ContainerExpressions.Containers
         {
             var message = maybe.Match(value, error);
             Trace.Log(message);
+
+            if (!maybe._hasValue)
+            {
+                LogException(maybe._error);
+                foreach (var ae in maybe.AggregateErrors) { LogException(ae); }
+            }
+
             return maybe;
         }
 
@@ -272,6 +350,13 @@ namespace ContainerExpressions.Containers
         {
             var message = maybe._hasValue ? value : error;
             Trace.Log(message);
+
+            if (!maybe._hasValue)
+            {
+                LogException(maybe._error);
+                foreach (var ae in maybe.AggregateErrors) { LogException(ae); }
+            }
+
             return maybe;
         }
 

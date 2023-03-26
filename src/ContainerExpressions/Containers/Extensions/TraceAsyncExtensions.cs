@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers
@@ -11,12 +12,20 @@ namespace ContainerExpressions.Containers
         /// <summary>Logs a trace step.</summary>
         /// <param name="message">The message to trace.</param>
         /// <returns>The initial value.</returns>
-        public static Task<T> LogValueAsync<T>(this Task<T> value, string message) => value.ContinueWith(x => { Trace.Log(message); return x.Result; });
+        public static Task<T> LogValueAsync<T>(this Task<T> value, string message) => value.ContinueWith(x => {
+            if (x.Status == TaskStatus.RanToCompletion) Trace.Log(message);
+            else if (x.Status == TaskStatus.Faulted) TraceExtensions.LogException(x.Exception);
+            return x;
+        }).Unwrap();
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="format">The message to trace.</param>
         /// <returns>The initial value.</returns>
-        public static Task<T> LogValueAsync<T>(this Task<T> value, Func<T, string> format) => value.ContinueWith(x => { Trace.Log(format(x.Result)); return x.Result; });
+        public static Task<T> LogValueAsync<T>(this Task<T> value, Func<T, string> format) => value.ContinueWith(x => {
+            if (x.Status == TaskStatus.RanToCompletion) Trace.Log(format(x.Result));
+            else if (x.Status == TaskStatus.Faulted) TraceExtensions.LogException(x.Exception);
+            return x;
+        }).Unwrap();
 
         #endregion
 
@@ -255,6 +264,13 @@ namespace ContainerExpressions.Containers
             {
                 var message = x.Result.Match(value, error);
                 Trace.Log(message);
+
+                if (!x.Result._hasValue && x.Result._error is Exception ex)
+                {
+                    TraceExtensions.LogException(ex);
+                    foreach (var ae in x.Result.AggregateErrors.Select(y => y as Exception)) { TraceExtensions.LogException(ae); }
+                }
+
                 return x.Result;
             });
 
@@ -267,6 +283,13 @@ namespace ContainerExpressions.Containers
             {
                 var message = x.Result._hasValue ? value : error;
                 Trace.Log(message);
+
+                if (!x.Result._hasValue && x.Result._error is Exception ex)
+                {
+                    TraceExtensions.LogException(ex);
+                    foreach (var ae in x.Result.AggregateErrors.Select(y => y as Exception)) { TraceExtensions.LogException(ae); }
+                }
+
                 return x.Result;
             });
 
@@ -279,6 +302,13 @@ namespace ContainerExpressions.Containers
             {
                 var message = x.Result.Match(value, error);
                 Trace.Log(message);
+
+                if (!x.Result._hasValue)
+                {
+                    TraceExtensions.LogException(x.Result._error);
+                    foreach (var ae in x.Result.AggregateErrors) { TraceExtensions.LogException(ae); }
+                }
+
                 return x.Result;
             });
 
@@ -291,6 +321,13 @@ namespace ContainerExpressions.Containers
             {
                 var message = x.Result._hasValue ? value : error;
                 Trace.Log(message);
+
+                if (!x.Result._hasValue)
+                {
+                    TraceExtensions.LogException(x.Result._error);
+                    foreach (var ae in x.Result.AggregateErrors) { TraceExtensions.LogException(ae); }
+                }
+
                 return x.Result;
             });
 

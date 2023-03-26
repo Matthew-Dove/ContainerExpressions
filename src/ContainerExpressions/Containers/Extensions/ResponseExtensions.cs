@@ -1,5 +1,4 @@
-﻿using ContainerExpressions.Expressions.Models;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers
@@ -35,8 +34,7 @@ namespace ContainerExpressions.Containers
         {
             if (value.Status == TaskStatus.Faulted)
             {
-                var logger = ExceptionLogger.Create(Try.GetExceptionLogger());
-                LogAggregateExceptions(logger, value.Exception);
+                value.Exception.LogError();
             }
             return value.Status == TaskStatus.RanToCompletion ? new Response<T>(value.Result) : new Response<T>();
         }
@@ -50,20 +48,9 @@ namespace ContainerExpressions.Containers
         {
             if (value.Status == TaskStatus.Faulted)
             {
-                var logger = ExceptionLogger.Create(Try.GetExceptionLogger());
-                LogAggregateExceptions(logger, value.Exception);
+                value.Exception.LogError();
             }
             return new Response(value.Status == TaskStatus.RanToCompletion);
-        }
-
-        private static void LogAggregateExceptions(ExceptionLogger logger, AggregateException ae)
-        {
-            if (ae == null) return; // Null when no exception was thrown.
-            foreach (var e in ae.Flatten().InnerExceptions)
-            {
-                if (e is AggregateException ex) { LogAggregateExceptions(logger, ex); } // Flattened exceptions can still contain aggregate exceptions.
-                else { logger.Log(e); }
-            }
         }
 
         /// <summary>Create a response container in an valid state.</summary>
