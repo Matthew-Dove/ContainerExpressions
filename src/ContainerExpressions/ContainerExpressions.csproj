@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+	<LangVersion>latestMajor</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -9,10 +10,10 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <PackageOutputPath>..//../nupkg</PackageOutputPath>
     <id>ContainerExpressions</id>
     <Authors>Matthew Dove</Authors>
-    <Version>8.0.1</Version>
+    <Version>9.0.0</Version>
     <Copyright>Matthew Dove. All rights reserved.</Copyright>
     <PackageLicenseExpression></PackageLicenseExpression>
     <RepositoryUrl>https://github.com/Matthew-Dove/ContainerExpressions</RepositoryUrl>
@@ -26,12 +27,26 @@ Expressions are designed to work on top of containers, helping in common use cas
 
 For example the Response container's "utility" is to let the caller know if some T value was generated without error.
 The expression Retry will attempt to get the T value after x time delay for n attempts, a good combo for intermittent networking errors.</Description>
-    <PackageReleaseNotes>Breaking change: renamed extension method Response.WithValue(Any T) to Response.With(Any T) to follow the conventions of other containers.
-New container Alias allows you to give names to types, while retaining the behavior of the underlying type.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added some useful extensions.</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageIcon>dove.png</PackageIcon>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <IncludeSymbols>True</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageTags>containers;functional;types</PackageTags>
+    <PackageId>ContainerExpressions</PackageId>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

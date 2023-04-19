@@ -625,3 +625,7 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 ## 8.0.1
 
  * Added readme file to nuget.
+
+ ## 9.0.0
+
+ * // TODO: 
