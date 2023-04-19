@@ -57,7 +57,7 @@ namespace ContainerExpressions.Containers
             return EqualityComparer<T>.Default.Equals(_value, value);
         }
 
-        /// <summary>Compares obj if it is of type Response<T>, or of type T. Throws InvalidOperationException if Response is in an invalid state, and obj is a T value.</summary>
+        /// <summary>Compares obj if it is of type Response T, or of type T. Throws InvalidOperationException if Response is in an invalid state, and obj is a T value.</summary>
         public override bool Equals(object obj) => obj is T value && Equals(value) || obj is Response<T> response && Equals(response);
 
         /// <summary>Returns the Value's hash code (T), or IsValid's hash code (bool) if there is no value.</summary>

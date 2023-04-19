@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers
 {
-    /// <summary>Utility methods for the Maybe<TValue, TError> Container.</summary>
+    /// <summary>Utility methods for the Maybe TValue TError Container.</summary>
     public static class MaybeExtensions
     {
         #region Miscellaneous
@@ -148,7 +148,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -162,7 +162,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -176,7 +176,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -190,7 +190,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -206,7 +206,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="convert">A function that takes the first Maybe's error type, and converts it to the second Maybe's error type.</param>
@@ -218,7 +218,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="convert">A function that takes the first Maybe's error type, and converts it to the second Maybe's error type.</param>
@@ -230,7 +230,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -243,7 +243,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -259,7 +259,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="convert">A function that takes the first Maybe's error type, and converts it to the second Maybe's error type.</param>
@@ -271,7 +271,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="convert">A function that takes the first Maybe's error type, and converts it to the second Maybe's error type.</param>
@@ -283,7 +283,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -296,7 +296,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -314,7 +314,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -325,7 +325,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -336,7 +336,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -347,7 +347,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -360,7 +360,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="convert">A function that takes the first Maybe's error type, and converts it to the second Maybe's error type.</param>
@@ -372,7 +372,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="convert">A function that takes the first Maybe's error type, and converts it to the second Maybe's error type.</param>
@@ -384,7 +384,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -395,7 +395,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -406,7 +406,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="convert">A function that takes the first Maybe's error type, and converts it to the second Maybe's error type.</param>
@@ -418,7 +418,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="convert">A function that takes the first Maybe's error type, and converts it to the second Maybe's error type.</param>
@@ -430,7 +430,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -441,7 +441,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -454,7 +454,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -465,7 +465,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -476,7 +476,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -487,7 +487,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -500,7 +500,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="convert">A function that takes the first Maybe's error type, and converts it to the second Maybe's error type.</param>
@@ -512,7 +512,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="convert">A function that takes the first Maybe's error type, and converts it to the second Maybe's error type.</param>
@@ -524,7 +524,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -535,7 +535,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -546,7 +546,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="convert">A function that takes the first Maybe's error type, and converts it to the second Maybe's error type.</param>
@@ -558,7 +558,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="convert">A function that takes the first Maybe's error type, and converts it to the second Maybe's error type.</param>
@@ -570,7 +570,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -581,7 +581,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -594,7 +594,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -605,7 +605,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -616,7 +616,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -627,7 +627,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -640,7 +640,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="convert">A function that takes the first Maybe's error type, and converts it to the second Maybe's error type.</param>
@@ -652,7 +652,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="convert">A function that takes the first Maybe's error type, and converts it to the second Maybe's error type.</param>
@@ -664,7 +664,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -675,7 +675,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -686,7 +686,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="convert">A function that takes the first Maybe's error type, and converts it to the second Maybe's error type.</param>
@@ -698,7 +698,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="convert">A function that takes the first Maybe's error type, and converts it to the second Maybe's error type.</param>
@@ -710,7 +710,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>
@@ -721,7 +721,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>
         /// When both Maybes contain values, they are passed to the Bind function; the value TResult is then used to create a new Maybe.
-        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.
+        /// <para>Alternatively the existing error(s) are propagated to the new Maybe without invoking Bind.</para>
         /// </summary>
         /// <param name="maybe">The second Maybe to Bind with.</param>
         /// <param name="bind">A function that takes values from both Maybes, and produces a TResult.</param>

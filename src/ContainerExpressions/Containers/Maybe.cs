@@ -3,7 +3,7 @@
 namespace ContainerExpressions.Containers
 {
     /// <summary>
-    /// Maybe<TValue> contains either an instance of TValue, or an instance of Exception.
+    /// Maybe TValue contains either an instance of TValue, or an instance of Exception.
     /// <para>When two (or more) Maybe's Bind, their distinct errors are aggregated into a new Maybe.</para>
     /// <para>When both Maybes have some instance of TValue, the provided binding function will be invoked with said values.</para>
     /// </summary>
@@ -116,7 +116,7 @@ namespace ContainerExpressions.Containers
     }
 
     /// <summary>
-    /// Maybe<TValue, TError> contains either an instance of TValue, or an instance of TError.
+    /// Maybe TValue TError contains either an instance of TValue, or an instance of TError.
     /// <para>When two (or more) Maybe's Bind, their distinct errors are aggregated into a new Maybe.</para>
     /// <para>When both Maybes have some instance of TValue, the provided binding function will be invoked with said values.</para>
     /// </summary>
