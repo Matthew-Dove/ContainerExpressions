@@ -138,7 +138,7 @@ Either can change it's internal type during program execution similar to object,
 A case where you might use Either is when you have a function, and you find yourself about to drastically change it's return type for an edge case.  
 Let's say you have a SaveCustomer function that takes a Customer, and returns a boolean indicating if the save was successful or not.  
 A new requirement comes in, you must display a error message to the client if the customer's email is already in use by another client.  
-You can't just rely on the boolean's false, because you don't know if it was false from of a write error, or a duplicate email.  
+You can't just rely on the boolean's false, because you don't know if it was false from of a database write error, or a duplicate email.  
 So you must change the return type from boolean to CustomerResponse, and CustomerResponse contains two fields, one for the boolean, and another string for the error message.  
 Alternatively you could modify the return type to be `Either<bool, string>`, and return a string in the case of a duplicate email.  
 
@@ -162,6 +162,23 @@ string message = either.Match(
     error => "Internal error - try again later." // When Either's type is Error, this string is returned.
 );
 ````
+
+`Either` is also useful in as an input argument, where you can accept different types; and would normally have to overload the function.  
+Below we see `Either` allows you to create only one function that accept either a `string`, or a `Uri`.  
+
+```cs
+private User GetUserById(int id); // Some encapsulated function.
+
+// Without Either - we need two functions to accept the type overloads:
+public User GetUser(string id) => Get(int.parse(id));
+public User GetUser(int id) => GetUserById(id);
+
+// With Either - one function can combine the two overloads:
+public User GetUser(Either<string, int> id) => GetUserById(id.Match(int.Parse, x => x));
+
+// Invoking the functions remain the same, as Either has implicit operators. 
+User user = GetUser("1337"); // Auto cast to Either<string, int>.
+```
 
 ## NotNull`<T>`
 
