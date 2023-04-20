@@ -1146,5 +1146,256 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         #endregion
+
+        #region Unpack BaseResponse
+
+        [TestMethod]
+        public void Unpack_BaseResponse_Pass()
+        {
+            var input = new Response<Response>(new Response(true));
+
+            var result = input.Unpack();
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void Unpack_BaseResponse_FailValue()
+        {
+            var input = new Response<Response>(new Response());
+
+            var result = input.Unpack();
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void Unpack_BaseResponse_FailContainer()
+        {
+            var input = new Response<Response>();
+
+            var result = input.Unpack();
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_BaseResponse_Task_Pass()
+        {
+            var input = Task.FromResult(new Response<Response>(new Response(true)));
+
+            var result = await input.UnpackAsync();
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_BaseResponse_Task_FailValue()
+        {
+            var input = Task.FromResult(new Response<Response>(new Response()));
+
+            var result = await input.UnpackAsync();
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_BaseResponse_Task_FailContainer()
+        {
+            var input = Task.FromResult(new Response<Response>());
+
+            var result = await input.UnpackAsync();
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_BaseResponse_Task_FailTask()
+        {
+            var input = Task.FromException<Response<Response>>(new Exception());
+
+            var result = await input.UnpackAsync();
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_BaseResponse_Task_Async_Pass()
+        {
+            var input = Task.FromResult(new Response<Task<Response>>(Task.FromResult(new Response(true))));
+
+            var result = await input.UnpackAsync();
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_BaseResponse_Task_Async_FailValue()
+        {
+            var input = Task.FromResult(new Response<Task<Response>>(Task.FromResult(new Response())));
+
+            var result = await input.UnpackAsync();
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_BaseResponse_Task_Async_FailContainer()
+        {
+            var input = Task.FromResult(new Response<Task<Response>>());
+
+            var result = await input.UnpackAsync();
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_BaseResponse_Task_Async_FailTask_FirstContinuation()
+        {
+            var input = Task.FromException<Response<Task<Response>>>(new Exception());
+
+            var result = await input.UnpackAsync();
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_BaseResponse_Task_Async_FailTask_SecondContinuation()
+        {
+            var input = Task.FromResult(new Response<Task<Response>>(Task.FromException<Response>(new Exception())));
+
+            var result = await input.UnpackAsync();
+
+            Assert.IsFalse(result);
+        }
+
+        #endregion
+
+        #region Unpack Response
+
+        [TestMethod]
+        public void Unpack_Response_Pass()
+        {
+            var input = new Response<Response<int>>(new Response<int>(0));
+
+            var result = input.Unpack();
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(0, result);
+        }
+
+        [TestMethod]
+        public void Unpack_Response_FailValue()
+        {
+            var input = new Response<Response<int>>(new Response<int>());
+
+            var result = input.Unpack();
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void Unpack_Response_FailContainer()
+        {
+            var input = new Response<Response<int>>();
+
+            var result = input.Unpack();
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_Response_Task_Pass()
+        {
+            var input = Task.FromResult(new Response<Response<int>>(new Response<int>(0)));
+
+            var result = await input.UnpackAsync();
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(0, result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_Response_Task_FailValue()
+        {
+            var input = Task.FromResult(new Response<Response<int>>(new Response<int>()));
+
+            var result = await input.UnpackAsync();
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_Response_Task_FailContainer()
+        {
+            var input = Task.FromResult(new Response<Response<int>>());
+
+            var result = await input.UnpackAsync();
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_Response_Task_FailTask()
+        {
+            var input = Task.FromException<Response<Response<int>>>(new Exception());
+
+            var result = await input.UnpackAsync();
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_Response_Task_Async_Pass()
+        {
+            var input = Task.FromResult(new Response<Task<Response<int>>>(Task.FromResult(new Response<int>(0))));
+
+            var result = await input.UnpackAsync();
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(0, result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_Response_Task_Async_FailValue()
+        {
+            var input = Task.FromResult(new Response<Task<Response<int>>>(Task.FromResult(new Response<int>())));
+
+            var result = await input.UnpackAsync();
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_Response_Task_Async_FailContainer()
+        {
+            var input = Task.FromResult(new Response<Task<Response<int>>>());
+
+            var result = await input.UnpackAsync();
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_Response_Task_Async_FailTask_FirstContinuation()
+        {
+            var input = Task.FromException<Response<Task<Response<int>>>>(new Exception());
+
+            var result = await input.UnpackAsync();
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_Response_Task_Async_FailTask_SecondContinuation()
+        {
+            var input = Task.FromResult(new Response<Task<Response<int>>>(Task.FromException<Response<int>>(new Exception())));
+
+            var result = await input.UnpackAsync();
+
+            Assert.IsFalse(result);
+        }
+
+        #endregion
     }
 }

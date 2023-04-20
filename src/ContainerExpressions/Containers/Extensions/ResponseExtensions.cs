@@ -295,5 +295,81 @@ namespace ContainerExpressions.Containers
 
         /// <summary>When the Response is in a valid state the Func's result is returned, otherwise false is returned.</summary>
         public static bool IsTrue<T>(this Response<T> response, Func<T, bool> condition) => response ? condition(response) : false;
+
+        /// <summary>Flattens nested Response types into a single one.</summary>
+        public static Response Unpack(this Response<Response> response)
+        {
+            if (response.IsValid) return response.Value;
+            return new Response();
+        }
+
+        /// <summary>Flattens nested Response types into a single one.</summary>
+        public static Task<Response> UnpackAsync(this Task<Response<Response>> response)
+        {
+            return response.ContinueWith(static t =>
+            {
+                if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result.Value;
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                return new Response();
+            });
+        }
+
+        /// <summary>Flattens nested Response types into a single one.</summary>
+        public static Task<Response> UnpackAsync(this Task<Response<Task<Response>>> response)
+        {
+            return response.ContinueWith(static t =>
+            {
+                if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result.Value;
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                return Task.FromResult(new Response());
+            }).ContinueWith(static t =>
+            {
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.RanToCompletion)
+                {
+                    if (t.Result.Status == TaskStatus.RanToCompletion) return t.Result.Result;
+                    if (t.Result.Status == TaskStatus.Faulted) t.Exception.LogError();
+                }
+                return new Response();
+            });
+        }
+
+        /// <summary>Flattens nested Response types into a single one.</summary>
+        public static Response<T> Unpack<T>(this Response<Response<T>> response)
+        {
+            if (response.IsValid) return response.Value;
+            return new Response<T>();
+        }
+
+        /// <summary>Flattens nested Response types into a single one.</summary>
+        public static Task<Response<T>> UnpackAsync<T>(this Task<Response<Response<T>>> response)
+        {
+            return response.ContinueWith(static t =>
+            {
+                if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result.Value;
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                return new Response<T>();
+            });
+        }
+
+        /// <summary>Flattens nested Response types into a single one.</summary>
+        public static Task<Response<T>> UnpackAsync<T>(this Task<Response<Task<Response<T>>>> response)
+        {
+            return response.ContinueWith(static t =>
+            {
+                if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result.Value;
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                return Task.FromResult(new Response<T>());
+            }).ContinueWith(static t =>
+            {
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.RanToCompletion)
+                {
+                    if (t.Result.Status == TaskStatus.RanToCompletion && t.Result.Result.IsValid) return t.Result.Result;
+                    if (t.Result.Status == TaskStatus.Faulted) t.Exception.LogError();
+                }
+                return new Response<T>();
+            });
+        }
     }
 }

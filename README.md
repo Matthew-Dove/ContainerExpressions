@@ -1,8 +1,9 @@
 # ContainerExpressions
-ContainerExpressions provides generic abstractions to remove boilerplate code needed by all programs.  
-[PM> Install-Package ContainerExpressions](https://www.nuget.org/packages/ContainerExpressions/)  
+ContainerExpressions provides generic abstractions to remove boilerplate code needed by programs.  
+This package provides various wrappers for any type `T`, that give it some sort of "superpower".  
+The containers provide a base, for the expressions to target.  
 
-# Containers
+[PM> Install-Package ContainerExpressions](https://www.nuget.org/packages/ContainerExpressions/)  
 
 ## Response`<T>`
 
@@ -45,6 +46,24 @@ if (customer.IsValid)
 }
 ```
 
+### Response Extension Methods
+
+Useful utilities for the `Response<T>` type:  
+
+* `T GetValueOrDefault<T>` Returns the default value when the Response is in an invalid state.
+* `Response<TResult> Bind<T, TResult>` Invokes a second function with the output of the first one.
+* `Response<TResult> Transform<T, TResult>` Changes type `T`, to type `TResult`.
+* `Func<T, Response<TResult>> Lift<T, TResult>` Elevate the function’s type from `T`, to `Response<T>`
+* `Response<TResult> Pivot<T, TResult>` Execute the first function if the condition is true, otherwise execute the second function.  
+* `bool IsTrue<T>` When the Response is in a valid state the func's bool result is returned, otherwise false is returned.  
+* `Response<T> Create<T>` Create a response container in a valid state.  
+* `Response<T> With<T>` Create a new response container in a valid state, with the same type `T` as the original response.  
+* `Task<Response<T>> ToResponseTaskAsync<T>` Convert some `Task<T>` to `Task<Response<T>>`, in a valid state when the task did not fault; and finished executing.  
+* `Response<T> Unpack<T>` Converts `Response<Response<T>>` to `Response<T>`, which works much like `Task`'s `Unwrap` extension to flatten `Task<Task<T>>` to `Task<T>`.  
+
+In general you will find various overloads for these extension methods.  
+They target `T`, `Response`, and `Response<T>`; with options for both sync, and async types.  
+
 ## Response
 
 Similar to Response`<T>`, but used for methods that return void, instead of a *real* type.
@@ -70,17 +89,6 @@ class CustomerService
     }
 }
 ```
-
-### Response Extension Methods
-
-Useful utilities for the `Response<T>` type.  
-
-* `T GetValueOrDefault<T>(T defaultValue)` Returns the default value when the Response is in an invalid state.
-* `Response<TResult> Bind<TResult>(Func<T, Response<TResult>> func)` Invokes a second function with the output of the first one.
-* `Response<TResult> Transform<T, TResult>(Func<T, TResult> func)` Changes type `T`, to type `TResult`.
-* `Func<T, Response<TResult>> Lift<T, TResult>(Func<T, TResult>)` Elevate the function’s type from `T`, to `Response<T>`
-* `Response<TResult> Pivot<T, TResult>` Execute the first function if the condition is true, otherwise execute the second function.  
-* `bool IsTrue<T>` When the Response is in a valid state the func's bool result is returned, otherwise false is returned.  
 
 ## Later`<T>`
 
@@ -113,7 +121,8 @@ It can make code clearer as the logic isn't clouded by error handling, however w
 By default errors aren't logged, but you can add your own logger that'll be ran each time the Try Container encounters an error.  
 If you'd like to log any errors it's suggested you set up a logger at the start of the program, however you're able to change, or remove the error logger at any point in the program.  
 Whatever logger is set at the time a Try container is created, is the logger that Container will use. It's suggested your logger is stateless to avoid runtime complications.  
-The custom logger is a simple 'Action' that takes an 'Exception' as an argument. For example a logger in a console app might look like: `Try.SetExceptionLogger((ex) => Console.WriteLine(ex));`.  
+The custom logger is a simple 'Action' that takes an 'Exception' as an argument.  
+For example a logger in a console app might look like: `Try.SetExceptionLogger(ex => Console.WriteLine(ex))` - or simply: `Try.SetExceptionLogger(Console.WriteLine)`.  
 
 In the example below a `Widget` is persisted to disk in a fire, and forget fashion.  
 Since the result of the save isn't used, the return type is `void`. The function lacks error handling, so it's lifted to a Try Container.
@@ -432,8 +441,6 @@ That is already the fate of the `Match` expression, as C# now has some pretty po
 If you think the language has a better implementation than the types here, you should definitely use them.  
 Honesty, if C# ever got some level of Monad support (*not counting Task or LINQ*), that would be the end for this library.  
 
-# Expressions
-
 ## Compose`<T>`
 
 Used to run dependant functions one after each other, such that the first function's output feeds into the second function's input.  
@@ -553,6 +560,8 @@ public Response<T> CreateUser(UserModel user)
 }
 ```
 
+Note: we also have options for jitter, and `Retry.ExecuteExponential()` to grow the delays exponentially (*instead of linearly*) between failed attempts.  
+
 ## Reduce`<T>`
 
 Combine many values of `T` to a single value of `T`.  
@@ -628,4 +637,7 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 
  ## 9.0.0
 
- * // TODO: 
+ * Updated additional **Pack** details in the solution file (*debug symbols, xml comments, readme file, etc*).
+ * New extension method for `Response`, and `Response<T>` types (*both sync, and async*) called `Unpack()` - which flattens response containers.
+ * When `Try.SetExceptionLogger()` is configured, exceptions logged though `LogError()` - or found in `Response`, and `Maybe` containers, are sent though.
+ * 
