@@ -351,6 +351,30 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
+        public async Task BothResponses_AreValid_FunnelFunc_IsInvoked_Async()
+        {
+            var response1 = Task.FromResult(new Response<bool>(true));
+            var response2 = Task.FromResult(new Response<bool>(false));
+
+            var response = await Expression.FunnelAsync(response1, response2, (x, y) => false);
+
+            Assert.IsTrue(response.IsValid);
+            Assert.IsFalse(response.Value);
+        }
+
+        [TestMethod]
+        public async Task BothResponses_AreValid_FunnelFunc_IsInvoked_AsyncTask()
+        {
+            var response1 = Task.FromResult(new Response<bool>(true));
+            var response2 = Task.FromResult(new Response<bool>(false));
+
+            var response = await Expression.FunnelAsync(response1, response2, (x, y) => Task.FromResult(false));
+
+            Assert.IsTrue(response.IsValid);
+            Assert.IsFalse(response.Value);
+        }
+
+        [TestMethod]
         public void Response_Lift_Action()
         {
             var response = new Response();

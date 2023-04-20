@@ -25,6 +25,8 @@ namespace ContainerExpressions.Expressions
 
         #region Synchronous
 
+        // Callback: Func<T1, T2, TResult>
+
         /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
         public static Response<TResult> Funnel<T1, T2, TResult>(Response<T1> response1, Response<T2> response2, Func<T1, T2, TResult> func) => Core.Funnel.Converge(response1, response2, func);
 
@@ -46,9 +48,80 @@ namespace ContainerExpressions.Expressions
         /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
         public static Response<TResult> Funnel<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Response<T5> response5, Response<T6> response6, Response<T7> response7, Response<T8> response8, Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> func) => Core.Funnel.Converge(response1, response2, response3, response4, response5, response6, response7, response8, func);
 
+        // Callback: Func<T1, T2, Task<TResult>>
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, TResult>(Response<T1> response1, Response<T2> response2, Func<T1, T2, Task<TResult>> func) => Core.Funnel.ConvergeAsync(response1, response2, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Func<T1, T2, T3, Task<TResult>> func) => Core.Funnel.ConvergeAsync(response1, response2, response3, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Func<T1, T2, T3, T4, Task<TResult>> func) => Core.Funnel.ConvergeAsync(response1, response2, response3, response4, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Response<T5> response5, Func<T1, T2, T3, T4, T5, Task<TResult>> func) => Core.Funnel.ConvergeAsync(response1, response2, response3, response4, response5, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, T6, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Response<T5> response5, Response<T6> response6, Func<T1, T2, T3, T4, T5, T6, Task<TResult>> func) => Core.Funnel.ConvergeAsync(response1, response2, response3, response4, response5, response6, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Response<T5> response5, Response<T6> response6, Response<T7> response7, Func<T1, T2, T3, T4, T5, T6, T7, Task<TResult>> func) => Core.Funnel.ConvergeAsync(response1, response2, response3, response4, response5, response6, response7, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Response<T5> response5, Response<T6> response6, Response<T7> response7, Response<T8> response8, Func<T1, T2, T3, T4, T5, T6, T7, T8, Task<TResult>> func) => Core.Funnel.ConvergeAsync(response1, response2, response3, response4, response5, response6, response7, response8, func);
+
+        // Callback: Func<T1, T2, Response<TResult>>
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Response<TResult> Funnel<T1, T2, TResult>(Response<T1> response1, Response<T2> response2, Func<T1, T2, Response<TResult>> func) => Core.Funnel.Converge(response1, response2, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Response<TResult> Funnel<T1, T2, T3, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Func<T1, T2, T3, Response<TResult>> func) => Core.Funnel.Converge(response1, response2, response3, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Response<TResult> Funnel<T1, T2, T3, T4, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Func<T1, T2, T3, T4, Response<TResult>> func) => Core.Funnel.Converge(response1, response2, response3, response4, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Response<TResult> Funnel<T1, T2, T3, T4, T5, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Response<T5> response5, Func<T1, T2, T3, T4, T5, Response<TResult>> func) => Core.Funnel.Converge(response1, response2, response3, response4, response5, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Response<TResult> Funnel<T1, T2, T3, T4, T5, T6, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Response<T5> response5, Response<T6> response6, Func<T1, T2, T3, T4, T5, T6, Response<TResult>> func) => Core.Funnel.Converge(response1, response2, response3, response4, response5, response6, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Response<TResult> Funnel<T1, T2, T3, T4, T5, T6, T7, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Response<T5> response5, Response<T6> response6, Response<T7> response7, Func<T1, T2, T3, T4, T5, T6, T7, Response<TResult>> func) => Core.Funnel.Converge(response1, response2, response3, response4, response5, response6, response7, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Response<TResult> Funnel<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Response<T5> response5, Response<T6> response6, Response<T7> response7, Response<T8> response8, Func<T1, T2, T3, T4, T5, T6, T7, T8, Response<TResult>> func) => Core.Funnel.Converge(response1, response2, response3, response4, response5, response6, response7, response8, func);
+
+        // Callback: Func<T1, T2, Task<Response<TResult>>>
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, TResult>(Response<T1> response1, Response<T2> response2, Func<T1, T2, Task<Response<TResult>>> func) => Core.Funnel.ConvergeAsync(response1, response2, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Func<T1, T2, T3, Task<Response<TResult>>> func) => Core.Funnel.ConvergeAsync(response1, response2, response3, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Func<T1, T2, T3, T4, Task<Response<TResult>>> func) => Core.Funnel.ConvergeAsync(response1, response2, response3, response4, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Response<T5> response5, Func<T1, T2, T3, T4, T5, Task<Response<TResult>>> func) => Core.Funnel.ConvergeAsync(response1, response2, response3, response4, response5, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, T6, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Response<T5> response5, Response<T6> response6, Func<T1, T2, T3, T4, T5, T6, Task<Response<TResult>>> func) => Core.Funnel.ConvergeAsync(response1, response2, response3, response4, response5, response6, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Response<T5> response5, Response<T6> response6, Response<T7> response7, Func<T1, T2, T3, T4, T5, T6, T7, Task<Response<TResult>>> func) => Core.Funnel.ConvergeAsync(response1, response2, response3, response4, response5, response6, response7, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(Response<T1> response1, Response<T2> response2, Response<T3> response3, Response<T4> response4, Response<T5> response5, Response<T6> response6, Response<T7> response7, Response<T8> response8, Func<T1, T2, T3, T4, T5, T6, T7, T8, Task<Response<TResult>>> func) => Core.Funnel.ConvergeAsync(response1, response2, response3, response4, response5, response6, response7, response8, func);
+
         #endregion
 
         #region Asynchronous
+
+        // Callback: Func<T1, T2, TResult>
 
         /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
         public static Task<Response<TResult>> FunnelAsync<T1, T2, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Func<T1, T2, TResult> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, func);
@@ -70,6 +143,75 @@ namespace ContainerExpressions.Expressions
 
         /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
         public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Task<Response<T3>> response3, Task<Response<T4>> response4, Task<Response<T5>> response5, Task<Response<T6>> response6, Task<Response<T7>> response7, Task<Response<T8>> response8, Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, response3, response4, response5, response6, response7, response8, func);
+
+        // Callback: Func<T1, T2, Task<TResult>>
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Func<T1, T2, Task<TResult>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Task<Response<T3>> response3, Func<T1, T2, T3, Task<TResult>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, response3, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Task<Response<T3>> response3, Task<Response<T4>> response4, Func<T1, T2, T3, T4, Task<TResult>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, response3, response4, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Task<Response<T3>> response3, Task<Response<T4>> response4, Task<Response<T5>> response5, Func<T1, T2, T3, T4, T5, Task<TResult>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, response3, response4, response5, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, T6, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Task<Response<T3>> response3, Task<Response<T4>> response4, Task<Response<T5>> response5, Task<Response<T6>> response6, Func<T1, T2, T3, T4, T5, T6, Task<TResult>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, response3, response4, response5, response6, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Task<Response<T3>> response3, Task<Response<T4>> response4, Task<Response<T5>> response5, Task<Response<T6>> response6, Task<Response<T7>> response7, Func<T1, T2, T3, T4, T5, T6, T7, Task<TResult>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, response3, response4, response5, response6, response7, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Task<Response<T3>> response3, Task<Response<T4>> response4, Task<Response<T5>> response5, Task<Response<T6>> response6, Task<Response<T7>> response7, Task<Response<T8>> response8, Func<T1, T2, T3, T4, T5, T6, T7, T8, Task<TResult>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, response3, response4, response5, response6, response7, response8, func);
+
+        // Callback: Func<T1, T2, Response<TResult>>
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Func<T1, T2, Response<TResult>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Task<Response<T3>> response3, Func<T1, T2, T3, Response<TResult>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, response3, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Task<Response<T3>> response3, Task<Response<T4>> response4, Func<T1, T2, T3, T4, Response<TResult>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, response3, response4, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Task<Response<T3>> response3, Task<Response<T4>> response4, Task<Response<T5>> response5, Func<T1, T2, T3, T4, T5, Response<TResult>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, response3, response4, response5, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, T6, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Task<Response<T3>> response3, Task<Response<T4>> response4, Task<Response<T5>> response5, Task<Response<T6>> response6, Func<T1, T2, T3, T4, T5, T6, Response<TResult>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, response3, response4, response5, response6, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Task<Response<T3>> response3, Task<Response<T4>> response4, Task<Response<T5>> response5, Task<Response<T6>> response6, Task<Response<T7>> response7, Func<T1, T2, T3, T4, T5, T6, T7, Response<TResult>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, response3, response4, response5, response6, response7, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Task<Response<T3>> response3, Task<Response<T4>> response4, Task<Response<T5>> response5, Task<Response<T6>> response6, Task<Response<T7>> response7, Task<Response<T8>> response8, Func<T1, T2, T3, T4, T5, T6, T7, T8, Response<TResult>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, response3, response4, response5, response6, response7, response8, func);
+
+        // Callback: Func<T1, T2, Task<Response<TResult>>>
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Func<T1, T2, Task<Response<TResult>>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Task<Response<T3>> response3, Func<T1, T2, T3, Task<Response<TResult>>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, response3, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Task<Response<T3>> response3, Task<Response<T4>> response4, Func<T1, T2, T3, T4, Task<Response<TResult>>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, response3, response4, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Task<Response<T3>> response3, Task<Response<T4>> response4, Task<Response<T5>> response5, Func<T1, T2, T3, T4, T5, Task<Response<TResult>>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, response3, response4, response5, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, T6, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Task<Response<T3>> response3, Task<Response<T4>> response4, Task<Response<T5>> response5, Task<Response<T6>> response6, Func<T1, T2, T3, T4, T5, T6, Task<Response<TResult>>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, response3, response4, response5, response6, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Task<Response<T3>> response3, Task<Response<T4>> response4, Task<Response<T5>> response5, Task<Response<T6>> response6, Task<Response<T7>> response7, Func<T1, T2, T3, T4, T5, T6, T7, Task<Response<TResult>>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, response3, response4, response5, response6, response7, func);
+
+        /// <summary>Takes multiple Response types, and passes the results to the final function only if all Response types are in a valid state, all tasks are ran at the same time, not one after another.</summary>
+        public static Task<Response<TResult>> FunnelAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(Task<Response<T1>> response1, Task<Response<T2>> response2, Task<Response<T3>> response3, Task<Response<T4>> response4, Task<Response<T5>> response5, Task<Response<T6>> response6, Task<Response<T7>> response7, Task<Response<T8>> response8, Func<T1, T2, T3, T4, T5, T6, T7, T8, Task<Response<TResult>>> func) => Core.FunnelAsync.ConvergeAsync(response1, response2, response3, response4, response5, response6, response7, response8, func);
 
         #endregion
 
