@@ -33,9 +33,9 @@ namespace ContainerExpressions.Containers
 
         public override bool Equals(object obj) => obj != null && Equals(obj as NotNull<T>);
 
-        public override int GetHashCode() => Value.GetHashCode();
+        public override int GetHashCode() => Value?.GetHashCode() ?? 0;
 
-        public override string ToString() => Value.ToString();
+        public override string ToString() => Value?.ToString() ?? string.Empty;
 
         public static bool operator !=(NotNull<T> x, NotNull<T> y) => !(x == y);
         public static bool operator ==(NotNull<T> x, NotNull<T> y)
@@ -82,9 +82,9 @@ namespace ContainerExpressions.Containers
 
         public override bool Equals(object obj) => obj != null && obj is NN<T> notNull && Equals(notNull);
 
-        public override int GetHashCode() => Value.GetHashCode();
+        public override int GetHashCode() => Value?.GetHashCode() ?? 0;
 
-        public override string ToString() => Value.ToString();
+        public override string ToString() => Value?.ToString() ?? string.Empty;
 
         public static bool operator !=(NN<T> x, NN<T> y) => !(x == y);
         public static bool operator ==(NN<T> x, NN<T> y) => x.Equals(y);

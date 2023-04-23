@@ -60,8 +60,8 @@ namespace ContainerExpressions.Containers
         /// <summary>Compares obj if it is of type Response T, or of type T. Throws InvalidOperationException if Response is in an invalid state, and obj is a T value.</summary>
         public override bool Equals(object obj) => obj is T value && Equals(value) || obj is Response<T> response && Equals(response);
 
-        /// <summary>Returns the Value's hash code (T), or IsValid's hash code (bool) if there is no value.</summary>
-        public override int GetHashCode() => IsValid ? Value.GetHashCode() : IsValid.GetHashCode();
+        /// <summary>Returns the Value's hash code (T), or 0 if there is no value.</summary>
+        public override int GetHashCode() => IsValid ? Value?.GetHashCode() ?? 0 : 0;
 
         public static bool operator !=(Response<T> x, Response<T> y) => !(x == y);
         public static bool operator ==(Response<T> x, Response<T> y) => x.Equals(y);

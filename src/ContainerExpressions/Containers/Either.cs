@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ContainerExpressions.Containers
 {
@@ -6,7 +7,7 @@ namespace ContainerExpressions.Containers
     /// This type holds a single instance of a selection of types.
     /// <para>While Either can take on more than one type, it is only ever a single type at a time.</para>
     /// </summary>
-    public readonly struct Either<T1, T2>
+    public readonly struct Either<T1, T2> : IEquatable<Either<T1, T2>>
     {
         private readonly int _tag;
         private readonly T1 _t1;
@@ -42,11 +43,8 @@ namespace ContainerExpressions.Containers
             throw new InvalidOperationException("The internal type was not set, you must assign Either a type at least once.");
         }
 
-        /// <summary>Sets the current internal type to that of the value.</summary>
-        public static implicit operator Either<T1, T2>(T1 value) => new Either<T1, T2>(value);
-
-        /// <summary>Sets the current internal type to that of the value.</summary>
-        public static implicit operator Either<T1, T2>(T2 value) => new Either<T1, T2>(value);
+        public bool TryGetT1(out T1 t1) { if (_tag == 1) { t1 = _t1; return true; }; t1 = default; return false; }
+        public bool TryGetT2(out T2 t2) { if (_tag == 2) { t2 = _t2; return true; }; t2 = default; return false; }
 
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
@@ -62,7 +60,47 @@ namespace ContainerExpressions.Containers
                 value = _t2?.ToString();
             }
 
-            return value;
+            return value ?? string.Empty;
+        }
+
+        public static implicit operator Either<T1, T2>(T1 value) => new Either<T1, T2>(value);
+        public static implicit operator Either<T1, T2>(T2 value) => new Either<T1, T2>(value);
+
+        public static bool operator !=(Either<T1, T2> x, T1 y) => !(x == y);
+        public static bool operator ==(Either<T1, T2> x, T1 y) => x.Equals(y);
+
+        public static bool operator !=(T1 x, Either<T1, T2> y) => !(x == y);
+        public static bool operator ==(T1 x, Either<T1, T2> y) => y.Equals(x);
+
+        public static bool operator !=(Either<T1, T2> x, T2 y) => !(x == y);
+        public static bool operator ==(Either<T1, T2> x, T2 y) => x.Equals(y);
+
+        public static bool operator !=(T2 x, Either<T1, T2> y) => !(x == y);
+        public static bool operator ==(T2 x, Either<T1, T2> y) => y.Equals(x);
+
+        public static bool operator !=(Either<T1, T2> x, Either<T1, T2> y) => !(x == y);
+        public static bool operator ==(Either<T1, T2> x, Either<T1, T2> y) => x.Equals(y);
+
+        public bool Equals(T1 other) => new Either<T1, T2>(other).Equals(this);
+        public bool Equals(T2 other) => new Either<T1, T2>(other).Equals(this);
+
+        public override bool Equals(object obj) => obj != null && obj is Either<T1, T2> other && Equals(other);
+
+        public bool Equals(Either<T1, T2> other)
+        {
+            if (_tag != other._tag) return false;
+
+            if (_tag == 1) return EqualityComparer<T1>.Default.Equals(_t1, other._t1);
+            if (_tag == 2) return EqualityComparer<T2>.Default.Equals(_t2, other._t2);
+
+            return _tag == 0 && other._tag == 0;
+        }
+
+        public override int GetHashCode()
+        {
+            if (_tag == 1) return _t1?.GetHashCode() ?? 0;
+            else if (_tag == 2) return _t2?.GetHashCode() ?? 0;
+            else return 0;
         }
     }
 
@@ -149,7 +187,7 @@ namespace ContainerExpressions.Containers
                 value = _t3?.ToString();
             }
 
-            return value;
+            return value ?? string.Empty;
         }
     }
 
@@ -257,7 +295,7 @@ namespace ContainerExpressions.Containers
                 value = _t4?.ToString();
             }
 
-            return value;
+            return value ?? string.Empty;
         }
     }
 
@@ -390,7 +428,7 @@ namespace ContainerExpressions.Containers
                 value = _t5?.ToString();
             }
 
-            return value;
+            return value ?? string.Empty;
         }
     }
 
@@ -550,7 +588,7 @@ namespace ContainerExpressions.Containers
                 value = _t6?.ToString();
             }
 
-            return value;
+            return value ?? string.Empty;
         }
     }
 
@@ -739,7 +777,7 @@ namespace ContainerExpressions.Containers
                 value = _t7?.ToString();
             }
 
-            return value;
+            return value ?? string.Empty;
         }
     }
 
@@ -959,10 +997,9 @@ namespace ContainerExpressions.Containers
                 value = _t8?.ToString();
             }
 
-            return value;
+            return value ?? string.Empty;
         }
     }
-
 
     #endregion
 }

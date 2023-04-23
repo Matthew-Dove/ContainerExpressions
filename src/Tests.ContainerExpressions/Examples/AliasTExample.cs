@@ -52,5 +52,70 @@ namespace Tests.ContainerExpressions.Examples
         }
 
         private class UpperCase : Alias<string> { public UpperCase(string value) : base(value?.ToUpper()) { } }
+
+        #region Combining Alias & Either
+
+        /**
+         * You can create custom reusable friendly named types by combining `Alias`, and `Either`.
+         * This can save you from needing to write out the entire `Either` type each time you use it; and you can give the type a descriptive name.
+        **/
+
+        // Accepts either a: `string`, or an `int`. Does not do any extra processing on the input.
+        class StringOrInt : Alias<Either<int, string>> {
+            public StringOrInt(Either<int, string> value) : base(value) { }
+        }
+
+        [TestMethod]
+        public void AliasT_EitherT_StringOrInt_Example()
+        {
+            StringOrInt stringOrInt = new StringOrInt("1"); // String value
+            int number = stringOrInt.Value.Match(x => x, int.Parse); // Output: 1
+            bool isString = stringOrInt == "1"; // Output: true
+            bool isInt = stringOrInt == 1; // Output: false
+
+            Assert.AreEqual(1, number);
+            Assert.IsTrue(isString);
+            Assert.IsFalse(isInt);
+
+            stringOrInt = new StringOrInt(1); // Int value
+            number = stringOrInt.Value.Match(x => x, int.Parse); // Output: 1
+            isString = stringOrInt == "1"; // Output: false
+            isInt = stringOrInt == 1; // Output: true
+
+            Assert.AreEqual(1, number);
+            Assert.IsFalse(isString);
+            Assert.IsTrue(isInt);
+        }
+
+        // Accepts either a: `string`, `short`, `int`, or `long`. Converts the input to a `long`.
+        class ConvertToLong : Alias<long> {
+            public ConvertToLong(Either<string, short, int, long> value) : base(value.Match(long.Parse, Convert.ToInt64, Convert.ToInt64, x => x)) { }
+        }
+
+        [TestMethod]
+        public void AliasT_EitherT_ConvertToLong_Example()
+        {
+            ConvertToLong convertToLong = new ConvertToLong("1"); // String value
+            long number = convertToLong; // Output: 1
+
+            Assert.AreEqual(1L, number);
+
+            convertToLong = new ConvertToLong((short)1); // Short value
+            number = convertToLong; // Output: 1
+
+            Assert.AreEqual(1L, number);
+
+            convertToLong = new ConvertToLong((int)1); // Int value
+            number = convertToLong; // Output: 1
+
+            Assert.AreEqual(1L, number);
+
+            convertToLong = new ConvertToLong((long)1); // Long value
+            number = convertToLong; // Output: 1
+
+            Assert.AreEqual(1L, number);
+        }
+
+        #endregion
     }
 }

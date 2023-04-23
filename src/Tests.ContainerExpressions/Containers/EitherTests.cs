@@ -79,5 +79,101 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         #endregion
+
+        #region Comparison
+
+        [TestMethod]
+        public void Compare_Either_Pass()
+        {
+            var x = new Either<string, int>(1);
+            var y = new Either<string, int>(1);
+
+            var areEqual = x == y;
+
+            Assert.IsTrue(areEqual);
+        }
+
+        [TestMethod]
+        public void Compare_Either_Fail()
+        {
+            var x = new Either<string, int>(1);
+            var y = new Either<string, int>("1");
+
+            var areEqual = x == y;
+
+            Assert.IsFalse(areEqual);
+        }
+
+        [TestMethod]
+        public void Compare_T1Value_Pass()
+        {
+            var either = new Either<string, int>(1);
+            var value = 1;
+
+            var areEqual = value == either;
+
+            Assert.IsTrue(areEqual);
+        }
+
+        [TestMethod]
+        public void Compare_T1Value_FailValue()
+        {
+            var either = new Either<string, int>(1);
+            var value = 2;
+
+            var areEqual = value == either;
+
+            Assert.IsFalse(areEqual);
+        }
+
+        [TestMethod]
+        public void Compare_T1Value_FailType()
+        {
+            var either = new Either<string, int>(1);
+            var value = "1";
+
+            var areEqual = value == either;
+
+            Assert.IsFalse(areEqual);
+        }
+
+        #endregion
+
+        #region TryGet
+
+        [TestMethod]
+        public void TryGetT1_Pass()
+        {
+            var either = new Either<string, int>("1");
+
+            var result = either.TryGetT1(out var value);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual("1", value);
+        }
+
+        [TestMethod]
+        public void TryGetT1_Pass_AutoCast()
+        {
+            var either = new Either<string, int>("1");
+
+            var result = either.TryGetT1(out var value);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(either, value);
+        }
+
+        [TestMethod]
+        public void TryGetT1_Fail()
+        {
+            var either = new Either<string, int>(1);
+
+            var result = either.TryGetT1(out var value);
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(default, value);
+        }
+
+        #endregion
     }
 }

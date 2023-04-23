@@ -441,6 +441,47 @@ That is already the fate of the `Match` expression, as C# now has some pretty po
 If you think the language has a better implementation than the types here, you should definitely use them.  
 Honesty, if C# ever got some level of Monad support (*not counting Task or LINQ*), that would be the end for this library.  
 
+## Combining `Alias` & `Either`
+
+You can create custom reusable friendly named types by combining `Alias`, and `Either`.  
+This can save you from needing to write out the entire `Either` type each time you use it; and you can give the type a descriptive name too.  
+
+```cs
+// Accepts either a: string, or an int. Does not do any extra processing on the input.
+class StringOrInt : Alias<Either<int, string>> {
+    public StringOrInt(Either<int, string> value) : base(value) { }
+}
+
+StringOrInt stringOrInt = new StringOrInt("1"); // String value
+int number = stringOrInt.Value.Match(x => x, int.Parse); // Output: 1
+bool isString = stringOrInt == "1"; // Output: true
+bool isInt = stringOrInt == 1; // Output: false
+
+stringOrInt = new StringOrInt(1); // Int value
+number = stringOrInt.Value.Match(x => x, int.Parse); // Output: 1
+isString = stringOrInt == "1"; // Output: false
+isInt = stringOrInt == 1; // Output: true
+```
+
+```cs
+// Accepts either a: string, short, int, or long. Converts the input to a long.
+class ConvertToLong : Alias<long> {
+    public ConvertToLong(Either<string, short, int, long> value) : base(value.Match(long.Parse, Convert.ToInt64, Convert.ToInt64, x => x)) { }
+}
+
+ConvertToLong convertToLong = new ConvertToLong("1"); // String value
+long number = convertToLong; // Output: 1
+
+convertToLong = new ConvertToLong((short)1); // Short value
+number = convertToLong; // Output: 1
+
+convertToLong = new ConvertToLong((int)1); // Int value
+number = convertToLong; // Output: 1
+
+convertToLong = new ConvertToLong((long)1); // Long value
+number = convertToLong; // Output: 1
+```
+
 ## Compose`<T>`
 
 Used to run dependant functions one after each other, such that the first function's output feeds into the second function's input.  
@@ -641,3 +682,5 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
  * New extension method for `Response`, and `Response<T>` types (*both sync, and async*) called `Unpack()` - which flattens response containers.
  * When `Try.SetExceptionLogger()` is configured, exceptions logged though `LogError()` - or found in `Response`, and `Maybe` containers, are sent though.
  * Expanded the function targets for `Funnel`. Was only `T`, now includes: `Response<T>`, `Task<T>`, and `Task<Response<T>>`.
+ * Added equals overloads to `Either`, so you can easily compare some `T` value to the `Either` container.
+ * Added `TryGetT*` to `Either`, allowing access to the types without going though `Match<TResult>`.
