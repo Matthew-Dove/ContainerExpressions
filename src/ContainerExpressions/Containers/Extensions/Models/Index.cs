@@ -4,7 +4,7 @@
     public readonly struct Index
     {
         public A<int> Value { get; }
-        public Index(int value) { Value = new(value); }
+        internal Index(int value) { Value = new(value); }
 
         public static implicit operator A<int>(Index alias) => alias.Value;
         public static implicit operator Index(A<int> value) => new(value.Value);
@@ -12,5 +12,30 @@
         public static implicit operator Index(int value) => new(value);
 
         public override string ToString() => Value.ToString();
+
+        /// <summary>Attempts to retrieve a cached result, otherwise a new one is created.</summary>
+        internal static Index From(int result)
+        {
+            if (result >= IndexCache.InclusiveMin && result < IndexCache.ExclusiveMax) return IndexCache.Cache[result];
+            return new Index(result);
+        }
+    }
+
+    internal static class IndexCache
+    {
+        public const int InclusiveMin = 0;
+        public const int ExclusiveMax = 10;
+
+        public static readonly Index[] Cache = GenerateCache();
+
+        private static Index[] GenerateCache()
+        {
+            var cache = new Index[ExclusiveMax];
+            for (int i = 0; i < cache.Length; i++)
+            {
+                cache[i] = new Index(i);
+            }
+            return cache;
+        }
     }
 }

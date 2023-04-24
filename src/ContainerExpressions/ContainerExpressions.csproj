@@ -51,7 +51,6 @@ The expression Retry will attempt to get the T value after x time delay for n at
 
   <ItemGroup>
     <Folder Include="Expressions\Core\" />
-    <Folder Include="Expressions\Models\" />
   </ItemGroup>
 
   <ItemGroup>

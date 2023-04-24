@@ -793,6 +793,8 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
  * Updated additional **Pack** details in the solution file (*debug symbols, xml comments, readme file, etc*).
  * New extension method for `Response`, and `Response<T>` types (*both sync, and async*) called `Unpack()` - which flattens response containers.
  * When `Try.SetExceptionLogger()` is configured, exceptions logged though `LogError()` - or found in `Response`, and `Maybe` containers, are sent though.
+ * Added a `LogError` extension method, so you can which forwards exceptions to the logger setup for: `Try.SetExceptionLogger`.
  * Expanded the function targets for `Funnel`. Was only `T`, now includes: `Response<T>`, `Task<T>`, and `Task<Response<T>>`.
  * Added equals overloads to `Either`, so you can easily compare some `T` value to the `Either` container.
  * Added `TryGetT*` to `Either`, allowing access to the types without going though `Match<TResult>`.
+ * Added a struct version of `Alias<T>` called `A<T>`.
