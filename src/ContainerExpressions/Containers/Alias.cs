@@ -46,6 +46,7 @@ namespace ContainerExpressions.Containers
     /// A struct alterative to the Alias class.
     /// <para>Note: As structs cannot be inherited, you cannot rename this type as you can for Alias.</para>
     /// <para>However you can still use this in it's raw form for method overloading, or you can have a global usings file to alias your custom type.</para>
+    /// <para><![CDATA[global using XXX = ContainerExpressions.Containers.A<int>;]]></para>
     /// </summary>
     public readonly struct A<T> : IEquatable<A<T>>
     {
@@ -59,8 +60,9 @@ namespace ContainerExpressions.Containers
         }
 
         public static implicit operator T(A<T> alias) => alias.Value;
+        public static implicit operator A<T>(T value) => new (value);
 
-        public bool Equals(A<T> other) => other != default && ((other.Value == null && Value == null) || other.Equals(Value));
+        public bool Equals(A<T> other) => ((other.Value == null && Value == null) || other.Equals(Value));
 
         public bool Equals(T value) => (value == null && Value == null) || EqualityComparer<T>.Default.Equals(Value, value);
 
@@ -71,17 +73,12 @@ namespace ContainerExpressions.Containers
         public override string ToString() => Value?.ToString() ?? string.Empty;
 
         public static bool operator !=(A<T> x, A<T> y) => !(x == y);
-        public static bool operator ==(A<T> x, A<T> y)
-        {
-            if (x == default) return y == default;
-            if (y == default) return x == default;
-            return x.Equals(y);
-        }
+        public static bool operator ==(A<T> x, A<T> y) => x.Equals(y);
 
         public static bool operator !=(A<T> x, T y) => !(x == y);
-        public static bool operator ==(A<T> x, T y) => x != default && x.Equals(y);
+        public static bool operator ==(A<T> x, T y) => x.Equals(y);
 
         public static bool operator !=(T x, A<T> y) => !(x == y);
-        public static bool operator ==(T x, A<T> y) => y != default && y.Equals(x);
+        public static bool operator ==(T x, A<T> y) => y.Equals(x);
     }
 }

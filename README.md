@@ -446,6 +446,106 @@ public sealed class Index : Alias<int> {
 }
 ```
 
+The above custom type `Index` works great, but it has one big problem.  
+It forces you to create a reference class (_`Index`_) for a value struct (_`int`_).  
+This might be ok if `T` was a reference type too, but quite wasteful when `T` is a value type.  
+To get around this, we also have a struct alias type: `A<T>`.  
+Structs are not as versatile as classes, for example they cannot implement inheritance - which is how `Alias<T>` works today (it is abstract, so there is no runtime penality for doing this_).  
+There are two work arounds I have for you:  
+
+1) Use a file, or global [using directive](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/using-directive) (_a complier feature_).
+
+```cs
+global using Index = ContainerExpressions.Containers.A<int>; // Put this in GlobalUsings.cs file.
+// OR
+using Index = ContainerExpressions.Containers.A<int>; // Put this in the local file - not as useful as the Index name won't work everywhere.
+```
+
+That solution is pretty good, you get a descriptive name; and a type overload.  
+But you do miss out on a few things:  
+\> You cannot add XML comments to the type, to further explain your alias.  
+\> You cannot customise the `implicit operator` behaviour, or override any of the `Equals`, `GetHashCode`, or `ToString` methods.  
+\> You cannot modify the value in the constructor, before it's sent down to the alias type (_so you could not implement `UpperCase` for example_).  
+
+2) If you need something more than a `using directive`, you'll need to create this wrapper around your `T`.
+
+```cs
+/// <summary>The current element's index.</summary>
+public readonly struct Index
+{
+	public A<int> Value { get; }
+	public Index(int value) { Value = new(value); }
+
+	public static implicit operator A<int>(Index alias) => alias.Value;
+	public static implicit operator Index(A<int> value) => new(value.Value);
+	public static implicit operator int(Index alias) => alias.Value.Value;
+	public static implicit operator Index(int value) => new(value);
+
+	public override string ToString() => Value.ToString();
+}
+```
+
+This gets you everything in `Alias<int>`, missing from `A<int>` - but in struct form!  
+I cannot make this struct for you unfortunately, you will have to copy + paste it; and replace the `int` with your desired type.  
+That said, this should be possible if using [Source Generators](https://learn.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview), but I haven't played with them yet. 
+
+Be aware that `Index` is not safe to do `Equals` comparison on, or to use in collections such as a `Dictionary`.  
+For such cases you would need to expose the underlying `A<T>`, so cast it first, or access it directly though the `Value` property.  
+Note: the reference type `Alias<T>` does not have this problem, and is safe to use anywhere you would use `T`.  
+
+You could do away with the the helper methods for a more concise version, you'd just need to manually access the underlying alias type (_`A<int>`_) though the `Value` property:  
+
+```cs
+public readonly struct Index
+{
+	public A<int> Value { get; }
+	public Index(int value) { Value = new(value); }
+}
+```
+
+You might ask - why am I using `Index` in so many examples? When would you wrap a plain `int`?  
+Well 1) to show the differences without introducing new concepts; and 2) because I have a perfect example that would benefit from an alias.  
+Take the following extension method from the `System.Linq` namespace:
+
+```cs
+// Summary:
+//   Projects each element of a sequence into a new form by incorporating the element's index.
+//
+// Selector:
+//   A transform function to apply to each source element; the second parameter of the function represents the index of the source element.
+//
+public static IEnumerable<TResult> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, int, TResult> selector);
+
+// Code example of using the above extension method:
+new string[] { "Jane", "John" }.Select((x, i) => $"Index: {i}, Name: {x}.");
+```
+
+The problem here is the selector: `Func<TSource, int, TResult>` - you can infer what `TSource`, and `TResult` are, but what is `int` doing here?  
+When creating the lambda function in your IDE, there is no hint on the `int` type, as C# does not provide a way to add XML comments on `Func` type parameters.  
+So you either already know it, or you stop what you're doing and go read the full comments, or Google / StackOverflow / ChatGPT it.  
+If `int` was named `Index` instead, it would be much more obvious what this parameter is doing here.  
+We could put XML comments on the type too, which would show up in the IDE as you are creating the lambda - awesome!  
+I had a similar method to write in this project, I started off with an `int`, but changed it to `Index` (_with comments explaining it's usage_):  
+
+```cs
+// Before:
+public static TError[] LogError<TError>(this TError[] ex, Func<TError, int, string> format) where TError : Exception
+{
+    for (int i = 0; i < ex.Length; i++) { Trace.Log(format(ex[i], i)); LogException(ex[i]); }
+    return ex;
+}
+
+// After:
+public static TError[] LogError<TError>(this TError[] ex, Func<TError, Index, string> format) where TError : Exception
+{
+    for (int i = 0; i < ex.Length; i++) { Trace.Log(format(ex[i], i)); LogException(ex[i]); }
+    return ex;
+}
+
+// Notice how nothing else in the function needed to change after replacing int with Index?
+// This is thanks to the implicit casting provided by Alias, the loop's i is converted into an Index automatically.
+```
+
 You could make the argument that new C# language features such as a properties' init accessor, or record types make this `Alias` container obsolete.  
 They dramatically cut down on the red tape required when creating new types, which is the same goal as `Alias`.  
 In the long term I imagine that will be the ultimate fate of this library, every addition here will slowly be eaten away as C# adopts similar concepts into it's specification.  

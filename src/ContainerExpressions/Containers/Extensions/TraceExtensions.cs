@@ -125,30 +125,26 @@ namespace ContainerExpressions.Containers
             return ex;
         }
 
-        /// <summary>The current element's index.</summary>
-        public sealed class Index : Alias<int> {
-            public Index(int value) : base(value) { }
-            public static implicit operator Index(int value) => new (value);
-        }
-
-        /// <summary>The total number of elements in the collection.</summary>
-        public sealed class Length : Alias<int> {
-            public Length(int value) : base(value) { }
-            public static implicit operator Length(int value) => new(value);
-        }
-
+        /// <summary>Logs many exceptions.</summary>
+        /// <typeparam name="TError"></typeparam>
+        /// <param name="ex">The exceptions to log.</param>
+        /// <param name="format">The messages to trace, one for each error</param>
+        /// <returns>The exceptions originally provided.</returns>
         public static TError[] LogError<TError>(this TError[] ex, Func<TError, Index, string> format) where TError : Exception
         {
             for (int i = 0; i < ex.Length; i++) { Trace.Log(format(ex[i], i)); LogException(ex[i]); }
             return ex;
         }
 
+        /// <summary>Logs many exceptions.</summary>
+        /// <param name="ex">The exceptions to log.</param>
+        /// <param name="format">The messages to trace, one for each error</param>
+        /// <returns>The exceptions originally provided.</returns>
         public static TError[] LogError<TError>(this TError[] ex, Func<TError, Index, Length, string> format) where TError : Exception
         {
             for (int i = 0; i < ex.Length; i++) { Trace.Log(format(ex[i], i, ex.Length)); LogException(ex[i]); }
             return ex;
         }
-
 
         #endregion
 
@@ -408,7 +404,11 @@ namespace ContainerExpressions.Containers
             if (!maybe._hasValue && maybe._error is Exception ex)
             {
                 LogException(ex);
-                foreach (var ae in maybe.AggregateErrors.Select(x => x as Exception).Where(x => x != null)) { LogException(ae); }
+                foreach (var ae in maybe.AggregateErrors.Select((x, y) => x as Exception).Where(x => x != null)) { LogException(ae); }
+
+
+                new string[] { "Jane", "John" }.Select((x, i) => $"Index: {i}, Name: {x}.");
+
             }
 
             return maybe;
