@@ -1,5 +1,6 @@
 ﻿using ContainerExpressions.Expressions.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ContainerExpressions.Containers
@@ -7,6 +8,8 @@ namespace ContainerExpressions.Containers
     /// <summary>Extensions for the Trace Container.</summary>
     public static class TraceExtensions
     {
+        #region Utilities
+
         /// <summary>Logs an exception, will check for aggregate exceptions, and log them out individually.</summary>
         internal static void LogException(Exception ex)
         {
@@ -22,10 +25,12 @@ namespace ContainerExpressions.Containers
             if (ae == null) return; // Null when no exception was thrown for tasks.
             foreach (var e in ae.Flatten().InnerExceptions)
             {
-                if (e is AggregateException ex) { LogAggregatedExceptions(logger, ex); } // Flattened exceptions can still contain aggregate exceptions.
+                if (e is AggregateException ex) { LogAggregatedExceptions(logger, ex); } // Flattened exceptions can still contain aggregate exceptions themselves.
                 else { logger.Log(e); }
             }
         }
+
+        #endregion
 
         #region TError
 
@@ -35,6 +40,24 @@ namespace ContainerExpressions.Containers
         public static TError LogError<TError>(this TError ex) where TError : Exception
         {
             LogException(ex);
+            return ex;
+        }
+
+        /// <summary>Logs many exceptions.</summary>
+        /// <param name="ex">The exceptions to log.</param>
+        /// <returns>The exceptions originally provided.</returns>
+        public static IEnumerable<TError> LogError<TError>(this IEnumerable<TError> ex) where TError : Exception
+        {
+            foreach (var e in ex) LogException(e);
+            return ex;
+        }
+
+        /// <summary>Logs many exceptions.</summary>
+        /// <param name="ex">The exceptions to log.</param>
+        /// <returns>The exceptions originally provided.</returns>
+        public static TError[] LogError<TError>(this TError[] ex) where TError : Exception
+        {
+            for (int i = 0; i < ex.Length; i++) LogException(ex[i]);
             return ex;
         }
 
@@ -49,6 +72,28 @@ namespace ContainerExpressions.Containers
             return ex;
         }
 
+        /// <summary>Logs many exceptions.</summary>
+        /// <param name="ex">The exceptions to log.</param>
+        /// <param name="message">The message to trace (only once).</param>
+        /// <returns>The exceptions originally provided.</returns>
+        public static IEnumerable<TError> LogError<TError>(this IEnumerable<TError> ex, string message) where TError : Exception
+        {
+            Trace.Log(message);
+            foreach (var e in ex) LogException(e);
+            return ex;
+        }
+
+        /// <summary>Logs many exceptions.</summary>
+        /// <param name="ex">The exceptions to log.</param>
+        /// <param name="message">The message to trace (only once).</param>
+        /// <returns>The exceptions originally provided.</returns>
+        public static TError[] LogError<TError>(this TError[] ex, string message) where TError : Exception
+        {
+            Trace.Log(message);
+            for (int i = 0; i < ex.Length; i++) LogException(ex[i]);
+            return ex;
+        }
+
         /// <summary>Logs an exception.</summary>
         /// <param name="ex">The exception to log.</param>
         /// <param name="format">The message to trace.</param>
@@ -59,6 +104,51 @@ namespace ContainerExpressions.Containers
             LogException(ex);
             return ex;
         }
+
+        /// <summary>Logs many exceptions.</summary>
+        /// <param name="ex">The exceptions to log.</param>
+        /// <param name="format">The messages to trace, one for each error.</param>
+        /// <returns>The exceptions originally provided.</returns>
+        public static IEnumerable<TError> LogError<TError>(this IEnumerable<TError> ex, Func<TError, string> format) where TError : Exception
+        {
+            foreach (var e in ex) { Trace.Log(format(e)); LogException(e); }
+            return ex;
+        }
+
+        /// <summary>Logs many exceptions.</summary>
+        /// <param name="ex">The exceptions to log.</param>
+        /// <param name="format">The messages to trace, one for each error.</param>
+        /// <returns>The exceptions originally provided.</returns>
+        public static TError[] LogError<TError>(this TError[] ex, Func<TError, string> format) where TError : Exception
+        {
+            for (int i = 0; i < ex.Length; i++) { Trace.Log(format(ex[i])); LogException(ex[i]); }
+            return ex;
+        }
+
+        /// <summary>The current element's index.</summary>
+        public sealed class Index : Alias<int> {
+            public Index(int value) : base(value) { }
+            public static implicit operator Index(int value) => new (value);
+        }
+
+        /// <summary>The total number of elements in the collection.</summary>
+        public sealed class Length : Alias<int> {
+            public Length(int value) : base(value) { }
+            public static implicit operator Length(int value) => new(value);
+        }
+
+        public static TError[] LogError<TError>(this TError[] ex, Func<TError, Index, string> format) where TError : Exception
+        {
+            for (int i = 0; i < ex.Length; i++) { Trace.Log(format(ex[i], i)); LogException(ex[i]); }
+            return ex;
+        }
+
+        public static TError[] LogError<TError>(this TError[] ex, Func<TError, Index, Length, string> format) where TError : Exception
+        {
+            for (int i = 0; i < ex.Length; i++) { Trace.Log(format(ex[i], i, ex.Length)); LogException(ex[i]); }
+            return ex;
+        }
+
 
         #endregion
 
@@ -300,7 +390,7 @@ namespace ContainerExpressions.Containers
             if (!maybe._hasValue && maybe._error is Exception ex)
             {
                 LogException(ex);
-                foreach (var ae in maybe.AggregateErrors.Select(x => x as Exception)) { LogException(ae); }
+                foreach (var ae in maybe.AggregateErrors.Select(x => x as Exception).Where(x => x != null)) { LogException(ae); }
             }
 
             return maybe;
@@ -318,7 +408,7 @@ namespace ContainerExpressions.Containers
             if (!maybe._hasValue && maybe._error is Exception ex)
             {
                 LogException(ex);
-                foreach (var ae in maybe.AggregateErrors.Select(x => x as Exception)) { LogException(ae); }
+                foreach (var ae in maybe.AggregateErrors.Select(x => x as Exception).Where(x => x != null)) { LogException(ae); }
             }
 
             return maybe;

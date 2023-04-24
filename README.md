@@ -434,6 +434,18 @@ void Save(UpperCase username)
 }
 ```
 
+The base class `Alias<T>`, cannot implement autocasting from `T`, to your custom type.  
+This is because the abstract class has no knowledge of the your type, and `implicit operators` do not accept generic parameters in C#.  
+If you would like to implement this behaviour (_such that the user does not need to call your constructor_), simply add this one liner to your `Alias` definition.  
+
+```cs
+/// <summary>The current element's index.</summary>
+public sealed class Index : Alias<int> {
+    public Index(int value) : base(value) { }
+    public static implicit operator Index(int value) => new (value);
+}
+```
+
 You could make the argument that new C# language features such as a properties' init accessor, or record types make this `Alias` container obsolete.  
 They dramatically cut down on the red tape required when creating new types, which is the same goal as `Alias`.  
 In the long term I imagine that will be the ultimate fate of this library, every addition here will slowly be eaten away as C# adopts similar concepts into it's specification.  

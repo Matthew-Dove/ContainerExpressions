@@ -6,6 +6,40 @@ namespace ContainerExpressions.Containers
     /// <summary>Utility methods for the Response Container.</summary>
     public static class ResponseExtensions
     {
+        #region Utilities
+
+        /// <summary>
+        /// Takes a task's result, and puts it in a response container.
+        /// <para>Aggregate errors are logged (if any), the task is expected to be completed (i.e. from a continuation).</para>
+        /// </summary>
+        /// <returns>A valid response, when the task runs to completion; otherwise an invalid response.</returns>
+        private static Response TaskToResponse(Task value)
+        {
+            if (value.Status == TaskStatus.Faulted)
+            {
+                value.Exception.LogError();
+            }
+            return new Response(value.Status == TaskStatus.RanToCompletion);
+        }
+
+        /// <summary>
+        /// Extracts the value produced by a task, and puts it in a response container.
+        /// <para>Aggregate errors are logged (if any), the task is expected to be completed (i.e. from a continuation).</para>
+        /// </summary>
+        /// <returns>A valid response, when the task produces a value; otherwise an invalid response.</returns>
+        private static Response<T> TaskToResponse<T>(Task<T> value)
+        {
+            if (value.Status == TaskStatus.Faulted)
+            {
+                value.Exception.LogError();
+            }
+            return value.Status == TaskStatus.RanToCompletion ? new Response<T>(value.Result) : new Response<T>();
+        }
+
+        #endregion
+
+        #region Miscellaneous
+
         /// <summary>Creates a valid container response.</summary>
         public static Response<T> With<T>(this Response<T> _, T value) => new Response<T>(value);
 
@@ -25,39 +59,15 @@ namespace ContainerExpressions.Containers
         /// <param name="value">The response's value.</param>
         public static Task<Response<T>> ToResponseTaskAsync<T>(this Task<T> value) => value.ContinueWith(TaskToResponse);
 
-        /// <summary>
-        /// Extracts the value produced by a task, and puts it in a response container.
-        /// <para>Aggregate errors are logged (if any), the task is expected to be completed (i.e. from a continuation).</para>
-        /// </summary>
-        /// <returns>A valid response, when the task produces a value; otherwise an invalid response.</returns>
-        private static Response<T> TaskToResponse<T>(Task<T> value)
-        {
-            if (value.Status == TaskStatus.Faulted)
-            {
-                value.Exception.LogError();
-            }
-            return value.Status == TaskStatus.RanToCompletion ? new Response<T>(value.Result) : new Response<T>();
-        }
-
-        /// <summary>
-        /// Takes a task's result, and puts it in a response container.
-        /// <para>Aggregate errors are logged (if any), the task is expected to be completed (i.e. from a continuation).</para>
-        /// </summary>
-        /// <returns>A valid response, when the task runs to completion; otherwise an invalid response.</returns>
-        private static Response TaskToResponse(Task value)
-        {
-            if (value.Status == TaskStatus.Faulted)
-            {
-                value.Exception.LogError();
-            }
-            return new Response(value.Status == TaskStatus.RanToCompletion);
-        }
-
         /// <summary>Create a response container in an valid state.</summary>
         public static Response AsValid(this Response _) => new Response(true);
 
         /// <summary>Create a response container in a valid state.</summary>
         private static Response<T> Create<T>(T value) => new Response<T>(value);
+
+        #endregion
+
+        #region Lift
 
         /// <summary>Turn a Response into a function that wraps the initial Response.</summary>
         public static Func<Response<T>> Lift<T>(this Response<T> value) => () => value;
@@ -88,6 +98,16 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Turn an async function that doesn't return a task Response, into one that does.</summary>
         public static Func<T, Task<Response<TResult>>> LiftAsync<T, TResult>(this Func<T, Task<TResult>> func) => Create<Func<T, Task<Response<TResult>>>>(x => func(x).ContinueWith(TaskToResponse));
+
+        /// <summary>Gets the value, unless the state is invalid, then the default value is returned.</summary>
+        public static T GetValueOrDefault<T>(this Response<T> response, T defaultValue) => response ? response : defaultValue;
+
+        /// <summary>When the Response is in a valid state the Func's result is returned, otherwise false is returned.</summary>
+        public static bool IsTrue<T>(this Response<T> response, Func<T, bool> condition) => response ? condition(response) : false;
+
+        #endregion
+
+        #region Bind
 
         /**
          * For bind we have the following input => output scenarios.
@@ -186,8 +206,9 @@ namespace ContainerExpressions.Containers
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Task<Response> BindAsync<T>(this Task<Response<T>> response, Func<T, Task<Response>> func) => response.ContinueWith(x => x.Result ? func(x.Result) : Task.FromResult(new Response())).Unwrap();
 
-        /// <summary>Gets the value, unless the state is invalid, then the default value is returned.</summary>
-        public static T GetValueOrDefault<T>(this Response<T> response, T defaultValue) => response ? response : defaultValue;
+        #endregion
+
+        #region Transform
 
         /// <summary>Map the response to a calculated value.</summary>
         /// <typeparam name="T">The type of the pre-calculated value.</typeparam>
@@ -257,6 +278,10 @@ namespace ContainerExpressions.Containers
         /// <returns>The mapped response, or an invalid response if the input was in an invalid state.</returns>
         public static Func<Task<Response<TResult>>> TransformAsync<T, TResult>(this Func<Task<Response<T>>> term, Func<T, TResult> func) => () => term().ContinueWith(x => x.Result ? Response.Create(func(x.Result)) : new Response<TResult>());
 
+        #endregion
+
+        #region Pivot
+
         /// <summary>
         /// Executes one of the functions when the input response is valid, otherwise an invalid response is returned.
         /// <para>When the condition is true the first function is executed, otherwise the second function is executed.</para>
@@ -293,8 +318,9 @@ namespace ContainerExpressions.Containers
         /// </summary>
         public static Task<Response<TResult>> PivotAsync<T, TResult>(this Task<Response<T>> response, bool condition, Func<T, Task<Response<TResult>>> func1, Func<T, Task<Response<TResult>>> func2) => response.ContinueWith(x =>  x.Result ? (condition ? func1(x.Result) : func2(x.Result)) : Task.FromResult(new Response<TResult>())).Unwrap();
 
-        /// <summary>When the Response is in a valid state the Func's result is returned, otherwise false is returned.</summary>
-        public static bool IsTrue<T>(this Response<T> response, Func<T, bool> condition) => response ? condition(response) : false;
+        #endregion
+
+        #region Unpack
 
         /// <summary>Flattens nested Response types into a single one.</summary>
         public static Response Unpack(this Response<Response> response)
@@ -371,5 +397,7 @@ namespace ContainerExpressions.Containers
                 return new Response<T>();
             });
         }
+
+        #endregion
     }
 }
