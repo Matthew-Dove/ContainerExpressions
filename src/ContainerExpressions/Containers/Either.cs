@@ -170,6 +170,10 @@ namespace ContainerExpressions.Containers
             throw new InvalidOperationException("The internal type was not set, you must assign Either a type at least once.");
         }
 
+        public bool TryGetT1(out T1 t1) { if (_tag == 1) { t1 = _t1; return true; }; t1 = default; return false; }
+        public bool TryGetT2(out T2 t2) { if (_tag == 2) { t2 = _t2; return true; }; t2 = default; return false; }
+        public bool TryGetT3(out T3 t3) { if (_tag == 3) { t3 = _t3; return true; }; t3 = default; return false; }
+
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
         {
@@ -321,6 +325,11 @@ namespace ContainerExpressions.Containers
 
             throw new InvalidOperationException("The internal type was not set, you must assign Either a type at least once.");
         }
+
+        public bool TryGetT1(out T1 t1) { if (_tag == 1) { t1 = _t1; return true; }; t1 = default; return false; }
+        public bool TryGetT2(out T2 t2) { if (_tag == 2) { t2 = _t2; return true; }; t2 = default; return false; }
+        public bool TryGetT3(out T3 t3) { if (_tag == 3) { t3 = _t3; return true; }; t3 = default; return false; }
+        public bool TryGetT4(out T4 t4) { if (_tag == 4) { t4 = _t4; return true; }; t4 = default; return false; }
 
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
@@ -505,6 +514,12 @@ namespace ContainerExpressions.Containers
 
             throw new InvalidOperationException("The internal type was not set, you must assign Either a type at least once.");
         }
+
+        public bool TryGetT1(out T1 t1) { if (_tag == 1) { t1 = _t1; return true; }; t1 = default; return false; }
+        public bool TryGetT2(out T2 t2) { if (_tag == 2) { t2 = _t2; return true; }; t2 = default; return false; }
+        public bool TryGetT3(out T3 t3) { if (_tag == 3) { t3 = _t3; return true; }; t3 = default; return false; }
+        public bool TryGetT4(out T4 t4) { if (_tag == 4) { t4 = _t4; return true; }; t4 = default; return false; }
+        public bool TryGetT5(out T5 t5) { if (_tag == 5) { t5 = _t5; return true; }; t5 = default; return false; }
 
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
@@ -723,6 +738,13 @@ namespace ContainerExpressions.Containers
 
             throw new InvalidOperationException("The internal type was not set, you must assign Either a type at least once.");
         }
+
+        public bool TryGetT1(out T1 t1) { if (_tag == 1) { t1 = _t1; return true; }; t1 = default; return false; }
+        public bool TryGetT2(out T2 t2) { if (_tag == 2) { t2 = _t2; return true; }; t2 = default; return false; }
+        public bool TryGetT3(out T3 t3) { if (_tag == 3) { t3 = _t3; return true; }; t3 = default; return false; }
+        public bool TryGetT4(out T4 t4) { if (_tag == 4) { t4 = _t4; return true; }; t4 = default; return false; }
+        public bool TryGetT5(out T5 t5) { if (_tag == 5) { t5 = _t5; return true; }; t5 = default; return false; }
+        public bool TryGetT6(out T6 t6) { if (_tag == 6) { t6 = _t6; return true; }; t6 = default; return false; }
 
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
@@ -977,6 +999,14 @@ namespace ContainerExpressions.Containers
 
             throw new InvalidOperationException("The internal type was not set, you must assign Either a type at least once.");
         }
+
+        public bool TryGetT1(out T1 t1) { if (_tag == 1) { t1 = _t1; return true; }; t1 = default; return false; }
+        public bool TryGetT2(out T2 t2) { if (_tag == 2) { t2 = _t2; return true; }; t2 = default; return false; }
+        public bool TryGetT3(out T3 t3) { if (_tag == 3) { t3 = _t3; return true; }; t3 = default; return false; }
+        public bool TryGetT4(out T4 t4) { if (_tag == 4) { t4 = _t4; return true; }; t4 = default; return false; }
+        public bool TryGetT5(out T5 t5) { if (_tag == 5) { t5 = _t5; return true; }; t5 = default; return false; }
+        public bool TryGetT6(out T6 t6) { if (_tag == 6) { t6 = _t6; return true; }; t6 = default; return false; }
+        public bool TryGetT7(out T7 t7) { if (_tag == 7) { t7 = _t7; return true; }; t7 = default; return false; }
 
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
@@ -1269,6 +1299,15 @@ namespace ContainerExpressions.Containers
 
             throw new InvalidOperationException("The internal type was not set, you must assign Either a type at least once.");
         }
+
+        public bool TryGetT1(out T1 t1) { if (_tag == 1) { t1 = _t1; return true; }; t1 = default; return false; }
+        public bool TryGetT2(out T2 t2) { if (_tag == 2) { t2 = _t2; return true; }; t2 = default; return false; }
+        public bool TryGetT3(out T3 t3) { if (_tag == 3) { t3 = _t3; return true; }; t3 = default; return false; }
+        public bool TryGetT4(out T4 t4) { if (_tag == 4) { t4 = _t4; return true; }; t4 = default; return false; }
+        public bool TryGetT5(out T5 t5) { if (_tag == 5) { t5 = _t5; return true; }; t5 = default; return false; }
+        public bool TryGetT6(out T6 t6) { if (_tag == 6) { t6 = _t6; return true; }; t6 = default; return false; }
+        public bool TryGetT7(out T7 t7) { if (_tag == 7) { t7 = _t7; return true; }; t7 = default; return false; }
+        public bool TryGetT8(out T8 t8) { if (_tag == 8) { t8 = _t8; return true; }; t8 = default; return false; }
 
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
