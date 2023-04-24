@@ -798,3 +798,5 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
  * Added equals overloads to `Either`, so you can easily compare some `T` value to the `Either` container.
  * Added `TryGetT*` to `Either`, allowing access to the types without going though `Match<TResult>`.
  * Added a struct version of `Alias<T>` called `A<T>`.
+ * Added shared types to resue in containers, such as `OK`, `BadRequest`, `ServerError`, etc.
+ * Created shared common lambda functions, such as `Lambda.Identity` to reflect the input as the output. i.e. instead of having to write `(x => x)`.
