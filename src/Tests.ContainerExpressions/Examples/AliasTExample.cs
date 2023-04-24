@@ -55,16 +55,11 @@ namespace Tests.ContainerExpressions.Examples
 
         #region Combining Alias & Either
 
-        /**
-         * You can create custom reusable friendly named types by combining `Alias`, and `Either`.
-         * This can save you from needing to write out the entire `Either` type each time you use it; and you can give the type a descriptive name.
-        **/
-
-        // Accepts either a: `string`, or an `int`. Does not do any extra processing on the input.
         class StringOrInt : Alias<Either<int, string>> {
             public StringOrInt(Either<int, string> value) : base(value) { }
         }
 
+        /// <summary>https://github.com/Matthew-Dove/ContainerExpressions#combining-alias--either</summary>
         [TestMethod]
         public void AliasT_EitherT_StringOrInt_Example()
         {
@@ -87,7 +82,6 @@ namespace Tests.ContainerExpressions.Examples
             Assert.IsTrue(isInt);
         }
 
-        // Accepts either a: `string`, `short`, `int`, or `long`. Converts the input to a `long`.
         class ConvertToLong : Alias<long> {
             public ConvertToLong(Either<string, short, int, long> value) : base(value.Match(long.Parse, Convert.ToInt64, Convert.ToInt64, x => x)) { }
         }
