@@ -146,6 +146,23 @@ namespace ContainerExpressions.Containers
             return error;
         }
 
+        // A special log function for Maybe<TValue> to use, so that the same message is not traced twice (once for the top level error, and once for the aggregate errors).
+        private static TError[] LogErrorValueWithNoTrace<TError>(this TError[] error, string message)
+        {
+            if (error == null) return default;
+
+            for (int i = 0; i < error.Length; i++)
+            {
+                if (error[i] == null) continue;
+                Exception ex;
+                if (error is Exception e) ex = e;
+                else ex = new ContainerExpressionsErrorException<TError>(error[i], message);
+                LogException(ex);
+            }
+
+            return error;
+        }
+
         /// <summary>Logs a custom error type.</summary>
         /// <param name="error">The custom error type to log (i.e. not an exception).</param>
         /// <param name="format">The message to trace.</param>
@@ -684,12 +701,12 @@ namespace ContainerExpressions.Containers
         public static Maybe<TValue, TError> Log<TValue, TError>(this Maybe<TValue, TError> maybe, Func<TValue, string> value, Func<TError, string> error)
         {
             var message = maybe.Match(value, error);
-            Trace.Log(message);
+            if (maybe._hasValue) Trace.Log(message);
 
-            if (!maybe._hasValue && maybe._error is Exception ex)
+            if (!maybe._hasValue)
             {
-                LogException(ex);
-                foreach (var ae in maybe.AggregateErrors.Select(x => x as Exception).Where(x => x != null)) { LogException(ae); }
+                LogErrorValue(maybe._error, message);
+                LogErrorValueWithNoTrace(maybe.AggregateErrors, message);
             }
 
             return maybe;
@@ -702,12 +719,12 @@ namespace ContainerExpressions.Containers
         public static Maybe<TValue, TError> Log<TValue, TError>(this Maybe<TValue, TError> maybe, string value, string error)
         {
             var message = maybe._hasValue ? value : error;
-            Trace.Log(message);
+            if (maybe._hasValue) Trace.Log(message);
 
-            if (!maybe._hasValue && maybe._error != null)
+            if (!maybe._hasValue)
             {
-                LogErrorValue(maybe._error);
-                foreach (var ae in maybe.AggregateErrors.Where(x => x != null)) { LogErrorValue(ae); }
+                LogErrorValue(maybe._error, message);
+                LogErrorValueWithNoTrace(maybe.AggregateErrors, message);
             }
 
             return maybe;
@@ -724,8 +741,8 @@ namespace ContainerExpressions.Containers
 
             if (!maybe._hasValue)
             {
-                LogException(maybe._error);
-                foreach (var ae in maybe.AggregateErrors) { LogException(ae); }
+                LogError(maybe._error);
+                LogError(maybe.AggregateErrors);
             }
 
             return maybe;
@@ -742,8 +759,8 @@ namespace ContainerExpressions.Containers
 
             if (!maybe._hasValue)
             {
-                LogException(maybe._error);
-                foreach (var ae in maybe.AggregateErrors) { LogException(ae); }
+                LogError(maybe._error);
+                LogError(maybe.AggregateErrors);
             }
 
             return maybe;
