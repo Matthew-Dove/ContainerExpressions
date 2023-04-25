@@ -319,7 +319,7 @@ namespace ContainerExpressions.Containers
         public static Maybe<TValue> Create<TValue>(TValue value) => new Maybe<TValue>(value);
 
         /// <summary>Creates a Maybe with the provided Exception instance.</summary>
-        public static Maybe<TValue> Create<TValue>(Exception error) => new Maybe<TValue>(error);
+        public static Maybe<TValue> CreateError<TValue>(Exception error) => new Maybe<TValue>(error);
 
         /// <summary>Creates a Maybe from a T2 Either.</summary>
         public static Maybe<TValue> Create<TValue>(Either<TValue, Exception> either) => new Maybe<TValue>(either);
@@ -347,7 +347,7 @@ namespace ContainerExpressions.Containers
         public static Maybe<TValue, TError> Create<TValue, TError>(TValue value) => new Maybe<TValue, TError>(value);
 
         /// <summary>Creates a Maybe with the provided TError instance.</summary>
-        public static Maybe<TValue, TError> Create<TValue, TError>(TError error) => new Maybe<TValue, TError>(error);
+        public static Maybe<TValue, TError> CreateError<TValue, TError>(TError error) => new Maybe<TValue, TError>(error);
 
         /// <summary>Creates a Maybe from a T2 Either.</summary>
         public static Maybe<TValue, TError> Create<TValue, TError>(Either<TValue, TError> either) => new Maybe<TValue, TError>(either);

@@ -32,7 +32,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Converts Maybe into a Response, when the instance is TValue a valid Response is returned; otherwise an invalid one is selected.</summary>
         public static Task<Response<TValue>> ToResponseAsync<TValue>(this Task<Maybe<TValue>> maybe) => maybe.MatchAsync(x => new Response<TValue>(x), _ => new Response<TValue>());
 
-        private static readonly Exception _taskExCache = new Exception("Error waiting on task to complete.");
+        private static readonly Exception _taskExCache = new Exception("Error waiting for task to successfully complete.");
 
         /// <summary>Creates a Maybe, that wraps a Task. When the task is successful, the value is set, otherwise the error is set.</summary>
         public static Task<Maybe<TValue>> ToMaybeTaskAsync<TValue>(this Task<TValue> value)
@@ -359,6 +359,56 @@ namespace ContainerExpressions.Containers
         public static Task<Maybe<TResult>> BindAsync<TValue, TBindValue, TResult>(this Task<Maybe<TValue>> value, Task<Maybe<TBindValue>> maybe, Func<TValue, TBindValue, Task<TResult>> bind)
         {
             return Task.WhenAll(value, maybe).ContinueWith(_ => BindAsync(value.Result, maybe.Result, bind)).Unwrap();
+        }
+
+        #endregion
+
+        #region Unpack
+
+        /// <summary>Flattens nested Maybe types into a single one.</summary>
+        public static Maybe<TValue> Unpack<TValue>(this Maybe<Maybe<TValue>> maybe)
+        {
+            if (!maybe._hasValue) return new Maybe<TValue>(maybe._error);
+            if (maybe._value._hasValue) return new Maybe<TValue>(maybe._value._value);
+            return new Maybe<TValue>(maybe._value._error);
+        }
+
+        /// <summary>Flattens nested Maybe types into a single one.</summary>
+        public static Task<Maybe<TValue>> UnpackAsync<TValue>(this Task<Maybe<Maybe<TValue>>> maybe)
+        {
+            return maybe.ContinueWith(static t =>
+            {
+                var ex = _taskExCache;
+                if (t.Status == TaskStatus.RanToCompletion) return t.Result.Unpack();
+                if (t.Status == TaskStatus.Faulted) { ex = t.Exception; t.Exception.LogError(); }
+                return new Maybe<TValue>(ex);
+            });
+        }
+
+        /// <summary>Flattens nested Maybe types into a single one.</summary>
+        public static Task<Maybe<TValue>> UnpackAsync<TValue>(this Task<Maybe<Task<Maybe<TValue>>>> maybe)
+        {
+            return maybe.ContinueWith(static t =>
+            {
+                var ex = _taskExCache;
+                if (t.Status == TaskStatus.RanToCompletion)
+                {
+                    if (t.Result._hasValue) return t.Result._value;
+                    return Task.FromResult(Maybe.CreateError<TValue>(t.Result._error));
+                }
+                if (t.Status == TaskStatus.Faulted) { ex = t.Exception; t.Exception.LogError(); }
+                return Task.FromResult(Maybe.CreateError<TValue>(ex));
+            }).ContinueWith(static t =>
+            {
+                var ex = _taskExCache;
+                if (t.Status == TaskStatus.Faulted) { ex = t.Exception; t.Exception.LogError(); }
+                if (t.Status == TaskStatus.RanToCompletion)
+                {
+                    if (t.Result.Status == TaskStatus.Faulted) { ex = t.Exception; t.Exception.LogError(); }
+                    if (t.Result.Status == TaskStatus.RanToCompletion) return t.Result.Result;
+                }
+                return new Maybe<TValue>(ex);
+            });
         }
 
         #endregion
