@@ -790,6 +790,39 @@ public class UserController : ControllerBase
 }
 ```
 
+## Shared Functions
+
+Generic, common, little helper functions for lambdas.  
+There are only a few implementations (*for now*) - so I'm just going to paste the class here in lieu of documentation:  
+
+```cs
+/// <summary>A place to put shared common functions.</summary>
+public static class Lambda
+{
+    /// <summary>Maps the input directly to the output.</summary>
+    public static T Identity<T>(T x) => x;
+
+    /// <summary>Pretends to return a T (i.e. to compile), but will really throw the passed exception.</summary>
+    public static T Identity<T>(Exception ex) => throw ex;
+
+    /// <summary>Discards the function input, and returns the specified result.</summary>
+    public static Func<T, T> Default<T>(T result = default) => _ => result;
+
+    /// <summary>Discards the function input, and returns the specified result (of a different type to the input type).</summary>
+    public static Func<T, TResult> Default<T, TResult>(TResult result = default) => _ => result;
+}
+```
+
+Why use these? They are static functions (*i.e. allocation free*), and their names are descriptive.  
+Of course you can make your anonymous delegates static inline now too i.e. `(static x => x)`.  
+
+When ordering `ints` using `System.Linq`, you must provide a **key** to `OrderBy`.  
+This forces you to write: `new int[] { 3, 2, 5, 7, 6 }.OrderBy(x => x);`.  
+You can replace `(x => x)`, with the `Identity` function: `new int[] { 3, 2, 5, 7, 6 }.OrderBy(Identity);`.  
+This makes the code's intent clear.  
+Note: you would normally need to write `OrderBy(Lambda.Identity)` instead.  
+So I suggest adding `global using static ContainerExpressions.Containers.Lambda;` to your **GlobalUsings.cs** file.  
+
 # Credits
 * [Icon](https://www.flaticon.com/free-icon/bird_2630452) made by [Vitaly Gorbachev](https://www.flaticon.com/authors/vitaly-gorbachev) from [Flaticon](https://www.flaticon.com/).
 
