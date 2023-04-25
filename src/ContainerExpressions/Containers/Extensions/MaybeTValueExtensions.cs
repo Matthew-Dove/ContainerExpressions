@@ -18,6 +18,10 @@ namespace ContainerExpressions.Containers
         /// <summary>Converts Maybe into a Response, when the instance is TValue a valid Response is returned; otherwise an invalid one is selected.</summary>
         public static Response<TValue> ToResponse<TValue>(this Maybe<TValue> maybe) => maybe.Match(x => new Response<TValue>(x), _ => new Response<TValue>());
 
+        /// <summary>When Maybe has a value (i.e. not an error), the Func's result is returned, otherwise false is returned.</summary>
+        /// <param name="condition">A function that accepts the Maybe's value, and returns a boolean.</param>
+        public static bool IsTrue<TValue>(this Maybe<TValue> maybe, Func<TValue, bool> condition) => maybe._hasValue ? condition(maybe._value) : false;
+
         /// <summary>Returns the value of Maybe when the instance is TValue, otherwise @default is returned.</summary>
         /// <param name="default">The value to use when Maybe contains an instance of Exception.</param>
         public static Task<TValue> GetValueOrDefaultAsync<TValue>(this Task<Maybe<TValue>> maybe, TValue @default) => maybe.MatchAsync(x => x, _ => @default);
@@ -27,6 +31,23 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Converts Maybe into a Response, when the instance is TValue a valid Response is returned; otherwise an invalid one is selected.</summary>
         public static Task<Response<TValue>> ToResponseAsync<TValue>(this Task<Maybe<TValue>> maybe) => maybe.MatchAsync(x => new Response<TValue>(x), _ => new Response<TValue>());
+
+        private static readonly Exception _taskExCache = new Exception("Error waiting on task to complete.");
+
+        /// <summary>Creates a Maybe, that wraps a Task. When the task is successful, the value is set, otherwise the error is set.</summary>
+        public static Task<Maybe<TValue>> ToMaybeTaskAsync<TValue>(this Task<TValue> value)
+        {
+            return value.ContinueWith(static t =>
+            {
+                var ex = _taskExCache;
+                if (t.Status == TaskStatus.Faulted)
+                {
+                    ex = t.Exception;
+                    t.Exception.LogError();
+                }
+                return t.Status == TaskStatus.RanToCompletion ? new Maybe<TValue>(t.Result) : new Maybe<TValue>(ex);
+            });
+        }
 
         #endregion
 

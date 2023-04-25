@@ -2,6 +2,16 @@
 {
     // Common types for reuse with containers i.e. - Either, Response, and Maybe.
 
+    /// <summary>A marker type to use when you have no return type, or result.</summary>
+    public readonly struct Unit
+    {
+        /// <summary>A cached Response Unit in a valid state.</summary>
+        public static readonly Response<Unit> Success = new Response<Unit>(new Unit());
+
+        /// <summary>A cached Response Unit in an invalid state.</summary>
+        public static readonly Response<Unit> Error = new Response<Unit>();
+    }
+
     #region HTTP
 
     /// <summary>Ok: 200 / Created: 201 / Accepted: 202 / NoContent: 204 (Your request was successfully processed).</summary>
@@ -131,14 +141,4 @@
     }
 
     #endregion
-
-    /// <summary>A marker type to use when you have no return type, or result.</summary>
-    public readonly struct Unit
-    {
-        /// <summary>A cached Response Unit in a valid state.</summary>
-        public static readonly Response<Unit> Success = new Response<Unit>(new Unit());
-
-        /// <summary>A cached Response Unit in an invalid state.</summary>
-        public static readonly Response<Unit> Error = new Response<Unit>();
-    }
 }

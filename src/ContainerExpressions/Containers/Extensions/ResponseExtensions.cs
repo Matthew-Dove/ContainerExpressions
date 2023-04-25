@@ -65,6 +65,20 @@ namespace ContainerExpressions.Containers
         /// <summary>Create a response container in a valid state.</summary>
         private static Response<T> Create<T>(T value) => new Response<T>(value);
 
+        /// <summary>Gets the value, unless the state is invalid, then the default value is returned.</summary>
+        public static T GetValueOrDefault<T>(this Response<T> response, T defaultValue) => response ? response : defaultValue;
+
+        /// <summary>Gets the value, unless the state is invalid, or the task failed, then the default value is returned.</summary>
+        public static Task<T> GetValueOrDefaultAsync<T>(this Task<Response<T>> response, T defaultValue) => response.ContinueWith(t =>
+        {
+            if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+            if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result.Value;
+            return defaultValue;
+        });
+
+        /// <summary>When the Response is in a valid state the Func's result is returned, otherwise false is returned.</summary>
+        public static bool IsTrue<T>(this Response<T> response, Func<T, bool> condition) => response ? condition(response) : false;
+
         #endregion
 
         #region Lift
@@ -98,12 +112,6 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Turn an async function that doesn't return a task Response, into one that does.</summary>
         public static Func<T, Task<Response<TResult>>> LiftAsync<T, TResult>(this Func<T, Task<TResult>> func) => Create<Func<T, Task<Response<TResult>>>>(x => func(x).ContinueWith(TaskToResponse));
-
-        /// <summary>Gets the value, unless the state is invalid, then the default value is returned.</summary>
-        public static T GetValueOrDefault<T>(this Response<T> response, T defaultValue) => response ? response : defaultValue;
-
-        /// <summary>When the Response is in a valid state the Func's result is returned, otherwise false is returned.</summary>
-        public static bool IsTrue<T>(this Response<T> response, Func<T, bool> condition) => response ? condition(response) : false;
 
         #endregion
 
