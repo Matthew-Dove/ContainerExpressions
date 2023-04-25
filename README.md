@@ -898,4 +898,4 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * Created shared common lambda functions, such as `Lambda.Identity` to reflect the input as the output. i.e. instead of having to write `(x => x)`.
 * Added `TryGetValue()`, and `TryGetError()` to `Maybe`.
 * Added `Unpack` to `Maybe`.
-* Created a new container: `Cache`, used to store a readonly default values for reference types (*i.e. instead of using null*).
+* Created a new container `Cache:` store readonly default values for reference types (*i.e. instead of using null*).
