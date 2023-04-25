@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers
 {
@@ -326,6 +327,9 @@ namespace ContainerExpressions.Containers
         /// <summary>Creates a Maybe from the Response value when valid, otherwise the Exception will be used to create the Maybe.</summary>
         public static Maybe<TValue> Create<TValue>(Response<TValue> response, Exception ex) => new Maybe<TValue>(response, ex);
 
+        /// <summary>Creates a Maybe from the provided Task's result.</summary>
+        public static Task<Maybe<TValue>> CreateAsync<TValue>(Task<TValue> value) => value.ToMaybeTaskAsync();
+
         #endregion
 
         #region Maybe<TValue, TError>
@@ -350,6 +354,9 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Creates a Maybe from the Response value when valid, otherwise the TError will be used to create the Maybe.</summary>
         public static Maybe<TValue, TError> Create<TValue, TError>(Response<TValue> response, TError error) => new Maybe<TValue, TError>(response, error);
+
+        /// <summary>Creates a Maybe from the provided Task's result.</summary>
+        public static Task<Maybe<TValue, TError>> CreateAsync<TValue, TError>(Task<TValue> value, TError error) => value.ToMaybeTaskAsync(error);
 
         #endregion
     }
