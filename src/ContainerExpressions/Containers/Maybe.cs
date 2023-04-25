@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ContainerExpressions.Containers
 {
@@ -7,7 +8,7 @@ namespace ContainerExpressions.Containers
     /// <para>When two (or more) Maybe's Bind, their distinct errors are aggregated into a new Maybe.</para>
     /// <para>When both Maybes have some instance of TValue, the provided binding function will be invoked with said values.</para>
     /// </summary>
-    public readonly struct Maybe<TValue>
+    public readonly struct Maybe<TValue> : IEquatable<Maybe<TValue>>
     {
         internal Exception[] AggregateErrors { get; }
         internal readonly static Exception[] _emptyAggregateErrors = new Exception[0];
@@ -102,17 +103,56 @@ namespace ContainerExpressions.Containers
             AggregateErrors = errors;
         }
 
+        public bool TryGetValue(out TValue value) { if (_hasValue) { value = _value; return true; }; value = default; return false; }
+        public bool TryGetError(out Exception error) { if (!_hasValue) { error = _error; return true; }; error = default; return false; }
+
         public override string ToString() => this.Match(x => x?.ToString(), x => x?.ToString()) ?? string.Empty;
 
         public static implicit operator Response<TValue>(Maybe<TValue> maybe) => maybe.Match(x => new Response<TValue>(x), _ => new Response<TValue>());
-
         public static implicit operator Maybe<TValue>(Either<TValue, Exception> either) => new Maybe<TValue>(either);
-
         public static implicit operator Either<TValue, Exception>(Maybe<TValue> maybe) => maybe.Match(x => new Either<TValue, Exception>(x), x => new Either<TValue, Exception>(x));
 
         public static implicit operator Maybe<TValue>(TValue value) => new Maybe<TValue>(value);
-
         public static implicit operator Maybe<TValue>(Exception error) => new Maybe<TValue>(error);
+
+        public static bool operator !=(Maybe<TValue> x, Maybe<TValue> y) => !(x == y);
+        public static bool operator ==(Maybe<TValue> x, Maybe<TValue> y) => x.Equals(y);
+
+        public static bool operator !=(TValue x, Maybe<TValue> y) => !(x == y);
+        public static bool operator ==(TValue x, Maybe<TValue> y) => y.Equals(x);
+        public static bool operator !=(Maybe<TValue> x, TValue y) => !(x == y);
+        public static bool operator ==(Maybe<TValue> x, TValue y) => x.Equals(y);
+
+        public static bool operator !=(Exception x, Maybe<TValue> y) => !(x == y);
+        public static bool operator ==(Exception x, Maybe<TValue> y) => y.Equals(x);
+        public static bool operator !=(Maybe<TValue> x, Exception y) => !(x == y);
+        public static bool operator ==(Maybe<TValue> x, Exception y) => x.Equals(y);
+
+        public bool Equals(TValue value) => new Maybe<TValue>(value).Equals(this);
+        public bool Equals(Exception error) => new Maybe<TValue>(error).Equals(this);
+
+        public override bool Equals(object obj)
+        {
+            return obj switch
+            {
+                Maybe<TValue> other => Equals(other),
+                TValue value => Equals(value),
+                Exception error => Equals(error),
+                _ => false
+            };
+        }
+
+        public bool Equals(Maybe<TValue> other)
+        {
+            if (_hasValue) return EqualityComparer<TValue>.Default.Equals(_value, other._value);
+            return EqualityComparer<Exception>.Default.Equals(_error, other._error);
+        }
+
+        public override int GetHashCode()
+        {
+            if (_hasValue) return _value?.GetHashCode() ?? 0;
+            return _error?.GetHashCode() ?? 0;
+        }
     }
 
     /// <summary>
@@ -120,7 +160,7 @@ namespace ContainerExpressions.Containers
     /// <para>When two (or more) Maybe's Bind, their distinct errors are aggregated into a new Maybe.</para>
     /// <para>When both Maybes have some instance of TValue, the provided binding function will be invoked with said values.</para>
     /// </summary>
-    public readonly struct Maybe<TValue, TError>
+    public readonly struct Maybe<TValue, TError> : IEquatable<Maybe<TValue, TError>>
     {
         internal TError[] AggregateErrors { get; }
         internal readonly static TError[] _emptyAggregateErrors = new TError[0];
@@ -214,17 +254,56 @@ namespace ContainerExpressions.Containers
             AggregateErrors = errors;
         }
 
+        public bool TryGetValue(out TValue value) { if (_hasValue) { value = _value; return true; }; value = default; return false; }
+        public bool TryGetError(out TError error) { if (!_hasValue) { error = _error; return true; }; error = default; return false; }
+
         public override string ToString() => this.Match(x => x?.ToString(), x => x?.ToString()) ?? string.Empty;
 
         public static implicit operator Response<TValue>(Maybe<TValue, TError> maybe) => maybe.Match(x => new Response<TValue>(x), _ => new Response<TValue>());
-
         public static implicit operator Maybe<TValue, TError>(Either<TValue, TError> either) => new Maybe<TValue, TError>(either);
-
         public static implicit operator Either<TValue, TError>(Maybe<TValue, TError> maybe) => maybe.Match(x => new Either<TValue, TError>(x), x => new Either<TValue, TError>(x));
 
         public static implicit operator Maybe<TValue, TError>(TValue value) => new Maybe<TValue, TError>(value);
-
         public static implicit operator Maybe<TValue, TError>(TError error) => new Maybe<TValue, TError>(error);
+
+        public static bool operator !=(Maybe<TValue, TError> x, Maybe<TValue, TError> y) => !(x == y);
+        public static bool operator ==(Maybe<TValue, TError> x, Maybe<TValue, TError> y) => x.Equals(y);
+
+        public static bool operator !=(TValue x, Maybe<TValue, TError> y) => !(x == y);
+        public static bool operator ==(TValue x, Maybe<TValue, TError> y) => y.Equals(x);
+        public static bool operator !=(Maybe<TValue, TError> x, TValue y) => !(x == y);
+        public static bool operator ==(Maybe<TValue, TError> x, TValue y) => x.Equals(y);
+
+        public static bool operator !=(TError x, Maybe<TValue, TError> y) => !(x == y);
+        public static bool operator ==(TError x, Maybe<TValue, TError> y) => y.Equals(x);
+        public static bool operator !=(Maybe<TValue, TError> x, TError y) => !(x == y);
+        public static bool operator ==(Maybe<TValue, TError> x, TError y) => x.Equals(y);
+
+        public bool Equals(TValue value) => new Maybe<TValue, TError>(value).Equals(this);
+        public bool Equals(TError error) => new Maybe<TValue, TError>(error).Equals(this);
+
+        public override bool Equals(object obj)
+        {
+            return obj switch
+            {
+                Maybe<TValue, TError> other => Equals(other),
+                TValue value => Equals(value),
+                TError error => Equals(error),
+                _ => false
+            };
+        }
+
+        public bool Equals(Maybe<TValue, TError> other)
+        {
+            if (_hasValue) return EqualityComparer<TValue>.Default.Equals(_value, other._value);
+            return EqualityComparer<TError>.Default.Equals(_error, other._error);
+        }
+
+        public override int GetHashCode()
+        {
+            if (_hasValue) return _value?.GetHashCode() ?? 0;
+            return _error?.GetHashCode() ?? 0;
+        }
     }
 
     /// <summary>A helper class of static methods used to created Maybe types.</summary>

@@ -824,7 +824,7 @@ Note: you would normally need to write `OrderBy(Lambda.Identity)` instead.
 So I suggest adding `global using static ContainerExpressions.Containers.Lambda;` to your **GlobalUsings.cs** file.  
 
 # Credits
-* [Icon](https://www.flaticon.com/free-icon/bird_2630452) made by [Vitaly Gorbachev](https://www.flaticon.com/authors/vitaly-gorbachev) from [Flaticon](https://www.flaticon.com/).
+* [Icon](https://www.flaticon.com/free-icon/bird_2630452) made by [Vitaly Gorbachev](https://www.flaticon.com/authors/vitaly-gorbachev) from [Flaticon](https://www.flaticon.com/)
 
 # Changelog
 
@@ -873,3 +873,4 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * Added a struct version of `Alias<T>` called `A<T>`.
 * Added shared types to resue in containers, such as `OK`, `BadRequest`, `Error`, etc.
 * Created shared common lambda functions, such as `Lambda.Identity` to reflect the input as the output. i.e. instead of having to write `(x => x)`.
+* Added `TryGetValue()`, and `TryGetError()` to `Maybe`.
