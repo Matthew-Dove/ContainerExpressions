@@ -88,15 +88,15 @@
         }
     }
 
-    /// <summary>ServerError: 500 (Internal Server Error).</summary>
-    public readonly struct ServerError { }
+    /// <summary>Error: 500 (Internal Server Error).</summary>
+    public readonly struct Error { }
 
     /// <summary>Error: 500 (Server Error).</summary>
-    public readonly struct ServerError<T>
+    public readonly struct Error<T>
     {
         public T Value { get; }
 
-        public ServerError(T value)
+        public Error(T value)
         {
             Value = value;
         }

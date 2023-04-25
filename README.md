@@ -750,6 +750,46 @@ var pi = divide(22D, 7D);
 var answer = Expression.Funnel(e, pi, Math.Pow);
 ```
 
+## Shared Types
+
+Common reusable types for use with containers such as: `Either`, `Maybe`, and `Response`.  
+Prebaked types for a "batteries included" feeling, these should be common types you'd make yourself; feel free to use these.  
+In general the shared types will be structs, with a generic, and non-generic implementation:  
+
+* `Unit:` A marker type to use when you have no return type, or result. Provides access to a cached `Response<Unit>` for reuse.
+* `Ok:` 200 / Created: 201 / Accepted: 202 / NoContent: 204 (Your request was successfully processed).
+* `BadRequest:` 400 (Validation error on your request).
+* `Unauthorized:` 401 (We do not know who you are).
+* `Forbidden:` 403 (We know who you are, but you are not allowed to be here).
+* `NotFound:` 404 (Requested server resource was not found).
+* `TooManyRequests:` 429 (Rate Limit).
+* `Error:` 500 (Internal Server Error).
+* `BadGateway:` 502 (Upstream Error).
+* `GatewayTimeout:` 504 (Upstream Timeout).
+
+You might have custom types, such as: `InvalidEmail`, `UserNotActive`, `AdminUser`, etc.  
+Find a contrived example below:  
+
+```cs
+public class UserController : ControllerBase  
+{
+    public IActionResult Put(User user)
+    {
+        return Update(user).Match<IActionResult>(
+            ok => NoContent(),
+            notFound => StatusCode(404),
+            badRequest => BadRequest(badRequest.Value), // Using the generic version to provide error messages to the client.
+            error => StatusCode(500)
+        );
+    }
+
+    private static Either<Ok, NotFound, BadRequest<string[]>, Error> Update(User _)
+    {
+        return new BadRequest<string[]>(new string[] { "Your request is bad." });
+    }
+}
+```
+
 # Credits
 * [Icon](https://www.flaticon.com/free-icon/bird_2630452) made by [Vitaly Gorbachev](https://www.flaticon.com/authors/vitaly-gorbachev) from [Flaticon](https://www.flaticon.com/).
 
@@ -786,17 +826,17 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 
 ## 8.0.1
 
- * Added readme file to nuget.
+* Added readme file to nuget.
 
- ## 9.0.0
+## 9.0.0
 
- * Updated additional **Pack** details in the solution file (*debug symbols, xml comments, readme file, etc*).
- * New extension method for `Response`, and `Response<T>` types (*both sync, and async*) called `Unpack()` - which flattens response containers.
- * When `Try.SetExceptionLogger()` is configured, exceptions logged though `LogError()` - or found in `Response`, and `Maybe` containers, are sent though.
- * Added a `LogError` extension method, so you can which forwards exceptions to the logger setup for: `Try.SetExceptionLogger`.
- * Expanded the function targets for `Funnel`. Was only `T`, now includes: `Response<T>`, `Task<T>`, and `Task<Response<T>>`.
- * Added equals overloads to `Either`, so you can easily compare some `T` value to the `Either` container.
- * Added `TryGetT*` to `Either`, allowing access to the types without going though `Match<TResult>`.
- * Added a struct version of `Alias<T>` called `A<T>`.
- * Added shared types to resue in containers, such as `OK`, `BadRequest`, `ServerError`, etc.
- * Created shared common lambda functions, such as `Lambda.Identity` to reflect the input as the output. i.e. instead of having to write `(x => x)`.
+* Updated additional **Pack** details in the solution file (*debug symbols, xml comments, readme file, etc*).
+* New extension method for `Response`, and `Response<T>` types (*both sync, and async*) called `Unpack()` - which flattens response containers.
+* When `Try.SetExceptionLogger()` is configured, exceptions logged though `LogError()` - or found in `Response`, and `Maybe` containers, are sent though.
+* Added a `LogError` extension method, so you can which forwards exceptions to the logger setup for: `Try.SetExceptionLogger`.
+* Expanded the function targets for `Funnel`. Was only `T`, now includes: `Response<T>`, `Task<T>`, and `Task<Response<T>>`.
+* Added equals overloads to `Either`, so you can easily compare some `T` value to the `Either` container.
+* Added `TryGetT*` to `Either`, allowing access to the types without going though `Match<TResult>`.
+* Added a struct version of `Alias<T>` called `A<T>`.
+* Added shared types to resue in containers, such as `OK`, `BadRequest`, `Error`, etc.
+* Created shared common lambda functions, such as `Lambda.Identity` to reflect the input as the output. i.e. instead of having to write `(x => x)`.
