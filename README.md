@@ -821,7 +821,30 @@ This forces you to write: `new int[] { 3, 2, 5, 7, 6 }.OrderBy(x => x);`.
 You can replace `(x => x)`, with the `Identity` function: `new int[] { 3, 2, 5, 7, 6 }.OrderBy(Identity);`.  
 This makes the code's intent clear.  
 Note: you would normally need to write `OrderBy(Lambda.Identity)` instead.  
-So I suggest adding `global using static ContainerExpressions.Containers.Lambda;` to your **GlobalUsings.cs** file.  
+I suggest adding `global using static ContainerExpressions.Containers.Lambda;` to your **GlobalUsings.cs** file.  
+
+## Cache
+
+Holds instances for any reference type `TValue`, you can use this instead of `null` when falling back to some default value.  
+By not having to create new instances everytime, you are saving on object allocation.  
+The instances given to, and read from the cache should be considered readonly, and immutable. The cache should be set at start up.  
+The cache is implemented in classes created at compile time (*i.e. static + generics*), so there is no collection, or locking happening in the background.  
+Along the lines of `string.Empty`, and `Array.Empty<T>` e.g.: `var str = Cache.Get<string>();`, and `var strArray = Cache.Get<string[]>();`.  
+You can only have one cache value per type. However this restriction *can* be worked around by using `Alias<T>`.   
+
+```cs
+// Example of adding different string references to the cache.
+class Jane : Alias<string> { public Jane() : base(nameof(Jane)) { } }
+class John : Alias<string> { public John() : base(nameof(John)) { } }
+
+// This works because we are not adding a string type, we are adding two new types: Jane, and John.
+Cache.Set(new Jane());
+Cache.Set(new John());
+
+John john = Cache.Get<John>();
+string name = Cache.Get<John>(); // Auto casting provided by Alias<string> works here.
+Jane jane = Cache.Get<Jane>();
+```
 
 # Credits
 * [Icon](https://www.flaticon.com/free-icon/bird_2630452) made by [Vitaly Gorbachev](https://www.flaticon.com/authors/vitaly-gorbachev) from [Flaticon](https://www.flaticon.com/)
@@ -874,3 +897,5 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * Added shared types to resue in containers, such as `OK`, `BadRequest`, `Error`, etc.
 * Created shared common lambda functions, such as `Lambda.Identity` to reflect the input as the output. i.e. instead of having to write `(x => x)`.
 * Added `TryGetValue()`, and `TryGetError()` to `Maybe`.
+* Added `Unpack` to `Maybe`.
+* Created a new container: `Cache`, used to store a readonly default values for reference types (*i.e. instead of using null*).
