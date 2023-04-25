@@ -748,5 +748,52 @@ namespace ContainerExpressions.Containers
         }
 
         #endregion
+
+        #region Unpack
+
+        /// <summary>Flattens nested Maybe types into a single one.</summary>
+        public static Maybe<TValue, TError> Unpack<TValue, TError>(this Maybe<Maybe<TValue, TError>, TError> maybe)
+        {
+            if (!maybe._hasValue) return new Maybe<TValue, TError>(maybe._error);
+            if (maybe._value._hasValue) return new Maybe<TValue, TError>(maybe._value._value);
+            return new Maybe<TValue, TError>(maybe._value._error);
+        }
+
+        /// <summary>Flattens nested Maybe types into a single one.</summary>
+        public static Task<Maybe<TValue, TError>> UnpackAsync<TValue, TError>(this Task<Maybe<Maybe<TValue, TError>, TError>> maybe, TError error)
+        {
+            return maybe.ContinueWith(t =>
+            {
+                if (t.Status == TaskStatus.RanToCompletion) return t.Result.Unpack();
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                return new Maybe<TValue, TError>(error);
+            });
+        }
+
+        /// <summary>Flattens nested Maybe types into a single one.</summary>
+        public static Task<Maybe<TValue, TError>> UnpackAsync<TValue, TError>(this Task<Maybe<Task<Maybe<TValue, TError>>, TError>> maybe, TError error)
+        {
+            return maybe.ContinueWith(t =>
+            {
+                if (t.Status == TaskStatus.RanToCompletion)
+                {
+                    if (t.Result._hasValue) return t.Result._value;
+                    return Task.FromResult(Maybe.CreateError<TValue, TError>(t.Result._error));
+                }
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                return Task.FromResult(Maybe.CreateError<TValue, TError>(error));
+            }).ContinueWith(t =>
+            {
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.RanToCompletion)
+                {
+                    if (t.Result.Status == TaskStatus.Faulted) t.Exception.LogError();
+                    if (t.Result.Status == TaskStatus.RanToCompletion) return t.Result.Result;
+                }
+                return new Maybe<TValue, TError>(error);
+            });
+        }
+
+        #endregion
     }
 }
