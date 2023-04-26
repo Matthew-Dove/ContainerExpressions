@@ -823,27 +823,30 @@ This makes the code's intent clear.
 Note: you would normally need to write `OrderBy(Lambda.Identity)` instead.  
 I suggest adding `global using static ContainerExpressions.Containers.Lambda;` to your **GlobalUsings.cs** file.  
 
-## Cache
+## Instance
 
 Holds instances for any reference type `TValue`, you can use this instead of `null` when falling back to some default value.  
-By not having to create new instances everytime, you are saving on object allocation.  
-The instances given to, and read from the cache should be considered readonly, and immutable. The cache should be set at start up.  
-The cache is implemented in classes created at compile time (*i.e. static + generics*), so there is no collection, or locking happening in the background.  
-Along the lines of `string.Empty`, and `Array.Empty<T>` e.g.: `var str = Cache.Get<string>();`, and `var strArray = Cache.Get<string[]>();`.  
-You can only have one cache value per type. However this restriction *can* be worked around by using `Alias<T>`.   
+By not having to create new instances, you are saving on object allocation.  
+The instances given to, and read from `Instance` should be considered readonly, and immutable.  
+Instances should be created at program start up.  
+`Instance` is implemented in classes created at compile time (*i.e. using static + generics*), so there is no backing collection, or explicit locking.  
+Along the lines of:  
+\> `string.Empty`, and `Array.Empty<T>()`.  
+\> We have: `var str = Cache.Get<string>()`, and `var strArray = Cache.Get<string[]>()`.  
+You can only have one value per type. However this restriction *can* be worked around using `Alias<T>`.  
 
 ```cs
-// Example of adding different string references to the cache.
+// Example of adding different string references to Instance.
 class Jane : Alias<string> { public Jane() : base(nameof(Jane)) { } }
 class John : Alias<string> { public John() : base(nameof(John)) { } }
 
 // This works because we are not adding a string type, we are adding two new types: Jane, and John.
-Cache.Set(new Jane());
-Cache.Set(new John());
+Instance.Create(new Jane());
+Instance.Create(new John());
 
-John john = Cache.Get<John>();
-string name = Cache.Get<John>(); // Auto casting provided by Alias<string> works here.
-Jane jane = Cache.Get<Jane>();
+John john = Instance.Of<John>();
+string name = Instance.Of<John>(); // Auto casting provided by Alias<string> works here.
+Jane jane = Instance.Of<Jane>();
 ```
 
 # Credits
@@ -899,3 +902,7 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * Added `TryGetValue()`, and `TryGetError()` to `Maybe`.
 * Added `Unpack` to `Maybe`.
 * Created a new container `Cache:` store readonly default values for reference types (*i.e. instead of using null*).
+
+## 10.0.0
+
+* Renamed `Cache` to `Instance`, as the former name lead to confusion on what the container did.

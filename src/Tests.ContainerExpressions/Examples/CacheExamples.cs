@@ -15,12 +15,12 @@ namespace Tests.ContainerExpressions.Examples
         public void AliasSameReferenceTypes()
         {
             // This works because we are not adding a string type, we are adding two new types: Jane, and John.
-            Cache.Set(new Jane());
-            Cache.Set(new John());
+            Instance.Create(new Jane());
+            Instance.Create(new John());
 
-            John john = Cache.Get<John>();
-            string name = Cache.Get<John>(); // Auto casting provided by Alias<string> works here.
-            Jane jane = Cache.Get<Jane>();
+            John john = Instance.Of<John>();
+            string name = Instance.Of<John>(); // Auto casting provided by Alias<string> works here.
+            Jane jane = Instance.Of<Jane>();
 
             Assert.AreEqual(new John(), john);
             Assert.AreEqual(nameof(John), name);
@@ -34,12 +34,12 @@ namespace Tests.ContainerExpressions.Examples
         [TestMethod]
         public void AliasSameValueTypes()
         {
-            Cache.Set(new One());
-            Cache.Set(new Two());
+            Instance.Create(new One());
+            Instance.Create(new Two());
 
-            One one = Cache.Get<One>();
-            int num = Cache.Get<One>();
-            Two two = Cache.Get<Two>();
+            One one = Instance.Of<One>();
+            int num = Instance.Of<One>();
+            Two two = Instance.Of<Two>();
 
             Assert.AreEqual(new One(), one);
             Assert.AreEqual(1, num);
@@ -53,12 +53,12 @@ namespace Tests.ContainerExpressions.Examples
         [TestMethod]
         public void DerivedTypes()
         {
-            Cache.Set(new Base());
-            Cache.Set(new Derived());
+            Instance.Create(new Base());
+            Instance.Create(new Derived());
 
-            Derived derived = Cache.Get<Derived>();
-            Base @cast = Cache.Get<Derived>();
-            Base @base = Cache.Get<Base>();
+            Derived derived = Instance.Of<Derived>();
+            Base @cast = Instance.Of<Derived>();
+            Base @base = Instance.Of<Base>();
 
             Assert.IsNotNull(derived);
             Assert.IsNotNull(@cast);

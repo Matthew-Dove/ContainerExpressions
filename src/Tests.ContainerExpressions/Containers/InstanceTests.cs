@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 namespace Tests.ContainerExpressions.Containers
 {
     [TestClass]
-    public class CacheTests
+    public class InstanceTests
     {
         [TestMethod]
         public void CanGetBaseTask()
         {
-            var a = Cache.Get<Task>();
-            var b = Cache.Get<Task[]>();
-            var c = Cache.Get<IEnumerable<Task>>();
-            var d = Cache.Get<List<Task>>();
+            var a = Instance.Of<Task>();
+            var b = Instance.Of<Task[]>();
+            var c = Instance.Of<IEnumerable<Task>>();
+            var d = Instance.Of<List<Task>>();
 
             Assert.IsTrue(a.IsCompletedSuccessfully);
             Assert.AreEqual(0, b.Length);
@@ -28,22 +28,22 @@ namespace Tests.ContainerExpressions.Containers
         [ExpectedException(typeof(InvalidOperationException))]
         public void BaseTaskTValueMustBeSetFirst()
         {
-            var hashset = Cache.Get<HashSet<Task>>();
+            var hashset = Instance.Of<HashSet<Task>>();
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void CannotSetNull()
         {
-            Cache.Set<HashSet<Task>>(null);
+            Instance.Create<HashSet<Task>>(null);
         }
 
         [TestMethod]
         public void CanSetTValueOnce()
         {
-            Cache.Set(new HashSet<Task>());
+            Instance.Create(new HashSet<Task>());
 
-            var hashset = Cache.Get<HashSet<Task>>();
+            var hashset = Instance.Of<HashSet<Task>>();
 
             Assert.IsNotNull(hashset);
             Assert.AreEqual(0, hashset.Count);
@@ -53,8 +53,8 @@ namespace Tests.ContainerExpressions.Containers
         [ExpectedException(typeof(InvalidOperationException))]
         public void CannotSetTValueTwice()
         {
-            Cache.Set(new HashSet<Task>());
-            Cache.Set(new HashSet<Task>());
+            Instance.Create(new HashSet<Task>());
+            Instance.Create(new HashSet<Task>());
         }
     }
 }
