@@ -18,6 +18,25 @@ namespace Tests.ContainerExpressions.Containers
             _loop = new Loop<string>(_items);
         }
 
+        [TestMethod] public void Index00() => Assert.AreEqual(0, _loop);
+        [TestMethod] public void Index01() => Assert.AreEqual(1, _loop.Seek(1));
+        [TestMethod] public void Index02() => Assert.AreEqual(2, _loop.Seek(1) + 1);
+        [TestMethod] public void Index03() => Assert.AreEqual(3, _loop.Seek(1) + 2);
+        [TestMethod] public void Index04() => Assert.AreEqual(0, _loop.Seek(1) - 1);
+        [TestMethod] public void Index05() => Assert.AreEqual(0, _loop.Seek(2) - 2);
+        [TestMethod] public void Index06() => Assert.AreEqual(1, _loop.Seek(0) + 1);
+        [TestMethod] public void Index07() => Assert.AreEqual(-1, _loop - 1);
+        [TestMethod] public void Index08() => Assert.AreEqual(0, _loop + 0);
+        [TestMethod] public void Index09() => Assert.AreEqual(1, _loop + 1);
+
+        [TestMethod]
+        public void Zero()
+        {
+            string item = _loop;
+
+            Assert.AreEqual(_items[0], item);
+        }
+
         [TestMethod]
         public void Seek()
         {
@@ -41,7 +60,7 @@ namespace Tests.ContainerExpressions.Containers
         {
             string item = _loop++;
 
-            Assert.AreEqual(_items[0], item);
+            Assert.AreEqual(_items[1], item);
         }
 
         [TestMethod]
@@ -51,7 +70,7 @@ namespace Tests.ContainerExpressions.Containers
 
             string item = _loop--;
 
-            Assert.AreEqual(_items[0], item);
+            Assert.AreEqual(_items[1], item);
         }
 
         [TestMethod]
@@ -61,7 +80,7 @@ namespace Tests.ContainerExpressions.Containers
 
             string item = loop;
 
-            Assert.AreEqual(_items[0], item);
+            Assert.AreEqual(_items[1], item);
         }
 
         [TestMethod]
@@ -72,7 +91,7 @@ namespace Tests.ContainerExpressions.Containers
 
             string item = loop;
 
-            Assert.AreEqual(_items[0], item);
+            Assert.AreEqual(_items[1], item);
         }
 
         [TestMethod]
@@ -87,8 +106,8 @@ namespace Tests.ContainerExpressions.Containers
         public void GetFirst()
         {
             string item1 = _loop[0];
-            string item2 = _loop + 1;
-            string item3 = _loop + 0;
+            string item2 = _loop + 0;
+            string item3 = _loop;
 
             Assert.AreEqual(_items[0], item1);
             Assert.AreEqual(_items[0], item2);
@@ -101,7 +120,7 @@ namespace Tests.ContainerExpressions.Containers
             var last = _items.Length - 1;
 
             string item1 = _loop[last];
-            string item2 = _loop + last + 1;
+            string item2 = _loop + last;
             string item3 = _loop;
 
             Assert.AreEqual(_items[last], item1);
