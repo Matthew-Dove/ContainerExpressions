@@ -1,5 +1,6 @@
 ﻿using ContainerExpressions.Expressions.Models;
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers
@@ -7,30 +8,30 @@ namespace ContainerExpressions.Containers
     /// <summary>Wraps a function in error protecting code.</summary>
     public static class Try
     {
+        internal static Response<Action<Exception>> GetExceptionLogger() => _logger;
+        private static Response<Action<Exception>> _logger = new Response<Action<Exception>>();
+
         /// <summary>If you'd like to log errors as they come, add your stateless error logger here, if a logger already exists, it'll be overwritten.</summary>
         public static void SetExceptionLogger(Action<Exception> logger)
         {
-            if (logger == null)
-                throw new ArgumentNullException(nameof(logger));
-
+            if (logger == null) ArgumentNullException(nameof(logger));
             _logger = Response.Create(logger);
         }
 
-        internal static Response<Action<Exception>> GetExceptionLogger() => _logger;
-
-        private static Response<Action<Exception>> _logger = new Response<Action<Exception>>();
-
         /// <summary>Wraps a function in error protecting code.</summary>
-        public static Response Run(Action action)
+        public static Response Run(
+            Action action,
+            [CallerArgumentExpression(nameof(action))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
-            if (action == null)
-                throw new ArgumentNullException(nameof(action));
-
-            var logger = GetExceptionLogger();
-            return PaddedCage(action, ExceptionLogger.Create(logger));
+            if (action == null) ArgumentNullException(nameof(action));
+            return PaddedCage(action, ExceptionLogger.Create(_logger));
         }
 
-        private static Response PaddedCage(Action action, ExceptionLogger exceptionLogger)
+        private static Response PaddedCage(Action action, ExceptionLogger error)
         {
             var response = new Response();
 
@@ -41,23 +42,26 @@ namespace ContainerExpressions.Containers
             }
             catch (Exception ex)
             {
-                exceptionLogger.Log(ex);
+                error.Log(ex);
             }
 
             return response;
         }
 
         /// <summary>Wraps a function in error protecting code.</summary>
-        public static Response<T> Run<T>(Func<T> func)
+        public static Response<T> Run<T>(
+        Func<T> func,
+            [CallerArgumentExpression(nameof(func))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
-            if (func == null)
-                throw new ArgumentNullException(nameof(func));
-
-            var exceptionLogger = GetExceptionLogger();
-            return PaddedCage(func, ExceptionLogger.Create(exceptionLogger));
+            if (func == null) ArgumentNullException(nameof(func));
+            return PaddedCage(func, ExceptionLogger.Create(_logger));
         }
 
-        private static Response<T> PaddedCage<T>(Func<T> func, ExceptionLogger exceptionLogger)
+        private static Response<T> PaddedCage<T>(Func<T> func, ExceptionLogger error)
         {
             var response = new Response<T>();
 
@@ -68,23 +72,26 @@ namespace ContainerExpressions.Containers
             }
             catch (Exception ex)
             {
-                exceptionLogger.Log(ex);
+                error.Log(ex);
             }
 
             return response;
         }
 
         /// <summary>Wraps a function in error protecting code.</summary>
-        public static Task<Response> RunAsync(Func<Task> action)
+        public static Task<Response> RunAsync(
+            Func<Task> action,
+            [CallerArgumentExpression(nameof(action))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
-            if (action == null)
-                throw new ArgumentNullException(nameof(action));
-
-            var logger = Try.GetExceptionLogger();
-            return PaddedCageAsync(action, ExceptionLogger.Create(logger));
+            if (action == null) ArgumentNullException(nameof(action));
+            return PaddedCageAsync(action, ExceptionLogger.Create(_logger));
         }
 
-        private static async Task<Response> PaddedCageAsync(Func<Task> func, ExceptionLogger exceptionLogger)
+        private static async Task<Response> PaddedCageAsync(Func<Task> func, ExceptionLogger error)
         {
             var response = new Response();
 
@@ -97,28 +104,31 @@ namespace ContainerExpressions.Containers
             {
                 foreach (var e in ae.Flatten().InnerExceptions)
                 {
-                    exceptionLogger.Log(e);
+                    error.Log(e);
                 }
             }
             catch (Exception ex)
             {
-                exceptionLogger.Log(ex);
+                error.Log(ex);
             }
 
             return response;
         }
 
         /// <summary>Wraps a function in error protecting code.</summary>
-        public static Task<Response<T>> RunAsync<T>(Func<Task<T>> func)
+        public static Task<Response<T>> RunAsync<T>(
+            Func<Task<T>> func,
+            [CallerArgumentExpression(nameof(func))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
-            if (func == null)
-                throw new ArgumentNullException(nameof(func));
-
-            var exceptionLogger = Try.GetExceptionLogger();
-            return PaddedCageAsync(func, ExceptionLogger.Create(exceptionLogger));
+            if (func == null) ArgumentNullException(nameof(func));
+            return PaddedCageAsync(func, ExceptionLogger.Create(_logger));
         }
 
-        private static async Task<Response<T>> PaddedCageAsync<T>(Func<Task<T>> func, ExceptionLogger exceptionLogger)
+        private static async Task<Response<T>> PaddedCageAsync<T>(Func<Task<T>> func, ExceptionLogger error)
         {
             var response = new Response<T>();
 
@@ -131,12 +141,12 @@ namespace ContainerExpressions.Containers
             {
                 foreach (var e in ae.Flatten().InnerExceptions)
                 {
-                    exceptionLogger.Log(e);
+                    error.Log(e);
                 }
             }
             catch (Exception ex)
             {
-                exceptionLogger.Log(ex);
+                error.Log(ex);
             }
 
             return response;

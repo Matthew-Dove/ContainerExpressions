@@ -4,13 +4,13 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Tests.ContainerExpressions.Examples
 {
     [TestClass]
-    public class CacheExamples
+    public class InstanceExamples
     {
-        // Example of adding different string references to the cache.
+        // Example of adding different string references.
         sealed class Jane : Alias<string> { public Jane() : base(nameof(Jane)) { } }
         sealed class John : Alias<string> { public John() : base(nameof(John)) { } }
 
-        /// <summary>https://github.com/Matthew-Dove/ContainerExpressions#cache</summary>
+        /// <summary>https://github.com/Matthew-Dove/ContainerExpressions#instance</summary>
         [TestMethod]
         public void AliasSameReferenceTypes()
         {
@@ -27,7 +27,7 @@ namespace Tests.ContainerExpressions.Examples
             Assert.AreEqual(nameof(Jane), jane);
         }
 
-        // Example of adding value types to the cache.
+        // Example of adding value types.
         sealed class One : Alias<int> { public One() : base(1) { } }
         sealed class Two : Alias<int> { public Two() : base(2) { } }
 
@@ -46,7 +46,7 @@ namespace Tests.ContainerExpressions.Examples
             Assert.AreEqual(2, two);
         }
 
-        // Example of adding derived types to the cache.
+        // Example of adding derived types.
         class Base { }
         class Derived : Base { }
 

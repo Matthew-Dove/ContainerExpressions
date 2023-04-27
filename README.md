@@ -849,6 +849,19 @@ string name = Instance.Of<John>(); // Auto casting provided by Alias<string> wor
 Jane jane = Instance.Of<Jane>();
 ```
 
+## Combining `Alias` & `Instance`
+
+Below is an example of creating a CVS type, that reuses a `char[]` instance.  
+As demonstrated, custom types can be quick to build, and efficient to run.  
+
+```cs
+public sealed class Csv : Alias<string[]> {
+    private sealed class Comma : Alias<char[]> { public Comma() : base(new char[] { ',' }) { } } // Private type for Instance to avoid collisions on char[].
+    static Csv() => Instance.Create(new Comma()); // Static constructor registers the Instance type of Comma.
+    public Csv(string csv) : base(csv.Split(Instance.Of<Comma>())) { } // Splits the string into a string[], the char[] argument is reused.
+}
+```
+
 # Credits
 * [Icon](https://www.flaticon.com/free-icon/bird_2630452) made by [Vitaly Gorbachev](https://www.flaticon.com/authors/vitaly-gorbachev) from [Flaticon](https://www.flaticon.com/)
 

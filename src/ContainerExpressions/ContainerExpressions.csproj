@@ -80,4 +80,8 @@ The expression Retry will attempt to get the T value after x time delay for n at
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Memory" Version="4.5.5" />
+  </ItemGroup>
+
 </Project>
