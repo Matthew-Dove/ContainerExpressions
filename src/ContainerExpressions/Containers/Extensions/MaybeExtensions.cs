@@ -33,6 +33,19 @@ namespace ContainerExpressions.Containers
         public static Task<Response<TValue>> ToResponseAsync<TValue, TError>(this Task<Maybe<TValue, TError>> maybe) => maybe.MatchAsync(x => new Response<TValue>(x), _ => new Response<TValue>());
 
         /// <summary>Creates a Maybe, that wraps a Task. When the task is successful, the value is set, otherwise the error is set.</summary>
+        public static Task<Maybe<Unit, TError>> ToMaybeTaskAsync<TError>(this Task value, TError error)
+        {
+            return value.ContinueWith(t =>
+            {
+                if (t.Status == TaskStatus.Faulted)
+                {
+                    t.Exception.LogError();
+                }
+                return t.Status == TaskStatus.RanToCompletion ? Unit<TError>.MaybeValue : Unit<TError>.MaybeError(error);
+            });
+        }
+
+        /// <summary>Creates a Maybe, that wraps a Task. When the task is successful, the value is set, otherwise the error is set.</summary>
         public static Task<Maybe<TValue, TError>> ToMaybeTaskAsync<TValue, TError>(this Task<TValue> value, TError error)
         {
             return value.ContinueWith(t =>
@@ -44,6 +57,12 @@ namespace ContainerExpressions.Containers
                 return t.Status == TaskStatus.RanToCompletion ? new Maybe<TValue, TError>(t.Result) : new Maybe<TValue, TError>(error);
             });
         }
+
+        /// <summary>Returns true when Maybe had a value to set.</summary>
+        public static bool TryGetValue<TValue, TError>(this Maybe<TValue, TError> maybe, out TValue value) { if (maybe._hasValue) { value = maybe._value; return true; }; value = default; return false; }
+
+        /// <summary>Returns true when Maybe had an error to set.</summary>
+        public static bool TryGetError<TValue, TError>(this Maybe<TValue, TError> maybe, out TError error) { if (!maybe._hasValue) { error = maybe._error; return true; }; error = default; return false; }
 
         #endregion
 

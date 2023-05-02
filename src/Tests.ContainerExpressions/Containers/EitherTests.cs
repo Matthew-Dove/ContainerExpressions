@@ -1,6 +1,7 @@
 ﻿using ContainerExpressions.Containers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Threading.Tasks;
 
 namespace Tests.ContainerExpressions.Containers
 {
@@ -172,6 +173,61 @@ namespace Tests.ContainerExpressions.Containers
 
             Assert.IsFalse(result);
             Assert.AreEqual(default, value);
+        }
+
+        #endregion
+
+        #region When
+
+        class Check { [ThreadStatic] public static bool IsCalled; }
+        class When
+        {
+            public static When Self = new When();
+            public int Func(string s) => int.Parse(s);
+            public void Action(string s) { }
+            public Task<int> FuncAsync(string s) => Task.FromResult(int.Parse(s));
+            public Task ActionAsync(string s) => Task.CompletedTask;
+        }
+
+        [TestMethod]
+        public void When_T1()
+        {
+            Check.IsCalled = false;
+
+            var either = new Either<string, int>("1");
+            var number = either.WhenT1(int.Parse);
+            var response = either.WhenT1(static x => { Check.IsCalled = true; });
+
+            Assert.IsTrue(number);
+            Assert.AreEqual(1, number);
+            Assert.IsTrue(response);
+            Assert.IsTrue(Check.IsCalled);
+        }
+
+        [TestMethod]
+        public void When_Not_T1()
+        {
+            Check.IsCalled = false;
+
+            var either = new Either<string, int>(1);
+            var number = either.WhenT1(int.Parse);
+            var response = either.WhenT1(static x => { Check.IsCalled = true; });
+
+            Assert.IsFalse(number);
+            Assert.IsFalse(response);
+            Assert.IsFalse(Check.IsCalled);
+        }
+
+        [TestMethod]
+        public void When_T1_Instance_Method()
+        {
+            var either = new Either<string, int>("1");
+            var number = either.WhenT1(When.Self.Func);
+            var response = either.WhenT1(When.Self.Action);
+
+            Assert.IsTrue(number);
+            Assert.AreEqual(1, number);
+            Assert.IsTrue(response);
         }
 
         #endregion

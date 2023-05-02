@@ -8,6 +8,13 @@ namespace ContainerExpressions.Containers
     {
         #region Miscellaneous
 
+        private static class Cache<TValue, TError>
+        {
+            private static readonly TError[] _errors = new TError[0];
+            public static TError[] Value(TValue _) => _errors;
+            public static TError[] Error(TError _, TError[] aggregateErrors) => aggregateErrors;
+        }
+
         /// <summary>Returns the value of Maybe when the instance is TValue, otherwise @default is returned.</summary>
         /// <param name="default">The value to use when Maybe contains an instance of Exception.</param>
         public static TValue GetValueOrDefault<TValue>(this Maybe<TValue> maybe, TValue @default) => maybe.Match(x => x, _ => @default);
@@ -35,6 +42,21 @@ namespace ContainerExpressions.Containers
         private static readonly Exception _taskExCache = new Exception("Error waiting for task to successfully complete.");
 
         /// <summary>Creates a Maybe, that wraps a Task. When the task is successful, the value is set, otherwise the error is set.</summary>
+        public static Task<Maybe<Unit>> ToMaybeTaskAsync(this Task value)
+        {
+            return value.ContinueWith(static t =>
+            {
+                var ex = _taskExCache;
+                if (t.Status == TaskStatus.Faulted)
+                {
+                    ex = t.Exception;
+                    t.Exception.LogError();
+                }
+                return t.Status == TaskStatus.RanToCompletion ? Unit.MaybeValue : Unit.MaybeError(ex);
+            });
+        }
+
+        /// <summary>Creates a Maybe, that wraps a Task. When the task is successful, the value is set, otherwise the error is set.</summary>
         public static Task<Maybe<TValue>> ToMaybeTaskAsync<TValue>(this Task<TValue> value)
         {
             return value.ContinueWith(static t =>
@@ -49,12 +71,41 @@ namespace ContainerExpressions.Containers
             });
         }
 
-        #endregion
+        /// <summary>Returns true when Maybe had a value to set.</summary>
+        public static bool TryGetValue<TValue>(this Maybe<TValue> maybe, out TValue value) { if (maybe._hasValue) { value = maybe._value; return true; }; value = default; return false; }
 
-        #region With
+        /// <summary>Returns true when Maybe had an error to set.</summary>
+        public static bool TryGetError<TValue>(this Maybe<TValue> maybe, out Exception error) { if (!maybe._hasValue) { error = maybe._error; return true; }; error = default; return false; }
 
-        /// <summary>Creates a new Maybe from the existing types, with the specified values.</summary>
-        public static Maybe<TValue> With<TValue>(this Maybe<TValue> _, Response<TValue> value, Exception error) => new Maybe<TValue>(value, error);
+        /// <summary>Returns true when Maybe had an error to set.</summary>
+        public static bool TryGetAggregateErrors<TValue, TError>(this Maybe<TValue, TError> maybe, out TError[] errors)
+        {
+            errors = maybe.Match(Cache<TValue, TError>.Value, Cache<TValue, TError>.Error);
+            return !maybe._hasValue;
+        }
+
+
+
+
+        /// <summary>Returns true when Maybe had an error to set.</summary>
+        //public static bool TryGetAllErrors<TValue, TError>(this Maybe<TValue, TError> maybe, out TError[] errors)
+        //{
+        //    if (!maybe._hasValue
+        //    errors = maybe.Match(Cache<TValue, TError>.Value, Cache<TValue, TError>.Error);
+        //    return maybe._hasValue;
+        //}
+
+
+
+
+
+
+    #endregion
+
+    #region With
+
+    /// <summary>Creates a new Maybe from the existing types, with the specified values.</summary>
+    public static Maybe<TValue> With<TValue>(this Maybe<TValue> _, Response<TValue> value, Exception error) => new Maybe<TValue>(value, error);
 
         /// <summary>Creates a new Maybe from the existing types, with the specified values.</summary>
         public static Maybe<TValue> With<TValue>(this Maybe<TValue> _, Either<TValue, Exception> either) => new Maybe<TValue>(either);

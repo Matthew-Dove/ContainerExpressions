@@ -79,6 +79,38 @@ namespace ContainerExpressions.Containers
         /// <summary>When the Response is in a valid state the Func's result is returned, otherwise false is returned.</summary>
         public static bool IsTrue<T>(this Response<T> response, Func<T, bool> condition) => response ? condition(response) : false;
 
+        /**
+         * Overloaded types to target for containers.
+         * Note: Actions, and Funcs can take N additional input parameters.
+         * Note: All actions map to Func<Response>, as they don't return a type; and async void methods don't return a Task either.
+         * 
+         * [Void]
+         * Response
+         * Task<Response>
+         * Func<Response>
+         * Func<Task<Response>>
+         * 
+         * [Value]
+         * T
+         * Task<T>
+         * Func<T>
+         * Func<Task<T>>
+         * 
+         * [Response and Value]
+         * Response<T>
+         * Task<Response<T>>
+         * Func<Response<T>>
+         * Func<Task<Response<T>>>
+        **/
+
+        /// <summary>Converts the target into a Response Unit, based on the original response's IsValid state.</summary>
+        public static Response<Unit> ToUnit(this Response response) => response.IsValid ? Unit.ResponseSuccess : Unit.ResponseError;
+
+        /// <summary>Turn a function that returns a Response, into one that returns a Response Unit.</summary>
+        public static Func<Response<Unit>> ToUnit(this Func<Response> func) => () => func().ToUnit();
+
+
+
         #endregion
 
         #region Lift
@@ -99,19 +131,37 @@ namespace ContainerExpressions.Containers
         public static Func<Response> Lift(this Action func) { return () => { func(); return new Response(true); }; }
 
         /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
-        public static Func<T, Response> Lift<T>(this Action<T> func) { return x => { func(x); return new Response(true); }; }
-
-        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
         public static Func<Response<T>> Lift<T>(this Func<T> func) => () => Create(func());
-
-        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
-        public static Func<T, Response<TResult>> Lift<T, TResult>(this Func<T, TResult> func) => Create<Func<T, Response<TResult>>>(x => Create(func(x)));
 
         /// <summary>Turn an async function that doesn't return a Response, into one that does.</summary>
         public static Func<Task<Response<T>>> LiftAsync<T>(this Func<Task<T>> func) => () => func().ContinueWith(TaskToResponse);
 
+        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
+        public static Func<T, Response<TResult>> Lift<T, TResult>(this Func<T, TResult> func) => new Func<T, Response<TResult>>(x => Create(func(x)));
+
+
+
+
+
+
         /// <summary>Turn an async function that doesn't return a task Response, into one that does.</summary>
-        public static Func<T, Task<Response<TResult>>> LiftAsync<T, TResult>(this Func<T, Task<TResult>> func) => Create<Func<T, Task<Response<TResult>>>>(x => func(x).ContinueWith(TaskToResponse));
+        public static Func<T, Task<Response<TResult>>> LiftAsync<T, TResult>(this Func<T, Task<TResult>> func) => new Func<T, Task<Response<TResult>>>(x => func(x).ContinueWith(TaskToResponse));
+
+
+        public static Func<T, Task<Response<TResult>>> LiftAsync2<T, TResult>(this Func<T, Task<TResult>> func, T value)
+        {
+            //var result = func(value).ContinueWith(TaskToResponse);
+
+            return new Func<T, Task<Response<TResult>>>(x => func(x).ContinueWith(TaskToResponse));
+        }
+
+
+
+        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
+        public static Func<T, Response> Lift<T>(this Action<T> func) { return x => { func(x); return new Response(true); }; }
+
+
+
 
         #endregion
 

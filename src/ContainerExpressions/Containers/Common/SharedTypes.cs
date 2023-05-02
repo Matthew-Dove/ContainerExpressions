@@ -1,15 +1,45 @@
-﻿namespace ContainerExpressions.Containers
+﻿using System;
+
+namespace ContainerExpressions.Containers
 {
     // Common types for reuse with containers i.e. - Either, Response, and Maybe.
 
-    /// <summary>A marker type to use when you have no return type, or result.</summary>
-    public readonly struct Unit
+    /// <summary>A marker type to use when you have nothing to return.</summary>
+    public sealed class Unit : IEquatable<Unit>
     {
+        /// <summary>Cached Unit Instance.</summary>
+        public static readonly Unit Instance = new Unit();
+
         /// <summary>A cached Response Unit in a valid state.</summary>
-        public static readonly Response<Unit> Success = new Response<Unit>(new Unit());
+        public static readonly Response<Unit> ResponseSuccess = new Response<Unit>(Instance);
 
         /// <summary>A cached Response Unit in an invalid state.</summary>
-        public static readonly Response<Unit> Error = new Response<Unit>();
+        public static readonly Response<Unit> ResponseError = new Response<Unit>();
+
+        /// <summary>A cached Maybe Unit, with the value set.</summary>
+        public static readonly Maybe<Unit> MaybeValue = new Maybe<Unit>(Instance);
+
+        /// <summary>A Maybe Unit, with the error set.</summary>
+        public static Maybe<Unit> MaybeError(Exception ex) => new Maybe<Unit>(ex);
+
+        private Unit() { }
+
+        public bool Equals(Unit other) => other != null;
+        public override bool Equals(object obj) => obj is Unit other && Equals(other);
+        public override int GetHashCode() => 1;
+        public override string ToString() => string.Empty;
+
+        public static bool operator !=(Unit x, Unit y) => !(x == y);
+        public static bool operator ==(Unit x, Unit y) => x.Equals(y);
+    }
+
+    public static class Unit<T>
+    {
+        /// <summary>A cached Maybe Unit, with the value set.</summary>
+        public readonly static Maybe<Unit, T> MaybeValue = new Maybe<Unit, T>(Unit.Instance);
+
+        /// <summary>A Maybe Unit, with the error set.</summary>
+        public static Maybe<Unit, T> MaybeError(T error) => new Maybe<Unit, T>(error);
     }
 
     #region HTTP

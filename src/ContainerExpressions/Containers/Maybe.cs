@@ -9,7 +9,7 @@ namespace ContainerExpressions.Containers
     /// <para>When two (or more) Maybe's Bind, their distinct errors are aggregated into a new Maybe.</para>
     /// <para>When both Maybes have some instance of TValue, the provided binding function will be invoked with said values.</para>
     /// </summary>
-    public readonly struct Maybe<TValue> : IEquatable<Maybe<TValue>>
+    public readonly struct Maybe<TValue> : IEquatable<Maybe<TValue>>, IEquatable<TValue>
     {
         internal Exception[] AggregateErrors { get; }
         internal readonly static Exception[] _emptyAggregateErrors = new Exception[0];
@@ -104,9 +104,6 @@ namespace ContainerExpressions.Containers
             AggregateErrors = errors;
         }
 
-        public bool TryGetValue(out TValue value) { if (_hasValue) { value = _value; return true; }; value = default; return false; }
-        public bool TryGetError(out Exception error) { if (!_hasValue) { error = _error; return true; }; error = default; return false; }
-
         public override string ToString() => this.Match(x => x?.ToString(), x => x?.ToString()) ?? string.Empty;
 
         public static implicit operator Response<TValue>(Maybe<TValue> maybe) => maybe.Match(x => new Response<TValue>(x), _ => new Response<TValue>());
@@ -161,7 +158,7 @@ namespace ContainerExpressions.Containers
     /// <para>When two (or more) Maybe's Bind, their distinct errors are aggregated into a new Maybe.</para>
     /// <para>When both Maybes have some instance of TValue, the provided binding function will be invoked with said values.</para>
     /// </summary>
-    public readonly struct Maybe<TValue, TError> : IEquatable<Maybe<TValue, TError>>
+    public readonly struct Maybe<TValue, TError> : IEquatable<Maybe<TValue, TError>>, IEquatable<TValue>
     {
         internal TError[] AggregateErrors { get; }
         internal readonly static TError[] _emptyAggregateErrors = new TError[0];
@@ -254,9 +251,6 @@ namespace ContainerExpressions.Containers
 
             AggregateErrors = errors;
         }
-
-        public bool TryGetValue(out TValue value) { if (_hasValue) { value = _value; return true; }; value = default; return false; }
-        public bool TryGetError(out TError error) { if (!_hasValue) { error = _error; return true; }; error = default; return false; }
 
         public override string ToString() => this.Match(x => x?.ToString(), x => x?.ToString()) ?? string.Empty;
 

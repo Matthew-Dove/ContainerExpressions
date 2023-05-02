@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace ContainerExpressions.Containers
 {
     /// <summary>Loads the value only once, the first time it's accessed.</summary>
-    public struct Later<T>
+    public sealed class Later<T>
     {
         /// <summary>Gets the value form the function, if this is the first time the value is read, the function will be invoked.</summary>
         public T Value { get { if (_func != null) { _value = _func(); _func = null; } return _value; } }
@@ -27,7 +27,7 @@ namespace ContainerExpressions.Containers
     }
 
     /// <summary>Loads the value only once in a thread safe way, the first time it's accessed.</summary>
-    public struct LaterAsync<T>
+    public sealed class LaterAsync<T>
     {
         /// <summary>Gets the value form the function, if this is the first time the value is read, the function will be invoked (in a thread-safe manner).</summary>
         public Task<T> Value { get { return GetValue(); } }

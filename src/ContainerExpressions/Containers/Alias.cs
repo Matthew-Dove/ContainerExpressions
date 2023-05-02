@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace ContainerExpressions.Containers
 {
     /// <summary>Allows you to name a type.</summary>
-    public abstract class Alias<T> : IEquatable<Alias<T>>
+    public abstract class Alias<T> : IEquatable<Alias<T>>, IEquatable<T>
     {
         /// <summary>The underlying value of T.</summary>
         public T Value { get; }
@@ -48,7 +48,7 @@ namespace ContainerExpressions.Containers
     /// <para>However you can still use this in it's raw form for method overloading, or you can have a global usings file to alias your custom type.</para>
     /// <para><![CDATA[global using XXX = ContainerExpressions.Containers.A<int>;]]></para>
     /// </summary>
-    public readonly struct A<T> : IEquatable<A<T>>
+    public readonly struct A<T> : IEquatable<A<T>>, IEquatable<T>
     {
         /// <summary>The underlying value of T.</summary>
         public T Value { get; }

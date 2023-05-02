@@ -12,8 +12,8 @@ namespace ContainerExpressions.Containers
     /// </summary>
     public static class Instance
     {
-        /// <summary>Gets a default instance for TValue. Create must be called first for TValue.</summary>
-        public static TValue Of<TValue>() where TValue : class => Instance<TValue>.Value;
+        /// <summary>Gets a default instance for TValue. Create must be called first for some reference type TValue.</summary>
+        public static TValue Of<TValue>() => Instance<TValue>.Value;
 
         /// <summary>Stores a default instance for TValue. You can only call this once per type of TValue.</summary>
         public static void Create<TValue>(TValue value) where TValue : class => Instance<TValue>.Value = value;
@@ -108,16 +108,14 @@ namespace ContainerExpressions.Containers
 
     /// <summary>
     /// A holder for some instance of T.
-    /// <para>T must be a reference type, and T cannot be null.</para>
-    /// <para>Each instance of T may only be set once.</para>
-    /// <para>If you attempt to set some Instance T to null, set the same type twice, or try to get a type that has not been set first; an exception will be thrown.</para>
+    /// <para>An instance of T may only be set once.</para>
     /// </summary>
-    file static class Instance<T> where T : class
+    file static class Instance<T>
     {
-        private static T _value = null;
         public static T Value {
             get
             {
+                if (_isValue) return _value; // Value types cannot be set due to the generic constraints placed on Instance.Create(), so we can return them as they are not null.
                 if (_value == null) throw new InvalidOperationException($"Must set a value for type: {typeof(T)}, before attempting to retrieve it.");
                 return _value;
             }
@@ -128,5 +126,16 @@ namespace ContainerExpressions.Containers
                 _value = value;
             }
         }
+
+        private static readonly bool _isValue = typeof(T).IsValueType;
+        private static T _value = default;
     }
+
+    /// <summary>Holds completed tasks for requested types.</summary>
+    public static class InstanceAsync {
+        public static Task<TResult> Of<TResult>() => InstanceAsync<TResult>.Value;
+        public static ValueTask<TResult> ValueOf<TResult>() => new ValueTask<TResult>(default(TResult));
+    }
+
+    file static class InstanceAsync<T> { public static readonly Task<T> Value = Task.FromResult<T>(default(T)); }
 }

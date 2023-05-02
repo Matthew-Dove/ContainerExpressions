@@ -8,6 +8,7 @@ namespace ContainerExpressions.Containers
         static Csv() => Instance.Create(new Comma());
     }
 
+    // Options
     public readonly struct SmartEnum<T>
     {
         private readonly int _bitmask;

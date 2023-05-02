@@ -129,25 +129,6 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        public void ForEach()
-        {
-            var count = 0;
-
-            _loop.ForEach(x => count++);
-
-            Assert.AreEqual(count, _items.Length);
-        }
-
-        [TestMethod]
-        public void Transform()
-        {
-            var numbers = _loop.Transform(long.Parse);
-
-            Assert.AreEqual(_items.Length, numbers.Length);
-            Assert.AreEqual(long.Parse(_items[1]), numbers[1]);
-        }
-
-        [TestMethod]
         public void ForLoop()
         {
             var items = new string[_items.Length];
@@ -304,6 +285,35 @@ namespace Tests.ContainerExpressions.Containers
             var items = loop.Skip(1).Take(1);
 
             Assert.IsFalse(items.Any());
+        }
+
+        [TestMethod]
+        public void ForEach()
+        {
+            var count = 0;
+
+            _loop.ForEach(x => count++);
+
+            Assert.AreEqual(count, _items.Length);
+        }
+
+        [TestMethod]
+        public void Transform()
+        {
+            var numbers = _loop.Transform(long.Parse);
+
+            Assert.AreEqual(_items.Length, numbers.Length);
+            Assert.AreEqual(long.Parse(_items[1]), numbers[1]);
+        }
+
+        [TestMethod]
+        public void Flattern()
+        {
+            var loop = Loop.Create(new[] { 1, 1, 1 });
+
+            var sum = loop.Flattern(0, (x, y) => x + y);
+
+            Assert.AreEqual(loop.Sum(), sum);
         }
     }
 }

@@ -1581,20 +1581,110 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         #endregion
+
+        #region TryGet
+
+        [TestMethod]
+        public void MaybeError_TryGet_Value_Pass()
+        {
+            var maybe = new Maybe<int, string>(1);
+
+            bool result = maybe.TryGetValue(out int value);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(1, value);
+        }
+
+        [TestMethod]
+        public void MaybeError_TryGet_Value_Fail()
+        {
+            var maybe = new Maybe<int, string>("error");
+
+            bool result = maybe.TryGetValue(out int value);
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(default, value);
+        }
+
+        [TestMethod]
+        public void MaybeError_TryGet_Error_Pass()
+        {
+            var maybe = new Maybe<int, string>("error");
+
+            bool result = maybe.TryGetError(out string error);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual("error", error);
+        }
+
+        [TestMethod]
+        public void MaybeError_TryGet_Error_Fail()
+        {
+            var maybe = new Maybe<int, string>(1);
+
+            bool result = maybe.TryGetError(out string error);
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(default, error);
+        }
+
+        [TestMethod]
+        public void MaybeValue_TryGet_Value_Pass()
+        {
+            var maybe = new Maybe<int>(1);
+
+            bool result = maybe.TryGetValue(out int value);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(1, value);
+        }
+
+        [TestMethod]
+        public void MaybeValue_TryGet_Value_Fail()
+        {
+            var maybe = new Maybe<int>(new Exception("error"));
+
+            bool result = maybe.TryGetValue(out int value);
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(default, value);
+        }
+
+        [TestMethod]
+        public void MaybeValue_TryGet_Error_Pass()
+        {
+            var error = new Exception("error");
+            var maybe = new Maybe<int>(error);
+
+            bool result = maybe.TryGetError(out Exception ex);
+
+            Assert.IsTrue(result);
+            Assert.ReferenceEquals(error, ex);
+        }
+
+        [TestMethod]
+        public void MaybeValue_TryGet_Error_Fail()
+        {
+            var maybe = new Maybe<int>(1);
+
+            bool result = maybe.TryGetError(out Exception ex);
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(default, ex);
+        }
+
+        #endregion
     }
 
-    public static class MaybeTestsExtensions
+    file static class MaybeTestsExtensions
     {
+        public static TError[] GetAggregateErrors<TValue, TError>(this Maybe<TValue, TError> maybe) => maybe.Match(Cache<TValue, TError>.WhenValue, Cache<TValue, TError>.WhenError);
+
         private static class Cache<TValue, TError>
         {
             private static readonly TError[] _errors = new TError[0];
             public static TError[] WhenValue(TValue _) => _errors;
             public static TError[] WhenError(TError _, TError[] aggregateErrors) => aggregateErrors;
-        }
-
-        public static TError[] GetAggregateErrors<TValue, TError>(this Maybe<TValue, TError> maybe)
-        {
-            return maybe.Match(Cache<TValue, TError>.WhenValue, Cache<TValue, TError>.WhenError);
         }
     }
 }

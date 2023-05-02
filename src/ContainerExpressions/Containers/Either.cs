@@ -7,11 +7,11 @@ namespace ContainerExpressions.Containers
     /// This type holds a single instance of a selection of types.
     /// <para>While Either can take on more than one type, it is only ever a single type at a time.</para>
     /// </summary>
-    public readonly struct Either<T1, T2> : IEquatable<Either<T1, T2>>
+    public readonly struct Either<T1, T2> : IEquatable<Either<T1, T2>>, IEquatable<T1>
     {
-        private readonly int _tag;
-        private readonly T1 _t1;
-        private readonly T2 _t2;
+        internal readonly int _tag;
+        internal readonly T1 _t1;
+        internal readonly T2 _t2;
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T1 t1)
@@ -29,38 +29,15 @@ namespace ContainerExpressions.Containers
             _t2 = t2;
         }
 
-        /// <summary>
-        /// Gets a type that each type of Either can transform to.
-        /// <para>Only one function will be invoked depending on what type is internally stored.</para>
-        /// </summary>
-        public TResult Match<TResult>(Func<T1, TResult> f1, Func<T2, TResult> f2)
-        {
-            if (_tag == 1)
-                return f1(_t1);
-            if (_tag == 2)
-                return f2(_t2);
-
-            throw new InvalidOperationException("The internal type was not set, you must assign Either a type at least once.");
-        }
-
-        public bool TryGetT1(out T1 t1) { if (_tag == 1) { t1 = _t1; return true; }; t1 = default; return false; }
-        public bool TryGetT2(out T2 t2) { if (_tag == 2) { t2 = _t2; return true; }; t2 = default; return false; }
-
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
         {
-            string value = null;
+            if (_tag == 0) return string.Empty;
 
-            if (_tag == 1)
-            {
-                value = _t1?.ToString();
-            }
-            else if (_tag == 2)
-            {
-                value = _t2?.ToString();
-            }
+            if (_tag == 1) return _t1?.ToString() ?? string.Empty;
+            if (_tag == 2) return _t2?.ToString() ?? string.Empty;
 
-            return value ?? string.Empty;
+            return string.Empty;
         }
 
         public static implicit operator Either<T1, T2>(T1 value) => new Either<T1, T2>(value);
@@ -120,7 +97,7 @@ namespace ContainerExpressions.Containers
     /// This type holds a single instance of a selection of types.
     /// <para>While Either can take on more than one type, it is only ever a single type at a time.</para>
     /// </summary>
-    public readonly struct Either<T1, T2, T3> : IEquatable<Either<T1, T2, T3>>
+    public readonly struct Either<T1, T2, T3> : IEquatable<Either<T1, T2, T3>>, IEquatable<T1>
     {
         private readonly int _tag;
         private readonly T1 _t1;
@@ -260,7 +237,7 @@ namespace ContainerExpressions.Containers
     /// This type holds a single instance of a selection of types.
     /// <para>While Either can take on more than one type, it is only ever a single type at a time.</para>
     /// </summary>
-    public readonly struct Either<T1, T2, T3, T4> : IEquatable<Either<T1, T2, T3, T4>>
+    public readonly struct Either<T1, T2, T3, T4> : IEquatable<Either<T1, T2, T3, T4>>, IEquatable<T1>
     {
         private readonly int _tag;
         private readonly T1 _t1;
@@ -431,7 +408,7 @@ namespace ContainerExpressions.Containers
     /// This type holds a single instance of a selection of types.
     /// <para>While Either can take on more than one type, it is only ever a single type at a time.</para>
     /// </summary>
-    public readonly struct Either<T1, T2, T3, T4, T5> : IEquatable<Either<T1, T2, T3, T4, T5>>
+    public readonly struct Either<T1, T2, T3, T4, T5> : IEquatable<Either<T1, T2, T3, T4, T5>>, IEquatable<T1>
     {
         private readonly int _tag;
         private readonly T1 _t1;
@@ -635,7 +612,7 @@ namespace ContainerExpressions.Containers
     /// This type holds a single instance of a selection of types.
     /// <para>While Either can take on more than one type, it is only ever a single type at a time.</para>
     /// </summary>
-    public readonly struct Either<T1, T2, T3, T4, T5, T6> : IEquatable<Either<T1, T2, T3, T4, T5, T6>>
+    public readonly struct Either<T1, T2, T3, T4, T5, T6> : IEquatable<Either<T1, T2, T3, T4, T5, T6>>, IEquatable<T1>
     {
         private readonly int _tag;
         private readonly T1 _t1;
@@ -874,7 +851,7 @@ namespace ContainerExpressions.Containers
     /// This type holds a single instance of a selection of types.
     /// <para>While Either can take on more than one type, it is only ever a single type at a time.</para>
     /// </summary>
-    public readonly struct Either<T1, T2, T3, T4, T5, T6, T7> : IEquatable<Either<T1, T2, T3, T4, T5, T6, T7>>
+    public readonly struct Either<T1, T2, T3, T4, T5, T6, T7> : IEquatable<Either<T1, T2, T3, T4, T5, T6, T7>>, IEquatable<T1>
     {
         private readonly int _tag;
         private readonly T1 _t1;
@@ -1150,7 +1127,7 @@ namespace ContainerExpressions.Containers
     /// This type holds a single instance of a selection of types.
     /// <para>While Either can take on more than one type, it is only ever a single type at a time.</para>
     /// </summary>
-    public readonly struct Either<T1, T2, T3, T4, T5, T6, T7, T8> : IEquatable<Either<T1, T2, T3, T4, T5, T6, T7, T8>>
+    public readonly struct Either<T1, T2, T3, T4, T5, T6, T7, T8> : IEquatable<Either<T1, T2, T3, T4, T5, T6, T7, T8>>, IEquatable<T1>
     {
         private readonly int _tag;
         private readonly T1 _t1;
