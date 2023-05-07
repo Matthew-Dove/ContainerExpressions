@@ -165,7 +165,7 @@ namespace ContainerExpressions.Containers
         public override int GetHashCode() => ValueTask.GetHashCode();
 
         public bool Equals(ResponseTask<T> other) => Equals(other.ValueTask);
-        public bool Equals(Task<T> other) => Equals(new ValueTask<T>(other));
+        public bool Equals(Task<T> other) => Equals(new ValueTask<T>(other ?? _canceled));
         public bool Equals(ValueTask<T> other) => other.Equals(ValueTask);
 
         public bool Equals(Response<T> other)
@@ -242,7 +242,7 @@ namespace ContainerExpressions.Containers
         public override int GetHashCode() => ValueTask.GetHashCode();
 
         public bool Equals(ResponseTask other) => Equals(other.ValueTask);
-        public bool Equals(Task other) => Equals(new ValueTask(other));
+        public bool Equals(Task other) => Equals(new ValueTask(other ?? _canceled));
         public bool Equals(ValueTask other) => other.Equals(ValueTask);
 
         public bool Equals(Response other)
