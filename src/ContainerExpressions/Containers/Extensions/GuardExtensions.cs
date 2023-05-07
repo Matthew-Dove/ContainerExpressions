@@ -2,11 +2,30 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 
 namespace ContainerExpressions.Containers.Extensions
 {
     public static class GuardExtensions
     {
+        // TODO: Ensure all exceptions are thrown in another class / method, to improve the chance of them having a cold jit; and these being inlined at runtime.
+
+        public static void ThrowError<T>(
+            this T ex,
+            [CallerArgumentExpression(nameof(ex))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            ) where T : Exception => throw ex;
+
+        public static void ThrowError(
+            this ExceptionDispatchInfo ex,
+            [CallerArgumentExpression(nameof(ex))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            ) => ex.Throw();
+
         public static T ThrowIfNull<T>(
             this T target,
             [CallerArgumentExpression(nameof(target))] string argument = "",

@@ -1,7 +1,6 @@
 ﻿using ContainerExpressions.Containers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -80,7 +79,19 @@ namespace Tests.ContainerExpressions.Containers
             await Task.Delay(1); // The method must use async await, otherwise the exception will be thrown at runtime instead of being handled.
             return quotient;
         }
+
+        [TestMethod]
+        public async Task Custom_Sleep_Awaiter()
+        {
+            var sleep = new Sleep(1);
+
+            var naptime = await sleep;
+
+            Assert.AreEqual(1, naptime);
+        }
     }
+
+    #region Awaiter Extensions
 
     public static class AwaiterExtensions
     {
@@ -132,4 +143,113 @@ namespace Tests.ContainerExpressions.Containers
             return response.Value.UnpackAsync().GetAwaiter();
         }
     }
+
+    #endregion 
+
+    #region Sleep Awaiter
+
+    public readonly struct Sleep
+    {
+        private readonly Task<int> _sleeper;
+
+        public Sleep(int milliSeconds) => _sleeper = Task.Delay(milliSeconds).ContinueWith(_ => milliSeconds);
+
+        public SleepAwaiter<int> GetAwaiter() => new SleepAwaiter<int>(_sleeper);
+    }
+
+    public readonly struct SleepAwaiter<T> : ICriticalNotifyCompletion
+    {
+        public bool IsCompleted => _task.IsCompleted;
+        private readonly Task<T> _task;
+
+        public SleepAwaiter(Task<T> task) => _task = task;
+
+        public void OnCompleted(Action continuation) => _task.ContinueWith(_ => continuation());
+        public void UnsafeOnCompleted(Action continuation) => OnCompleted(continuation);
+        public T GetResult() => _task.GetAwaiter().GetResult();
+    }
+
+    #endregion
+
+    #region Task Type
+
+    class Tester
+    {
+        public async TaskLike FooAsync()
+        {
+            await Task.Yield();
+            await default(TaskLike);
+        }
+    }
+
+    public struct TaskLikeMethodBuilder//<T> - make builder a struct with no readonly?
+    {
+        public TaskLike Task => default(TaskLike);
+
+        public TaskLikeMethodBuilder() => Console.WriteLine(".ctor");
+
+        public static TaskLikeMethodBuilder Create() => new TaskLikeMethodBuilder();
+
+        public void SetResult() => Console.WriteLine("SetResult");
+        // Generic version: public void SetResult(T result) => Console.WriteLine("SetResult");
+
+        public void SetException(Exception ex) => Console.WriteLine("Error");
+
+        public void Start<TStateMachine>(ref TStateMachine stateMachine)
+            where TStateMachine : IAsyncStateMachine
+        {
+            Console.WriteLine("Start");
+            stateMachine.MoveNext();
+        }
+
+        public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
+            where TAwaiter : INotifyCompletion
+            where TStateMachine : IAsyncStateMachine
+        {
+            Console.WriteLine("AwaitOnCompleted");
+            awaiter.OnCompleted(stateMachine.MoveNext);
+        }
+
+        public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
+            where TAwaiter : ICriticalNotifyCompletion
+            where TStateMachine : IAsyncStateMachine
+        {
+            Console.WriteLine("AwaitUnsafeOnCompleted");
+            AwaitOnCompleted(ref awaiter, ref stateMachine);
+        }
+
+        public void SetStateMachine(IAsyncStateMachine stateMachine)
+        {
+            Console.WriteLine("SetStateMachine");
+        }
+    }
+
+    [AsyncMethodBuilder(typeof(TaskLikeMethodBuilder))]
+    public struct TaskLike//<T>
+    {
+        public TaskLikeAwaiter GetAwaiter() => default(TaskLikeAwaiter);
+    }
+
+    public struct TaskLikeAwaiter : ICriticalNotifyCompletion
+    {
+        public void GetResult()
+        {
+            Console.WriteLine("GetResult");
+        }
+
+        public bool IsCompleted => true;
+
+        public void OnCompleted(Action continuation)
+        {
+            Console.WriteLine("OnCompleted");
+        }
+
+        public void UnsafeOnCompleted(Action continuation)
+        {
+            Console.WriteLine("UnsafeOnCompleted");
+            OnCompleted(continuation);
+        }
+    }
+
+    #endregion
 }

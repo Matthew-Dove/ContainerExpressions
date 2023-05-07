@@ -10,14 +10,14 @@ namespace ContainerExpressions.Containers
         /// <summary>Cached Unit Instance.</summary>
         public static readonly Unit Instance = new Unit();
 
-        /// <summary>A cached Response Unit in a valid state.</summary>
-        public static readonly Response<Unit> ResponseSuccess = new Response<Unit>(Instance);
+        /// <summary>A Response Unit in a valid state.</summary>
+        public static Response<Unit> ResponseSuccess => new Response<Unit>(Instance);
 
-        /// <summary>A cached Response Unit in an invalid state.</summary>
-        public static readonly Response<Unit> ResponseError = new Response<Unit>();
+        /// <summary>A Response Unit in an invalid state.</summary>
+        public static Response<Unit> ResponseError => new Response<Unit>();
 
-        /// <summary>A cached Maybe Unit, with the value set.</summary>
-        public static readonly Maybe<Unit> MaybeValue = new Maybe<Unit>(Instance);
+        /// <summary>A Maybe Unit, with the value set.</summary>
+        public static Maybe<Unit> MaybeValue => new Maybe<Unit>(Instance);
 
         /// <summary>A Maybe Unit, with the error set.</summary>
         public static Maybe<Unit> MaybeError(Exception ex) => new Maybe<Unit>(ex);
@@ -35,8 +35,8 @@ namespace ContainerExpressions.Containers
 
     public static class Unit<T>
     {
-        /// <summary>A cached Maybe Unit, with the value set.</summary>
-        public readonly static Maybe<Unit, T> MaybeValue = new Maybe<Unit, T>(Unit.Instance);
+        /// <summary>A Maybe Unit, with the value set.</summary>
+        public static Maybe<Unit, T> MaybeValue => new Maybe<Unit, T>(Unit.Instance);
 
         /// <summary>A Maybe Unit, with the error set.</summary>
         public static Maybe<Unit, T> MaybeError(T error) => new Maybe<Unit, T>(error);
