@@ -62,10 +62,10 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public async Task Runtime_Errors_Are_Handled_Async()
         {
-            ResponseAsync<int> successResponse = Divide(1, 1);
+            ResponseTask<int> successResponse = Divide(1, 1);
             Response<int> success = await successResponse;
 
-            ResponseAsync<int> errorResponse = Divide(1, 0);
+            ResponseTask<int> errorResponse = Divide(1, 0);
             Response<int> error = await errorResponse;
 
             Assert.IsTrue(success);
@@ -119,16 +119,16 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         // Example using ResponseAsync with ValueTask.
-        public static ValueTaskAwaiter<Response<T>> GetAwaiter<T>(this ResponseAsync<T> response)
+        public static ValueTaskAwaiter<Response<T>> GetAwaiter<T>(this ResponseTask<T> response)
         {
-            if (response.Task.IsCompleted)
+            if (response.ValueTask.IsCompleted)
             {
-                return response.Task.IsCompletedSuccessfully
-                    ? new ValueTask<Response<T>>(Response.Create(response.Task.Result)).GetAwaiter()
-                    : new ValueTask<Response<T>>(Response.Create<T>()).GetAwaiter();
+                if (response.ValueTask.IsCompletedSuccessfully) return new ValueTask<Response<T>>(Response.Create(response.ValueTask.Result)).GetAwaiter();
+                if (response.ValueTask.IsFaulted) response.ValueTask.AsTask().Exception.LogError();
+                return new ValueTask<Response<T>>(Response.Create<T>()).GetAwaiter();
             }
 
-            return new ValueTask<Response<T>>(response.Task.AsTask().ContinueWith(static t =>
+            return new ValueTask<Response<T>>(response.ValueTask.AsTask().ContinueWith(static t =>
             {
                 if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
                 if (t.Status == TaskStatus.RanToCompletion) return Response.Create(t.Result);

@@ -1,30 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers
 {
-    // I should change ValueTask<T> Task { get; } to ValueTask<Response<T>> Task { get; }
-    public readonly struct ResponseAsync<T>
-    {
-        public ValueTask<T> Task { get; }
-
-        public ResponseAsync(Task<T> task) => Task = new ValueTask<T>(task);
-        public ResponseAsync(ValueTask<T> task) => Task = task;
-        public ResponseAsync(T value) => Task = new ValueTask<T>(value);
-
-        public static implicit operator Task<T>(ResponseAsync<T> response) => response.Task.AsTask();
-        public static implicit operator ResponseAsync<T>(Task<T> task) => new ResponseAsync<T>(task);
-
-        public static implicit operator ValueTask<T>(ResponseAsync<T> response) => response.Task;
-        public static implicit operator ResponseAsync<T>(ValueTask<T> task) => new ResponseAsync<T>(task);
-
-        public static implicit operator T(ResponseAsync<T> response) => response.Task.Result;
-        public static implicit operator ResponseAsync<T>(T value) => new ResponseAsync<T>(value);
-
-        public static implicit operator bool(ResponseAsync<T> response) => response.Task.IsCompletedSuccessfully;
-    }
-
     /// <summary>
     /// A wrapper around the real value a method will return.
     /// <para>Using this pattern you can tell if a returned value is the correct one, or if some error happened trying to get the real value.</para>
@@ -149,5 +129,87 @@ namespace ContainerExpressions.Containers
         public static bool operator ==(Response x, bool y) => x.Equals(y);
         public static bool operator !=(bool x, Response y) => !(x == y);
         public static bool operator ==(bool x, Response y) => y.Equals(x);
+    }
+
+    public readonly struct ResponseTask<T> : IEquatable<ResponseTask<T>>, IEquatable<Task<T>>, IEquatable<ValueTask<T>>, IEquatable<Response<T>>, IEquatable<T>
+    {
+        public ValueTask<T> ValueTask { get; }
+        private static readonly Task<T> _canceled = Task.FromCanceled<T>(new CancellationToken(true));
+
+        public ResponseTask(Task<T> task) => ValueTask = new ValueTask<T>(task ?? _canceled);
+        public ResponseTask(ValueTask<T> task) => ValueTask = task;
+        public ResponseTask(T value) => ValueTask = new ValueTask<T>(value);
+
+        public static implicit operator Task<T>(ResponseTask<T> response) => response.ValueTask.AsTask();
+        public static implicit operator ResponseTask<T>(Task<T> task) => new ResponseTask<T>(task);
+
+        public static implicit operator ValueTask<T>(ResponseTask<T> response) => response.ValueTask;
+        public static implicit operator ResponseTask<T>(ValueTask<T> task) => new ResponseTask<T>(task);
+
+        public static implicit operator bool(ResponseTask<T> response) => response.ValueTask.IsCompletedSuccessfully;
+        public static implicit operator Response<T>(ResponseTask<T> response)
+        {
+            if (response.ValueTask.IsCompleted)
+            {
+                if (response.ValueTask.IsCompletedSuccessfully) return new Response<T>(response.ValueTask.GetAwaiter().GetResult());
+                if (response.ValueTask.IsFaulted) response.ValueTask.AsTask().Exception.LogError();
+                return new Response<T>();
+            }
+            return new Response<T>(response.ValueTask.GetAwaiter().GetResult()); // Can error if cast before awaiting.
+        }
+
+        public static implicit operator T(ResponseTask<T> response) => response.ValueTask.GetAwaiter().GetResult(); // Can error if cast before awaiting.
+        public static implicit operator ResponseTask<T>(T value) => new ResponseTask<T>(value);
+        
+        public override string ToString() => ValueTask.ToString();
+        public override int GetHashCode() => ValueTask.GetHashCode();
+
+        public bool Equals(ResponseTask<T> other) => Equals(other.ValueTask);
+        public bool Equals(Task<T> other) => Equals(new ValueTask<T>(other));
+        public bool Equals(ValueTask<T> other) => other.Equals(ValueTask);
+
+        public bool Equals(Response<T> other)
+        {
+            if (!other.IsValid) return ValueTask.IsCompleted && (!ValueTask.IsCompletedSuccessfully);
+            return ValueTask.IsCompletedSuccessfully && Equals(new ValueTask<T>(other.Value));
+        }
+
+        public bool Equals(T other) => Equals(new ValueTask<T>(other));
+
+        public override bool Equals(object obj)
+        {
+            return obj switch
+            {
+                ResponseTask<T> other => Equals(other),
+                Task<T> task => Equals(task),
+                ValueTask<T> valueTask => Equals(valueTask),
+                Response<T> response => Equals(response),
+                T value => Equals(value),
+                _ => false
+            };
+        }
+
+        public static bool operator !=(ResponseTask<T> x, ResponseTask<T> y) => !(x == y);
+        public static bool operator ==(ResponseTask<T> x, ResponseTask<T> y) => x.Equals(y);
+
+        public static bool operator !=(ResponseTask<T> x, Task<T> y) => !(x == y);
+        public static bool operator ==(ResponseTask<T> x, Task<T> y) => x.Equals(y);
+        public static bool operator !=(Task<T> x, ResponseTask<T> y) => !(x == y);
+        public static bool operator ==(Task<T> x, ResponseTask<T> y) => y.Equals(x);
+
+        public static bool operator !=(ResponseTask<T> x, ValueTask<T> y) => !(x == y);
+        public static bool operator ==(ResponseTask<T> x, ValueTask<T> y) => x.Equals(y);
+        public static bool operator !=(ValueTask<T> x, ResponseTask<T> y) => !(x == y);
+        public static bool operator ==(ValueTask<T> x, ResponseTask<T> y) => y.Equals(x);
+
+        public static bool operator !=(ResponseTask<T> x, Response<T> y) => !(x == y);
+        public static bool operator ==(ResponseTask<T> x, Response<T> y) => x.Equals(y);
+        public static bool operator !=(Response<T> x, ResponseTask<T> y) => !(x == y);
+        public static bool operator ==(Response<T> x, ResponseTask<T> y) => y.Equals(x);
+
+        public static bool operator !=(ResponseTask<T> x, T y) => !(x == y);
+        public static bool operator ==(ResponseTask<T> x, T y) => x.Equals(y);
+        public static bool operator !=(T x, ResponseTask<T> y) => !(x == y);
+        public static bool operator ==(T x, ResponseTask<T> y) => y.Equals(x);
     }
 }
