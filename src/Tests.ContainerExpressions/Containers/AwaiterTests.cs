@@ -1,6 +1,7 @@
 ﻿using ContainerExpressions.Containers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -22,6 +23,16 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
+        public async Task Await_On_Response_ValueTask()
+        {
+            var response = Response.Create(new ValueTask(Task.CompletedTask));
+
+            var result = await response;
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
         public async Task Await_On_Response_ValueTaskT()
         {
             var response = Response.Create(new ValueTask<int>(1));
@@ -33,7 +44,10 @@ namespace Tests.ContainerExpressions.Containers
         public async Task Await_On_Response_Task()
         {
             var response = Response.Create(Task.CompletedTask);
-            await response;
+
+            var result  = await response;
+
+            Assert.IsTrue(result);
         }
 
         [TestMethod]
@@ -62,15 +76,32 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public async Task Runtime_Errors_Are_Handled_Async()
         {
+            ResponseTask successResponse = Divide(1, 1);
+            Response success = await successResponse;
+
+            Response err = await new ResponseTask(Divide(1, 0));
+            ResponseTask errorResponse = Divide(1, 0);
+            Response error = await errorResponse;
+
+            Assert.IsTrue(success);
+            Assert.IsFalse(error);
+            Assert.IsFalse(err);
+        }
+
+        [TestMethod]
+        public async Task Runtime_Errors_WithT_Are_Handled_Async()
+        {
             ResponseTask<int> successResponse = Divide(1, 1);
             Response<int> success = await successResponse;
 
             ResponseTask<int> errorResponse = Divide(1, 0);
             Response<int> error = await errorResponse;
+            Response<int> err = await new ResponseTask<int>(Divide(1, 0));
 
             Assert.IsTrue(success);
             Assert.AreEqual(1, success);
             Assert.IsFalse(error);
+            Assert.IsFalse(err);
         }
 
         private static async Task<int> Divide(int numerator, int denominator)
@@ -89,25 +120,117 @@ namespace Tests.ContainerExpressions.Containers
 
             Assert.AreEqual(1, naptime);
         }
+
+        [Ignore]
+        [TestMethod]
+        public async Task Custom_Uri_Awaiter()
+        {
+            Response<string> body = await new Uri("https://www.example.com/"); // This one is just for the lols.
+            Assert.IsTrue(body);
+            Assert.IsFalse(string.IsNullOrWhiteSpace(body));
+        }
+
+        [TestMethod]
+        public async Task Unpack_BaseResponse_Task_Awaiter()
+        {
+            var input = Response.Create(Task.FromResult(new Response<Response>(new Response(true))));
+
+            var result = await input;
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_BaseResponse_Task_Async_Awaiter()
+        {
+            var input = Response.Create(Task.FromResult(new Response<Task<Response>>(Task.FromResult(new Response(true)))));
+
+            var result = await input;
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_Response_Task_Awaiter()
+        {
+            var input = Response.Create(Task.FromResult(new Response<Response<int>>(new Response<int>(1))));
+
+            var result = await input;
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(1, result);
+        }
+
+        [TestMethod]
+        public async Task Unpack_Response_Task_Async_Awaiter()
+        {
+            var input = Response.Create(Task.FromResult(new Response<Task<Response<int>>>(Task.FromResult(new Response<int>(1)))));
+
+            var result = await input;
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(1, result);
+        }
     }
 
     #region Awaiter Extensions
 
     public static class AwaiterExtensions
     {
-        // Example using ValueTask. Will blowup when the response is not valid, or the task is canceled, or faulted.
+        #region Response
+
+        // Example using Response ValueTask with no result.
+        public static ValueTaskAwaiter<Response> GetAwaiter(this Response<ValueTask> response)
+        {
+            if (!response) return new ValueTask<Response>(Response.Error).GetAwaiter();
+
+            if (response.Value.IsCompleted)
+            {
+                if (response.Value.IsCompletedSuccessfully) return new ValueTask<Response>(Response.Success).GetAwaiter();
+                if (response.Value.IsFaulted) response.Value.AsTask().Exception.LogError();
+                return new ValueTask<Response>(Response.Error).GetAwaiter();
+            }
+
+            return new ValueTask<Response>(response.Value.AsTask().ContinueWith(static t =>
+            {
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.RanToCompletion) return Response.Success;
+                return Response.Error;
+            })).GetAwaiter();
+        }
+
+        // Example using Response ValueTask with T.
         public static ValueTaskAwaiter<Response<T>> GetAwaiter<T>(this Response<ValueTask<T>> response)
         {
-            return new ValueTask<Response<T>>(Response.Create(response.Value.Result)).GetAwaiter();
+            if (!response) return new ValueTask<Response<T>>(Response<T>.Error).GetAwaiter();
+
+            if (response.Value.IsCompleted)
+            {
+                if (response.Value.IsCompletedSuccessfully) return new ValueTask<Response<T>>(Response.Create(response.Value.Result)).GetAwaiter();
+                if (response.Value.IsFaulted) response.Value.AsTask().Exception.LogError();
+                return new ValueTask<Response<T>>(Response.Create<T>()).GetAwaiter();
+            }
+
+            return new ValueTask<Response<T>>(response.Value.AsTask().ContinueWith(static t =>
+            {
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.RanToCompletion) return Response.Create(t.Result);
+                return new Response<T>();
+            })).GetAwaiter();
         }
 
-        // Example using Task with no result. Will blowup when the response is not valid, or the task is canceled, or faulted.
-        public static TaskAwaiter GetAwaiter(this Response<Task> response)
+        // Example using Response Task with no result.
+        public static TaskAwaiter<Response> GetAwaiter(this Response<Task> response)
         {
-            return response.Value.GetAwaiter();
+            if (!response) return InstanceAsync.Of<Response>().GetAwaiter();
+            return response.Value.ContinueWith(static t => {
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.RanToCompletion) return Response.Success;
+                return Response.Error;
+            }).GetAwaiter();
         }
 
-        // Example using Response with Task.
+        // Example using Response Task with T.
         public static TaskAwaiter<Response<T>> GetAwaiter<T>(this Response<Task<T>> response)
         {
             if (!response) return InstanceAsync.Of<Response<T>>().GetAwaiter();
@@ -118,7 +241,57 @@ namespace Tests.ContainerExpressions.Containers
             }).GetAwaiter();
         }
 
-        // Example using ResponseAsync with ValueTask.
+        #endregion
+
+        #region Unpack
+
+        public static TaskAwaiter<Response> GetAwaiter(this Response<Task<Response<Response>>> response)
+        {
+            if (!response) return InstanceAsync.Of<Response>().GetAwaiter();
+            return response.Value.UnpackAsync().GetAwaiter();
+        }
+
+        public static TaskAwaiter<Response> GetAwaiter(this Response<Task<Response<Task<Response>>>> response)
+        {
+            if (!response) return InstanceAsync.Of<Response>().GetAwaiter();
+            return response.Value.UnpackAsync().GetAwaiter();
+        }
+
+        public static TaskAwaiter<Response<T>> GetAwaiter<T>(this Response<Task<Response<Response<T>>>> response)
+        {
+            if (!response) return InstanceAsync.Of<Response<T>>().GetAwaiter();
+            return response.Value.UnpackAsync().GetAwaiter();
+        }
+
+        public static TaskAwaiter<Response<T>> GetAwaiter<T>(this Response<Task<Response<Task<Response<T>>>>> response)
+        {
+            if (!response) return InstanceAsync.Of<Response<T>>().GetAwaiter();
+            return response.Value.UnpackAsync().GetAwaiter();
+        }
+
+        #endregion
+
+        #region ResponseTask
+
+        // Example using ResponseTask with no result.
+        public static ValueTaskAwaiter<Response> GetAwaiter(this ResponseTask response)
+        {
+            if (response.ValueTask.IsCompleted)
+            {
+                if (response.ValueTask.IsCompletedSuccessfully) return new ValueTask<Response>(Response.Success).GetAwaiter();
+                if (response.ValueTask.IsFaulted) response.ValueTask.AsTask().Exception.LogError();
+                return new ValueTask<Response>(Response.Error).GetAwaiter();
+            }
+
+            return new ValueTask<Response>(response.ValueTask.AsTask().ContinueWith(static t =>
+            {
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.RanToCompletion) return Response.Success;
+                return Response.Error;
+            })).GetAwaiter();
+        }
+
+        // Example using ResponseTask with T.
         public static ValueTaskAwaiter<Response<T>> GetAwaiter<T>(this ResponseTask<T> response)
         {
             if (response.ValueTask.IsCompleted)
@@ -136,17 +309,20 @@ namespace Tests.ContainerExpressions.Containers
             })).GetAwaiter();
         }
 
-        // Unpack
-        public static TaskAwaiter<Response<T>> GetAwaiter<T>(this Response<Task<Response<Response<T>>>> response)
+        #endregion
+
+        // This one is just for the lols.
+        public static RestClientAwaiter GetAwaiter(this Uri uri)
         {
-            if (!response) return InstanceAsync.Of<Response<T>>().GetAwaiter();
-            return response.Value.UnpackAsync().GetAwaiter();
+            var wc = new WebClient();
+            var task = wc.DownloadStringTaskAsync(uri).ContinueWith(t => { wc.Dispose(); return t.Result; });
+            return new RestClientAwaiter(task);
         }
     }
 
     #endregion 
 
-    #region Sleep Awaiter
+    #region Custom Awaiters
 
     public readonly struct Sleep
     {
@@ -167,6 +343,18 @@ namespace Tests.ContainerExpressions.Containers
         public void OnCompleted(Action continuation) => _task.ContinueWith(_ => continuation());
         public void UnsafeOnCompleted(Action continuation) => OnCompleted(continuation);
         public T GetResult() => _task.GetAwaiter().GetResult();
+    }
+
+    public readonly struct RestClientAwaiter : ICriticalNotifyCompletion
+    {
+        public bool IsCompleted => _task.IsCompleted;
+        private readonly Task<string> _task;
+
+        public RestClientAwaiter(Task<string> task) => _task = task;
+
+        public void OnCompleted(Action continuation) => _task.ContinueWith(_ => continuation());
+        public void UnsafeOnCompleted(Action continuation) => OnCompleted(continuation);
+        public Response<string> GetResult() => Response.Create(_task.GetAwaiter().GetResult());
     }
 
     #endregion
