@@ -178,6 +178,14 @@ namespace Tests.ContainerExpressions.Containers
             var response = await new ResponseTask(Task.CompletedTask);
             Assert.IsTrue(response);
         }
+
+        [TestMethod]
+        public async Task TaskResponse_With_T_Pass()
+        {
+            var response = await new ResponseTask<int>(Task.FromResult(1));
+            Assert.IsTrue(response);
+            Assert.AreEqual(1, response);
+        }
     }
 
     #region Awaiter Extensions
