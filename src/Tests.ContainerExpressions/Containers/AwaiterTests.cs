@@ -76,11 +76,11 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public async Task Runtime_Errors_Are_Handled_Async()
         {
-            ResponseTask successResponse = Divide(1, 1);
+            ResponseValueTask successResponse = Divide(1, 1);
             Response success = await successResponse;
 
-            Response err = await new ResponseTask(Divide(1, 0));
-            ResponseTask errorResponse = Divide(1, 0);
+            Response err = await new ResponseValueTask(Divide(1, 0));
+            ResponseValueTask errorResponse = Divide(1, 0);
             Response error = await errorResponse;
 
             Assert.IsTrue(success);
@@ -91,12 +91,12 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public async Task Runtime_Errors_WithT_Are_Handled_Async()
         {
-            ResponseTask<int> successResponse = Divide(1, 1);
+            ResponseValueTask<int> successResponse = Divide(1, 1);
             Response<int> success = await successResponse;
 
-            ResponseTask<int> errorResponse = Divide(1, 0);
+            ResponseValueTask<int> errorResponse = Divide(1, 0);
             Response<int> error = await errorResponse;
-            Response<int> err = await new ResponseTask<int>(Divide(1, 0));
+            Response<int> err = await new ResponseValueTask<int>(Divide(1, 0));
 
             Assert.IsTrue(success);
             Assert.AreEqual(1, success);
