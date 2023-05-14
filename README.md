@@ -862,6 +862,89 @@ public sealed class Csv : Alias<string[]> {
 }
 ```
 
+## Custom Awaiters
+
+A `Task` can be canceled, or faulted; in these cases you won't get a result from `await`, instead you'll get a runtime exception.  
+If you wrap a `Task` in a `Response`, a custom awaiter will kick in:
+
+* **Normal:** `Task<Response<T>>` or `Task<T>`
+* **Target:** `Response<Task<Response<T>>>` or `Response<Task<T>>`
+
+```cs
+int number = 100;
+Response<int> input = Response.Create(number);
+
+Task<Response<int>> task = Task.FromResult(input); // Normal: Task<Response<T>>
+Response<Task<Response<int>>> response = Response.Create(task); // Target: Response<Task<Response<T>>>
+
+Response<int> result = await response; // This is a "safe" Response, it will be invalid when the Task is canceled, or faulted - instead of throwing exceptions.
+
+Assert.IsTrue(result);
+Assert.AreEqual(number, result);
+```
+
+There are other custom awaiters available for `ValueTask`, and `Task`; along with their various **Packed** implementations:  
+
+* `Response<ValueTask>`
+* `Response<ValueTask<T>>`
+* `Response<Task>`
+* `Response<Task<T>>`
+* `Response<Task<Response<Response>>>`
+* `Response<Task<Response<Task<Response>>>>`
+* `Response<Task<Response<Response<T>>>>`
+* `Response<Task<Response<Task<Response<T>>>>>`
+
+## ResponseTask`<T>`
+
+A helper type for the `Response` custom awaiters.  
+`ResponseTask<T>` serves as a bridge between `Task<T>` / `ValueTask<T>`, and `Response<T>`.  
+The core difference between `ResponseTask<T>`, and `Response<T>`; is `ResponseTask<T>` is constrained to be a `ValueTask<T>`.  
+This allows us to cast easily from some `Task<T>`, to `ResponseTask<T>`, and then down to `Response<T>`.  
+For example:
+
+```cs
+// Function to call.
+static async Task<int> Divide(int numerator, int denominator)
+{
+    var quotient = numerator / denominator;
+    await Task.Delay(1);
+    return quotient;
+}
+
+// Calling code.
+ResponseTask<int> successResponse = Divide(1, 1); 
+Response<int> success = await successResponse; // Response<int> success = Divide(1, 1); is not possible to cast; so we use ResponseTask<int>.
+
+ResponseTask<int> errorResponse = Divide(1, 0); // This would normally be a runtime exception.
+Response<int> error = await errorResponse;
+
+Assert.IsTrue(success);
+Assert.AreEqual(1, success);
+Assert.IsFalse(error);
+```
+
+Writing out the types on seperate lines is not necessary (*i.e.*):
+
+```cs
+Response<int> success = await new ResponseTask<int>(Divide(1, 1)); // OK.
+Response<int> error = await new ResponseTask<int>(Divide(1, 0)); // Fail (but no runtime exception).
+
+Assert.IsTrue(success);
+Assert.AreEqual(1, success);
+Assert.IsFalse(error);
+```
+
+It's fine to use `var` too, as it's the awaiter that determines the type:
+
+```cs
+// No need to wrap Task<T> types in try catches anymore!
+var success = await new ResponseTask<int>(Divide(1, 1));
+var error = await new ResponseTask<int>(Divide(1, 0));
+```
+
+**Note:** Exceptions on a **Faulted** `Task` will be logged though to `Try.SetExceptionLogger()` subscribers, so make sure to set this at program startup.  
+
+
 # Credits
 * [Icon](https://www.flaticon.com/free-icon/bird_2630452) made by [Vitaly Gorbachev](https://www.flaticon.com/authors/vitaly-gorbachev) from [Flaticon](https://www.flaticon.com/)
 
@@ -919,3 +1002,5 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 ## 10.0.0
 
 * Renamed `Cache` to `Instance`, as the former name lead to confusion on what the container did.
+* Added custom awaiters for `Response` types wrapping `Task`.
+* Created `ResponseTask` to make casting between `Task`, and `Response` easier.
