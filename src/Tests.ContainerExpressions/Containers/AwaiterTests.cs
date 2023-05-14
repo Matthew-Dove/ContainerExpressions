@@ -171,6 +171,22 @@ namespace Tests.ContainerExpressions.Containers
             Assert.IsTrue(result);
             Assert.AreEqual(1, result);
         }
+
+        [TestMethod]
+        public async Task TaskResponse_Pass()
+        {
+            var penis = new ResponseTask(Task.Delay(1000));
+
+            //var response = await new ResponseTask(Task.Delay(10000));
+
+            var gap = await penis;
+            var gapy = await penis;
+            var gapy1 = await penis;
+            var gapy2 = await penis;
+            var gapy3 = await penis;
+            var gapy4 = await penis;
+            var gapy6= await penis;
+        }
     }
 
     #region Awaiter Extensions

@@ -7,45 +7,45 @@ namespace ContainerExpressions.Containers
 {
     public readonly struct ResponseValueTask<T> : IEquatable<ResponseValueTask<T>>, IEquatable<Task<T>>, IEquatable<ValueTask<T>>, IEquatable<Response<T>>, IEquatable<T>
     {
-        public ValueTask<T> ValueTask { get; }
+        public ValueTask<T> Value { get; }
         private static readonly Task<T> _canceled = Task.FromCanceled<T>(new CancellationToken(true));
 
-        public ResponseValueTask(Task<T> task) => ValueTask = new ValueTask<T>(task ?? _canceled);
-        public ResponseValueTask(ValueTask<T> valueTask) => ValueTask = valueTask;
-        public ResponseValueTask(T value) => ValueTask = new ValueTask<T>(value);
+        public ResponseValueTask(Task<T> task) => Value = new ValueTask<T>(task ?? _canceled);
+        public ResponseValueTask(ValueTask<T> valueTask) => Value = valueTask;
+        public ResponseValueTask(T value) => Value = new ValueTask<T>(value);
 
-        public static implicit operator Task<T>(ResponseValueTask<T> response) => response.ValueTask.AsTask();
+        public static implicit operator Task<T>(ResponseValueTask<T> response) => response.Value.AsTask();
         public static implicit operator ResponseValueTask<T>(Task<T> task) => new ResponseValueTask<T>(task);
 
-        public static implicit operator ValueTask<T>(ResponseValueTask<T> response) => response.ValueTask;
+        public static implicit operator ValueTask<T>(ResponseValueTask<T> response) => response.Value;
         public static implicit operator ResponseValueTask<T>(ValueTask<T> task) => new ResponseValueTask<T>(task);
 
-        public static implicit operator bool(ResponseValueTask<T> response) => response.ValueTask.IsCompletedSuccessfully;
+        public static implicit operator bool(ResponseValueTask<T> response) => response.Value.IsCompletedSuccessfully;
         public static implicit operator Response<T>(ResponseValueTask<T> response)
         {
-            if (response.ValueTask.IsCompleted)
+            if (response.Value.IsCompleted)
             {
-                if (response.ValueTask.IsCompletedSuccessfully) return new Response<T>(response.ValueTask.GetAwaiter().GetResult());
-                if (response.ValueTask.IsFaulted) response.ValueTask.AsTask().Exception.LogError();
+                if (response.Value.IsCompletedSuccessfully) return new Response<T>(response.Value.GetAwaiter().GetResult());
+                if (response.Value.IsFaulted) response.Value.AsTask().Exception.LogError();
                 return new Response<T>();
             }
-            return new Response<T>(response.ValueTask.GetAwaiter().GetResult()); // Can error if cast before awaiting.
+            return new Response<T>(response.Value.GetAwaiter().GetResult()); // Can error if cast before awaiting.
         }
 
-        public static implicit operator T(ResponseValueTask<T> response) => response.ValueTask.GetAwaiter().GetResult(); // Can error if cast before awaiting.
+        public static implicit operator T(ResponseValueTask<T> response) => response.Value.GetAwaiter().GetResult(); // Can error if cast before awaiting.
         public static implicit operator ResponseValueTask<T>(T value) => new ResponseValueTask<T>(value);
 
-        public override string ToString() => ValueTask.ToString();
-        public override int GetHashCode() => ValueTask.GetHashCode();
+        public override string ToString() => Value.ToString();
+        public override int GetHashCode() => Value.GetHashCode();
 
-        public bool Equals(ResponseValueTask<T> other) => Equals(other.ValueTask);
+        public bool Equals(ResponseValueTask<T> other) => Equals(other.Value);
         public bool Equals(Task<T> other) => Equals(new ValueTask<T>(other ?? _canceled));
-        public bool Equals(ValueTask<T> other) => other.Equals(ValueTask);
+        public bool Equals(ValueTask<T> other) => other.Equals(Value);
 
         public bool Equals(Response<T> other)
         {
-            if (!other.IsValid) return ValueTask.IsCompleted && (!ValueTask.IsCompletedSuccessfully);
-            return ValueTask.IsCompletedSuccessfully && Equals(new ValueTask<T>(other.Value));
+            if (!other.IsValid) return Value.IsCompleted && (!Value.IsCompletedSuccessfully);
+            return Value.IsCompletedSuccessfully && Equals(new ValueTask<T>(other.Value));
         }
 
         public bool Equals(T other) => Equals(new ValueTask<T>(other));
@@ -89,40 +89,40 @@ namespace ContainerExpressions.Containers
 
     public readonly struct ResponseValueTask : IEquatable<ResponseValueTask>, IEquatable<Task>, IEquatable<ValueTask>, IEquatable<Response>
     {
-        public ValueTask ValueTask { get; }
+        public ValueTask Value { get; }
         private static readonly Task _canceled = Task.FromCanceled(new CancellationToken(true));
 
-        public ResponseValueTask(Task task) => ValueTask = new ValueTask(task ?? _canceled);
-        public ResponseValueTask(ValueTask valueTask) => ValueTask = valueTask;
+        public ResponseValueTask(Task task) => Value = new ValueTask(task ?? _canceled);
+        public ResponseValueTask(ValueTask valueTask) => Value = valueTask;
 
-        public static implicit operator Task(ResponseValueTask response) => response.ValueTask.AsTask();
+        public static implicit operator Task(ResponseValueTask response) => response.Value.AsTask();
         public static implicit operator ResponseValueTask(Task task) => new ResponseValueTask(task);
 
-        public static implicit operator ValueTask(ResponseValueTask response) => response.ValueTask;
+        public static implicit operator ValueTask(ResponseValueTask response) => response.Value;
         public static implicit operator ResponseValueTask(ValueTask task) => new ResponseValueTask(task);
 
-        public static implicit operator bool(ResponseValueTask response) => response.ValueTask.IsCompletedSuccessfully;
+        public static implicit operator bool(ResponseValueTask response) => response.Value.IsCompletedSuccessfully;
         public static implicit operator Response(ResponseValueTask response)
         {
-            if (response.ValueTask.IsCompleted)
+            if (response.Value.IsCompleted)
             {
-                if (response.ValueTask.IsCompletedSuccessfully) return new Response(true);
-                if (response.ValueTask.IsFaulted) response.ValueTask.AsTask().Exception.LogError();
+                if (response.Value.IsCompletedSuccessfully) return new Response(true);
+                if (response.Value.IsFaulted) response.Value.AsTask().Exception.LogError();
             }
             return new Response();
         }
 
-        public override string ToString() => ValueTask.ToString();
-        public override int GetHashCode() => ValueTask.GetHashCode();
+        public override string ToString() => Value.ToString();
+        public override int GetHashCode() => Value.GetHashCode();
 
-        public bool Equals(ResponseValueTask other) => Equals(other.ValueTask);
+        public bool Equals(ResponseValueTask other) => Equals(other.Value);
         public bool Equals(Task other) => Equals(new ValueTask(other ?? _canceled));
-        public bool Equals(ValueTask other) => other.Equals(ValueTask);
+        public bool Equals(ValueTask other) => other.Equals(Value);
 
         public bool Equals(Response other)
         {
-            if (!other.IsValid) return ValueTask.IsCompleted && (!ValueTask.IsCompletedSuccessfully);
-            return new Response(ValueTask.IsCompletedSuccessfully);
+            if (!other.IsValid) return Value.IsCompleted && (!Value.IsCompletedSuccessfully);
+            return new Response(Value.IsCompletedSuccessfully);
         }
 
         public override bool Equals(object obj)
@@ -156,19 +156,19 @@ namespace ContainerExpressions.Containers
         public static bool operator ==(Response x, ResponseValueTask y) => y.Equals(x);
     }
 
-    public static class ResponseTaskAwaiterExtensions
+    public static class ResponseValueTaskAwaiterExtensions
     {
-        // ResponseTask with no result.
+        // ResponseValueTask with no result.
         public static ValueTaskAwaiter<Response> GetAwaiter(this ResponseValueTask response)
         {
-            if (response.ValueTask.IsCompleted)
+            if (response.Value.IsCompleted)
             {
-                if (response.ValueTask.IsCompletedSuccessfully) return new ValueTask<Response>(Response.Success).GetAwaiter();
-                if (response.ValueTask.IsFaulted) response.ValueTask.AsTask().Exception.LogError();
+                if (response.Value.IsCompletedSuccessfully) return new ValueTask<Response>(Response.Success).GetAwaiter();
+                if (response.Value.IsFaulted) response.Value.AsTask().Exception.LogError();
                 return new ValueTask<Response>(Response.Error).GetAwaiter();
             }
 
-            return new ValueTask<Response>(response.ValueTask.AsTask().ContinueWith(static t =>
+            return new ValueTask<Response>(response.Value.AsTask().ContinueWith(static t =>
             {
                 if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
                 if (t.Status == TaskStatus.RanToCompletion) return Response.Success;
@@ -176,17 +176,17 @@ namespace ContainerExpressions.Containers
             })).GetAwaiter();
         }
 
-        // ResponseTask with T result.
+        // ResponseValueTask with T result.
         public static ValueTaskAwaiter<Response<T>> GetAwaiter<T>(this ResponseValueTask<T> response)
         {
-            if (response.ValueTask.IsCompleted)
+            if (response.Value.IsCompleted)
             {
-                if (response.ValueTask.IsCompletedSuccessfully) return new ValueTask<Response<T>>(Response.Create(response.ValueTask.Result)).GetAwaiter();
-                if (response.ValueTask.IsFaulted) response.ValueTask.AsTask().Exception.LogError();
+                if (response.Value.IsCompletedSuccessfully) return new ValueTask<Response<T>>(Response.Create(response.Value.Result)).GetAwaiter();
+                if (response.Value.IsFaulted) response.Value.AsTask().Exception.LogError();
                 return new ValueTask<Response<T>>(Response.Create<T>()).GetAwaiter();
             }
 
-            return new ValueTask<Response<T>>(response.ValueTask.AsTask().ContinueWith(static t =>
+            return new ValueTask<Response<T>>(response.Value.AsTask().ContinueWith(static t =>
             {
                 if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
                 if (t.Status == TaskStatus.RanToCompletion) return Response.Create(t.Result);
