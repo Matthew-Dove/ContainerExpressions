@@ -7,12 +7,12 @@ namespace Tests.ContainerExpressions.Examples
     [TestClass]
     public class ResponseValueTaskExample
     {
-        /// <summary>https://github.com/Matthew-Dove/ContainerExpressions#responsetaskt</summary>
+        /// <summary>https://github.com/Matthew-Dove/ContainerExpressions#responsevaluetaskt</summary>
         [TestMethod]
         public async Task Task_To_ResponseTask_To_Response()
         {
             ResponseValueTask<int> successResponse = Divide(1, 1);
-            Response<int> success = await successResponse; // Response<int> success = Divide(1, 1); is not possible to cast; so we use ResponseTask<int>.
+            Response<int> success = await successResponse; // Response<int> success = Divide(1, 1); is not possible to cast; so we use ResponseValueTask<int>.
 
             ResponseValueTask<int> errorResponse = Divide(1, 0); // This would normally be a runtime exception.
             Response<int> error = await errorResponse;
