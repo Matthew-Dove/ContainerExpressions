@@ -188,20 +188,6 @@ namespace Tests.ContainerExpressions.Containers
         }
     }
 
-    #region Awaiter Extensions
-
-    public static class AwaiterExtensions
-    {
-        public static RestClientAwaiter GetAwaiter(this Uri uri)
-        {
-            var wc = new WebClient();
-            var task = wc.DownloadStringTaskAsync(uri).ContinueWith(t => { wc.Dispose(); return t.Result; }); // This one is just for the lols.
-            return new RestClientAwaiter(task);
-        }
-    }
-
-    #endregion 
-
     #region Custom Awaiters
 
     public readonly struct Sleep
@@ -237,85 +223,13 @@ namespace Tests.ContainerExpressions.Containers
         public Response<string> GetResult() => Response.Create(_task.GetAwaiter().GetResult());
     }
 
-    #endregion
-
-    #region Task Type
-
-    class Tester
+    public static class AwaiterExtensions
     {
-        public async TaskLike FooAsync()
+        public static RestClientAwaiter GetAwaiter(this Uri uri)
         {
-            await Task.Yield();
-            await default(TaskLike);
-        }
-    }
-
-    public struct TaskLikeMethodBuilder//<T> - make builder a struct with no readonly?
-    {
-        public TaskLike Task => default(TaskLike);
-
-        public TaskLikeMethodBuilder() => Console.WriteLine(".ctor");
-
-        public static TaskLikeMethodBuilder Create() => new TaskLikeMethodBuilder();
-
-        public void SetResult() => Console.WriteLine("SetResult");
-        // Generic version: public void SetResult(T result) => Console.WriteLine("SetResult");
-
-        public void SetException(Exception ex) => Console.WriteLine("Error");
-
-        public void Start<TStateMachine>(ref TStateMachine stateMachine)
-            where TStateMachine : IAsyncStateMachine
-        {
-            Console.WriteLine("Start");
-            stateMachine.MoveNext();
-        }
-
-        public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
-            where TAwaiter : INotifyCompletion
-            where TStateMachine : IAsyncStateMachine
-        {
-            Console.WriteLine("AwaitOnCompleted");
-            awaiter.OnCompleted(stateMachine.MoveNext);
-        }
-
-        public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
-            where TAwaiter : ICriticalNotifyCompletion
-            where TStateMachine : IAsyncStateMachine
-        {
-            Console.WriteLine("AwaitUnsafeOnCompleted");
-            AwaitOnCompleted(ref awaiter, ref stateMachine);
-        }
-
-        public void SetStateMachine(IAsyncStateMachine stateMachine)
-        {
-            Console.WriteLine("SetStateMachine");
-        }
-    }
-
-    [AsyncMethodBuilder(typeof(TaskLikeMethodBuilder))]
-    public struct TaskLike//<T>
-    {
-        public TaskLikeAwaiter GetAwaiter() => default(TaskLikeAwaiter);
-    }
-
-    public struct TaskLikeAwaiter : ICriticalNotifyCompletion
-    {
-        public void GetResult()
-        {
-            Console.WriteLine("GetResult");
-        }
-
-        public bool IsCompleted => true;
-
-        public void OnCompleted(Action continuation)
-        {
-            Console.WriteLine("OnCompleted");
-        }
-
-        public void UnsafeOnCompleted(Action continuation)
-        {
-            Console.WriteLine("UnsafeOnCompleted");
-            OnCompleted(continuation);
+            var wc = new WebClient();
+            var task = wc.DownloadStringTaskAsync(uri).ContinueWith(t => { wc.Dispose(); return t.Result; }); // This one is just for the lols.
+            return new RestClientAwaiter(task);
         }
     }
 
