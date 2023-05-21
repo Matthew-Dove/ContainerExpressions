@@ -17,9 +17,6 @@ namespace ContainerExpressions.Containers
     [AsyncMethodBuilder(typeof(ResponseAsyncMethodBuilder<>))]
     public sealed class ResponseAsync<T> : IDisposable
     {
-        private static readonly Box<T> _mark = new Box<T>(default(T)); // Marker reference to determine if a result was pre-calculated (so we can optimize for reads).
-
-        private T _result;
         private volatile Box<T> _box;
         private readonly SemaphoreSlim _sync;
         private bool _isDisposed;
@@ -28,8 +25,7 @@ namespace ContainerExpressions.Containers
         // Use this constructor when you already have the value to set (i.e. T is pre-calculated).
         public ResponseAsync(T result)
         {
-            _result = result;
-            _box = _mark;
+            _box = new Box<T>(result);
             _sync = null;
             _isDisposed = true;
             _tcs = null;
@@ -37,7 +33,6 @@ namespace ContainerExpressions.Containers
 
         internal ResponseAsync()
         {
-            _result = default;
             _box = null;
             _sync = new SemaphoreSlim(0, 1);
             _isDisposed = false;
@@ -60,9 +55,8 @@ namespace ContainerExpressions.Containers
                         if (_isDisposed)
                         {
                             var box = _box;
-                            if (box != null && !ReferenceEquals(box, _mark)) _tcs.SetResult(Response.Create(box.Value)); // Task is already completed.
-                            else if (box != null && ReferenceEquals(box, _mark)) _tcs.SetResult(Response.Create(_result)); // The result was pre-calculated.
-                            else if (box == null) _tcs.SetCanceled(); // There is no result, as the task generated an exception, or was canceled.
+                            if (box != null) _tcs.SetResult(Response.Create(box.Value)); // Task is already completed.
+                            else _tcs.SetCanceled(); // There is no result, as the task generated an exception, or was canceled.
 
                         }
                     }
@@ -87,7 +81,6 @@ namespace ContainerExpressions.Containers
         internal Response<T> GetValue()
         {
             var box = _box;
-            if (box != null && ReferenceEquals(box, _mark)) return new Response<T>(_result); // Result was pre-calculated.
             return box == null ? new Response<T>() : new Response<T>(box.Value); // If null, then a result was never set for this task.
         }
 
