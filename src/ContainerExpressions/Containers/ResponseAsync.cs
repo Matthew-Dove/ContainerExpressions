@@ -57,9 +57,14 @@ namespace ContainerExpressions.Containers
                     if (_tcs == null)
                     {
                         _tcs = new TaskCompletionSource<Response<T>>();
-                        var box = _box;
-                        if (box != null && !ReferenceEquals(box, _mark)) _tcs.SetResult(Response.Create(box.Value)); // Task is already completed. 
-                        else if (ReferenceEquals(box, _mark)) _tcs.SetResult(Response.Create(_result)); // The result was pre-calculated.
+                        if (_isDisposed)
+                        {
+                            var box = _box;
+                            if (box != null && !ReferenceEquals(box, _mark)) _tcs.SetResult(Response.Create(box.Value)); // Task is already completed.
+                            else if (box != null && ReferenceEquals(box, _mark)) _tcs.SetResult(Response.Create(_result)); // The result was pre-calculated.
+                            else if (box == null) _tcs.SetCanceled(); // There is no result, as the task generated an exception, or was canceled.
+
+                        }
                     }
                 }
             }
@@ -82,7 +87,7 @@ namespace ContainerExpressions.Containers
         internal Response<T> GetValue()
         {
             var box = _box;
-            if (ReferenceEquals(box, _mark)) return new Response<T>(_result); // Result was pre-calculated.
+            if (box != null && ReferenceEquals(box, _mark)) return new Response<T>(_result); // Result was pre-calculated.
             return box == null ? new Response<T>() : new Response<T>(box.Value); // If null, then a result was never set for this task.
         }
 
