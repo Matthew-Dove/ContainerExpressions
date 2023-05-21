@@ -57,8 +57,9 @@ namespace ContainerExpressions.Containers
                     if (_tcs == null)
                     {
                         _tcs = new TaskCompletionSource<Response<T>>();
-                        if (_box != null && !ReferenceEquals(_box, _mark)) _tcs.SetResult(Response.Create(_box.Value)); // Task is already completed. 
-                        else if (ReferenceEquals(_box, _mark)) _tcs.SetResult(Response.Create(_result)); // The result was pre-calculated.
+                        var box = _box;
+                        if (box != null && !ReferenceEquals(box, _mark)) _tcs.SetResult(Response.Create(box.Value)); // Task is already completed. 
+                        else if (ReferenceEquals(box, _mark)) _tcs.SetResult(Response.Create(_result)); // The result was pre-calculated.
                     }
                 }
             }
