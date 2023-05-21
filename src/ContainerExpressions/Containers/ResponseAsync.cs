@@ -9,10 +9,10 @@ namespace ContainerExpressions.Containers
 
     /**
     * General flow for the task-like type ResponseAsync{T}:
-    * 1) Create custom async method builder.
-    * 2) Foreach await in that method, call OnCompleted on said builder.
-    * 3) Outside that method, get the custom awaiter (i.e. Task); and call get result (i.e. await keyword).
-    * 4) When the method result returns (or an exception is thrown), inform the awaiter the task is completed.
+    * 1) Create the custom async method builder.
+    * 2) Foreach await in that method, call "OnCompleted" on said builder.
+    * 3) Outside that method, get the custom awaiter (i.e. the Task); and call get result (i.e. the await keyword).
+    * 4) When the method result returns (or an exception is thrown / task is canceled), inform the awaiter the task is completed; and the result is ready.
     **/
     [AsyncMethodBuilder(typeof(ResponseAsyncMethodBuilder<>))]
     public sealed class ResponseAsync<T> : IDisposable
@@ -52,7 +52,7 @@ namespace ContainerExpressions.Containers
         {
             if (_tcs == null)
             {
-                lock (this) // The user calls this (from who knows where, how many times), so we need to play on the safe side.
+                lock (this) // The user calls this (from who knows where, how many times), and we only want the tcs created once.
                 {
                     if (_tcs == null)
                     {
@@ -113,7 +113,7 @@ namespace ContainerExpressions.Containers
             {
                 lock (this)
                 {
-                    if (!_isDisposed) // Double-checked locking, this disposed flag also tells us the task is finished (when true).
+                    if (!_isDisposed) // This disposed flag also tells us the task is finished (when true).
                     {
                         if (disposing)
                         {
