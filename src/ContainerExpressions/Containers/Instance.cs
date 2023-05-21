@@ -135,7 +135,10 @@ namespace ContainerExpressions.Containers
     public static class InstanceAsync {
         public static Task<TResult> Of<TResult>() => InstanceAsync<TResult>.Value;
         public static ValueTask<TResult> ValueOf<TResult>() => new ValueTask<TResult>(default(TResult));
+        public static ResponseAsync<TResult> ResponseOf<TResult>() => InstanceResponseAsync<TResult>.Value;
     }
 
     file static class InstanceAsync<T> { public static readonly Task<T> Value = Task.FromResult<T>(default(T)); }
+
+    file static class InstanceResponseAsync<T> { public static readonly ResponseAsync<T> Value = ResponseAsync<T>.FromResult(default(T)); }
 }

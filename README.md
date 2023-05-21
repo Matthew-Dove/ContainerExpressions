@@ -849,6 +849,13 @@ string name = Instance.Of<John>(); // Auto casting provided by Alias<string> wor
 Jane jane = Instance.Of<Jane>();
 ```
 
+## InstanceAsync
+
+Just like `Instance`, but targets `Task` types.  
+* `InstanceAsync.Of<int>():` gets a cached, and completed `Task<int>` with a default `int` value.
+* `InstanceAsync.ValueOf<int>():` gets a completed `ValueTask<int>`, with a default `int` value; newly created on each invoke.
+* `InstanceAsync.ResponseOf<int>():` gets a cached, and completed `ResponseAsync<int>`, with a default `int` value.
+
 ## Combining `Alias` & `Instance`
 
 Below is an example of creating a CVS type, that reuses a `char[]` instance.  
@@ -861,6 +868,29 @@ public sealed class Csv : Alias<string[]> {
     public Csv(string csv) : base(csv.Split(Instance.Of<Comma>())) { } // Splits the string into a string[], the char[] argument is reused.
 }
 ```
+
+## ResponseAsync`<T>`
+
+A task-like type that can be used on async functions to catch, and log exceptions thrown in a method.  
+You can use `ResponseAsync<T>` anywhere you would use `Task<T>`, and it will return a `Response<T>` - instead of a `T`).  
+
+```cs
+private static async ResponseAsync<int> GetValue()
+{
+    return await Task.FromResult(42);
+}
+
+private static async ResponseAsync<int> GetError()
+{
+    throw new Exception();
+    return await Task.FromResult(42);
+}
+
+var value = await GetValue(); // Result: 42.
+var error = await GetError(); // Result: No value, as an error occurred (but no exception is thrown from this await).
+```
+
+**Note:** Exceptions are logged to the `Try.SetExceptionLogger()` listener, so make sure to set this at startup to catch them.
 
 ## Custom Awaiters
 
@@ -1008,3 +1038,4 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * Renamed `Cache` to `Instance`, as the former name lead to confusion on what the container did.
 * Added custom awaiters for `Response` types wrapping `Task`.
 * Created `ResponseTask` to make casting between `Task`, and `Response` easier.
+* `ResponseAsync<T>` is a task-like type that can be used on `async` functions to catch, and log exceptions thrown in a method.
