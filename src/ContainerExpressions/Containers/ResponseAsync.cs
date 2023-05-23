@@ -5,33 +5,52 @@ using System;
 using System.Collections.Concurrent;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks.Sources;
+using ContainerExpressions.Containers.Common;
 
 namespace ContainerExpressions.Containers
 {
-    file sealed class Box<T> : Alias<T> { public Box(T value) : base(value) { } } // Force T on the heap, so we can mark it volatile; and skip a lock.
+    file sealed class Box<T> : Alias<T> { public Box(T value) : base(value) { } } // Force T on the heap, so we can mark it volatile; skipping a lock.
 
     // Bag of things for ResponseAsync{T}, so we can make it a readonly struct.
     file sealed class Bag<T>
     {
-        public volatile Box<T> Box;
+        /**
+         * [Volatile WORM access pattern]
+         * get: read > isDefault > volatile read
+         * set: volatile write
+        **/
+        public Box<T> Result
+        {
+            get { return _result == default ? Volatile.Read(ref _result) : _result; }
+            set { Volatile.Write(ref _result, value); }
+        }
+
+        public TaskCompletionSource<Response<T>> Tcs
+        {
+            get { return _tcs == default ? Volatile.Read(ref _tcs) : _tcs; }
+            set { Volatile.Write(ref _tcs, value); }
+        }
+
         public readonly ManualResetEventSlim Sync;
         public bool IsDisposed;
-        public volatile TaskCompletionSource<Response<T>> Tcs;
+
+        private Box<T> _result;
+        private TaskCompletionSource<Response<T>> _tcs;
 
         public Bag(T result)
         {
-            Box = new Box<T>(result);
-            Sync = null;
+            Result = new Box<T>(result);
+            Sync = default;
             IsDisposed = true;
-            Tcs = null;
+            Tcs = default;
         }
 
         public Bag()
         {
-            Box = null;
+            Result = default;
             Sync = new ManualResetEventSlim(false);
             IsDisposed = false;
-            Tcs = null;
+            Tcs = default;
         }
     }
 
@@ -67,10 +86,9 @@ namespace ContainerExpressions.Containers
                         _bag.Tcs = new TaskCompletionSource<Response<T>>();
                         if (_bag.IsDisposed)
                         {
-                            var box = _bag.Box;
-                            if (box != null) _bag.Tcs.SetResult(Response.Create(box.Value)); // Task is already completed.
+                            var result = _bag.Result;
+                            if (result != null) _bag.Tcs.SetResult(Response.Create(result.Value)); // Task is already completed.
                             else _bag.Tcs.SetCanceled(); // There is no result, as the task generated an exception, or was canceled.
-
                         }
                     }
                 }
@@ -93,14 +111,14 @@ namespace ContainerExpressions.Containers
         // Called by the awaiter when the result is requested (either manually by getting the awaiter, or when using the await keyword).
         internal Response<T> GetValue()
         {
-            var box = _bag.Box;
-            return box == null ? new Response<T>() : new Response<T>(box.Value); // If null, then a result was never set for this task.
+            var result = _bag.Result;
+            return result == null ? new Response<T>() : new Response<T>(result.Value); // If null, then a result was never set for this task.
         }
 
         // Called by the state machine when the method has returned a result.
         internal void SetValue(T value)
         {
-            _bag.Box = new Box<T>(value);
+            _bag.Result = new Box<T>(value);
             _bag.Tcs?.SetResult(Response.Create(value));
             _bag.Sync.Set();
         }
@@ -212,7 +230,7 @@ namespace ContainerExpressions.Containers
     }
 
     /**
-     * Use on a method returning a ValueTask{Response{T}} type.
+     * Use on a method returning a ValueTask{Response{T}}, or a ValueTask{T} type.
      * [AsyncMethodBuilder(typeof(ResponseAsyncValueTaskCompletionSource{}))]
     **/
     public readonly struct ResponseAsyncValueTaskCompletionSource<T>
@@ -251,7 +269,7 @@ namespace ContainerExpressions.Containers
     }
 
     /**
-     * Use on a method returning a Task{Response{T}} type.
+     * Use on a method returning a Task{Response{T}}, or a Task{T} type.
      * [AsyncMethodBuilder(typeof(ResponseAsyncTaskCompletionSource{}))]
     **/
     public readonly struct ResponseAsyncTaskCompletionSource<T>
@@ -289,34 +307,66 @@ namespace ContainerExpressions.Containers
             => awaiter.UnsafeOnCompleted(stateMachine.MoveNext);
     }
 
+    // Bag of things for ValueTaskSource{T}, so we can make it a readonly struct.
     file sealed class SourceBag<T>
     {
-        public T Result;
-        public ExceptionDispatchInfo Error;
-        public ValueTaskSourceStatus Status;
-        public Action<object> Continuation;
-        public object State;
-    }
-
-    public readonly struct ValueTaskSource<T> : IValueTaskSource<T>
-    {
-        private const int MIN_TOKEN = short.MinValue;
-        private const int MAX_TOKEN = 2^14;
-
-        private static readonly ConcurrentDictionary<short, SourceBag<T>> _sources;
-        private static int _token;
-
-        static ValueTaskSource()
+        /**
+         * [Volatile WORM access pattern]
+         * get: read > isDefault > volatile read
+         * set: volatile write
+        **/
+        public Box<T> Result
         {
-            _sources = new ConcurrentDictionary<short, SourceBag<T>>();
-            _token = MIN_TOKEN;
+            get { return _result == default ? Volatile.Read(ref _result) : _result; }
+            set { Volatile.Write(ref _result, value); }
         }
 
-        public short GetNextToken()
+        public ExceptionDispatchInfo Error
         {
+            get { return _error == default ? Volatile.Read(ref _error) : _error; }
+            set { Volatile.Write(ref _error, value); }
+        }
+
+        public Box<ValueTaskSourceStatus> Status
+        {
+            get { return _status == default ? Volatile.Read(ref _status) : _status; }
+            set { Volatile.Write(ref _status, value); }
+        }
+
+        public Action<object> Continuation
+        {
+            get { return _continuation == default ? Volatile.Read(ref _continuation) : _continuation; }
+            set { Volatile.Write(ref _continuation, value); }
+        }
+
+        public object State
+        {
+            get { return _state == default ? Volatile.Read(ref _state) : _state; }
+            set { Volatile.Write(ref _state, value); }
+        }
+
+        private Box<T> _result = default;
+        private ExceptionDispatchInfo _error = default;
+        private Box<ValueTaskSourceStatus> _status = default;
+        private Action<object> _continuation = default;
+        private object _state = default;
+    }
+
+    // A non-generic class to ensure unique short tokens are generated for all active ValueTaskSource{T} instances.
+    file static class ValueTaskSource
+    {
+        private const int MIN_TOKEN = short.MinValue;
+        private const int MAX_TOKEN = 2 ^ 14;
+
+        private static int _token = MIN_TOKEN;
+        private static object _lock = new object();
+
+        public static short GetNextToken()
+        {
+            // Reset the token count when we start to run out of space, this will happen every ~50K tokens.
             if (_token > MAX_TOKEN)
             {
-                lock (_sources)
+                lock (_lock)
                 {
                     if (_token > MAX_TOKEN)
                     {
@@ -324,7 +374,22 @@ namespace ContainerExpressions.Containers
                     }
                 }
             }
-            var token = (short)Interlocked.Increment(ref _token);
+            return (short)Interlocked.Increment(ref _token);
+        }
+    }
+
+    public readonly struct ValueTaskSource<T> : IValueTaskSource<T>
+    {
+        private static readonly ConcurrentDictionary<short, SourceBag<T>> _sources;
+
+        static ValueTaskSource()
+        {
+            _sources = new ConcurrentDictionary<short, SourceBag<T>>();
+        }
+
+        public short GetToken()
+        {
+            var token = ValueTaskSource.GetNextToken();
             _sources.TryAdd(token, new SourceBag<T>());
             return token;
         }
@@ -332,8 +397,8 @@ namespace ContainerExpressions.Containers
         public void SetResult(short token, T result)
         {
             _sources.TryGetValue(token, out SourceBag<T> source);
-            source.Result = result;
-            source.Status = ValueTaskSourceStatus.Succeeded;
+            source.Result = new Box<T>(result);
+            source.Status = new Box<ValueTaskSourceStatus>(ValueTaskSourceStatus.Succeeded);
             source.Continuation(source.State);
         }
 
@@ -341,16 +406,22 @@ namespace ContainerExpressions.Containers
         {
             _sources.TryGetValue(token, out SourceBag<T> source);
             source.Error = ex;
-            source.Status = ValueTaskSourceStatus.Faulted;
+            source.Status = new Box<ValueTaskSourceStatus>(ValueTaskSourceStatus.Faulted);
             source.Continuation(source.State);
         }
 
         public T GetResult(short token)
         {
-            _sources.TryGetValue(token, out SourceBag<T> source);
-            _sources.TryRemove(token, out _);
-            if (source.Error is not null) source.Error.Throw();
-            return source.Result;
+            _sources.TryRemove(token, out SourceBag<T> source);
+
+            var result = source.Result;
+            if (result is not null) return result.Value;
+
+            var error = source.Error;
+            if (error is not null) source.Error.Throw();
+
+            ThrowHelper.InvalidOperationException($"{nameof(IValueTaskSource<T>)} finished with no matching result, or error; for the token: {token}.");
+            return default;
         }
 
         public ValueTaskSourceStatus GetStatus(short token)
@@ -371,7 +442,7 @@ namespace ContainerExpressions.Containers
      * Use on a method returning a ValueTask{Response{T}}, or a ValueTask{T} type.
      * [AsyncMethodBuilder(typeof(ResponseAsyncValueTaskSource{}))]
      * 
-     * The main difference between this, and ResponseAsyncValueTaskCompletionSource, is that ValueTaskSource is cheaper to use than TaskCompletionSource.
+     * The main difference between this, and ResponseAsyncValueTaskCompletionSource{T}, is that ValueTaskSource{T} avoids creating a TaskCompletionSource.
      * That said, both async method builders have the same logical effect.
     **/
     public readonly struct ResponseAsyncValueTaskSource<T>
@@ -386,7 +457,7 @@ namespace ContainerExpressions.Containers
         public ValueTask<T> Task => new ValueTask<T>(_source, _token);
         private readonly short _token;
 
-        public ResponseAsyncValueTaskSource() { _token = _source.GetNextToken(); }
+        public ResponseAsyncValueTaskSource() { _token = _source.GetToken(); }
 
         public void SetResult(T result) { _source.SetResult(_token, result); }
 
