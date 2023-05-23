@@ -2,10 +2,38 @@
 using System.Threading.Tasks;
 using System.Threading;
 using System;
+using System.Collections.Concurrent;
+using System.Runtime.ExceptionServices;
+using System.Threading.Tasks.Sources;
 
 namespace ContainerExpressions.Containers
 {
     file sealed class Box<T> : Alias<T> { public Box(T value) : base(value) { } } // Force T on the heap, so we can mark it volatile; and skip a lock.
+
+    // Bag of things for ResponseAsync{T}, so we can make it a readonly struct.
+    file sealed class Bag<T>
+    {
+        public volatile Box<T> Box;
+        public readonly ManualResetEventSlim Sync;
+        public bool IsDisposed;
+        public volatile TaskCompletionSource<Response<T>> Tcs;
+
+        public Bag(T result)
+        {
+            Box = new Box<T>(result);
+            Sync = null;
+            IsDisposed = true;
+            Tcs = null;
+        }
+
+        public Bag()
+        {
+            Box = null;
+            Sync = new ManualResetEventSlim(false);
+            IsDisposed = false;
+            Tcs = null;
+        }
+    }
 
     /**
     * General flow for the task-like type ResponseAsync{T}:
@@ -15,29 +43,14 @@ namespace ContainerExpressions.Containers
     * 4) When the method result returns (or an exception is thrown / task is canceled), inform the awaiter the task is completed; and the result is ready.
     **/
     [AsyncMethodBuilder(typeof(ResponseAsyncMethodBuilder<>))]
-    public sealed class ResponseAsync<T> : IDisposable
+    public readonly struct ResponseAsync<T> : IDisposable
     {
-        private volatile Box<T> _box;
-        private readonly SemaphoreSlim _sync;
-        private bool _isDisposed;
-        private volatile TaskCompletionSource<Response<T>> _tcs;
+        private readonly Bag<T> _bag;
 
         // Use this constructor when you already have the value to set (i.e. T is pre-calculated).
-        public ResponseAsync(T result)
-        {
-            _box = new Box<T>(result);
-            _sync = null;
-            _isDisposed = true;
-            _tcs = null;
-        }
+        public ResponseAsync(T result) { _bag = new Bag<T>(result); }
 
-        internal ResponseAsync()
-        {
-            _box = null;
-            _sync = new SemaphoreSlim(0, 1);
-            _isDisposed = false;
-            _tcs = null;
-        }
+        public ResponseAsync() { _bag = new Bag<T>(); }
 
         // Static helper for the public constructor to set the result.
         public static ResponseAsync<T> FromResult(T result) => new ResponseAsync<T>(result);
@@ -45,74 +58,74 @@ namespace ContainerExpressions.Containers
         // Convert into a Task{T} type.
         public Task<Response<T>> AsTask()
         {
-            if (_tcs == null)
+            if (_bag.Tcs == null)
             {
-                lock (this) // The user calls this (from who knows where, how many times), and we only want the tcs created once.
+                lock (_bag.Sync) // The user calls this (from who knows where, how many times), and we only want the tcs created once.
                 {
-                    if (_tcs == null)
+                    if (_bag.Tcs == null)
                     {
-                        _tcs = new TaskCompletionSource<Response<T>>();
-                        if (_isDisposed)
+                        _bag.Tcs = new TaskCompletionSource<Response<T>>();
+                        if (_bag.IsDisposed)
                         {
-                            var box = _box;
-                            if (box != null) _tcs.SetResult(Response.Create(box.Value)); // Task is already completed.
-                            else _tcs.SetCanceled(); // There is no result, as the task generated an exception, or was canceled.
+                            var box = _bag.Box;
+                            if (box != null) _bag.Tcs.SetResult(Response.Create(box.Value)); // Task is already completed.
+                            else _bag.Tcs.SetCanceled(); // There is no result, as the task generated an exception, or was canceled.
 
                         }
                     }
                 }
             }
-            return _tcs.Task;
+            return _bag.Tcs.Task;
         }
 
         // When true, the value is ready to be read.
-        internal bool IsCompleted() { if (_isDisposed) return true; lock (this) { return _isDisposed; } } // Try lock free read first.
+        internal bool IsCompleted() { if (_bag.IsDisposed) return true; lock (_bag.Sync) { return _bag.IsDisposed; } } // Try lock free read first.
 
         // Called by the awaiter, after the state machine has finished, and before the result has been calculated (when using the await keyword).
         internal void Wait()
         {
-            if (_isDisposed) return; // Try lock free read first.
-            lock (this) { if (_isDisposed) return; }
-            _sync.Wait();
+            if (_bag.IsDisposed) return; // Try lock free read first.
+            lock (_bag.Sync) { if (_bag.IsDisposed) return; }
+            _bag.Sync.Wait();
             Dispose(disposing: true);
         }
 
         // Called by the awaiter when the result is requested (either manually by getting the awaiter, or when using the await keyword).
         internal Response<T> GetValue()
         {
-            var box = _box;
+            var box = _bag.Box;
             return box == null ? new Response<T>() : new Response<T>(box.Value); // If null, then a result was never set for this task.
         }
 
         // Called by the state machine when the method has returned a result.
         internal void SetValue(T value)
         {
-            _box = new Box<T>(value);
-            _tcs?.SetResult(Response.Create(value));
-            _sync.Release(1);
+            _bag.Box = new Box<T>(value);
+            _bag.Tcs?.SetResult(Response.Create(value));
+            _bag.Sync.Set();
         }
 
         // Called by the state machine when the method has thrown an exception.
         internal void SetException(Exception ex)
         {
             ex.LogError();
-            _tcs?.SetException(ex);
-            _sync.Release(1);
+            _bag.Tcs?.SetException(ex);
+            _bag.Sync.Set();
         }
 
         private void Dispose(bool disposing)
         {
-            if (!_isDisposed)
+            if (!_bag.IsDisposed)
             {
-                lock (this)
+                lock (_bag.Sync)
                 {
-                    if (!_isDisposed) // This disposed flag also tells us the task is finished (when true).
+                    if (!_bag.IsDisposed) // This disposed flag also tells us the task is finished (when true).
                     {
                         if (disposing)
                         {
-                            _sync.Dispose();
+                            _bag.Sync.Dispose();
                         }
-                        _isDisposed = true;
+                        _bag.IsDisposed = true;
                     }
                 }
             }
@@ -180,6 +193,209 @@ namespace ContainerExpressions.Containers
         public void SetResult(T result) => _response.SetValue(result);
 
         public void SetException(Exception ex) => _response.SetException(ex);
+
+        public void SetStateMachine(IAsyncStateMachine _) { }
+
+        public void Start<TStateMachine>(ref TStateMachine stateMachine)
+            where TStateMachine : IAsyncStateMachine
+            => stateMachine.MoveNext();
+
+        public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
+            where TAwaiter : INotifyCompletion
+            where TStateMachine : IAsyncStateMachine
+            => awaiter.OnCompleted(stateMachine.MoveNext);
+
+        public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
+            where TAwaiter : ICriticalNotifyCompletion
+            where TStateMachine : IAsyncStateMachine
+            => awaiter.UnsafeOnCompleted(stateMachine.MoveNext);
+    }
+
+    /**
+     * Use on a method returning a ValueTask{Response{T}} type.
+     * [AsyncMethodBuilder(typeof(ResponseAsyncValueTaskCompletionSource{}))]
+    **/
+    public readonly struct ResponseAsyncValueTaskCompletionSource<T>
+    {
+        public static ResponseAsyncValueTaskCompletionSource<T> Create() => new ResponseAsyncValueTaskCompletionSource<T>();
+
+        private static readonly bool _isResponseType;
+
+        static ResponseAsyncValueTaskCompletionSource() { _isResponseType = typeof(T).Equals(new Response<T>(default(T)).Value?.GetType()); }
+
+        public ValueTask<T> Task => new ValueTask<T>(_tcs.Task);
+
+        private readonly TaskCompletionSource<T> _tcs;
+
+        public ResponseAsyncValueTaskCompletionSource() { _tcs = new TaskCompletionSource<T>(); }
+
+        public void SetResult(T result) => _tcs.SetResult(result);
+
+        public void SetException(Exception ex) { ex.LogError(); if (_isResponseType) _tcs.SetResult(default(T)); else _tcs.SetException(ex); }
+
+        public void SetStateMachine(IAsyncStateMachine _) { }
+
+        public void Start<TStateMachine>(ref TStateMachine stateMachine)
+            where TStateMachine : IAsyncStateMachine
+            => stateMachine.MoveNext();
+
+        public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
+            where TAwaiter : INotifyCompletion
+            where TStateMachine : IAsyncStateMachine
+            => awaiter.OnCompleted(stateMachine.MoveNext);
+
+        public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
+            where TAwaiter : ICriticalNotifyCompletion
+            where TStateMachine : IAsyncStateMachine
+            => awaiter.UnsafeOnCompleted(stateMachine.MoveNext);
+    }
+
+    /**
+     * Use on a method returning a Task{Response{T}} type.
+     * [AsyncMethodBuilder(typeof(ResponseAsyncTaskCompletionSource{}))]
+    **/
+    public readonly struct ResponseAsyncTaskCompletionSource<T>
+    {
+        public static ResponseAsyncTaskCompletionSource<T> Create() => new ResponseAsyncTaskCompletionSource<T>();
+
+        private static readonly bool _isResponseType;
+
+        static ResponseAsyncTaskCompletionSource() { _isResponseType = typeof(T).Equals(new Response<T>(default(T)).Value?.GetType()); }
+
+        public Task<T> Task => _tcs.Task;
+
+        private readonly TaskCompletionSource<T> _tcs;
+
+        public ResponseAsyncTaskCompletionSource() { _tcs = new TaskCompletionSource<T>(); }
+
+        public void SetResult(T result) => _tcs.SetResult(result);
+
+        public void SetException(Exception ex) { ex.LogError(); if (_isResponseType) _tcs.SetResult(default(T)); else _tcs.SetException(ex); }
+
+        public void SetStateMachine(IAsyncStateMachine _) { }
+
+        public void Start<TStateMachine>(ref TStateMachine stateMachine)
+            where TStateMachine : IAsyncStateMachine
+            => stateMachine.MoveNext();
+
+        public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
+            where TAwaiter : INotifyCompletion
+            where TStateMachine : IAsyncStateMachine
+            => awaiter.OnCompleted(stateMachine.MoveNext);
+
+        public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
+            where TAwaiter : ICriticalNotifyCompletion
+            where TStateMachine : IAsyncStateMachine
+            => awaiter.UnsafeOnCompleted(stateMachine.MoveNext);
+    }
+
+    file sealed class SourceBag<T>
+    {
+        public T Result;
+        public ExceptionDispatchInfo Error;
+        public ValueTaskSourceStatus Status;
+        public Action<object> Continuation;
+        public object State;
+    }
+
+    public readonly struct ValueTaskSource<T> : IValueTaskSource<T>
+    {
+        private const int MIN_TOKEN = short.MinValue;
+        private const int MAX_TOKEN = 2^14;
+
+        private static readonly ConcurrentDictionary<short, SourceBag<T>> _sources;
+        private static int _token;
+
+        static ValueTaskSource()
+        {
+            _sources = new ConcurrentDictionary<short, SourceBag<T>>();
+            _token = MIN_TOKEN;
+        }
+
+        public short GetNextToken()
+        {
+            if (_token > MAX_TOKEN)
+            {
+                lock (_sources)
+                {
+                    if (_token > MAX_TOKEN)
+                    {
+                        _token = MIN_TOKEN;
+                    }
+                }
+            }
+            var token = (short)Interlocked.Increment(ref _token);
+            _sources.TryAdd(token, new SourceBag<T>());
+            return token;
+        }
+
+        public void SetResult(short token, T result)
+        {
+            _sources.TryGetValue(token, out SourceBag<T> source);
+            source.Result = result;
+            source.Status = ValueTaskSourceStatus.Succeeded;
+            source.Continuation(source.State);
+        }
+
+        public void SetException(short token, ExceptionDispatchInfo ex)
+        {
+            _sources.TryGetValue(token, out SourceBag<T> source);
+            source.Error = ex;
+            source.Status = ValueTaskSourceStatus.Faulted;
+            source.Continuation(source.State);
+        }
+
+        public T GetResult(short token)
+        {
+            _sources.TryGetValue(token, out SourceBag<T> source);
+            _sources.TryRemove(token, out _);
+            if (source.Error is not null) source.Error.Throw();
+            return source.Result;
+        }
+
+        public ValueTaskSourceStatus GetStatus(short token)
+        {
+            _sources.TryGetValue(token, out SourceBag<T> source);
+            return source.Status;
+        }
+
+        public void OnCompleted(Action<object> continuation, object state, short token, ValueTaskSourceOnCompletedFlags flags)
+        {
+            _sources.TryGetValue(token, out SourceBag<T> source);
+            source.Continuation = continuation;
+            source.State = state;
+        }
+    }
+
+    /**
+     * Use on a method returning a ValueTask{Response{T}}, or a ValueTask{T} type.
+     * [AsyncMethodBuilder(typeof(ResponseAsyncValueTaskSource{}))]
+     * 
+     * The main difference between this, and ResponseAsyncValueTaskCompletionSource, is that ValueTaskSource is cheaper to use than TaskCompletionSource.
+     * That said, both async method builders have the same logical effect.
+    **/
+    public readonly struct ResponseAsyncValueTaskSource<T>
+    {
+        public static ResponseAsyncValueTaskSource<T> Create() => new ResponseAsyncValueTaskSource<T>();
+
+        private static readonly bool _isResponseType;
+        private static readonly ValueTaskSource<T> _source;
+
+        static ResponseAsyncValueTaskSource() { _isResponseType = typeof(T).Equals(new Response<T>(default(T)).Value?.GetType()); }
+
+        public ValueTask<T> Task => new ValueTask<T>(_source, _token);
+        private readonly short _token;
+
+        public ResponseAsyncValueTaskSource() { _token = _source.GetNextToken(); }
+
+        public void SetResult(T result) { _source.SetResult(_token, result); }
+
+        public void SetException(Exception ex)
+        {
+            ex.LogError();
+            if (_isResponseType) _source.SetResult(_token, default(T));
+            else _source.SetException(_token, ExceptionDispatchInfo.Capture(ex));
+        }
 
         public void SetStateMachine(IAsyncStateMachine _) { }
 
