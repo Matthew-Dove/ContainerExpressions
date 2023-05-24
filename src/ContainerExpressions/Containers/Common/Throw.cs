@@ -2,7 +2,7 @@
 
 namespace ContainerExpressions.Containers.Common
 {
-    internal static class ThrowHelper
+    internal static class Throw
     {
         public static void ArgumentOutOfRangeException(string name) => throw new ArgumentOutOfRangeException(name);
 

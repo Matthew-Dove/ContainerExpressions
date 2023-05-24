@@ -171,10 +171,7 @@ namespace ContainerExpressions.Containers
 
         private readonly ResponseAsync<T> _response;
 
-        internal ResponseAsyncAwaiter(ResponseAsync<T> response)
-        {
-            _response = response;
-        }
+        internal ResponseAsyncAwaiter(ResponseAsync<T> response) { _response = response; }
 
         public void UnsafeOnCompleted(Action continuation) => OnCompleted(continuation);
 
@@ -382,10 +379,7 @@ namespace ContainerExpressions.Containers
     {
         private static readonly ConcurrentDictionary<short, SourceBag<T>> _sources;
 
-        static ValueTaskSource()
-        {
-            _sources = new ConcurrentDictionary<short, SourceBag<T>>();
-        }
+        static ValueTaskSource() { _sources = new ConcurrentDictionary<short, SourceBag<T>>(); }
 
         public short GetToken()
         {
@@ -420,7 +414,7 @@ namespace ContainerExpressions.Containers
             var error = source.Error;
             if (error is not null) source.Error.Throw();
 
-            ThrowHelper.InvalidOperationException($"{nameof(IValueTaskSource<T>)} finished with no matching result, or error; for the token: {token}.");
+            Throw.InvalidOperationException($"{nameof(IValueTaskSource<T>)} finished with no matching result, or error; for the token: {token}.");
             return default;
         }
 

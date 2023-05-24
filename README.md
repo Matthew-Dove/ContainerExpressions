@@ -844,7 +844,7 @@ class John : Alias<string> { public John() : base(nameof(John)) { } }
 Instance.Create(new Jane());
 Instance.Create(new John());
 
-John john = Instance.Of<John>();
+John john = Instance.Of<John();
 string name = Instance.Of<John>(); // Auto casting provided by Alias<string> works here.
 Jane jane = Instance.Of<Jane>();
 ```
@@ -891,6 +891,30 @@ var error = await GetError(); // Result: No value, as an error occurred (but no 
 ```
 
 **Note:** Exceptions are logged to the `Try.SetExceptionLogger()` listener, so make sure to set this at startup to catch them.
+
+## Custom Async Method Builders
+
+Override the default async method builders for `Task`, and `ValueTask`.  
+This keeps their task-like types, and awaiters intact; only replacing the method builder implementation (*specifically around exception handling*).  
+We have the following options available:
+* `ResponseAsyncTaskCompletionSource<T>:` use on a method returning a `Task<Response<T>>`, or a `Task<T>` type.
+* `ResponseAsyncValueTaskCompletionSource<T>:` use on a method returning a `ValueTask<Response<T>>`, or a `ValueTask<T>` type.
+* `ResponseAsyncValueTaskSource<T>:` use on a method returning a `ValueTask<Response<T>>`, or a `ValueTask<T>` type.
+
+If the method returns a `T`, instead of a `Response<T>`, errors will still be logged, but they will also be thrown if you attempt to get the result.  
+The main difference between `ResponseAsyncValueTaskCompletionSource<T>`, and `ResponseAsyncValueTaskSource<T>`, is that `ResponseAsyncValueTaskSource<T>` avoids creating a TaskCompletionSource; which may, *or may not* be an optimization for your use case.  
+That said, both of those async method builders have the same logical effect (*but different implementations*).
+
+Example usage:
+```cs
+// Returns an invalid response when an exception is thrown in this method (or the task is cancelled), otherwise returns a valid response.
+[AsyncMethodBuilder(typeof(ResponseAsyncTaskCompletionSource<>))]
+public async Task<Response<string>> Foo() // TaskAwaiter with a custom async method builder.
+{
+    await Task.Delay(0);
+    return Response.Create("Hello, World!");
+}
+```
 
 ## Custom Awaiters
 
