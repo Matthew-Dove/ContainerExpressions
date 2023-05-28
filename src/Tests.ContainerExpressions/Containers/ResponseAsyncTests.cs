@@ -12,6 +12,7 @@ namespace Tests.ContainerExpressions.Containers
     public class ResponseAsyncTests
     {
         private const int _result = 1;
+        private static readonly int _numThreads = Environment.ProcessorCount - 1;
 
         #region Test Functions
 
@@ -154,7 +155,7 @@ namespace Tests.ContainerExpressions.Containers
             var isError = false;
             var func = RunAwaiters();
 
-            Parallel.For(0, Environment.ProcessorCount, async _ => {
+            Parallel.For(0, _numThreads, async _ => {
                 var result = await func;
                 if (!result.IsTrue(x => x == _result)) Volatile.Write(ref isError, true);
             });
@@ -168,7 +169,7 @@ namespace Tests.ContainerExpressions.Containers
             var isError = false;
             var func = RunAwaiters().AsTask();
 
-            Parallel.For(0, Environment.ProcessorCount, async _ => {
+            Parallel.For(0, _numThreads, async _ => {
                 var result = await func;
                 if (!result.IsTrue(x => x == _result)) Volatile.Write(ref isError, true);
             });
@@ -182,7 +183,7 @@ namespace Tests.ContainerExpressions.Containers
             var isError = false;
             var func = RunAwaiters();
 
-            Parallel.For(0, Environment.ProcessorCount, async _ => {
+            Parallel.For(0, _numThreads, async _ => {
                 var result = await func.AsValueTask();
                 if (!result.IsTrue(x => x == _result)) Volatile.Write(ref isError, true);
             });
@@ -295,7 +296,7 @@ namespace Tests.ContainerExpressions.Containers
         {
             var isError = false;
 
-            Parallel.For(0, Environment.ProcessorCount, async _ => {
+            Parallel.For(0, _numThreads, async _ => {
                 var result = await TaskDelay();
                 if (!result.IsTrue(x => x == _result)) Volatile.Write(ref isError, true);
             });
@@ -308,7 +309,7 @@ namespace Tests.ContainerExpressions.Containers
         {
             var isError = false;
 
-            Parallel.For(0, Environment.ProcessorCount, async _ => {
+            Parallel.For(0, _numThreads, async _ => {
                 var result = await ValueTaskDelay();
                 if (!result.IsTrue(x => x == _result)) Volatile.Write(ref isError, true);
             });
@@ -321,7 +322,7 @@ namespace Tests.ContainerExpressions.Containers
         {
             var isError = false;
 
-            Parallel.For(0, Environment.ProcessorCount, async _ =>
+            Parallel.For(0, _numThreads, async _ =>
             {
                 var result = await ValueTaskSourceDelay();
                 if (!result.IsTrue(x => x == _result)) Volatile.Write(ref isError, true);
