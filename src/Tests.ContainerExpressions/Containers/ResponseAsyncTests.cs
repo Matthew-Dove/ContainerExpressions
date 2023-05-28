@@ -24,16 +24,16 @@ namespace Tests.ContainerExpressions.Containers
             return await Task.Delay(delay).ContinueWith(_ => _result); // TaskAwaiter
         }
 
-        private static async ResponseAsync<int> ThrowError() { await Task.CompletedTask; throw new Exception("Error!"); }
+        private static async ResponseAsync<int> ThrowError(bool throwBeforeAwait = false) { if (throwBeforeAwait) throw new Exception("Error!"); await Task.CompletedTask; throw new Exception("Error!"); }
 
         [AsyncMethodBuilder(typeof(ResponseAsyncTaskCompletionSource<>))]
-        private static async Task<Response<int>> TaskError() { await Task.CompletedTask; throw new Exception("Error!"); }
+        private static async Task<Response<int>> TaskError(bool throwBeforeAwait = false) { if (throwBeforeAwait) throw new Exception("Error!"); await Task.CompletedTask; throw new Exception("Error!"); }
 
         [AsyncMethodBuilder(typeof(ResponseAsyncValueTaskCompletionSource<>))]
-        private static async ValueTask<Response<int>> ValueTaskError() { await Task.CompletedTask; throw new Exception("Error!"); }
+        private static async ValueTask<Response<int>> ValueTaskError(bool throwBeforeAwait = false) { if (throwBeforeAwait) throw new Exception("Error!"); await Task.CompletedTask; throw new Exception("Error!"); }
 
         [AsyncMethodBuilder(typeof(ResponseAsyncValueTaskSource<>))]
-        private static async ValueTask<Response<int>> ValueTaskSourceError() { await Task.CompletedTask; throw new Exception("Error!"); }
+        private static async ValueTask<Response<int>> ValueTaskSourceError(bool throwBeforeAwait = false) { if (throwBeforeAwait) throw new Exception("Error!"); await Task.CompletedTask; throw new Exception("Error!"); }
 
         [AsyncMethodBuilder(typeof(ResponseAsyncTaskCompletionSource<>))]
         private static async Task<Response<int>> TaskDelay() { await Task.Delay(1); return Response.Create(_result); }
@@ -96,8 +96,21 @@ namespace Tests.ContainerExpressions.Containers
         {
             const int error = -1;
 
-            var err01 = await ThrowError();
+            var err01 = await ThrowError(throwBeforeAwait: true);
             var err02 = await ThrowError();
+
+            int result = err01 && err02 ? err01 + err02 : error;
+
+            Assert.AreEqual(error, result);
+        }
+
+        [TestMethod]
+        public void Error_Handling_Blocking()
+        {
+            const int error = -1;
+
+            var err01 = ThrowError(throwBeforeAwait: true).GetAwaiter().GetResult();
+            var err02 = ThrowError().GetAwaiter().GetResult();
 
             int result = err01 && err02 ? err01 + err02 : error;
 
@@ -232,22 +245,49 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public async Task AsyncMethodBuilder_TaskError()
         {
-            var result = await TaskError();
-            Assert.IsFalse(result);
+            var blocking1 = TaskError().GetAwaiter().GetResult();
+            var blocking2 = TaskError(throwBeforeAwait: true).GetAwaiter().GetResult();
+
+            var result1 = await TaskError();
+            var result2 = await TaskError(throwBeforeAwait: true);
+
+            Assert.IsFalse(blocking1);
+            Assert.IsFalse(blocking2);
+
+            Assert.IsFalse(result1);
+            Assert.IsFalse(result2);
         }
 
         [TestMethod]
         public async Task AsyncMethodBuilder_ValueTaskError()
         {
-            var result = await ValueTaskError();
-            Assert.IsFalse(result);
+            var blocking1 = ValueTaskError().GetAwaiter().GetResult();
+            var blocking2 = ValueTaskError(throwBeforeAwait: true).GetAwaiter().GetResult();
+
+            var result1 = await ValueTaskError();
+            var result2 = await ValueTaskError(throwBeforeAwait: true);
+
+            Assert.IsFalse(blocking1);
+            Assert.IsFalse(blocking2);
+
+            Assert.IsFalse(result1);
+            Assert.IsFalse(result2);
         }
 
         [TestMethod]
         public async Task AsyncMethodBuilder_ValueTaskSourceError()
         {
-            var result = await ValueTaskSourceError();
-            Assert.IsFalse(result);
+            var blocking1 = ValueTaskSourceError().GetAwaiter().GetResult();
+            var blocking2 = ValueTaskSourceError(throwBeforeAwait: true).GetAwaiter().GetResult();
+
+            var result1 = await ValueTaskSourceError();
+            var result2 = await ValueTaskSourceError(throwBeforeAwait: true);
+
+            Assert.IsFalse(blocking1);
+            Assert.IsFalse(blocking2);
+
+            Assert.IsFalse(result1);
+            Assert.IsFalse(result2);
         }
 
         [TestMethod]

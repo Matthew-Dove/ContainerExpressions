@@ -510,41 +510,43 @@ namespace ContainerExpressions.Containers
         }
     }
 
-    public readonly struct ValueTaskSource<T> : IValueTaskSource<T>
+    public sealed class ValueTaskSource<T> : IValueTaskSource<T>
     {
         private static readonly ConcurrentDictionary<short, SourceBag<T>> _sources;
 
         static ValueTaskSource() { _sources = new ConcurrentDictionary<short, SourceBag<T>>(); }
 
-        public short GetToken()
+        public short GetToken() => ValueTaskSource.GetNextToken();
+
+        private static bool WaitFor(short token)
         {
-            var token = ValueTaskSource.GetNextToken();
-            _sources.AddOrUpdate(token, new SourceBag<T>(), static (x, y) => y);
-            return token;
+            if (_sources.ContainsKey(token)) return true;
+            return SpinWait.SpinUntil(() => _sources.ContainsKey(token), 250);
         }
 
         public void SetResult(short token, T result)
         {
-            var source = _sources.GetOrAdd(token, new SourceBag<T>());
-            source.Result = new Box<T>(result);
-            source.Status = new Box<ValueTaskSourceStatus>(ValueTaskSourceStatus.Succeeded);
-            if (source.Continuation != null && source.State != null) source.Continuation(source.State);
+            var source = new SourceBag<T>
+            {
+                Result = new Box<T>(result),
+                Status = new Box<ValueTaskSourceStatus>(ValueTaskSourceStatus.Succeeded)
+            };
+            _sources.TryAdd(token, source);
         }
 
         public void SetException(short token, ExceptionDispatchInfo ex)
         {
-            var source = _sources.GetOrAdd(token, new SourceBag<T>());
-            source.Error = ex;
-            source.Status = new Box<ValueTaskSourceStatus>(ValueTaskSourceStatus.Faulted);
-            if (source.Continuation != null && source.State != null) source.Continuation(source.State);
+            var source = new SourceBag<T>
+            {
+                Error = ex,
+                Status = new Box<ValueTaskSourceStatus>(ValueTaskSourceStatus.Faulted)
+            };
+            _sources.TryAdd(token, source);
         }
 
         public T GetResult(short token)
         {
-            const int millisecondsTimeout = 250;
-
-            var sourceIsReady = () => _sources.TryGetValue(token, out SourceBag<T> bag) && bag.Status != null && bag.Status != ValueTaskSourceStatus.Pending;
-            SpinWait.SpinUntil(sourceIsReady, millisecondsTimeout);
+            WaitFor(token);
 
             _sources.TryRemove(token, out SourceBag<T> source);
 
@@ -566,22 +568,8 @@ namespace ContainerExpressions.Containers
 
         public void OnCompleted(Action<object> continuation, object state, short token, ValueTaskSourceOnCompletedFlags flags)
         {
-            if (_sources.TryGetValue(token, out SourceBag<T> source))
-            {
-                if (source.Status != null && source.Status != ValueTaskSourceStatus.Pending)
-                {
-                    continuation(state);
-                }
-                else
-                {
-                    source.Continuation = continuation;
-                    source.State = state;
-                }
-            }
-            else
-            {
-                continuation(state);
-            }
+            WaitFor(token);
+            continuation(state);
         }
     }
 
@@ -599,7 +587,7 @@ namespace ContainerExpressions.Containers
         private static readonly bool _isResponseType;
         private static readonly ValueTaskSource<T> _source;
 
-        static ResponseAsyncValueTaskSource() { _isResponseType = typeof(T).Equals(new Response<T>(default(T)).Value?.GetType()); }
+        static ResponseAsyncValueTaskSource() { _isResponseType = typeof(T).Equals(new Response<T>(default(T)).Value?.GetType()); _source = new ValueTaskSource<T>(); }
 
         public ValueTask<T> Task => new ValueTask<T>(_source, _token);
         private readonly short _token;
