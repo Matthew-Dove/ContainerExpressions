@@ -184,7 +184,7 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        public void Many_Threads0()
+        public void Many_Threads()
         {
             var isError = false;
             var func = RunAwaiters();

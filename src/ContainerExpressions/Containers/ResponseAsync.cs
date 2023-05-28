@@ -6,7 +6,6 @@ using System.Collections.Concurrent;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks.Sources;
 using ContainerExpressions.Containers.Common;
-using System.Diagnostics;
 
 namespace ContainerExpressions.Containers
 {
@@ -32,7 +31,7 @@ namespace ContainerExpressions.Containers
             set { Volatile.Write(ref _tcs, value); }
         }
 
-        public readonly ManualResetEventSlim Sync;
+        public readonly ManualResetEvent Sync;
         public bool IsDisposed;
 
         private Box<T> _result;
@@ -58,7 +57,7 @@ namespace ContainerExpressions.Containers
         public Bag()
         {
             Result = default;
-            Sync = new ManualResetEventSlim(false);
+            Sync = new ManualResetEvent(false);
             IsDisposed = false;
             Tcs = default;
         }
@@ -93,7 +92,7 @@ namespace ContainerExpressions.Containers
         {
             if (_bag.IsDisposed) return; // Try lock free read first.
             lock (_bag.Sync) { if (_bag.IsDisposed) return; }
-            _bag.Sync.Wait();
+            _bag.Sync.WaitOne();
             Dispose(disposing: true);
         }
 
@@ -510,6 +509,7 @@ namespace ContainerExpressions.Containers
         }
     }
 
+    // Alterative to the provided ManualResetValueTaskSourceCore{T} implementation.
     public sealed class ValueTaskSource<T> : IValueTaskSource<T>
     {
         private static readonly ConcurrentDictionary<short, SourceBag<T>> _sources;
