@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Runtime.CompilerServices;
+using System.Diagnostics;
 
 namespace Tests.ContainerExpressions.Containers
 {
@@ -94,6 +95,15 @@ namespace Tests.ContainerExpressions.Containers
         public async Task Happy_Path_WithValueTask()
         {
             var result = await RunAwaitersWithValueTask().AsResponse();
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(_result, result);
+        }
+
+        [TestMethod]
+        public async Task Happy_Path_WithValueTask_SpinWait()
+        {
+            var result = await RunAwaitersWithValueTask().AsResponse(spinWait: true);
 
             Assert.IsTrue(result);
             Assert.AreEqual(_result, result);
