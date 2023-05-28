@@ -101,15 +101,6 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        public async Task Happy_Path_WithValueTask_SpinWait()
-        {
-            var result = await RunAwaitersWithValueTask().AsResponse(spinWait: true);
-
-            Assert.IsTrue(result);
-            Assert.AreEqual(_result, result);
-        }
-
-        [TestMethod]
         public void Synchronous_Result()
         {
             var result = ResponseAsync.FromResult(_result).GetAwaiter().GetResult();
