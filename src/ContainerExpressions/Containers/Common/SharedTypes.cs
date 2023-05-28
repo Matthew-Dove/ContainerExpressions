@@ -24,7 +24,7 @@ namespace ContainerExpressions.Containers
 
         private Unit() { }
 
-        public bool Equals(Unit other) => other != null;
+        public bool Equals(Unit other) => (object)other != null;
         public override bool Equals(object obj) => obj is Unit other && Equals(other);
         public override int GetHashCode() => 1;
         public override string ToString() => string.Empty;

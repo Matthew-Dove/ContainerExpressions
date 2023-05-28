@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks.Sources;
 using ContainerExpressions.Containers.Common;
+using System.Diagnostics;
 
 namespace ContainerExpressions.Containers
 {
@@ -45,6 +46,15 @@ namespace ContainerExpressions.Containers
             Tcs = default;
         }
 
+        public Bag(Exception ex)
+        {
+            Result = default;
+            Sync = default;
+            IsDisposed = true;
+            Tcs = default;
+            ex.LogError();
+        }
+
         public Bag()
         {
             Result = default;
@@ -66,35 +76,14 @@ namespace ContainerExpressions.Containers
     {
         private readonly Bag<T> _bag;
 
-        // Use this constructor when you already have the value to set (i.e. T is pre-calculated).
+        // Constructor to use when you already have the value to set (i.e. T is pre-calculated).
         public ResponseAsync(T result) { _bag = new Bag<T>(result); }
 
+        // Constructor to use when you have an error even before trying to start the calculation.
+        public ResponseAsync(Exception ex) { _bag = new Bag<T>(ex); }
+
+        // Constructor to use when the result hasn't been calculated yet (i.e. the result, or error will be set later).
         public ResponseAsync() { _bag = new Bag<T>(); }
-
-        // Static helper for the public constructor to set the result.
-        public static ResponseAsync<T> FromResult(T result) => new ResponseAsync<T>(result);
-
-        // Convert into a Task{T} type.
-        public Task<Response<T>> AsTask()
-        {
-            if (_bag.Tcs == null)
-            {
-                lock (_bag.Sync) // The user calls this (from who knows where, how many times), and we only want the tcs created once.
-                {
-                    if (_bag.Tcs == null)
-                    {
-                        _bag.Tcs = new TaskCompletionSource<Response<T>>();
-                        if (_bag.IsDisposed)
-                        {
-                            var result = _bag.Result;
-                            if (result != null) _bag.Tcs.SetResult(Response.Create(result.Value)); // Task is already completed.
-                            else _bag.Tcs.SetCanceled(); // There is no result, as the task generated an exception, or was canceled.
-                        }
-                    }
-                }
-            }
-            return _bag.Tcs.Task;
-        }
 
         // When true, the value is ready to be read.
         internal bool IsCompleted() { if (_bag.IsDisposed) return true; lock (_bag.Sync) { return _bag.IsDisposed; } } // Try lock free read first.
@@ -127,8 +116,47 @@ namespace ContainerExpressions.Containers
         internal void SetException(Exception ex)
         {
             ex.LogError();
-            _bag.Tcs?.SetException(ex);
+            _bag.Tcs?.SetResult(new Response<T>());
             _bag.Sync.Set();
+        }
+
+        // Convert ResponseAsync{T} into a Task{T} type.
+        public Task<Response<T>> AsTask()
+        {
+            if (_bag.Tcs == null)
+            {
+                lock (_bag.Sync) // The user calls this (from who knows where, how many times), and we only want the tcs created once.
+                {
+                    if (_bag.Tcs == null)
+                    {
+                        _bag.Tcs = new TaskCompletionSource<Response<T>>();
+                        if (_bag.IsDisposed || _bag.Result != default)
+                        {
+                            if (_bag.Result != default) _bag.Tcs.SetResult(Response.Create(_bag.Result.Value)); // Task is completed.
+                            else _bag.Tcs.SetResult(new Response<T>()); // There is no result, as the task generated an exception, or was canceled.
+                        }
+                    }
+                }
+            }
+            return _bag.Tcs.Task;
+        }
+
+        // Convert ResponseAsync{T} into a ValueTask{T} type.
+        public ValueTask<Response<T>> AsValueTask()
+        {
+            ValueTask<Response<T>> vt;
+
+            if (_bag.IsDisposed || _bag.Result != default)
+            {
+                if (_bag.Result != default) vt = new(Response.Create(_bag.Result.Value)); // Task is completed.
+                else vt = new(new Response<T>()); // There is no result, as the task generated an exception, or was canceled.
+            }
+            else
+            {
+                vt = new(AsTask()); // Task is currently running.
+            }
+
+            return vt;
         }
 
         private void Dispose(bool disposing)
@@ -155,10 +183,117 @@ namespace ContainerExpressions.Containers
             GC.SuppressFinalize(this);
         }
 
-        // Custom awaiter to convert ResponseAsync<T> into Response<T>, when using the await keyword.
+        // Custom awaiter to convert ResponseAsync{T} into Response{T}, when using the await keyword.
         public ResponseAsyncAwaiter<T> GetAwaiter() => new ResponseAsyncAwaiter<T>(this);
 
-        public static implicit operator Task<Response<T>>(ResponseAsync<T> response) => response.AsTask(); // Auto-cast to Task{T}.
+        public static implicit operator Task<Response<T>>(ResponseAsync<T> response) => response.AsTask(); // Cast to Task{T}.
+        public static implicit operator ValueTask<Response<T>>(ResponseAsync<T> response) => response.AsValueTask(); // Cast to ValueTask{T}.
+    }
+
+    public static class ResponseAsync
+    {
+        // Static helper for the public constructor to set the result.
+        public static ResponseAsync<T> FromResult<T>(T result) => new ResponseAsync<T>(result);
+
+        // Static helper for the public constructor to set an error.
+        public static ResponseAsync<T> FromError<T>(Exception ex) => new ResponseAsync<T>(ex);
+
+        #region Task Converters
+
+        // Safely run the ValueTask, and convert the result into a Response.
+        public static ValueTask<Response> AsResponse(this ValueTask task)
+        {
+            if (task.IsCompleted)
+            {
+                if (task.IsCompletedSuccessfully) return new ValueTask<Response>(Response.Success);
+                if (task.IsFaulted) task.AsTask().Exception.LogError();
+                return new ValueTask<Response>(Response.Error);
+            }
+
+            return new ValueTask<Response>(task.AsTask().ContinueWith(static t =>
+            {
+                if (t.Status == TaskStatus.RanToCompletion) return Response.Success;
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                return Response.Error;
+            }));
+        }
+
+        // Safely run the ValueTask{T}, and convert the T, into a Response{T}.
+        public static ValueTask<Response<T>> AsResponse<T>(this ValueTask<T> task)
+        {
+            if (task.IsCompleted)
+            {
+                if (task.IsCompletedSuccessfully) return new ValueTask<Response<T>>(Response.Create(task.Result));
+                if (task.IsFaulted) task.AsTask().Exception.LogError();
+                return new ValueTask<Response<T>>(Response.Create<T>());
+            }
+
+            return new ValueTask<Response<T>>(task.AsTask().ContinueWith(static t =>
+            {
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.RanToCompletion) return Response.Create(t.Result);
+                return Response.Create<T>();
+            }));
+        }
+
+        // Safely run the Task, and convert the result into a Response.
+        public static Task<Response> AsResponse(this Task task)
+        {
+            return task.ContinueWith(static t =>
+            {
+                if (t.Status == TaskStatus.RanToCompletion) return new Response(true);
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                return new Response();
+            });
+        }
+
+        // Safely run the Task{T}, and convert the T, into a Response{T}.
+        public static Task<Response<T>> AsResponse<T>(this Task<T> task)
+        {
+            return task.ContinueWith(static t =>
+            {
+                if (t.Status == TaskStatus.RanToCompletion) return new Response<T>(t.Result);
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                return new Response<T>();
+            });
+        }
+
+        #endregion
+
+        #region Awaiters
+
+        // Awaiter for a Func returning ResponseAsync{T}.
+        public static ResponseAsyncAwaiter<T> GetAwaiter<T>(this Func<ResponseAsync<T>> func) => func().GetAwaiter();
+
+        // Awaiter for a Func returning T.
+        public static ResponseAsyncAwaiter<T> GetAwaiter<T>(this Func<T> func)
+        {
+            try
+            {
+                var result = func();
+                return new ResponseAsyncAwaiter<T>(new ResponseAsync<T>(result));
+            }
+            catch (Exception ex)
+            {
+                return new ResponseAsyncAwaiter<T>(new ResponseAsync<T>(ex));
+            }
+        }
+
+        // Awaiter for an Action.
+        public static ResponseAsyncAwaiter<Unit> GetAwaiter(this Action action)
+        {
+            try
+            {
+                action();
+                return new ResponseAsyncAwaiter<Unit>(new ResponseAsync<Unit>(Unit.Instance));
+            }
+            catch (Exception ex)
+            {
+                return new ResponseAsyncAwaiter<Unit>(new ResponseAsync<Unit>(ex));
+            }
+        }
+
+        #endregion
     }
 
     /**
@@ -171,7 +306,7 @@ namespace ContainerExpressions.Containers
 
         private readonly ResponseAsync<T> _response;
 
-        internal ResponseAsyncAwaiter(ResponseAsync<T> response) { _response = response; }
+        public ResponseAsyncAwaiter(ResponseAsync<T> response) { _response = response; }
 
         public void UnsafeOnCompleted(Action continuation) => OnCompleted(continuation);
 
@@ -384,34 +519,39 @@ namespace ContainerExpressions.Containers
         public short GetToken()
         {
             var token = ValueTaskSource.GetNextToken();
-            _sources.TryAdd(token, new SourceBag<T>());
+            _sources.AddOrUpdate(token, new SourceBag<T>(), static (x, y) => y);
             return token;
         }
 
         public void SetResult(short token, T result)
         {
-            _sources.TryGetValue(token, out SourceBag<T> source);
+            var source = _sources.GetOrAdd(token, new SourceBag<T>());
             source.Result = new Box<T>(result);
             source.Status = new Box<ValueTaskSourceStatus>(ValueTaskSourceStatus.Succeeded);
-            source.Continuation(source.State);
+            if (source.Continuation != null && source.State != null) source.Continuation(source.State);
         }
 
         public void SetException(short token, ExceptionDispatchInfo ex)
         {
-            _sources.TryGetValue(token, out SourceBag<T> source);
+            var source = _sources.GetOrAdd(token, new SourceBag<T>());
             source.Error = ex;
             source.Status = new Box<ValueTaskSourceStatus>(ValueTaskSourceStatus.Faulted);
-            source.Continuation(source.State);
+            if (source.Continuation != null && source.State != null) source.Continuation(source.State);
         }
 
         public T GetResult(short token)
         {
+            const int millisecondsTimeout = 250;
+
+            var sourceIsReady = () => _sources.TryGetValue(token, out SourceBag<T> bag) && bag.Status != null && bag.Status != ValueTaskSourceStatus.Pending;
+            SpinWait.SpinUntil(sourceIsReady, millisecondsTimeout);
+
             _sources.TryRemove(token, out SourceBag<T> source);
 
-            var result = source.Result;
+            var result = source?.Result;
             if (result is not null) return result.Value;
 
-            var error = source.Error;
+            var error = source?.Error;
             if (error is not null) source.Error.Throw();
 
             Throw.InvalidOperationException($"{nameof(IValueTaskSource<T>)} finished with no matching result, or error; for the token: {token}.");
@@ -420,15 +560,28 @@ namespace ContainerExpressions.Containers
 
         public ValueTaskSourceStatus GetStatus(short token)
         {
-            _sources.TryGetValue(token, out SourceBag<T> source);
-            return source.Status;
+            if (_sources.TryGetValue(token, out SourceBag<T> source) && source.Status != null) return source.Status;
+            return ValueTaskSourceStatus.Pending;
         }
 
         public void OnCompleted(Action<object> continuation, object state, short token, ValueTaskSourceOnCompletedFlags flags)
         {
-            _sources.TryGetValue(token, out SourceBag<T> source);
-            source.Continuation = continuation;
-            source.State = state;
+            if (_sources.TryGetValue(token, out SourceBag<T> source))
+            {
+                if (source.Status != null && source.Status != ValueTaskSourceStatus.Pending)
+                {
+                    continuation(state);
+                }
+                else
+                {
+                    source.Continuation = continuation;
+                    source.State = state;
+                }
+            }
+            else
+            {
+                continuation(state);
+            }
         }
     }
 

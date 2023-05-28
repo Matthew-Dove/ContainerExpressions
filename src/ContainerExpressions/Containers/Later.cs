@@ -1,8 +1,66 @@
-﻿using System;
+﻿using ContainerExpressions.Containers.Extensions;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers
 {
+    public struct LazyLoader<T>
+    {
+        public T Value { get {
+            if (_func != null) {
+                _value = _func();
+                _func = null;
+            }
+            return _value;
+        } }
+
+        private T _value;
+        private Func<T> _func;
+
+        internal LazyLoader(Func<T> func) { _func = func; }
+    }
+
+    // Use this over Later{T} when you want to have a local lazy value (i.e. you won't pass this around, put it in a cache, call it asyncly, etc).
+    public readonly struct ValueLater<T> : IEquatable<ValueLater<T>>, IEquatable<T>
+    {
+        private static readonly EqualityComparer<T> _comparer = EqualityComparer<T>.Default;
+        public readonly LazyLoader<T> Lazy;
+
+        public ValueLater(Func<T> func) { Lazy = new LazyLoader<T>(func.ThrowIfNull()); }
+
+        public override string ToString() => Lazy.Value?.ToString() ?? string.Empty;
+        public override int GetHashCode() => _comparer.GetHashCode();
+        public bool Equals(ValueLater<T> other) => _comparer.Equals(other.Lazy.Value, Lazy.Value);
+        public bool Equals(T other) => _comparer.Equals(other, Lazy.Value);
+        public override bool Equals(object obj)
+        {
+            return obj switch
+            {
+                ValueLater<T> other => Equals(other),
+                T t => Equals(t),
+                _ => false
+            };
+        }
+
+        public static implicit operator T(ValueLater<T> later) => later.Lazy.Value;
+        public static implicit operator ValueLater<T>(Func<T> func) => new ValueLater<T>(func);
+
+        public static bool operator ==(ValueLater<T> x, ValueLater<T> y) => x.Equals(y);
+        public static bool operator !=(ValueLater<T> x, ValueLater<T> y) => !(x == y);
+
+        public static bool operator ==(ValueLater<T> x, T y) => x.Equals(y);
+        public static bool operator !=(ValueLater<T> x, T y) => !(x == y);
+
+        public static bool operator ==(T x, ValueLater<T> y) => y.Equals(x);
+        public static bool operator !=(T x, ValueLater<T> y) => !(x == y);
+    }
+
+    public static class ValueLater
+    {
+        public static ValueLater<T> Create<T>(Func<T> func) => new ValueLater<T>(func);
+    }
+
     /// <summary>Loads the value only once, the first time it's accessed.</summary>
     public sealed class Later<T>
     {

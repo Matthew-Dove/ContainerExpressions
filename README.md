@@ -109,7 +109,19 @@ class UserService : IUserService
     }
 }
 ```
-Note: there is also Later.CreateAsync() for asynchronous values.
+**Note:** there is also `Later.CreateAsync()` for asynchronous values.
+
+## ValueLater`<T>`
+
+Struct option of the `Later<T>` type.  
+Use this for lazy loads, where copy semantics make sense.  
+There is no `async` version for this value type.  
+
+```cs
+var later = new ValueLater<int>(() => 42); // Helper method included: ValueLater.Create(() => 42);.
+int number1 = later.Lazy.Value; // Long syntax (function is calculated at this point).
+int number2 = later; // Short syntax (same behaviour as above).
+```
 
 ## Try`<T>`
 
@@ -810,10 +822,16 @@ public static class Lambda
 
     /// <summary>Discards the function input, and returns the specified result (of a different type to the input type).</summary>
     public static Func<T, TResult> Default<T, TResult>(TResult result = default) => _ => result;
+
+    // Wrap method delegates, so the complier can recognise them as Func{TResult} types. 
+    public static Func<TResult> ToFunc<TResult>(this Func<TResult> func) => func;
+
+    // Wrap method delegates, so the complier can recognise them as Action types. 
+    public static Action ToAction(this Action action) => action;
 }
 ```
 
-Why use these? They are static functions (*i.e. allocation free*), and their names are descriptive.  
+Why use these? They are static functions, with descriptive names.  
 Of course you can make your anonymous delegates static inline now too i.e. `(static x => x)`.  
 
 When ordering `ints` using `System.Linq`, you must provide a **key** to `OrderBy`.  
@@ -822,6 +840,22 @@ You can replace `(x => x)`, with the `Identity` function: `new int[] { 3, 2, 5, 
 This makes the code's intent clear.  
 Note: you would normally need to write `OrderBy(Lambda.Identity)` instead.  
 I suggest adding `global using static ContainerExpressions.Containers.Lambda;` to your **GlobalUsings.cs** file.  
+
+The `ToFunc<TResult>`, and `ToAction` helpers are used to turn any method into a base that can be targeted with extensions.  
+```cs
+private static int GetResult(int i, string s) => 1;
+private static void GetVoid(int i, string s) => throw new Exception(); // Error is caught (and logged) by the await below.
+
+// Func with 2 args is converted into a func with 0 args.
+Response<int> funcResult = await Lambda.ToFunc(() => GetResult(0, "")); // await safely wraps the function in a Response<int>.
+
+// Action with 2 args is converted into a action with 0 args.
+Response<Unit> actionResult = await Lambda.ToAction(() => GetVoid(0, "")); // await safely wraps the function in a Response<Unit> (Unit represents void).
+
+// There is an argument builder with compiler implicit type support. The end result is the same as above, so it's more of a preference.
+Response<int> argsFuncResult = await Lambda.Args(0, "").ToFunc(GetResult);
+Response<Unit> argsActionResult = await Lambda.Args(0, "").ToAction(GetVoid);
+```
 
 ## Instance
 
@@ -872,7 +906,7 @@ public sealed class Csv : Alias<string[]> {
 ## ResponseAsync`<T>`
 
 A task-like type that can be used on async functions to catch, and log exceptions thrown in a method.  
-You can use `ResponseAsync<T>` anywhere you would use `Task<T>`, and it will return a `Response<T>` - instead of a `T`).  
+You can use `ResponseAsync<T>` anywhere you would use `Task<T>`, and it will return a `Response<T>` - instead of a `T`.  
 
 ```cs
 private static async ResponseAsync<int> GetValue()
@@ -891,6 +925,13 @@ var error = await GetError(); // Result: No value, as an error occurred (but no 
 ```
 
 **Note:** Exceptions are logged to the `Try.SetExceptionLogger()` listener, so make sure to set this at startup to catch them.
+
+`ResponseAsync<T>` functionality also includes:
+* `AsTask():` Convert `ResponseAsync<T>` into a `Task<Response<T>>` (*that won't throw exceptions*).
+* `AsValueTask():` Convert `ResponseAsync<T>` into a `ValueTask<Response<T>>` (*that won't throw exceptions*).
+* `AsResponse():` Converts a `Task<T>`, or `ValueTask<T>` into a `Task<Response<T>>`, or `ValueTask<Response<T>>` respectively (*with no exceptions*).
+* `FromResult<T>(T):` Creates a `ResponseAsync<T>` task in a completed state, with a valid `Response<T>` result.
+* `FromError<T>(Exception):` Creates a `ResponseAsync<T>` task in a completed state, with an invalid `Response<T>` result (*errors are logged*).
 
 ## Custom Async Method Builders
 
@@ -937,7 +978,8 @@ Assert.IsTrue(result);
 Assert.AreEqual(number, result);
 ```
 
-There are other custom awaiters available for `ValueTask`, and `Task`; along with their various **Packed** implementations:  
+There are other custom awaiters available for `ValueTask`, and `Task`; along with their various **Packed** implementations.  
+All these types can be safely converted to `Response` / `Response<T>` using the `await` keyword:  
 
 * `Response<ValueTask>`
 * `Response<ValueTask<T>>`
@@ -947,6 +989,9 @@ There are other custom awaiters available for `ValueTask`, and `Task`; along wit
 * `Response<Task<Response<Task<Response>>>>`
 * `Response<Task<Response<Response<T>>>>`
 * `Response<Task<Response<Task<Response<T>>>>>`
+* `Func<ResponseAsync<T>>`
+* `Func<T>`
+* `Action`
 
 ## ResponseValueTask`<T>`
 
@@ -1060,6 +1105,8 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 ## 10.0.0
 
 * Renamed `Cache` to `Instance`, as the former name lead to confusion on what the container did.
-* Added custom awaiters for `Response` types wrapping `Task`.
-* Created `ResponseTask` to make casting between `Task`, and `Response` easier.
+* Added custom awaiters for `Response` types wrapping `Task` / `ValueTask`.
+* Created `ResponseTask` to make casting between `Task`, and `Response` easier (*`ResponseValueTask` is also available for `ValueTask` sources*).
 * `ResponseAsync<T>` is a task-like type that can be used on `async` functions to catch, and log exceptions thrown in a method.
+* Added async method builders for `Task`, and `ValueTask` to safely create `Response` types.
+* Added a value type verion of `Later<T>` - `ValueLater<T>`.

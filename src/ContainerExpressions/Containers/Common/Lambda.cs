@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ContainerExpressions.Containers.Common.Models;
+using System;
 
 namespace ContainerExpressions.Containers
 {
@@ -16,5 +17,24 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Discards the function input, and returns the specified result (of a different type to the input type).</summary>
         public static Func<T, TResult> Default<T, TResult>(TResult result = default) => _ => result;
+
+        // Wrap method delegates, so the complier can recognise them as Func{TResult} types. 
+        public static Func<TResult> ToFunc<TResult>(this Func<TResult> func) => func;
+
+        // Wrap method delegates, so the complier can recognise them as Action types. 
+        public static Action ToAction(this Action action) => action;
+
+        // Create a function wrapper that takes 0 args.
+        public static Parameters Args() => new();
+
+        // Create a function wrapper that takes 1 arg.
+        public static Parameters<T1> Args<T1>(T1 t1) => new(t1);
+
+        #region Parameters Permutations
+
+        // Create a function wrapper that takes n args.
+        public static Parameters<T1, T2> Args<T1, T2>(T1 t1, T2 t2) => new(t1, t2);
+
+        #endregion
     }
 }

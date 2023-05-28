@@ -140,5 +140,5 @@ namespace ContainerExpressions.Containers
 
     file static class InstanceAsync<T> { public static readonly Task<T> Value = Task.FromResult<T>(default(T)); }
 
-    file static class InstanceResponseAsync<T> { public static readonly ResponseAsync<T> Value = ResponseAsync<T>.FromResult(default(T)); }
+    file static class InstanceResponseAsync<T> { public static readonly ResponseAsync<T> Value = ResponseAsync.FromResult<T>(default(T)); }
 }

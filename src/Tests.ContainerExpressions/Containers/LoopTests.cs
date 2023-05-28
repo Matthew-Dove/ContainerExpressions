@@ -253,7 +253,6 @@ namespace Tests.ContainerExpressions.Containers
         {
             var loop = new Loop<string>(Array.Empty<string>());
 
-            var i = 0;
             foreach (var item in loop)
             {
                 Assert.AreEqual(1, 2);
