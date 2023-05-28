@@ -6,7 +6,6 @@ using System.Collections.Concurrent;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks.Sources;
 using ContainerExpressions.Containers.Common;
-using System.Diagnostics;
 
 namespace ContainerExpressions.Containers
 {

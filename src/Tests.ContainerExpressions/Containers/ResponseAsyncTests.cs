@@ -16,13 +16,28 @@ namespace Tests.ContainerExpressions.Containers
 
         #region Test Functions
 
-        private static ResponseAsync<int> RunAwaiters() => RunAwaitersWithDelay(1);
-
-        private static async ResponseAsync<int> RunAwaitersWithDelay(short delay) // ResponseAsyncAwaiter
+        private static async ResponseAsync<int> RunAwaiters()
         {
             await Task.Yield(); // YieldAwaiter
-            await new ValueTask<string>("Hello, World!"); // ValueTaskAwaiter
-            return await Task.Delay(delay).ContinueWith(_ => _result); // TaskAwaiter
+            await ResponseAsync.FromResult("Hello"); // ResponseAsyncAwaiter
+            await new ValueTask<string>("World"); // ValueTaskAwaiter
+            return await Task.Delay(1).ContinueWith(_ => _result); // TaskAwaiter
+        }
+
+        private static async Task<int> RunAwaitersWithTask()
+        {
+            await Task.Yield();
+            await ResponseAsync.FromResult("Hello");
+            await new ValueTask<string>("World");
+            return await Task.Delay(1).ContinueWith(_ => _result);
+        }
+
+        private static async ValueTask<int> RunAwaitersWithValueTask()
+        {
+            await Task.Yield();
+            await ResponseAsync.FromResult("Hello");
+            await new ValueTask<string>("World");
+            return await Task.Delay(1).ContinueWith(_ => _result);
         }
 
         private static async ResponseAsync<int> ThrowError(bool throwBeforeAwait = false) { if (throwBeforeAwait) throw new Exception("Error!"); await Task.CompletedTask; throw new Exception("Error!"); }
@@ -61,6 +76,24 @@ namespace Tests.ContainerExpressions.Containers
         public async Task Happy_Path()
         {
             var result = await RunAwaiters();
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(_result, result);
+        }
+
+        [TestMethod]
+        public async Task Happy_Path_WithTask()
+        {
+            var result = await RunAwaitersWithTask().AsResponse();
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(_result, result);
+        }
+
+        [TestMethod]
+        public async Task Happy_Path_WithValueTask()
+        {
+            var result = await RunAwaitersWithValueTask().AsResponse();
 
             Assert.IsTrue(result);
             Assert.AreEqual(_result, result);
