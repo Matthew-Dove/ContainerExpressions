@@ -5,7 +5,6 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Runtime.CompilerServices;
-using System.Diagnostics;
 
 namespace Tests.ContainerExpressions.Containers
 {
@@ -187,10 +186,9 @@ namespace Tests.ContainerExpressions.Containers
         public void Many_Threads()
         {
             var isError = false;
-            var func = RunAwaiters();
 
             Parallel.For(0, _numThreads, async _ => {
-                var result = await func;
+                var result = await RunAwaiters();
                 if (!result.IsTrue(x => x == _result)) Volatile.Write(ref isError, true);
             });
 
@@ -201,10 +199,9 @@ namespace Tests.ContainerExpressions.Containers
         public void Many_Threads_Task()
         {
             var isError = false;
-            var func = RunAwaiters().AsTask();
 
             Parallel.For(0, _numThreads, async _ => {
-                var result = await func;
+                var result = await RunAwaiters().AsTask();
                 if (!result.IsTrue(x => x == _result)) Volatile.Write(ref isError, true);
             });
 
@@ -215,10 +212,9 @@ namespace Tests.ContainerExpressions.Containers
         public void Many_Threads_ValueTask()
         {
             var isError = false;
-            var func = RunAwaiters();
 
             Parallel.For(0, _numThreads, async _ => {
-                var result = await func.AsValueTask();
+                var result = await RunAwaiters().AsValueTask();
                 if (!result.IsTrue(x => x == _result)) Volatile.Write(ref isError, true);
             });
 
