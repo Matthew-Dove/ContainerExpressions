@@ -562,8 +562,8 @@ namespace ContainerExpressions.Containers
 
         public ValueTaskSourceStatus GetStatus(short token)
         {
-            if (_sources.TryGetValue(token, out SourceBag<T> source) && source.Status != null) return source.Status;
-            return ValueTaskSourceStatus.Pending;
+            _sources.TryGetValue(token, out SourceBag<T> source);
+            return source?.Status?.Value ?? ValueTaskSourceStatus.Pending;
         }
 
         public void OnCompleted(Action<object> continuation, object state, short token, ValueTaskSourceOnCompletedFlags flags)
