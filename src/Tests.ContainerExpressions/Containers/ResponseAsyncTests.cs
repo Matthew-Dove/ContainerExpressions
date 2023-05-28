@@ -150,7 +150,7 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        public void Many_Threads()
+        public void Many_Threads0()
         {
             var isError = false;
             var func = RunAwaiters();
@@ -189,6 +189,18 @@ namespace Tests.ContainerExpressions.Containers
             });
 
             Assert.IsFalse(Volatile.Read(ref isError));
+        }
+
+        [TestMethod]
+        public async Task Many_Threads_WhenAll()
+        {
+            var tasks = new Task<Response<int>>[_numThreads];
+            for (int i = 0; i < _numThreads; i++) tasks[i] = RunAwaiters();
+
+            var results = await Task.WhenAll(tasks);
+
+            var count = results.Count(x => x.IsTrue(y => y == _result));
+            Assert.AreEqual(_numThreads, count);
         }
 
         [TestMethod]
