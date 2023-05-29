@@ -12,7 +12,7 @@ namespace Tests.ContainerExpressions.Containers
     public class ResponseAsyncTests
     {
         private const int _result = 1;
-        private static readonly int _numThreads = Environment.ProcessorCount - 1;
+        private static readonly int _numThreads = Environment.ProcessorCount;
 
         #region Test Functions
 
@@ -94,6 +94,33 @@ namespace Tests.ContainerExpressions.Containers
         public async Task Happy_Path_WithValueTask()
         {
             var result = await RunAwaitersWithValueTask().AsResponse();
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(_result, result);
+        }
+
+        [TestMethod]
+        public void Happy_Path_Blocking()
+        {
+            var result = RunAwaiters().GetAwaiter().GetResult();
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(_result, result);
+        }
+
+        [TestMethod]
+        public void Happy_Path_WithTask_Blocking()
+        {
+            var result = RunAwaitersWithTask().AsResponse().GetAwaiter().GetResult();
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(_result, result);
+        }
+
+        [TestMethod]
+        public void Happy_Path_WithValueTask_Blocking()
+        {
+            var result = RunAwaitersWithValueTask().AsResponse().GetAwaiter().GetResult();
 
             Assert.IsTrue(result);
             Assert.AreEqual(_result, result);

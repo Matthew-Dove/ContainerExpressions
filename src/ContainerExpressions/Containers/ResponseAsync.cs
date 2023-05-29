@@ -25,41 +25,52 @@ namespace ContainerExpressions.Containers
             set { Volatile.Write(ref _result, value); }
         }
 
+        public bool IsCompleted
+        {
+            get { return _isCompleted == default ? Volatile.Read(ref _isCompleted) : _isCompleted; }
+            set { Volatile.Write(ref _isCompleted, value); }
+        }
+
         public TaskCompletionSource<Response<T>> Tcs
         {
             get { return _tcs == default ? Volatile.Read(ref _tcs) : _tcs; }
             set { Volatile.Write(ref _tcs, value); }
         }
 
-        public readonly ManualResetEventSlim Sync;
-        public bool IsDisposed;
+        public Action Continuation
+        {
+            get { return _continuation == default ? Volatile.Read(ref _continuation) : _continuation; }
+            set { Volatile.Write(ref _continuation, value); }
+        }
 
         private Box<T> _result;
+        private bool _isCompleted;
         private TaskCompletionSource<Response<T>> _tcs;
+        private Action _continuation;
 
         public Bag(T result)
         {
             Result = new Box<T>(result);
-            Sync = default;
-            IsDisposed = true;
+            _isCompleted = true;
             Tcs = default;
+            _continuation = default;
         }
 
         public Bag(Exception ex)
         {
             Result = default;
-            Sync = default;
-            IsDisposed = true;
+            _isCompleted = true;
             Tcs = default;
+            _continuation = default;
             ex.LogError();
         }
 
         public Bag()
         {
             Result = default;
-            Sync = new ManualResetEventSlim(false);
-            IsDisposed = false;
+            _isCompleted = false;
             Tcs = default;
+            _continuation = default;
         }
     }
 
@@ -71,7 +82,7 @@ namespace ContainerExpressions.Containers
     * 4) When the method result returns (or an exception is thrown / task is canceled), inform the awaiter the task is completed; and the result is ready.
     **/
     [AsyncMethodBuilder(typeof(ResponseAsyncMethodBuilder<>))]
-    public readonly struct ResponseAsync<T> : IDisposable
+    public readonly struct ResponseAsync<T>
     {
         private readonly Bag<T> _bag;
 
@@ -85,20 +96,14 @@ namespace ContainerExpressions.Containers
         public ResponseAsync() { _bag = new Bag<T>(); }
 
         // When true, the value is ready to be read.
-        internal bool IsCompleted() { if (_bag.IsDisposed) return true; lock (_bag.Sync) { return _bag.IsDisposed; } } // Try lock free read first.
+        internal bool IsCompleted() => _bag.IsCompleted;
 
-        // Called by the awaiter, after the state machine has finished, and before the result has been calculated (when using the await keyword).
-        internal void Wait()
-        {
-            if (_bag.IsDisposed) return; // Try lock free read first.
-            lock (_bag.Sync) { if (_bag.IsDisposed) return; }
-            _bag.Sync.Wait();
-            Dispose(disposing: true);
-        }
+        internal void OnCompleted(Action continuation) => _bag.Continuation = continuation;
 
         // Called by the awaiter when the result is requested (either manually by getting the awaiter, or when using the await keyword).
         internal Response<T> GetValue()
         {
+            if (!_bag.IsCompleted) return AsTask().GetAwaiter().GetResult();
             var result = _bag.Result;
             return result == null ? new Response<T>() : new Response<T>(result.Value); // If null, then a result was never set for this task.
         }
@@ -107,37 +112,43 @@ namespace ContainerExpressions.Containers
         internal void SetValue(T value)
         {
             _bag.Result = new Box<T>(value);
+            _bag.IsCompleted = true;
             _bag.Tcs?.SetResult(Response.Create(value));
-            _bag.Sync.Set();
+            _bag.Continuation?.Invoke();
         }
 
         // Called by the state machine when the method has thrown an exception.
         internal void SetException(Exception ex)
         {
             ex.LogError();
+            _bag.IsCompleted = true;
             _bag.Tcs?.SetResult(new Response<T>());
-            _bag.Sync.Set();
+            _bag.Continuation?.Invoke();
         }
 
         // Convert ResponseAsync{T} into a Task{T} type.
         public Task<Response<T>> AsTask()
         {
-            if (_bag.Tcs == null)
+            var tcs = _bag.Tcs;
+            if (tcs == null)
             {
-                lock (_bag.Sync) // The user calls this (from who knows where, how many times), and we only want the tcs created once.
+                lock (_bag)
                 {
-                    if (_bag.Tcs == null)
+                    tcs = _bag.Tcs;
+                    if (tcs == null)
                     {
-                        _bag.Tcs = new TaskCompletionSource<Response<T>>();
-                        if (_bag.IsDisposed || _bag.Result != default)
+                        tcs = new TaskCompletionSource<Response<T>>();
+                        if (_bag.IsCompleted)
                         {
-                            if (_bag.Result != default) _bag.Tcs.SetResult(Response.Create(_bag.Result.Value)); // Task is completed.
-                            else _bag.Tcs.SetResult(new Response<T>()); // There is no result, as the task generated an exception, or was canceled.
+                            var result = _bag.Result;
+                            if (result != default) tcs.SetResult(Response.Create(result.Value)); // Task is completed.
+                            else tcs.SetResult(new Response<T>()); // There is no result, as the task generated an exception, or was canceled.
                         }
+                        _bag.Tcs = tcs;
                     }
                 }
             }
-            return _bag.Tcs.Task;
+            return tcs.Task;
         }
 
         // Convert ResponseAsync{T} into a ValueTask{T} type.
@@ -145,7 +156,7 @@ namespace ContainerExpressions.Containers
         {
             ValueTask<Response<T>> vt;
 
-            if (_bag.IsDisposed || _bag.Result != default)
+            if (_bag.IsCompleted)
             {
                 if (_bag.Result != default) vt = new(Response.Create(_bag.Result.Value)); // Task is completed.
                 else vt = new(new Response<T>()); // There is no result, as the task generated an exception, or was canceled.
@@ -156,30 +167,6 @@ namespace ContainerExpressions.Containers
             }
 
             return vt;
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (!_bag.IsDisposed)
-            {
-                lock (_bag.Sync)
-                {
-                    if (!_bag.IsDisposed) // This disposed flag also tells us the task is finished (when true).
-                    {
-                        if (disposing)
-                        {
-                            _bag.Sync.Dispose();
-                        }
-                        _bag.IsDisposed = true;
-                    }
-                }
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
 
         // Custom awaiter to convert ResponseAsync{T} into Response{T}, when using the await keyword.
@@ -309,17 +296,9 @@ namespace ContainerExpressions.Containers
 
         public void UnsafeOnCompleted(Action continuation) => OnCompleted(continuation);
 
-        public void OnCompleted(Action continuation)
-        {
-            _response.Wait(); // Wait for the value to be generated, or for some exception.
-            continuation(); // Get the final result.
-        }
+        public void OnCompleted(Action continuation) => _response.OnCompleted(continuation);
 
-        public Response<T> GetResult()
-        {
-            _response.Wait(); // Callers may skip using await, and use this.GetAwaiter().GetResult() instead, so we need to call Wait() here too.
-            return _response.GetValue(); // Gets the value, or an invalid response when an exception was set instead of a value.
-        }
+        public Response<T> GetResult() => _response.GetValue();
     }
 
     /**
