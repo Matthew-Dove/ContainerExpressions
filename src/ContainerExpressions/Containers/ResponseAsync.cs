@@ -31,7 +31,7 @@ namespace ContainerExpressions.Containers
             set { Volatile.Write(ref _tcs, value); }
         }
 
-        public readonly ManualResetEvent Sync;
+        public readonly ManualResetEventSlim Sync;
         public bool IsDisposed;
 
         private Box<T> _result;
@@ -57,7 +57,7 @@ namespace ContainerExpressions.Containers
         public Bag()
         {
             Result = default;
-            Sync = new ManualResetEvent(false);
+            Sync = new ManualResetEventSlim(false);
             IsDisposed = false;
             Tcs = default;
         }
@@ -92,7 +92,7 @@ namespace ContainerExpressions.Containers
         {
             if (_bag.IsDisposed) return; // Try lock free read first.
             lock (_bag.Sync) { if (_bag.IsDisposed) return; }
-            _bag.Sync.WaitOne();
+            _bag.Sync.Wait();
             Dispose(disposing: true);
         }
 
@@ -512,16 +512,16 @@ namespace ContainerExpressions.Containers
     // Alterative to the provided ManualResetValueTaskSourceCore{T} implementation.
     public sealed class ValueTaskSource<T> : IValueTaskSource<T>
     {
-        private static readonly ConcurrentDictionary<short, SourceBag<T>> _sources;
+        private static readonly ConcurrentDictionary<Box<short>, SourceBag<T>> _sources;
 
-        static ValueTaskSource() { _sources = new ConcurrentDictionary<short, SourceBag<T>>(); }
+        static ValueTaskSource() { _sources = new ConcurrentDictionary<Box<short>, SourceBag<T>>(); }
 
         public short GetToken() => ValueTaskSource.GetNextToken();
 
         private static bool WaitFor(short token)
         {
-            if (_sources.ContainsKey(token)) return true;
-            return SpinWait.SpinUntil(() => _sources.ContainsKey(token), 250);
+            if (_sources.ContainsKey(new Box<short>(token))) return true;
+            return SpinWait.SpinUntil(() => _sources.ContainsKey(new Box<short>(token)), 250);
         }
 
         public void SetResult(short token, T result)
@@ -531,7 +531,7 @@ namespace ContainerExpressions.Containers
                 Result = new Box<T>(result),
                 Status = new Box<ValueTaskSourceStatus>(ValueTaskSourceStatus.Succeeded)
             };
-            _sources.TryAdd(token, source);
+            _sources.TryAdd(new Box<short>(token), source);
         }
 
         public void SetException(short token, ExceptionDispatchInfo ex)
@@ -541,14 +541,14 @@ namespace ContainerExpressions.Containers
                 Error = ex,
                 Status = new Box<ValueTaskSourceStatus>(ValueTaskSourceStatus.Faulted)
             };
-            _sources.TryAdd(token, source);
+            _sources.TryAdd(new Box<short>(token), source);
         }
 
         public T GetResult(short token)
         {
             WaitFor(token);
 
-            _sources.TryRemove(token, out SourceBag<T> source);
+            _sources.TryRemove(new Box<short>(token), out SourceBag<T> source);
 
             var result = source?.Result;
             if (result is not null) return result.Value;
@@ -562,7 +562,7 @@ namespace ContainerExpressions.Containers
 
         public ValueTaskSourceStatus GetStatus(short token)
         {
-            _sources.TryGetValue(token, out SourceBag<T> source);
+            _sources.TryGetValue(new Box<short>(token), out SourceBag<T> source);
             return source?.Status?.Value ?? ValueTaskSourceStatus.Pending;
         }
 
