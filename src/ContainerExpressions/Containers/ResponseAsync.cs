@@ -158,7 +158,8 @@ namespace ContainerExpressions.Containers
 
             if (_bag.IsCompleted)
             {
-                if (_bag.Result != default) vt = new(Response.Create(_bag.Result.Value)); // Task is completed.
+                var result = _bag.Result;
+                if (result != default) vt = new(Response.Create(result.Value)); // Task is completed.
                 else vt = new(new Response<T>()); // There is no result, as the task generated an exception, or was canceled.
             }
             else
