@@ -940,11 +940,8 @@ This keeps their task-like types, and awaiters intact; only replacing the method
 We have the following options available:
 * `ResponseAsyncTaskCompletionSource<T>:` use on a method returning a `Task<Response<T>>`, or a `Task<T>` type.
 * `ResponseAsyncValueTaskCompletionSource<T>:` use on a method returning a `ValueTask<Response<T>>`, or a `ValueTask<T>` type.
-* `ResponseAsyncValueTaskSource<T>:` use on a method returning a `ValueTask<Response<T>>`, or a `ValueTask<T>` type.
 
 If the method returns a `T`, instead of a `Response<T>`, errors will still be logged, but they will also be thrown if you attempt to get the result.  
-The main difference between `ResponseAsyncValueTaskCompletionSource<T>`, and `ResponseAsyncValueTaskSource<T>`, is that `ResponseAsyncValueTaskSource<T>` avoids creating a TaskCompletionSource; which may, *or may not* be an optimization for your use case.  
-That said, both of those async method builders have the same logical effect (*but different implementations*).
 
 Example usage:
 ```cs
