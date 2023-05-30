@@ -18,25 +18,25 @@ namespace ContainerExpressions.Containers
         public Box<T> Result
         {
             get { return _result == default ? Volatile.Read(ref _result) : _result; }
-            set { Volatile.Write(ref _result, value); }
+            set { _result = value; Volatile.Write(ref _result, value); }
         }
 
         public bool IsCompleted
         {
             get { return _isCompleted == default ? Volatile.Read(ref _isCompleted) : _isCompleted; }
-            set { Volatile.Write(ref _isCompleted, value); }
+            set { _isCompleted = value; Volatile.Write(ref _isCompleted, value); }
         }
 
         public TaskCompletionSource<Response<T>> Tcs
         {
             get { return _tcs == default ? Volatile.Read(ref _tcs) : _tcs; }
-            set { Volatile.Write(ref _tcs, value); }
+            set { _tcs = value; Volatile.Write(ref _tcs, value); }
         }
 
         public Action Continuation
         {
             get { return _continuation == default ? Volatile.Read(ref _continuation) : _continuation; }
-            set { Volatile.Write(ref _continuation, value); }
+            set { _continuation = value; Volatile.Write(ref _continuation, value); }
         }
 
         private Box<T> _result;
