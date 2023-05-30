@@ -935,12 +935,8 @@ var error = await GetError(); // Result: No value, as an error occurred (but no 
 
 ## Custom Async Method Builders
 
-Override the default async method builders for `Task`, and `ValueTask`.  
+Override the default async method builder for `Task`, and `Task<T>` / `Task<Response<T>>`.  
 This keeps their task-like types, and awaiters intact; only replacing the method builder implementation (*specifically around exception handling*).  
-We have the following options available:
-* `ResponseAsyncTaskCompletionSource<T>:` use on a method returning a `Task<Response<T>>`, or a `Task<T>` type.
-* `ResponseAsyncValueTaskCompletionSource<T>:` use on a method returning a `ValueTask<Response<T>>`, or a `ValueTask<T>` type.
-
 If the method returns a `T`, instead of a `Response<T>`, errors will still be logged, but they will also be thrown if you attempt to get the result.  
 
 Example usage:

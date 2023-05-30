@@ -45,20 +45,8 @@ namespace Tests.ContainerExpressions.Containers
         [AsyncMethodBuilder(typeof(ResponseAsyncTaskCompletionSource<>))]
         private static async Task<Response<int>> TaskError(bool throwBeforeAwait = false) { if (throwBeforeAwait) throw new Exception("Error!"); await Task.CompletedTask; throw new Exception("Error!"); }
 
-        [AsyncMethodBuilder(typeof(ResponseAsyncValueTaskCompletionSource<>))]
-        private static async ValueTask<Response<int>> ValueTaskError(bool throwBeforeAwait = false) { if (throwBeforeAwait) throw new Exception("Error!"); await Task.CompletedTask; throw new Exception("Error!"); }
-
-        [AsyncMethodBuilder(typeof(ResponseAsyncValueTaskSource<>))]
-        private static async ValueTask<Response<int>> ValueTaskSourceError(bool throwBeforeAwait = false) { if (throwBeforeAwait) throw new Exception("Error!"); await Task.CompletedTask; throw new Exception("Error!"); }
-
         [AsyncMethodBuilder(typeof(ResponseAsyncTaskCompletionSource<>))]
         private static async Task<Response<int>> TaskDelay() { await Task.Delay(1); return Response.Create(_result); }
-
-        [AsyncMethodBuilder(typeof(ResponseAsyncValueTaskCompletionSource<>))]
-        private static async ValueTask<Response<int>> ValueTaskDelay() { await Task.Delay(1); return Response.Create(_result); }
-
-        [AsyncMethodBuilder(typeof(ResponseAsyncValueTaskSource<>))]
-        private static async ValueTask<Response<int>> ValueTaskSourceDelay() { await Task.Delay(1); return Response.Create(_result); }
 
         private static int TryGetResult() => throw new Exception("Error!");
         private static int GetResult0() => _result;
@@ -329,71 +317,12 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        public async Task AsyncMethodBuilder_ValueTaskError()
-        {
-            var blocking1 = ValueTaskError().GetAwaiter().GetResult();
-            var blocking2 = ValueTaskError(throwBeforeAwait: true).GetAwaiter().GetResult();
-
-            var result1 = await ValueTaskError();
-            var result2 = await ValueTaskError(throwBeforeAwait: true);
-
-            Assert.IsFalse(blocking1);
-            Assert.IsFalse(blocking2);
-
-            Assert.IsFalse(result1);
-            Assert.IsFalse(result2);
-        }
-
-        [TestMethod]
-        public async Task AsyncMethodBuilder_ValueTaskSourceError()
-        {
-            var blocking1 = ValueTaskSourceError().GetAwaiter().GetResult();
-            var blocking2 = ValueTaskSourceError(throwBeforeAwait: true).GetAwaiter().GetResult();
-
-            var result1 = await ValueTaskSourceError();
-            var result2 = await ValueTaskSourceError(throwBeforeAwait: true);
-
-            Assert.IsFalse(blocking1);
-            Assert.IsFalse(blocking2);
-
-            Assert.IsFalse(result1);
-            Assert.IsFalse(result2);
-        }
-
-        [TestMethod]
         public void Many_Threads_TaskDelay()
         {
             var isError = false;
 
             Parallel.For(0, _numThreads, async _ => {
                 var result = await TaskDelay();
-                if (!result.IsTrue(x => x == _result)) Volatile.Write(ref isError, true);
-            });
-
-            Assert.IsFalse(Volatile.Read(ref isError));
-        }
-
-        [TestMethod]
-        public void Many_Threads_ValueTaskDelay()
-        {
-            var isError = false;
-
-            Parallel.For(0, _numThreads, async _ => {
-                var result = await ValueTaskDelay();
-                if (!result.IsTrue(x => x == _result)) Volatile.Write(ref isError, true);
-            });
-
-            Assert.IsFalse(Volatile.Read(ref isError));
-        }
-
-        [TestMethod]
-        public void Many_Threads_ValueTaskSourceDelay()
-        {
-            var isError = false;
-
-            Parallel.For(0, _numThreads, async _ =>
-            {
-                var result = await ValueTaskSourceDelay();
                 if (!result.IsTrue(x => x == _result)) Volatile.Write(ref isError, true);
             });
 
