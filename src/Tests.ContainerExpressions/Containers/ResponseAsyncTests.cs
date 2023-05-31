@@ -198,11 +198,11 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        public void Many_Threads()
+        public async Task Many_Threads()
         {
             var isError = false;
 
-            Parallel.For(0, _numThreads, async _ => {
+            await Parallel.ForEachAsync(Enumerable.Repeat(0, _numThreads), async (_, _) => {
                 var result = await RunAwaiters();
                 if (!result.IsTrue(x => x == _result)) Volatile.Write(ref isError, true);
             });
@@ -211,11 +211,11 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        public void Many_Threads_Task()
+        public async Task Many_Threads_Task()
         {
             var isError = false;
 
-            Parallel.For(0, _numThreads, async _ => {
+            await Parallel.ForEachAsync(Enumerable.Repeat(0, _numThreads), async (_, _) => {
                 var result = await RunAwaiters().AsTask();
                 if (!result.IsTrue(x => x == _result)) Volatile.Write(ref isError, true);
             });
@@ -224,11 +224,11 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        public void Many_Threads_ValueTask()
+        public async Task Many_Threads_ValueTask()
         {
             var isError = false;
 
-            Parallel.For(0, _numThreads, async _ => {
+            await Parallel.ForEachAsync(Enumerable.Repeat(0, _numThreads), async (_, _) => {
                 var result = await RunAwaiters().AsValueTask();
                 if (!result.IsTrue(x => x == _result)) Volatile.Write(ref isError, true);
             });
@@ -317,11 +317,11 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        public void Many_Threads_TaskDelay()
+        public async Task Many_Threads_TaskDelay()
         {
             var isError = false;
 
-            Parallel.For(0, _numThreads, async _ => {
+            await Parallel.ForEachAsync(Enumerable.Repeat(0, _numThreads), async (_, _) => {
                 var result = await TaskDelay();
                 if (!result.IsTrue(x => x == _result)) Volatile.Write(ref isError, true);
             });
