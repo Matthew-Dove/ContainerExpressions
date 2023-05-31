@@ -101,7 +101,7 @@ namespace ContainerExpressions.Containers
         {
             if (!_bag.IsCompleted) return AsTask().GetAwaiter().GetResult();
             var result = _bag.Result;
-            return result == null ? new Response<T>() : new Response<T>(result.Value); // If null, then a result was never set for this task.
+            return result == default ? new Response<T>() : new Response<T>(result.Value); // If null, then a result was never set for this task.
         }
 
         // Called by the state machine when the method has returned a result.
@@ -126,12 +126,12 @@ namespace ContainerExpressions.Containers
         public Task<Response<T>> AsTask()
         {
             var tcs = _bag.Tcs;
-            if (tcs == null)
+            if (tcs == default)
             {
                 lock (_bag)
                 {
                     tcs = _bag.Tcs;
-                    if (tcs == null)
+                    if (tcs == default)
                     {
                         tcs = new TaskCompletionSource<Response<T>>();
                         if (_bag.IsCompleted)

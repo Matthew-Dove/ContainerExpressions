@@ -22,6 +22,12 @@ namespace ContainerExpressions.Containers
         /// <summary>A Maybe Unit, with the error set.</summary>
         public static Maybe<Unit> MaybeError(Exception ex) => new Maybe<Unit>(ex);
 
+        /// <summary>A completed ResponseAsync Unit in a valid state.</summary>
+        public static ResponseAsync<Unit> ResponseAsyncSuccess => new ResponseAsync<Unit>(Instance);
+
+        /// <summary>A completed ResponseAsync Unit in an invalid state.</summary>
+        public static ResponseAsync<Unit> ResponseAsyncError(Exception ex) => new ResponseAsync<Unit>(ex);
+
         private Unit() { }
 
         public bool Equals(Unit other) => (object)other != null;
