@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
+using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers.Extensions
 {
@@ -10,21 +11,8 @@ namespace ContainerExpressions.Containers.Extensions
     {
         // TODO: Ensure all exceptions are thrown in another class / method, to improve the chance of them having a cold jit; and these being inlined at runtime.
 
-        public static void ThrowError<T>(
-            this T ex,
-            [CallerArgumentExpression(nameof(ex))] string argument = "",
-            [CallerMemberName] string caller = "",
-            [CallerFilePath] string path = "",
-            [CallerLineNumber] int line = 0
-            ) where T : Exception => throw ex;
-
-        public static void ThrowError(
-            this ExceptionDispatchInfo ex,
-            [CallerArgumentExpression(nameof(ex))] string argument = "",
-            [CallerMemberName] string caller = "",
-            [CallerFilePath] string path = "",
-            [CallerLineNumber] int line = 0
-            ) => ex.Throw();
+        public static void ThrowError<T>(this T ex) where T : Exception => Exception(ex);
+        public static void ThrowError(this ExceptionDispatchInfo ex) => Exception(ex);
 
         public static T ThrowIfNull<T>(
             this T target,
@@ -124,6 +112,50 @@ namespace ContainerExpressions.Containers.Extensions
         {
             if (target.CompareTo(max) > 0) ArgumentOutOfRangeException(argument);
             return target;
+        }
+
+        /**
+         * [ThrowIfFaultedOrCanceled]
+         * Task.Wait(), Task.Result, and the various awaiters already throw faulted, and canceled exceptions; if you try to access them in said state.
+         * The purpose of this wrapper then, is to only throw a single exception (instead of aggregate exceptions); when there is only 1 error present.
+        **/
+
+        public static Task ThrowIfFaultedOrCanceled(
+            this Task target,
+            [CallerArgumentExpression(nameof(target))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        {
+            if (target == null) return target;
+            if (!target.IsCompleted) return target.ContinueWith(CheckStatus);
+            CheckStatus(target);
+            return target;
+        }
+
+        public static Task<T> ThrowIfFaultedOrCanceled<T>(
+            this Task<T> target,
+            [CallerArgumentExpression(nameof(target))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        {
+            if (target == null) return target;
+            if (!target.IsCompleted) return target.ContinueWith(static t => { CheckStatus(t); return t.Result; });
+            CheckStatus(target);
+            return target;
+        }
+
+        private static void CheckStatus(Task task)
+        {
+            if (task.Status == TaskStatus.Faulted)
+            {
+                if (task.Exception.InnerExceptions.Count == 1) task.Exception.InnerException.ThrowError();
+                else task.Exception.ThrowError();
+            }
+            if (task.Status == TaskStatus.Canceled) TaskCanceledException(task);
         }
     }
 }

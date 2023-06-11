@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using System.Threading;
 using System;
+using ContainerExpressions.Containers.Extensions;
+using ContainerExpressions.Containers.Internal;
 
 namespace ContainerExpressions.Containers
 {
@@ -109,8 +111,8 @@ namespace ContainerExpressions.Containers
         {
             _bag.Result = new Box<T>(value);
             _bag.IsCompleted = true;
-            _bag.Tcs?.SetResult(Response.Create(value));
             _bag.Continuation?.Invoke();
+            _bag.Tcs?.SetResult(Response.Create(value));
         }
 
         // Called by the state machine when the method has thrown an exception.
@@ -118,8 +120,8 @@ namespace ContainerExpressions.Containers
         {
             ex.LogError();
             _bag.IsCompleted = true;
-            _bag.Tcs?.SetResult(new Response<T>());
             _bag.Continuation?.Invoke();
+            _bag.Tcs?.SetResult(new Response<T>());
         }
 
         // Convert ResponseAsync{T} into a Task{T} type.
@@ -179,7 +181,7 @@ namespace ContainerExpressions.Containers
         public static ResponseAsync<T> FromResult<T>(T result) => new ResponseAsync<T>(result);
 
         // Static helper for the public constructor to set an error.
-        public static ResponseAsync<T> FromError<T>(Exception ex) => new ResponseAsync<T>(ex);
+        public static ResponseAsync<T> FromException<T>(Exception ex) => new ResponseAsync<T>(ex);
 
         #region Task Converters
 
@@ -243,7 +245,155 @@ namespace ContainerExpressions.Containers
 
         #endregion
 
-        #region Awaiters
+        #region Task Awaiters
+
+        private static readonly ArgumentNullException _nullTaskError = new ArgumentNullException("Function, or task cannot be null while awaited.");
+
+        // TODO: Make others like this one. Test for: value / error / timeout.
+        public static TaskAwaiter GetAwaiter(this Func<Task> func)
+        {
+            try
+            {
+                var result = func == null ? default : func();
+                if (result == default) return Task.FromException(_nullTaskError).GetAwaiter();
+
+                return result.ContinueWith(static t =>
+                {
+                    t.LogErrorAsync().ThrowIfFaultedOrCanceled();
+                }).GetAwaiter();
+            }
+            catch (Exception ex)
+            {
+                return Task.FromException(ex.LogError()).GetAwaiter();
+            }
+        }
+
+        public static TaskAwaiter<T> GetAwaiter<T>(this Func<Task<T>> func)
+        {
+            try
+            {
+                var result = func == null ? default : func();
+                if (result == default) return Task.FromException<T>(_nullTaskError).GetAwaiter();
+
+                return result.ContinueWith(static t =>
+                {
+                    t.LogErrorAsync().ThrowIfFaultedOrCanceled();
+                    return t.Result;
+                }).GetAwaiter();
+            }
+            catch (Exception ex)
+            {
+                return Task.FromException<T>(ex.LogError()).GetAwaiter();
+            }
+        }
+
+        public static TaskAwaiter<Response<T>> GetAwaiter<T>(this Func<Task<Response<T>>> func)
+        {
+            try
+            {
+                var result = func == null ? default : func();
+                if (result == default) return Pool<T>.ResponseError.GetAwaiter();
+
+                return result.ContinueWith(static t =>
+                {
+                    if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result;
+                    if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                    return new Response<T>();
+                }).GetAwaiter();
+            }
+            catch (Exception ex)
+            {
+                ex.LogError();
+                return Pool<T>.ResponseError.GetAwaiter();
+            }
+        }
+
+        public static ValueTaskAwaiter GetAwaiter(this Func<ValueTask> func)
+        {
+            try
+            {
+                var result = func == null ? default : func();
+                if (result == default) return new ValueTask(Task.FromException(_nullTaskError)).GetAwaiter();
+
+                if (result.IsCompleted)
+                {
+                    if (result.IsCompletedSuccessfully) return result.GetAwaiter();
+                    if (result.IsFaulted) result.AsTask().Exception.LogError();
+                    return new ValueTask().GetAwaiter();
+                }
+
+                return new ValueTask(result.AsTask().ContinueWith(static t =>
+                {
+                    if (t.Status == TaskStatus.Faulted)
+                        t.Exception.LogError();
+                })).GetAwaiter();
+            }
+            catch (Exception ex)
+            {
+                ex.LogError();
+                return new ValueTask().GetAwaiter();
+            }
+        }
+
+        public static ValueTaskAwaiter<T> GetAwaiter<T>(this Func<ValueTask<T>> func)
+        {
+            try
+            {
+                var result = func == null ? default : func();
+                if (result == default) return new ValueTask<T>(Task.FromException<T>(_nullTaskError)).GetAwaiter();
+
+                if (result.IsCompleted)
+                {
+                    if (result.IsCompletedSuccessfully) return result.GetAwaiter();
+                    if (result.IsFaulted) result.AsTask().Exception.LogError();
+                    return new ValueTask<T>().GetAwaiter();
+                }
+
+                return new ValueTask<T>(result.AsTask().ContinueWith(static t =>
+                {
+                    if (t.Status == TaskStatus.RanToCompletion) return t.Result;
+                    if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                    return new Response<T>();
+                })).GetAwaiter();
+            }
+            catch (Exception ex)
+            {
+                ex.LogError();
+                return new ValueTask<T>(new Response<T>()).GetAwaiter();
+            }
+        }
+
+        public static ValueTaskAwaiter<Response<T>> GetAwaiter<T>(this Func<ValueTask<Response<T>>> func)
+        {
+            try
+            {
+                var result = func == null ? default : func();
+                if (result == default) return new ValueTask<Response<T>>(Task.FromException<Response<T>>(_nullTaskError)).GetAwaiter();
+
+                if (result.IsCompleted)
+                {
+                    if (result.IsCompletedSuccessfully) return result.GetAwaiter();
+                    if (result.IsFaulted) result.AsTask().Exception.LogError();
+                    return new ValueTask<Response<T>>(new Response<T>()).GetAwaiter();
+                }
+
+                return new ValueTask<Response<T>>(result.AsTask().ContinueWith(static t =>
+                {
+                    if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result;
+                    if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                    return new Response<T>();
+                })).GetAwaiter();
+            }
+            catch (Exception ex)
+            {
+                ex.LogError();
+                return new ValueTask<Response<T>>(new Response<T>()).GetAwaiter();
+            }
+        }
+
+        #endregion
+
+        #region Response Async Awaiters
 
         // Awaiter for a Func returning ResponseAsync{T}.
         public static ResponseAsyncAwaiter<T> GetAwaiter<T>(this Func<ResponseAsync<T>> func) => func().GetAwaiter();

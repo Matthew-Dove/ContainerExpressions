@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ContainerExpressions.Containers.Internal;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -7,6 +8,70 @@ namespace ContainerExpressions.Containers
     /// <summary>Extensions for the Trace Container.</summary>
     public static class TraceAsyncExtensions
     {
+        #region TError
+
+        /// <summary>Logs exceptions from faulted tasks.</summary>
+        public static Task LogErrorAsync(this Task task)
+        {
+            if (task == null) return default;
+            if (!task.IsCompleted) return task.ContinueWith(static t => { if (t.IsFaulted) TraceExtensions.LogException(t.Exception); t.Wait(); });
+            if (task.IsFaulted) TraceExtensions.LogException(task.Exception);
+            return task;
+        }
+
+        /// <summary>Logs exceptions from faulted tasks.</summary>
+        public static Task<T> LogErrorAsync<T>(this Task<T> task)
+        {
+            if (task == null) return default;
+            if (!task.IsCompleted) return task.ContinueWith(static t => { if (t.IsFaulted) TraceExtensions.LogException(t.Exception); return t.Result; });
+            if (task.IsFaulted) TraceExtensions.LogException(task.Exception);
+            return task;
+        }
+
+        /// <summary>Logs exceptions from faulted tasks.</summary>
+        public static Task<Response> LogErrorAsync(this Task<Response> task)
+        {
+            if (task == null) return default;
+
+            if (!task.IsCompleted) return task.ContinueWith(static t => {
+                if (t.IsFaulted) TraceExtensions.LogException(t.Exception);
+                return t.Status == TaskStatus.RanToCompletion ? t.Result : Response.Error;
+            });
+
+            if (task.IsFaulted) TraceExtensions.LogException(task.Exception);
+            return task.Status == TaskStatus.RanToCompletion ? task : Pool.ResponseError;
+        }
+
+        /// <summary>Logs exceptions from faulted tasks.</summary>
+        public static Task<Response<T>> LogErrorAsync<T>(this Task<Response<T>> task)
+        {
+            if (task == null) return default;
+
+            if (!task.IsCompleted) return task.ContinueWith(static t => {
+                if (t.IsFaulted) TraceExtensions.LogException(t.Exception);
+                return t.Status == TaskStatus.RanToCompletion ? t.Result : Response<T>.Error;
+            });
+
+            if (task.IsFaulted) TraceExtensions.LogException(task.Exception);
+            return task.Status == TaskStatus.RanToCompletion ? task : Pool<T>.ResponseError;
+        }
+
+        /// <summary>Logs exceptions from faulted tasks.</summary>
+        public static Task<Response<Unit>> LogErrorAsync(this Task<Response<Unit>> task)
+        {
+            if (task == null) return default;
+
+            if (!task.IsCompleted) return task.ContinueWith(static t => {
+                if (t.IsFaulted) TraceExtensions.LogException(t.Exception);
+                return t.Status == TaskStatus.RanToCompletion ? t.Result : Unit.ResponseError;
+            });
+
+            if (task.IsFaulted) TraceExtensions.LogException(task.Exception);
+            return task.Status == TaskStatus.RanToCompletion ? task : Pool.UnitResponseError;
+        }
+
+        #endregion
+
         #region T
 
         /// <summary>Logs a trace step.</summary>
@@ -15,8 +80,8 @@ namespace ContainerExpressions.Containers
         public static Task<T> LogValueAsync<T>(this Task<T> value, string message) => value.ContinueWith(x => {
             if (x.Status == TaskStatus.RanToCompletion) Trace.Log(message);
             else if (x.Status == TaskStatus.Faulted) TraceExtensions.LogException(x.Exception);
-            return x;
-        }).Unwrap();
+            return x.Result;
+        });
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="format">The message to trace.</param>
@@ -24,8 +89,8 @@ namespace ContainerExpressions.Containers
         public static Task<T> LogValueAsync<T>(this Task<T> value, Func<T, string> format) => value.ContinueWith(x => {
             if (x.Status == TaskStatus.RanToCompletion) Trace.Log(format(x.Result));
             else if (x.Status == TaskStatus.Faulted) TraceExtensions.LogException(x.Exception);
-            return x;
-        }).Unwrap();
+            return x.Result;
+        });
 
         #endregion
 

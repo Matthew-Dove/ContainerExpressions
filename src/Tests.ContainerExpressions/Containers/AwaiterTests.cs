@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Net;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Tests.ContainerExpressions.Containers
@@ -185,6 +186,152 @@ namespace Tests.ContainerExpressions.Containers
             var response = await new ResponseTask<int>(Task.FromResult(1));
             Assert.IsTrue(response);
             Assert.AreEqual(1, response);
+        }
+
+        [TestMethod]
+        public async Task Func_ResponseAsync_Awaiter_T_Ok()
+        {
+            Func<ResponseAsync<int>> func = () => ResponseAsync.FromResult(1);
+
+            var result = await func;
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(1, result);
+        }
+
+        [TestMethod]
+        public async Task Func_ResponseAsync_Awaiter_T_Error()
+        {
+            Func<ResponseAsync<int>> func = () => ResponseAsync.FromException<int>(new Exception("await error"));
+
+            var result = await func;
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Func_Awaiter_T_Ok()
+        {
+            Func<int> func = () => 1;
+
+            var result = await func;
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(1, result);
+        }
+
+        [TestMethod]
+        public async Task Func_Awaiter_T_Error()
+        {
+            Func<int> func = () => throw new Exception("await error");
+
+            var result = await func;
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Action_Awaiter_Ok()
+        {
+            Action action = () => { };
+
+            var result = await action;
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task Action_Awaiter_Error()
+        {
+            Action action = () => throw new Exception("await error");
+
+            var result = await action;
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Func_Task_Awaiter_Void_Ok()
+        {
+            Func<Task> func = () => Task.CompletedTask;
+
+            await func;
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormatException))]
+        public async Task Func_Task_Awaiter_Void_Exception()
+        {
+            Func<Task> func = () => Task.FromException(new FormatException());
+
+            await func;
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(TaskCanceledException))]
+        public async Task Func_Task_Awaiter_Void_Canceled()
+        {
+            Func<Task> func = () => Task.FromCanceled(new CancellationToken(true));
+
+            await func;
+        }
+
+        [TestMethod]
+        public async Task Func_Task_Awaiter_T_Ok()
+        {
+            Func<Task<int>> func = () => Task.FromResult(1);
+
+            var result = await func;
+
+            Assert.AreEqual(1, result);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormatException))]
+        public async Task Func_Task_Awaiter_T_Exception()
+        {
+            Func<Task<int>> func = () => Task.FromException<int>(new FormatException());
+
+            var result = await func;
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(TaskCanceledException))]
+        public async Task Func_Task_Awaiter_T_Canceled()
+        {
+            Func<Task<int>> func = () => Task.FromCanceled<int>(new CancellationToken(true));
+
+            var result = await func;
+        }
+
+        [TestMethod]
+        public async Task Func_Task_Awaiter_ResponseT_Ok()
+        {
+            Func<Task<Response<int>>> func = () => Task.FromResult(Response.Create(1));
+
+            var result = await func;
+
+            Assert.AreEqual(1, result);
+        }
+
+        [TestMethod]
+        public async Task Func_Task_Awaiter_ResponseT_Exception()
+        {
+            Func<Task<Response<int>>> func = () => Task.FromException<Response<int>>(new FormatException());
+
+            var result = await func;
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Func_Task_Awaiter_ResponseT_Canceled()
+        {
+            Func<Task<Response<int>>> func = () => Task.FromCanceled<Response<int>>(new CancellationToken(true));
+
+            var result = await func;
+
+            Assert.IsFalse(result);
         }
     }
 
