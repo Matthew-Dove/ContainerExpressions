@@ -305,6 +305,36 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
+        public async Task Func_Task_Awaiter_Response_Ok()
+        {
+            Func<Task<Response>> func = () => Task.FromResult(Response.Success);
+
+            var result = await func;
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task Func_Task_Awaiter_Response_Exception()
+        {
+            Func<Task<Response>> func = () => Task.FromException<Response>(new FormatException());
+
+            var result = await func;
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Func_Task_Awaiter_Response_Canceled()
+        {
+            Func<Task<Response>> func = () => Task.FromCanceled<Response>(new CancellationToken(true));
+
+            var result = await func;
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
         public async Task Func_Task_Awaiter_ResponseT_Ok()
         {
             Func<Task<Response<int>>> func = () => Task.FromResult(Response.Create(1));

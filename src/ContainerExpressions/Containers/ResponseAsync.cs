@@ -249,7 +249,7 @@ namespace ContainerExpressions.Containers
 
         private static readonly ArgumentNullException _nullTaskError = new ArgumentNullException("Function, or task cannot be null while awaited.");
 
-        // TODO: Make others like this one. Test for: value / error / timeout.
+        // Task
         public static TaskAwaiter GetAwaiter(this Func<Task> func)
         {
             try
@@ -268,6 +268,7 @@ namespace ContainerExpressions.Containers
             }
         }
 
+        // Task{T}
         public static TaskAwaiter<T> GetAwaiter<T>(this Func<Task<T>> func)
         {
             try
@@ -287,6 +288,29 @@ namespace ContainerExpressions.Containers
             }
         }
 
+        // Task{Response}
+        public static TaskAwaiter<Response> GetAwaiter(this Func<Task<Response>> func)
+        {
+            try
+            {
+                var result = func == null ? default : func();
+                if (result == default) return Pool.ResponseError.GetAwaiter();
+
+                return result.ContinueWith(static t =>
+                {
+                    if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result;
+                    if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                    return new Response();
+                }).GetAwaiter();
+            }
+            catch (Exception ex)
+            {
+                ex.LogError();
+                return Pool.ResponseError.GetAwaiter();
+            }
+        }
+
+        // Task{Response{T}}
         public static TaskAwaiter<Response<T>> GetAwaiter<T>(this Func<Task<Response<T>>> func)
         {
             try
@@ -308,6 +332,7 @@ namespace ContainerExpressions.Containers
             }
         }
 
+        // ValueTask
         public static ValueTaskAwaiter GetAwaiter(this Func<ValueTask> func)
         {
             try
@@ -335,6 +360,7 @@ namespace ContainerExpressions.Containers
             }
         }
 
+        // ValueTask{T}
         public static ValueTaskAwaiter<T> GetAwaiter<T>(this Func<ValueTask<T>> func)
         {
             try
@@ -363,6 +389,36 @@ namespace ContainerExpressions.Containers
             }
         }
 
+        // ValueTask{Response}
+        public static ValueTaskAwaiter<Response> GetAwaiter(this Func<ValueTask<Response>> func)
+        {
+            try
+            {
+                var result = func == null ? default : func();
+                if (result == default) return new ValueTask<Response>(Task.FromException<Response>(_nullTaskError)).GetAwaiter();
+
+                if (result.IsCompleted)
+                {
+                    if (result.IsCompletedSuccessfully) return result.GetAwaiter();
+                    if (result.IsFaulted) result.AsTask().Exception.LogError();
+                    return new ValueTask<Response>(new Response()).GetAwaiter();
+                }
+
+                return new ValueTask<Response>(result.AsTask().ContinueWith(static t =>
+                {
+                    if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result;
+                    if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                    return new Response();
+                })).GetAwaiter();
+            }
+            catch (Exception ex)
+            {
+                ex.LogError();
+                return new ValueTask<Response>(new Response()).GetAwaiter();
+            }
+        }
+
+        // ValueTask{Response{T}}
         public static ValueTaskAwaiter<Response<T>> GetAwaiter<T>(this Func<ValueTask<Response<T>>> func)
         {
             try
