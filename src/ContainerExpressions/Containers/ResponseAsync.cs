@@ -247,44 +247,47 @@ namespace ContainerExpressions.Containers
 
         #region Task Awaiters
 
-        private static readonly ArgumentNullException _nullTaskError = new ArgumentNullException("Function, or task cannot be null while awaited.");
-
         // Task
-        public static TaskAwaiter GetAwaiter(this Func<Task> func)
+        public static TaskAwaiter<Response> GetAwaiter(this Func<Task> func)
         {
             try
             {
                 var result = func == null ? default : func();
-                if (result == default) return Task.FromException(_nullTaskError).GetAwaiter();
+                if (result == default) return Pool.ResponseError.GetAwaiter();
 
                 return result.ContinueWith(static t =>
                 {
-                    t.LogErrorAsync().ThrowIfFaultedOrCanceled();
+                    if (t.Status == TaskStatus.RanToCompletion) return new Response(true);
+                    if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                    return new Response();
                 }).GetAwaiter();
             }
             catch (Exception ex)
             {
-                return Task.FromException(ex.LogError()).GetAwaiter();
+                ex.LogError();
+                return Pool.ResponseError.GetAwaiter();
             }
         }
 
         // Task{T}
-        public static TaskAwaiter<T> GetAwaiter<T>(this Func<Task<T>> func)
+        public static TaskAwaiter<Response<T>> GetAwaiter<T>(this Func<Task<T>> func)
         {
             try
             {
                 var result = func == null ? default : func();
-                if (result == default) return Task.FromException<T>(_nullTaskError).GetAwaiter();
+                if (result == default) return Pool<T>.ResponseError.GetAwaiter();
 
                 return result.ContinueWith(static t =>
                 {
-                    t.LogErrorAsync().ThrowIfFaultedOrCanceled();
-                    return t.Result;
+                    if (t.Status == TaskStatus.RanToCompletion) return new Response<T>(t.Result);
+                    if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                    return new Response<T>();
                 }).GetAwaiter();
             }
             catch (Exception ex)
             {
-                return Task.FromException<T>(ex.LogError()).GetAwaiter();
+                ex.LogError();
+                return Pool<T>.ResponseError.GetAwaiter();
             }
         }
 
@@ -333,51 +336,52 @@ namespace ContainerExpressions.Containers
         }
 
         // ValueTask
-        public static ValueTaskAwaiter GetAwaiter(this Func<ValueTask> func)
+        public static ValueTaskAwaiter<Response> GetAwaiter(this Func<ValueTask> func)
         {
             try
             {
-                var result = func == null ? default : func();
-                if (result == default) return new ValueTask(Task.FromException(_nullTaskError)).GetAwaiter();
+                if (func == null) return new ValueTask<Response>(Response.Error).GetAwaiter();
+                var result = func();
 
                 if (result.IsCompleted)
                 {
-                    if (result.IsCompletedSuccessfully) return result.GetAwaiter();
+                    if (result.IsCompletedSuccessfully) return new ValueTask<Response>(Response.Success).GetAwaiter();
                     if (result.IsFaulted) result.AsTask().Exception.LogError();
-                    return new ValueTask().GetAwaiter();
+                    return new ValueTask<Response>(Response.Error).GetAwaiter();
                 }
 
-                return new ValueTask(result.AsTask().ContinueWith(static t =>
+                return new ValueTask<Response>(result.AsTask().ContinueWith(static t =>
                 {
-                    if (t.Status == TaskStatus.Faulted)
-                        t.Exception.LogError();
+                    if (t.Status == TaskStatus.RanToCompletion) return Response.Success;
+                    if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                    return Response.Error;
                 })).GetAwaiter();
             }
             catch (Exception ex)
             {
                 ex.LogError();
-                return new ValueTask().GetAwaiter();
+                return new ValueTask<Response>(Response.Error).GetAwaiter();
             }
         }
 
         // ValueTask{T}
-        public static ValueTaskAwaiter<T> GetAwaiter<T>(this Func<ValueTask<T>> func)
+        public static ValueTaskAwaiter<Response<T>> GetAwaiter<T>(this Func<ValueTask<T>> func)
         {
             try
             {
-                var result = func == null ? default : func();
-                if (result == default) return new ValueTask<T>(Task.FromException<T>(_nullTaskError)).GetAwaiter();
+                if (func == null) return new ValueTask<Response<T>>(Response<T>.Error).GetAwaiter();
+                var result = func();
 
                 if (result.IsCompleted)
                 {
-                    if (result.IsCompletedSuccessfully) return result.GetAwaiter();
+                    if (result.IsCompletedSuccessfully) return new ValueTask<Response<T>>(Response.Create(result.Result)).GetAwaiter();
                     if (result.IsFaulted) result.AsTask().Exception.LogError();
-                    return new ValueTask<T>().GetAwaiter();
+                    return new ValueTask<Response<T>>(Response<T>.Error).GetAwaiter();
                 }
 
-                return new ValueTask<T>(result.AsTask().ContinueWith(static t =>
+                return new ValueTask<Response<T>>(result.AsTask().ContinueWith(static t =>
                 {
-                    if (t.Status == TaskStatus.RanToCompletion) return t.Result;
+                    if (t.Status == TaskStatus.RanToCompletion) return Response.Create(t.Result);
                     if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
                     return new Response<T>();
                 })).GetAwaiter();
@@ -385,7 +389,7 @@ namespace ContainerExpressions.Containers
             catch (Exception ex)
             {
                 ex.LogError();
-                return new ValueTask<T>(new Response<T>()).GetAwaiter();
+                return new ValueTask<Response<T>>(Response<T>.Error).GetAwaiter();
             }
         }
 
@@ -394,8 +398,8 @@ namespace ContainerExpressions.Containers
         {
             try
             {
-                var result = func == null ? default : func();
-                if (result == default) return new ValueTask<Response>(Task.FromException<Response>(_nullTaskError)).GetAwaiter();
+                if (func == null) return new ValueTask<Response>(Response.Error).GetAwaiter();
+                var result = func();
 
                 if (result.IsCompleted)
                 {
@@ -423,8 +427,8 @@ namespace ContainerExpressions.Containers
         {
             try
             {
-                var result = func == null ? default : func();
-                if (result == default) return new ValueTask<Response<T>>(Task.FromException<Response<T>>(_nullTaskError)).GetAwaiter();
+                if (func == null) return new ValueTask<Response<T>>(Response<T>.Error).GetAwaiter();
+                var result = func();
 
                 if (result.IsCompleted)
                 {

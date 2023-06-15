@@ -974,6 +974,17 @@ Assert.AreEqual(number, result);
 There are other custom awaiters available for `ValueTask`, and `Task`; along with their various **Packed** implementations.  
 All these types can be safely converted to `Response` / `Response<T>` using the `await` keyword:  
 
+* `Action`
+* `Func<T>`
+* `Func<Task>`
+* `Func<Task<T>>`
+* `Func<Task<Response>>`
+* `Func<Task<Response<T>>>`
+* `Func<ValueTask>`
+* `Func<ValueTask<T>>`
+* `Func<ValueTask<Response>>`
+* `Func<ValueTask<Response<T>>>`
+* `Func<ResponseAsync<T>>`
 * `Response<ValueTask>`
 * `Response<ValueTask<T>>`
 * `Response<Task>`
@@ -982,9 +993,6 @@ All these types can be safely converted to `Response` / `Response<T>` using the 
 * `Response<Task<Response<Task<Response>>>>`
 * `Response<Task<Response<Response<T>>>>`
 * `Response<Task<Response<Task<Response<T>>>>>`
-* `Func<ResponseAsync<T>>`
-* `Func<T>`
-* `Action`
 
 ## ResponseValueTask`<T>`
 

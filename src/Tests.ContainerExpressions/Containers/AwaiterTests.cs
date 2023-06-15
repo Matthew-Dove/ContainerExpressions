@@ -259,21 +259,23 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        [ExpectedException(typeof(FormatException))]
         public async Task Func_Task_Awaiter_Void_Exception()
         {
             Func<Task> func = () => Task.FromException(new FormatException());
 
-            await func;
+            var result = await func;
+
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
-        [ExpectedException(typeof(TaskCanceledException))]
         public async Task Func_Task_Awaiter_Void_Canceled()
         {
             Func<Task> func = () => Task.FromCanceled(new CancellationToken(true));
 
-            await func;
+            var result = await func;
+
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -287,21 +289,23 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        [ExpectedException(typeof(FormatException))]
         public async Task Func_Task_Awaiter_T_Exception()
         {
             Func<Task<int>> func = () => Task.FromException<int>(new FormatException());
 
             var result = await func;
+
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
-        [ExpectedException(typeof(TaskCanceledException))]
         public async Task Func_Task_Awaiter_T_Canceled()
         {
             Func<Task<int>> func = () => Task.FromCanceled<int>(new CancellationToken(true));
 
             var result = await func;
+
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -362,6 +366,116 @@ namespace Tests.ContainerExpressions.Containers
             var result = await func;
 
             Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Func_ValueTask_Awaiter_ValueResponse_Ok()
+        {
+            Func<ValueTask> func = () => new ValueTask();
+
+            var result = await func;
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task Func_ValueTask_Awaiter_TaskResponse_Ok()
+        {
+            Func<ValueTask> func = () => new ValueTask(Task.CompletedTask);
+
+            var result = await func;
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task Func_ValueTask_Awaiter_TaskResponse_Delay()
+        {
+            Func<ValueTask> func = () => new ValueTask(Task.Delay(1));
+
+            var result = await func;
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task Func_ValueTask_Awaiter_ValueResponse_FuncIsNull()
+        {
+            Func<ValueTask> func = null;
+
+            var result = await func;
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Func_ValueTask_Awaiter_TaskResponse_Error()
+        {
+            Func<ValueTask> func = () => new ValueTask(Task.FromException(new FormatException()));
+
+            var result = await func;
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Func_ValueTask_Awaiter_TaskResponse_DelayedError()
+        {
+            Func<ValueTask> func = () => new ValueTask(Task.Delay(1).ContinueWith(_ => throw new FormatException()));
+
+            var result = await func;
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Func_ValueTask_Awaiter_TaskResponse_Cancel()
+        {
+            Func<ValueTask> func = () => new ValueTask(Task.FromCanceled(new CancellationToken(true)));
+
+            var result = await func;
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Func_ValueTask_Awaiter_TaskResponse_DelayedCancel()
+        {
+            Func<ValueTask> func = () => new ValueTask(Task.Delay(1).ContinueWith(_ => { }, TaskContinuationOptions.OnlyOnFaulted));
+
+            var result = await func;
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Func_ValueTask_Awaiter_ValueResponseT_Ok()
+        {
+            Func<ValueTask<int>> func = () => new ValueTask<int>(1);
+
+            var result = await func;
+
+            Assert.AreEqual(1, result);
+        }
+
+        [TestMethod]
+        public async Task Func_ValueTask_Awaiter_Response_Ok()
+        {
+            Func<ValueTask<Response>> func = () => new ValueTask<Response>(Response.Success);
+
+            var result = await func;
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task Func_ValueTask_Awaiter_ResponseT_Ok()
+        {
+            Func<ValueTask<Response<int>>> func = () => new ValueTask<Response<int>>(Response<int>.Success(1));
+
+            var result = await func;
+
+            Assert.AreEqual(result, 1);
         }
     }
 
