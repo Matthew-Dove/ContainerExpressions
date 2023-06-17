@@ -106,6 +106,7 @@ namespace ContainerExpressions.Containers
 
         public override string ToString() => this.Match(x => x?.ToString(), x => x?.ToString()) ?? string.Empty;
 
+        public static implicit operator bool(Maybe<TValue> maybe) => maybe._hasValue;
         public static implicit operator Response<TValue>(Maybe<TValue> maybe) => maybe.Match(x => new Response<TValue>(x), _ => new Response<TValue>());
         public static implicit operator Maybe<TValue>(Either<TValue, Exception> either) => new Maybe<TValue>(either);
         public static implicit operator Either<TValue, Exception>(Maybe<TValue> maybe) => maybe.Match(x => new Either<TValue, Exception>(x), x => new Either<TValue, Exception>(x));
@@ -254,6 +255,7 @@ namespace ContainerExpressions.Containers
 
         public override string ToString() => this.Match(x => x?.ToString(), x => x?.ToString()) ?? string.Empty;
 
+        public static implicit operator bool(Maybe<TValue, TError> maybe) => maybe._hasValue;
         public static implicit operator Response<TValue>(Maybe<TValue, TError> maybe) => maybe.Match(x => new Response<TValue>(x), _ => new Response<TValue>());
         public static implicit operator Maybe<TValue, TError>(Either<TValue, TError> either) => new Maybe<TValue, TError>(either);
         public static implicit operator Either<TValue, TError>(Maybe<TValue, TError> maybe) => maybe.Match(x => new Either<TValue, TError>(x), x => new Either<TValue, TError>(x));

@@ -8,11 +8,16 @@ namespace ContainerExpressions.Containers
     {
         #region Miscellaneous
 
-        private static class Cache<TValue, TError>
+        private static class Cache<TValue>
         {
-            private static readonly TError[] _errors = new TError[0];
-            public static TError[] Value(TValue _) => _errors;
-            public static TError[] Error(TError _, TError[] aggregateErrors) => aggregateErrors;
+            public static Exception[] Value(TValue _) => Array.Empty<Exception>();
+            public static Exception[] AggregateErrors(Exception _, Exception[] aggregateErrors) => aggregateErrors;
+            public static Exception[] AllErrors(Exception error, Exception[] aggregateErrors)
+            {
+                Array.Resize(ref aggregateErrors, aggregateErrors.Length + 1);
+                aggregateErrors[aggregateErrors.Length - 1] = error;
+                return aggregateErrors;
+            }
         }
 
         /// <summary>Returns the value of Maybe when the instance is TValue, otherwise @default is returned.</summary>
@@ -71,41 +76,32 @@ namespace ContainerExpressions.Containers
             });
         }
 
-        /// <summary>Returns true when Maybe had a value to set.</summary>
+        /// <summary>Returns true when Maybe had a value set.</summary>
         public static bool TryGetValue<TValue>(this Maybe<TValue> maybe, out TValue value) { if (maybe._hasValue) { value = maybe._value; return true; }; value = default; return false; }
 
-        /// <summary>Returns true when Maybe had an error to set.</summary>
+        /// <summary>Returns true when Maybe had an error set.</summary>
         public static bool TryGetError<TValue>(this Maybe<TValue> maybe, out Exception error) { if (!maybe._hasValue) { error = maybe._error; return true; }; error = default; return false; }
 
-        /// <summary>Returns true when Maybe had an error to set.</summary>
-        public static bool TryGetAggregateErrors<TValue, TError>(this Maybe<TValue, TError> maybe, out TError[] errors)
+        /// <summary>Returns true when Maybe has aggregate errors, with are are bundled together.</summary>
+        public static bool TryGetAggregateErrors<TValue>(this Maybe<TValue> maybe, out Exception[] errors)
         {
-            errors = maybe.Match(Cache<TValue, TError>.Value, Cache<TValue, TError>.Error);
+            errors = maybe.Match(Cache<TValue>.Value, Cache<TValue>.AggregateErrors);
+            return errors.Length > 0; // We don't check maybe's "_hasValue", as you can have a single error, without aggregate errors.
+        }
+
+        /// <summary>Returns true when Maybe had an error set, aggregate errors are bundled together; along with the top level error.</summary>
+        public static bool TryGetAllErrors<TValue>(this Maybe<TValue> maybe, out Exception[] errors)
+        {
+            errors = maybe.Match(Cache<TValue>.Value, Cache<TValue>.AllErrors);
             return !maybe._hasValue;
         }
 
+        #endregion
 
+        #region With
 
-
-        /// <summary>Returns true when Maybe had an error to set.</summary>
-        //public static bool TryGetAllErrors<TValue, TError>(this Maybe<TValue, TError> maybe, out TError[] errors)
-        //{
-        //    if (!maybe._hasValue
-        //    errors = maybe.Match(Cache<TValue, TError>.Value, Cache<TValue, TError>.Error);
-        //    return maybe._hasValue;
-        //}
-
-
-
-
-
-
-    #endregion
-
-    #region With
-
-    /// <summary>Creates a new Maybe from the existing types, with the specified values.</summary>
-    public static Maybe<TValue> With<TValue>(this Maybe<TValue> _, Response<TValue> value, Exception error) => new Maybe<TValue>(value, error);
+        /// <summary>Creates a new Maybe from the existing types, with the specified values.</summary>
+        public static Maybe<TValue> With<TValue>(this Maybe<TValue> _, Response<TValue> value, Exception error) => new Maybe<TValue>(value, error);
 
         /// <summary>Creates a new Maybe from the existing types, with the specified values.</summary>
         public static Maybe<TValue> With<TValue>(this Maybe<TValue> _, Either<TValue, Exception> either) => new Maybe<TValue>(either);

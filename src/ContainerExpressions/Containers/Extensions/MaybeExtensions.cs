@@ -8,6 +8,18 @@ namespace ContainerExpressions.Containers
     {
         #region Miscellaneous
 
+        private static class Cache<TValue, TError>
+        {
+            public static TError[] Value(TValue _) => Array.Empty<TError>();
+            public static TError[] AggregateErrors(TError _, TError[] aggregateErrors) => aggregateErrors;
+            public static TError[] AllErrors(TError error, TError[] aggregateErrors)
+            {
+                Array.Resize(ref aggregateErrors, aggregateErrors.Length + 1);
+                aggregateErrors[aggregateErrors.Length - 1] = error;
+                return aggregateErrors;
+            }
+        }
+
         /// <summary>Returns the value of Maybe when the instance is TValue, otherwise @default is returned.</summary>
         /// <param name="default">The value to use when Maybe contains an instance of TError.</param>
         public static TValue GetValueOrDefault<TValue, TError>(this Maybe<TValue, TError> maybe, TValue @default) => maybe.Match(x => x, _ => @default);
@@ -58,11 +70,25 @@ namespace ContainerExpressions.Containers
             });
         }
 
-        /// <summary>Returns true when Maybe had a value to set.</summary>
+        /// <summary>Returns true when Maybe had a value set.</summary>
         public static bool TryGetValue<TValue, TError>(this Maybe<TValue, TError> maybe, out TValue value) { if (maybe._hasValue) { value = maybe._value; return true; }; value = default; return false; }
 
-        /// <summary>Returns true when Maybe had an error to set.</summary>
+        /// <summary>Returns true when Maybe had an error set.</summary>
         public static bool TryGetError<TValue, TError>(this Maybe<TValue, TError> maybe, out TError error) { if (!maybe._hasValue) { error = maybe._error; return true; }; error = default; return false; }
+
+        /// <summary>Returns true when Maybe has aggregate errors, with are are bundled together.</summary>
+        public static bool TryGetAggregateErrors<TValue, TError>(this Maybe<TValue, TError> maybe, out TError[] errors)
+        {
+            errors = maybe.Match(Cache<TValue, TError>.Value, Cache<TValue, TError>.AggregateErrors);
+            return errors.Length > 0; // We don't check maybe's "_hasValue", as you can have a single error, without aggregate errors.
+        }
+
+        /// <summary>Returns true when Maybe had an error set, aggregate errors are bundled together; along with the top level error.</summary>
+        public static bool TryGetAllErrors<TValue, TError>(this Maybe<TValue, TError> maybe, out TError[] errors)
+        {
+            errors = maybe.Match(Cache<TValue, TError>.Value, Cache<TValue, TError>.AllErrors);
+            return !maybe._hasValue;
+        }
 
         #endregion
 

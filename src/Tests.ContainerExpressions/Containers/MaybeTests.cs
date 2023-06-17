@@ -11,6 +11,26 @@ namespace Tests.ContainerExpressions.Containers
         #region Maybe Error
 
         [TestMethod]
+        public void MaybeError_ImplicitBoolean_IsValue()
+        {
+            var maybe = new Maybe<int, string>(1);
+
+            if (!maybe) throw new Exception("Maybe Baby!");
+
+            Assert.IsTrue(maybe);
+        }
+
+        [TestMethod]
+        public void MaybeError_ImplicitBoolean_IsError()
+        {
+            var maybe = new Maybe<int, string>("error");
+
+            if (maybe) throw new Exception("Maybe Baby!");
+
+            Assert.IsFalse(maybe);
+        }
+
+        [TestMethod]
         public void MaybeError_DefaultCtor_IsError()
         {
             var maybe = new Maybe<int, string>();
@@ -675,6 +695,26 @@ namespace Tests.ContainerExpressions.Containers
         #endregion
 
         #region Maybe Value
+
+        [TestMethod]
+        public void MaybeValue_ImplicitBoolean_IsValue()
+        {
+            var maybe = new Maybe<int>(1);
+
+            if (!maybe) throw new Exception("Maybe Baby!");
+
+            Assert.IsTrue(maybe);
+        }
+
+        [TestMethod]
+        public void MaybeValue_ImplicitBoolean_IsError()
+        {
+            var maybe = new Maybe<int>(new Exception("error"));
+
+            if (maybe) throw new Exception("Maybe Baby!");
+
+            Assert.IsFalse(maybe);
+        }
 
         [TestMethod]
         public void MaybeValue_BindT_FirstOnly()
@@ -1671,6 +1711,226 @@ namespace Tests.ContainerExpressions.Containers
 
             Assert.IsFalse(result);
             Assert.AreEqual(default, ex);
+        }
+
+        [TestMethod]
+        public void Maybe_TryGet_AllErrors_Pass()
+        {
+            string error1 = "error1", error2 = "error2";
+            var maybe1 = new Maybe<int, string>(error1);
+            var maybe2 = new Maybe<int, string>(error2);
+
+            var maybe = maybe1.Bind(maybe2, (x, y) => x + y);
+            bool result = maybe.TryGetAllErrors(out string[] errors);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(2, errors.Length);
+
+            Assert.AreEqual(error1, errors[0]);
+            Assert.AreEqual(error2, errors[1]);
+        }
+
+        [TestMethod]
+        public void Maybe_TryGet_AllErrors_FirstOk_Pass()
+        {
+            var error = "error";
+            var maybe1 = new Maybe<int, string>(1);
+            var maybe2 = new Maybe<int, string>(error);
+
+            var maybe = maybe1.Bind(maybe2, (x, y) => x + y);
+            bool result = maybe.TryGetAllErrors(out string[] errors);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(1, errors.Length);
+
+            Assert.AreEqual(error, errors[0]);
+        }
+
+        [TestMethod]
+        public void Maybe_TryGet_AllErrors_SecondOk_Pass()
+        {
+            var error = "error";
+            var maybe1 = new Maybe<int, string>(error);
+            var maybe2 = new Maybe<int, string>(1);
+
+            var maybe = maybe1.Bind(maybe2, (x, y) => x + y);
+            bool result = maybe.TryGetAllErrors(out string[] errors);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(1, errors.Length);
+
+            Assert.AreEqual(error, errors[0]);
+        }
+
+        [TestMethod]
+        public void Maybe_TryGet_AllErrors_Fail()
+        {
+            var maybe1 = new Maybe<int, string>(1);
+            var maybe2 = new Maybe<int, string>(1);
+
+            var maybe = maybe1.Bind(maybe2, (x, y) => x + y);
+            bool result = maybe.TryGetAllErrors(out string[] errors);
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(2, maybe.Match(x => x, _ => 0));
+        }
+
+        [TestMethod]
+        public void Maybe_TryGet_AggregateErrors_Pass()
+        {
+            string error1 = "error1", error2 = "error2";
+            var maybe1 = new Maybe<int, string>(error1);
+            var maybe2 = new Maybe<int, string>(error2);
+
+            var maybe = maybe1.Bind(maybe2, (x, y) => x + y);
+            bool result = maybe.TryGetAggregateErrors(out string[] errors);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(1, errors.Length);
+            Assert.AreEqual(error1, errors[0]);
+            Assert.IsTrue(maybe.TryGetError(out string err));
+            Assert.AreEqual(error2, err);
+        }
+
+        [TestMethod]
+        public void Maybe_TryGet_AggregateErrors_SingleError_Fail()
+        {
+            string error = "error";
+            var maybe1 = new Maybe<int, string>(1);
+            var maybe2 = new Maybe<int, string>(error);
+
+            var maybe = maybe1.Bind(maybe2, (x, y) => x + y);
+            bool result = maybe.TryGetAggregateErrors(out string[] errors);
+
+            Assert.IsFalse(result); // False, as one error does not lead to an aggregate.
+            Assert.AreEqual(0, errors.Length);
+            Assert.IsTrue(maybe.TryGetError(out string err));
+            Assert.AreEqual(err, error);
+        }
+
+        [TestMethod]
+        public void Maybe_TryGet_AggregateErrors_BothValues_Fail()
+        {
+            var maybe1 = new Maybe<int, string>(1);
+            var maybe2 = new Maybe<int, string>(1);
+
+            var maybe = maybe1.Bind(maybe2, (x, y) => x + y);
+            bool result = maybe.TryGetAggregateErrors(out string[] errors);
+
+            Assert.AreEqual(2, maybe.Match(x => x, _ => 0));
+            Assert.IsFalse(result);
+            Assert.AreEqual(0, errors.Length);
+            Assert.IsFalse(maybe.TryGetError(out string _));
+        }
+
+        [TestMethod]
+        public void MaybeValue_TryGet_AllErrors_Pass()
+        {
+            Exception error1 = new Exception("error1"), error2 = new Exception("error2");
+            var maybe1 = new Maybe<int>(error1);
+            var maybe2 = new Maybe<int>(error2);
+
+            var maybe = maybe1.Bind(maybe2, (x, y) => x + y);
+            bool result = maybe.TryGetAllErrors(out Exception[] errors);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(2, errors.Length);
+
+            Assert.ReferenceEquals(error1, errors[0]);
+            Assert.ReferenceEquals(error2, errors[1]);
+        }
+
+        [TestMethod]
+        public void MaybeValue_TryGet_AllErrors_FirstOk_Pass()
+        {
+            var error = new Exception("error");
+            var maybe1 = new Maybe<int>(1);
+            var maybe2 = new Maybe<int>(error);
+
+            var maybe = maybe1.Bind(maybe2, (x, y) => x + y);
+            bool result = maybe.TryGetAllErrors(out Exception[] errors);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(1, errors.Length);
+
+            Assert.ReferenceEquals(error, errors[0]);
+        }
+
+        [TestMethod]
+        public void MaybeValue_TryGet_AllErrors_SecondOk_Pass()
+        {
+            var error = new Exception("error");
+            var maybe1 = new Maybe<int>(error);
+            var maybe2 = new Maybe<int>(1);
+
+            var maybe = maybe1.Bind(maybe2, (x, y) => x + y);
+            bool result = maybe.TryGetAllErrors(out Exception[] errors);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(1, errors.Length);
+
+            Assert.ReferenceEquals(error, errors[0]);
+        }
+
+        [TestMethod]
+        public void MaybeValue_TryGet_AllErrors_Fail()
+        {
+            var maybe1 = new Maybe<int>(1);
+            var maybe2 = new Maybe<int>(1);
+
+            var maybe = maybe1.Bind(maybe2, (x, y) => x + y);
+            bool result = maybe.TryGetAllErrors(out Exception[] errors);
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(2, maybe.Match(x => x, _ => 0));
+        }
+
+        [TestMethod]
+        public void MaybeValue_TryGet_AggregateErrors_Pass()
+        {
+            Exception error1 = new Exception("error1"), error2 = new Exception("error2");
+            var maybe1 = new Maybe<int>(error1);
+            var maybe2 = new Maybe<int>(error2);
+
+            var maybe = maybe1.Bind(maybe2, (x, y) => x + y);
+            bool result = maybe.TryGetAggregateErrors(out Exception[] errors);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(1, errors.Length);
+            Assert.ReferenceEquals(error1, errors[0]);
+            Assert.IsTrue(maybe.TryGetError(out Exception err));
+            Assert.ReferenceEquals(error2, err);
+        }
+
+        [TestMethod]
+        public void MaybeValue_TryGet_AggregateErrors_SingleError_Fail()
+        {
+            var error = new Exception("error");
+            var maybe1 = new Maybe<int>(1);
+            var maybe2 = new Maybe<int>(error);
+
+            var maybe = maybe1.Bind(maybe2, (x, y) => x + y);
+            bool result = maybe.TryGetAggregateErrors(out Exception[] errors);
+
+            Assert.IsFalse(result); // False, as one error does not lead to an aggregate.
+            Assert.AreEqual(0, errors.Length);
+            Assert.IsTrue(maybe.TryGetError(out Exception err));
+            Assert.ReferenceEquals(err, error);
+        }
+
+        [TestMethod]
+        public void MaybeValue_TryGet_AggregateErrors_BothValues_Fail()
+        {
+            var maybe1 = new Maybe<int, string>(1);
+            var maybe2 = new Maybe<int, string>(1);
+
+            var maybe = maybe1.Bind(maybe2, (x, y) => x + y);
+            bool result = maybe.TryGetAggregateErrors(out string[] errors);
+
+            Assert.AreEqual(2, maybe.Match(x => x, _ => 0));
+            Assert.IsFalse(result);
+            Assert.AreEqual(0, errors.Length);
+            Assert.IsFalse(maybe.TryGetError(out string _));
         }
 
         #endregion

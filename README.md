@@ -931,7 +931,7 @@ var error = await GetError(); // Result: No value, as an error occurred (but no 
 * `AsValueTask():` Convert `ResponseAsync<T>` into a `ValueTask<Response<T>>` (*that won't throw exceptions*).
 * `AsResponse():` Converts a `Task<T>`, or `ValueTask<T>` into a `Task<Response<T>>`, or `ValueTask<Response<T>>` respectively (*with no exceptions*).
 * `FromResult<T>(T):` Creates a `ResponseAsync<T>` task in a completed state, with a valid `Response<T>` result.
-* `FromError<T>(Exception):` Creates a `ResponseAsync<T>` task in a completed state, with an invalid `Response<T>` result (*errors are logged*).
+* `FromException<T>(Exception):` Creates a `ResponseAsync<T>` task in a completed state, with an invalid `Response<T>` result (*errors are logged*).
 
 ## Custom Async Method Builders
 
@@ -1111,3 +1111,5 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * `ResponseAsync<T>` is a task-like type that can be used on `async` functions to catch, and log exceptions thrown in a method.
 * Added async method builders for `Task`, and `ValueTask` to safely create `Response` types.
 * Added a value type verion of `Later<T>` - `ValueLater<T>`.
+* `Maybe<TValue>`, and `Maybe<TValue, TError>` now have a method  `TryGetAggregateErrors`, which provides easy access to the aggregate errors (*should they exist*).
+* `Maybe<TValue>`, and `Maybe<TValue, TError>` now have a method  `TryGetAllErrors`, which provides easy access all errors - top level and aggregate (*should they exist*).
