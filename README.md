@@ -1113,3 +1113,7 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * Added a value type verion of `Later<T>` - `ValueLater<T>`.
 * `Maybe<TValue>`, and `Maybe<TValue, TError>` now have a method  `TryGetAggregateErrors`, which provides easy access to the aggregate errors (*should they exist*).
 * `Maybe<TValue>`, and `Maybe<TValue, TError>` now have a method  `TryGetAllErrors`, which provides easy access all errors - top level and aggregate (*should they exist*).
+* Added `TryGetT*` to the `Either<T*>` containers. To retrieve the value if it's present.
+* Added `WhenT*` to the `Either<T*>` containers. Execute a `Func`, or `Action` on the value if it's present.
+* Added an `Action` overload to the `Match` method for the `Either<T*>` containers.
+* `Async` versions for the `TryGetT*`, `WhenT*`, and `Match` methods on the `Either<T*>` containers.

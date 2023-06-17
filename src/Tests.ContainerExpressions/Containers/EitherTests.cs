@@ -175,12 +175,23 @@ namespace Tests.ContainerExpressions.Containers
             Assert.AreEqual(default, value);
         }
 
+        [TestMethod]
+        public void TryGetT2_Pass()
+        {
+            var either = new Either<string, int>(1);
+
+            var result = either.TryGetT2(out var value);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(1, value);
+        }
+
         #endregion
 
         #region When
 
-        class Check { [ThreadStatic] public static bool IsCalled; }
-        class When
+        private class Check { [ThreadStatic] public static bool IsCalled; }
+        private class When
         {
             public static When Self = new When();
             public int Func(string s) => int.Parse(s);
@@ -195,11 +206,11 @@ namespace Tests.ContainerExpressions.Containers
             Check.IsCalled = false;
 
             var either = new Either<string, int>("1");
-            var number = either.WhenT1(int.Parse);
+            var number = either.WhenT1(int.Parse, out int num);
             var response = either.WhenT1(static x => { Check.IsCalled = true; });
 
             Assert.IsTrue(number);
-            Assert.AreEqual(1, number);
+            Assert.AreEqual(1, num);
             Assert.IsTrue(response);
             Assert.IsTrue(Check.IsCalled);
         }
@@ -210,7 +221,7 @@ namespace Tests.ContainerExpressions.Containers
             Check.IsCalled = false;
 
             var either = new Either<string, int>(1);
-            var number = either.WhenT1(int.Parse);
+            var number = either.WhenT1(int.Parse, out int num);
             var response = either.WhenT1(static x => { Check.IsCalled = true; });
 
             Assert.IsFalse(number);
@@ -222,12 +233,137 @@ namespace Tests.ContainerExpressions.Containers
         public void When_T1_Instance_Method()
         {
             var either = new Either<string, int>("1");
-            var number = either.WhenT1(When.Self.Func);
+            var number = either.WhenT1(When.Self.Func, out int num);
             var response = either.WhenT1(When.Self.Action);
 
             Assert.IsTrue(number);
-            Assert.AreEqual(1, number);
+            Assert.AreEqual(1, num);
             Assert.IsTrue(response);
+        }
+
+        [TestMethod]
+        public void When_T2()
+        {
+            Check.IsCalled = false;
+
+            var either = new Either<string, int>(1);
+            var number = either.WhenT2(Lambda.Identity, out int num);
+            var response = either.WhenT2(static x => { Check.IsCalled = true; });
+
+            Assert.IsTrue(number);
+            Assert.AreEqual(1, num);
+            Assert.IsTrue(response);
+            Assert.IsTrue(Check.IsCalled);
+        }
+
+        [TestMethod]
+        public async Task WhenAsyncFunc_T1()
+        {
+            var either = new Either<string, int>("1");
+            var number = either.WhenAsyncT1(When.Self.FuncAsync, out Task<int> num);
+
+            var n = await num;
+
+            Assert.IsTrue(number);
+            Assert.AreEqual(1, n);
+        }
+
+        [TestMethod]
+        public async Task WhenAsyncFunc_T2()
+        {
+            var either = new Either<string, int>(1);
+            var number = either.WhenAsyncT2(Lambda.IdentityAsync, out Task<int> num);
+
+            var n = await num;
+
+            Assert.IsTrue(number);
+            Assert.AreEqual(1, n);
+        }
+
+        [TestMethod]
+        public async Task WhenAsyncAction_T1()
+        {
+            Check.IsCalled = false;
+            var either = new Either<string, int>("1");
+            var number = either.WhenAsyncT1(When.Self.ActionAsync, out Task task1);
+            var response = either.WhenAsyncT1(static x => { Check.IsCalled = true; return Task.CompletedTask; }, out Task task2);
+
+            await Task.WhenAll(task1, task2);
+
+            Assert.IsTrue(number);
+            Assert.IsTrue(response);
+            Assert.IsTrue(Check.IsCalled);
+        }
+
+        [TestMethod]
+        public async Task WhenAsyncAction_T2()
+        {
+            Check.IsCalled = false;
+            var either = new Either<string, int>(1);
+            var number = either.WhenAsyncT2(static x => When.Self.ActionAsync(x.ToString()), out Task task1);
+            var response = either.WhenAsyncT2(static x => { Check.IsCalled = true; return Task.CompletedTask; }, out Task task2);
+
+            await Task.WhenAll(task1, task2);
+
+            Assert.IsTrue(number);
+            Assert.IsTrue(response);
+            Assert.IsTrue(Check.IsCalled);
+        }
+
+        #endregion
+
+        #region Match
+
+        [TestMethod]
+        public void MatchFunc_T1()
+        {
+            var either = new Either<string, int>("1");
+
+            var result = either.Match(Lambda.Identity, _ => "0");
+
+            Assert.AreEqual("1", result);
+        }
+
+        [TestMethod]
+        public async Task MatchFuncAsync_Implicit_T1()
+        {
+            var either = new Either<string, int>("1");
+
+            var result = await either.MatchAsync(Lambda.IdentityAsync, Lambda.DefaultAsync<int, string>("0"));
+
+            Assert.AreEqual("1", result);
+        }
+
+        [TestMethod]
+        public async Task MatchFuncAsync_Explicit_T1()
+        {
+            var either = new Either<string, int>("1");
+
+            var result = await either.Match(Lambda.IdentityAsync, Lambda.DefaultAsync<int, string>("0"));
+
+            Assert.AreEqual("1", result);
+        }
+
+        [TestMethod]
+        public void MatchAction_T1()
+        {
+            Check.IsCalled = false;
+            var either = new Either<string, int>("1");
+
+            either.Match(x => { Check.IsCalled = true; }, x => { });
+
+            Assert.IsTrue(Check.IsCalled);
+        }
+
+        [TestMethod]
+        public async Task MatchActionAsync_T1()
+        {
+            Check.IsCalled = false;
+            var either = new Either<string, int>("1");
+
+            await either.MatchAsync(x => { Check.IsCalled = true; return Task.CompletedTask; }, x => Task.CompletedTask);
+
+            Assert.IsTrue(Check.IsCalled);
         }
 
         #endregion

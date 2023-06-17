@@ -1,5 +1,6 @@
 ﻿using ContainerExpressions.Containers.Common.Models;
 using System;
+using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers
 {
@@ -9,14 +10,26 @@ namespace ContainerExpressions.Containers
         /// <summary>Maps the input directly to the output.</summary>
         public static T Identity<T>(T x) => x;
 
+        /// <summary>Maps the input to the output, after wrapping it in a task.</summary>
+        public static Task<T> IdentityAsync<T>(T x) => Task.FromResult(x);
+
         /// <summary>Pretends to return a T (i.e. to compile), but will really throw the passed exception.</summary>
         public static T Identity<T>(Exception ex) => throw ex;
+
+        /// <summary>Pretends to return a Task{T} (i.e. to compile), but will really throw the passed exception.</summary>
+        public static Task<T> IdentityAsync<T>(Exception ex) => throw ex;
 
         /// <summary>Discards the function input, and returns the specified result.</summary>
         public static Func<T, T> Default<T>(T result = default) => _ => result;
 
+        /// <summary>Discards the function input, and returns the specified result wrapped in a task.</summary>
+        public static Func<T, Task<T>> DefaultAsync<T>(T result = default) => _ => Task.FromResult(result);
+
         /// <summary>Discards the function input, and returns the specified result (of a different type to the input type).</summary>
         public static Func<T, TResult> Default<T, TResult>(TResult result = default) => _ => result;
+
+        /// <summary>Discards the function input, and returns the specified result wrapped in a task (of a different type to the input type).</summary>
+        public static Func<T, Task<TResult>> DefaultAsync<T, TResult>(TResult result = default) => _ => Task.FromResult(result);
 
         // Wrap method delegates, so the complier can recognise them as Func{TResult} types. 
         public static Func<TResult> ToFunc<TResult>(this Func<TResult> func) => func;
