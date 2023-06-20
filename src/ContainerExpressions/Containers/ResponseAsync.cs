@@ -2,15 +2,15 @@
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-using ContainerExpressions.Containers.Extensions;
 using ContainerExpressions.Containers.Internal;
+using System.Collections.Generic;
 
 namespace ContainerExpressions.Containers
 {
-    file sealed class Box<T> : Alias<T> { public Box(T value) : base(value) { } } // Force T on the heap, so we can mark it volatile; skipping a lock.
+    public sealed class Box<T> : Alias<T> { public Box(T value) : base(value) { } } // Force T on the heap, so we can mark it volatile; skipping a lock.
 
     // Bag of things for ResponseAsync{T}, so we can make it a readonly struct.
-    file sealed class Bag<T>
+    public sealed class State<T>
     {
         /**
          * [Volatile WORM access pattern]
@@ -46,7 +46,7 @@ namespace ContainerExpressions.Containers
         private TaskCompletionSource<Response<T>> _tcs;
         private Action _continuation;
 
-        public Bag(T result)
+        public State(T result)
         {
             Result = new Box<T>(result);
             _isCompleted = true;
@@ -54,7 +54,7 @@ namespace ContainerExpressions.Containers
             _continuation = default;
         }
 
-        public Bag(Exception ex)
+        public State(Exception ex)
         {
             Result = default;
             _isCompleted = true;
@@ -63,7 +63,7 @@ namespace ContainerExpressions.Containers
             ex.LogError();
         }
 
-        public Bag()
+        public State()
         {
             Result = default;
             _isCompleted = false;
@@ -80,69 +80,72 @@ namespace ContainerExpressions.Containers
     * 4) When the method result returns (or an exception is thrown / task is canceled), inform the awaiter the task is completed; and the result is ready.
     **/
     [AsyncMethodBuilder(typeof(ResponseAsyncMethodBuilder<>))]
-    public readonly struct ResponseAsync<T>
+    public readonly struct ResponseAsync<T> : IEquatable<ResponseAsync<T>>
     {
-        private readonly Bag<T> _bag;
+        private readonly State<T> _state;
 
         // Constructor to use when you already have the value to set (i.e. T is pre-calculated).
-        public ResponseAsync(T result) { _bag = new Bag<T>(result); }
+        public ResponseAsync(T result) { _state = new State<T>(result); }
 
         // Constructor to use when you have an error even before trying to start the calculation.
-        public ResponseAsync(Exception ex) { _bag = new Bag<T>(ex); }
+        public ResponseAsync(Exception ex) { _state = new State<T>(ex); }
+
+        // Constructor to use when you'd like to externally control the state. Useful for object pooling, or caching particular instances.
+        public ResponseAsync(State<T> state) { _state = state; }
 
         // Constructor to use when the result hasn't been calculated yet (i.e. the result, or error will be set later).
-        public ResponseAsync() { _bag = new Bag<T>(); }
+        public ResponseAsync() { _state = new State<T>(); }
 
         // When true, the value is ready to be read.
-        internal bool IsCompleted() => _bag.IsCompleted;
+        internal bool IsCompleted() => _state.IsCompleted;
 
-        internal void OnCompleted(Action continuation) => _bag.Continuation = continuation;
+        internal void OnCompleted(Action continuation) => _state.Continuation = continuation;
 
         // Called by the awaiter when the result is requested (either manually by getting the awaiter, or when using the await keyword).
         internal Response<T> GetValue()
         {
-            if (!_bag.IsCompleted) return AsTask().GetAwaiter().GetResult();
-            var result = _bag.Result;
+            if (!_state.IsCompleted) return AsTask().GetAwaiter().GetResult();
+            var result = _state.Result;
             return result == default ? new Response<T>() : new Response<T>(result.Value); // If null, then a result was never set for this task.
         }
 
         // Called by the state machine when the method has returned a result.
         internal void SetValue(T value)
         {
-            _bag.Result = new Box<T>(value);
-            _bag.IsCompleted = true;
-            _bag.Continuation?.Invoke();
-            _bag.Tcs?.SetResult(Response.Create(value));
+            _state.Result = new Box<T>(value);
+            _state.IsCompleted = true;
+            _state.Continuation?.Invoke();
+            _state.Tcs?.SetResult(Response.Create(value));
         }
 
         // Called by the state machine when the method has thrown an exception.
         internal void SetException(Exception ex)
         {
             ex.LogError();
-            _bag.IsCompleted = true;
-            _bag.Continuation?.Invoke();
-            _bag.Tcs?.SetResult(new Response<T>());
+            _state.IsCompleted = true;
+            _state.Continuation?.Invoke();
+            _state.Tcs?.SetResult(new Response<T>());
         }
 
         // Convert ResponseAsync{T} into a Task{T} type.
         public Task<Response<T>> AsTask()
         {
-            var tcs = _bag.Tcs;
+            var tcs = _state.Tcs;
             if (tcs == default)
             {
-                lock (_bag)
+                lock (_state)
                 {
-                    tcs = _bag.Tcs;
+                    tcs = _state.Tcs;
                     if (tcs == default)
                     {
                         tcs = new TaskCompletionSource<Response<T>>();
-                        if (_bag.IsCompleted)
+                        if (_state.IsCompleted)
                         {
-                            var result = _bag.Result;
+                            var result = _state.Result;
                             if (result != default) tcs.SetResult(Response.Create(result.Value)); // Task is completed.
                             else tcs.SetResult(new Response<T>()); // There is no result, as the task generated an exception, or was canceled.
                         }
-                        _bag.Tcs = tcs;
+                        _state.Tcs = tcs;
                     }
                 }
             }
@@ -154,9 +157,9 @@ namespace ContainerExpressions.Containers
         {
             ValueTask<Response<T>> vt;
 
-            if (_bag.IsCompleted)
+            if (_state.IsCompleted)
             {
-                var result = _bag.Result;
+                var result = _state.Result;
                 if (result != default) vt = new(Response.Create(result.Value)); // Task is completed.
                 else vt = new(new Response<T>()); // There is no result, as the task generated an exception, or was canceled.
             }
@@ -170,6 +173,37 @@ namespace ContainerExpressions.Containers
 
         // Custom awaiter to convert ResponseAsync{T} into Response{T}, when using the await keyword.
         public ResponseAsyncAwaiter<T> GetAwaiter() => new ResponseAsyncAwaiter<T>(this);
+
+        public override int GetHashCode() => _state?.GetHashCode() ?? 0;
+
+        public override bool Equals(object obj) => obj is ResponseAsync<T> response ? Equals(response) : false;
+
+        public bool Equals(ResponseAsync<T> other)
+        {
+            if (_state is null && other._state is null) return true;
+            if (_state is null) return false;
+            if (other._state is null) return false;
+
+            if (_state.IsCompleted && other._state.IsCompleted)
+            {
+                return EqualityComparer<T>.Default.Equals(_state.Result, other._state.Result);
+            }
+
+            return false;
+        }
+
+        public override string ToString()
+        {
+            if (_state.IsCompleted)
+            {
+                T result = _state.Result;
+                if (result != null) return result.ToString();
+            }
+            return string.Empty;
+        }
+
+        public static bool operator ==(ResponseAsync<T> left, ResponseAsync<T> right) => left.Equals(right);
+        public static bool operator !=(ResponseAsync<T> left, ResponseAsync<T> right) => !left.Equals(right);
 
         public static implicit operator Task<Response<T>>(ResponseAsync<T> response) => response.AsTask(); // Cast to Task{T}.
         public static implicit operator ValueTask<Response<T>>(ResponseAsync<T> response) => response.AsValueTask(); // Cast to ValueTask{T}.

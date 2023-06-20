@@ -300,6 +300,32 @@ namespace Tests.ContainerExpressions.Containers
             Assert.IsFalse(actionResult1);
         }
 
+        private static async Task<int> Add(int a, int b)
+        {
+            await Task.Delay(1);
+            return a + b;
+        }
+
+        [TestMethod]
+        public async Task Func_Awaiters_Task_Custom_Awaiter()
+        {
+            var adder = Lambda.Args(1, 1).ToFunc(Add);
+
+            var result = await adder; // Func is handled by a custom awaiter in ResponseAsync.
+
+            Assert.AreEqual(2, result);
+        }
+
+        [TestMethod]
+        public async Task Func_Awaiters_Task_Standard_Awaiter()
+        {
+            var adder = Lambda.Args(1, 1).ToFunc(Add);
+
+            var result = await adder(); // Func is invoked, so the normal task awaiter handles this one.
+
+            Assert.AreEqual(2, result);
+        }
+
         [TestMethod]
         public async Task AsyncMethodBuilder_TaskError()
         {
