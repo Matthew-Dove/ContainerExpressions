@@ -1,4 +1,5 @@
-﻿using ContainerExpressions.Expressions.Models;
+﻿using ContainerExpressions.Containers.Internal;
+using ContainerExpressions.Expressions.Models;
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace ContainerExpressions.Containers
         /// <summary>If you'd like to log errors as they come, add your stateless error logger here, if a logger already exists, it'll be overwritten.</summary>
         public static void SetExceptionLogger(Action<Exception> logger)
         {
-            if (logger == null) ArgumentNullException(nameof(logger));
+            if (logger == null) Throw.ArgumentNullException(nameof(logger));
             _logger = Response.Create(logger);
         }
 
@@ -27,7 +28,7 @@ namespace ContainerExpressions.Containers
             [CallerLineNumber] int line = 0
             )
         {
-            if (action == null) ArgumentNullException(nameof(action));
+            if (action == null) Throw.ArgumentNullException(nameof(action));
             return PaddedCage(action, ExceptionLogger.Create(_logger));
         }
 
@@ -57,7 +58,7 @@ namespace ContainerExpressions.Containers
             [CallerLineNumber] int line = 0
             )
         {
-            if (func == null) ArgumentNullException(nameof(func));
+            if (func == null) Throw.ArgumentNullException(nameof(func));
             return PaddedCage(func, ExceptionLogger.Create(_logger));
         }
 
@@ -87,7 +88,7 @@ namespace ContainerExpressions.Containers
             [CallerLineNumber] int line = 0
             )
         {
-            if (action == null) ArgumentNullException(nameof(action));
+            if (action == null) Throw.ArgumentNullException(nameof(action));
             return PaddedCageAsync(action, ExceptionLogger.Create(_logger));
         }
 
@@ -124,7 +125,7 @@ namespace ContainerExpressions.Containers
             [CallerLineNumber] int line = 0
             )
         {
-            if (func == null) ArgumentNullException(nameof(func));
+            if (func == null) Throw.ArgumentNullException(nameof(func));
             return PaddedCageAsync(func, ExceptionLogger.Create(_logger));
         }
 

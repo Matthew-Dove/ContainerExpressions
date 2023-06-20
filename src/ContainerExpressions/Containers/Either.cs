@@ -99,10 +99,10 @@ namespace ContainerExpressions.Containers
     /// </summary>
     public readonly struct Either<T1, T2, T3> : IEquatable<Either<T1, T2, T3>>
     {
-        private readonly int _tag;
-        private readonly T1 _t1;
-        private readonly T2 _t2;
-        private readonly T3 _t3;
+        internal readonly int _tag;
+        internal readonly T1 _t1;
+        internal readonly T2 _t2;
+        internal readonly T3 _t3;
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T1 t1)
@@ -131,45 +131,16 @@ namespace ContainerExpressions.Containers
             _t3 = t3;
         }
 
-        /// <summary>
-        /// Gets a type that each type of Either can transform to.
-        /// <para>Only one function will be invoked depending on what type is internally stored.</para>
-        /// </summary>
-        public TResult Match<TResult>(Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3)
-        {
-            if (_tag == 1)
-                return f1(_t1);
-            if (_tag == 2)
-                return f2(_t2);
-            if (_tag == 3)
-                return f3(_t3);
-
-            throw new InvalidOperationException("The internal type was not set, you must assign Either a type at least once.");
-        }
-
-        public bool TryGetT1(out T1 t1) { if (_tag == 1) { t1 = _t1; return true; }; t1 = default; return false; }
-        public bool TryGetT2(out T2 t2) { if (_tag == 2) { t2 = _t2; return true; }; t2 = default; return false; }
-        public bool TryGetT3(out T3 t3) { if (_tag == 3) { t3 = _t3; return true; }; t3 = default; return false; }
-
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
         {
-            string value = null;
+            if (_tag == 0) return string.Empty;
 
-            if (_tag == 1)
-            {
-                value = _t1?.ToString();
-            }
-            else if (_tag == 2)
-            {
-                value = _t2?.ToString();
-            }
-            else if (_tag == 3)
-            {
-                value = _t3?.ToString();
-            }
+            if (_tag == 1) return _t1?.ToString() ?? string.Empty;
+            if (_tag == 2) return _t2?.ToString() ?? string.Empty;
+            if (_tag == 3) return _t3?.ToString() ?? string.Empty;
 
-            return value ?? string.Empty;
+            return string.Empty;
         }
 
         public static implicit operator Either<T1, T2, T3>(T1 value) => new Either<T1, T2, T3>(value);
@@ -239,11 +210,11 @@ namespace ContainerExpressions.Containers
     /// </summary>
     public readonly struct Either<T1, T2, T3, T4> : IEquatable<Either<T1, T2, T3, T4>>
     {
-        private readonly int _tag;
-        private readonly T1 _t1;
-        private readonly T2 _t2;
-        private readonly T3 _t3;
-        private readonly T4 _t4;
+        internal readonly int _tag;
+        internal readonly T1 _t1;
+        internal readonly T2 _t2;
+        internal readonly T3 _t3;
+        internal readonly T4 _t4;
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T1 t1)
@@ -285,52 +256,17 @@ namespace ContainerExpressions.Containers
             _t4 = t4;
         }
 
-        /// <summary>
-        /// Gets a type that each type of Either can transform to.
-        /// <para>Only one function will be invoked depending on what type is internally stored.</para>
-        /// </summary>
-        public TResult Match<TResult>(Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4)
-        {
-            if (_tag == 1)
-                return f1(_t1);
-            if (_tag == 2)
-                return f2(_t2);
-            if (_tag == 3)
-                return f3(_t3);
-            if (_tag == 4)
-                return f4(_t4);
-
-            throw new InvalidOperationException("The internal type was not set, you must assign Either a type at least once.");
-        }
-
-        public bool TryGetT1(out T1 t1) { if (_tag == 1) { t1 = _t1; return true; }; t1 = default; return false; }
-        public bool TryGetT2(out T2 t2) { if (_tag == 2) { t2 = _t2; return true; }; t2 = default; return false; }
-        public bool TryGetT3(out T3 t3) { if (_tag == 3) { t3 = _t3; return true; }; t3 = default; return false; }
-        public bool TryGetT4(out T4 t4) { if (_tag == 4) { t4 = _t4; return true; }; t4 = default; return false; }
-
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
         {
-            string value = null;
+            if (_tag == 0) return string.Empty;
 
-            if (_tag == 1)
-            {
-                value = _t1?.ToString();
-            }
-            else if (_tag == 2)
-            {
-                value = _t2?.ToString();
-            }
-            else if (_tag == 3)
-            {
-                value = _t3?.ToString();
-            }
-            else if (_tag == 4)
-            {
-                value = _t4?.ToString();
-            }
+            if (_tag == 1) return _t1?.ToString() ?? string.Empty;
+            if (_tag == 2) return _t2?.ToString() ?? string.Empty;
+            if (_tag == 3) return _t3?.ToString() ?? string.Empty;
+            if (_tag == 4) return _t4?.ToString() ?? string.Empty;
 
-            return value ?? string.Empty;
+            return string.Empty;
         }
 
         public static implicit operator Either<T1, T2, T3, T4>(T1 value) => new Either<T1, T2, T3, T4>(value);
@@ -410,12 +346,12 @@ namespace ContainerExpressions.Containers
     /// </summary>
     public readonly struct Either<T1, T2, T3, T4, T5> : IEquatable<Either<T1, T2, T3, T4, T5>>
     {
-        private readonly int _tag;
-        private readonly T1 _t1;
-        private readonly T2 _t2;
-        private readonly T3 _t3;
-        private readonly T4 _t4;
-        private readonly T5 _t5;
+        internal readonly int _tag;
+        internal readonly T1 _t1;
+        internal readonly T2 _t2;
+        internal readonly T3 _t3;
+        internal readonly T4 _t4;
+        internal readonly T5 _t5;
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T1 t1)
@@ -472,59 +408,18 @@ namespace ContainerExpressions.Containers
             _t5 = t5;
         }
 
-        /// <summary>
-        /// Gets a type that each type of Either can transform to.
-        /// <para>Only one function will be invoked depending on what type is internally stored.</para>
-        /// </summary>
-        public TResult Match<TResult>(Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4, Func<T5, TResult> f5)
-        {
-            if (_tag == 1)
-                return f1(_t1);
-            if (_tag == 2)
-                return f2(_t2);
-            if (_tag == 3)
-                return f3(_t3);
-            if (_tag == 4)
-                return f4(_t4);
-            if (_tag == 5)
-                return f5(_t5);
-
-            throw new InvalidOperationException("The internal type was not set, you must assign Either a type at least once.");
-        }
-
-        public bool TryGetT1(out T1 t1) { if (_tag == 1) { t1 = _t1; return true; }; t1 = default; return false; }
-        public bool TryGetT2(out T2 t2) { if (_tag == 2) { t2 = _t2; return true; }; t2 = default; return false; }
-        public bool TryGetT3(out T3 t3) { if (_tag == 3) { t3 = _t3; return true; }; t3 = default; return false; }
-        public bool TryGetT4(out T4 t4) { if (_tag == 4) { t4 = _t4; return true; }; t4 = default; return false; }
-        public bool TryGetT5(out T5 t5) { if (_tag == 5) { t5 = _t5; return true; }; t5 = default; return false; }
-
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
         {
-            string value = null;
+            if (_tag == 0) return string.Empty;
 
-            if (_tag == 1)
-            {
-                value = _t1?.ToString();
-            }
-            else if (_tag == 2)
-            {
-                value = _t2?.ToString();
-            }
-            else if (_tag == 3)
-            {
-                value = _t3?.ToString();
-            }
-            else if (_tag == 4)
-            {
-                value = _t4?.ToString();
-            }
-            else if (_tag == 5)
-            {
-                value = _t5?.ToString();
-            }
+            if (_tag == 1) return _t1?.ToString() ?? string.Empty;
+            if (_tag == 2) return _t2?.ToString() ?? string.Empty;
+            if (_tag == 3) return _t3?.ToString() ?? string.Empty;
+            if (_tag == 4) return _t4?.ToString() ?? string.Empty;
+            if (_tag == 5) return _t5?.ToString() ?? string.Empty;
 
-            return value ?? string.Empty;
+            return string.Empty;
         }
 
         public static implicit operator Either<T1, T2, T3, T4, T5>(T1 value) => new Either<T1, T2, T3, T4, T5>(value);
@@ -614,13 +509,13 @@ namespace ContainerExpressions.Containers
     /// </summary>
     public readonly struct Either<T1, T2, T3, T4, T5, T6> : IEquatable<Either<T1, T2, T3, T4, T5, T6>>
     {
-        private readonly int _tag;
-        private readonly T1 _t1;
-        private readonly T2 _t2;
-        private readonly T3 _t3;
-        private readonly T4 _t4;
-        private readonly T5 _t5;
-        private readonly T6 _t6;
+        internal readonly int _tag;
+        internal readonly T1 _t1;
+        internal readonly T2 _t2;
+        internal readonly T3 _t3;
+        internal readonly T4 _t4;
+        internal readonly T5 _t5;
+        internal readonly T6 _t6;
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T1 t1)
@@ -694,66 +589,19 @@ namespace ContainerExpressions.Containers
             _t6 = t6;
         }
 
-        /// <summary>
-        /// Gets a type that each type of Either can transform to.
-        /// <para>Only one function will be invoked depending on what type is internally stored.</para>
-        /// </summary>
-        public TResult Match<TResult>(Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4, Func<T5, TResult> f5, Func<T6, TResult> f6)
-        {
-            if (_tag == 1)
-                return f1(_t1);
-            if (_tag == 2)
-                return f2(_t2);
-            if (_tag == 3)
-                return f3(_t3);
-            if (_tag == 4)
-                return f4(_t4);
-            if (_tag == 5)
-                return f5(_t5);
-            if (_tag == 6)
-                return f6(_t6);
-
-            throw new InvalidOperationException("The internal type was not set, you must assign Either a type at least once.");
-        }
-
-        public bool TryGetT1(out T1 t1) { if (_tag == 1) { t1 = _t1; return true; }; t1 = default; return false; }
-        public bool TryGetT2(out T2 t2) { if (_tag == 2) { t2 = _t2; return true; }; t2 = default; return false; }
-        public bool TryGetT3(out T3 t3) { if (_tag == 3) { t3 = _t3; return true; }; t3 = default; return false; }
-        public bool TryGetT4(out T4 t4) { if (_tag == 4) { t4 = _t4; return true; }; t4 = default; return false; }
-        public bool TryGetT5(out T5 t5) { if (_tag == 5) { t5 = _t5; return true; }; t5 = default; return false; }
-        public bool TryGetT6(out T6 t6) { if (_tag == 6) { t6 = _t6; return true; }; t6 = default; return false; }
-
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
         {
-            string value = null;
+            if (_tag == 0) return string.Empty;
 
-            if (_tag == 1)
-            {
-                value = _t1?.ToString();
-            }
-            else if (_tag == 2)
-            {
-                value = _t2?.ToString();
-            }
-            else if (_tag == 3)
-            {
-                value = _t3?.ToString();
-            }
-            else if (_tag == 4)
-            {
-                value = _t4?.ToString();
-            }
-            else if (_tag == 5)
-            {
-                value = _t5?.ToString();
-            }
-            else if (_tag == 6)
-            {
-                value = _t6?.ToString();
-            }
+            if (_tag == 1) return _t1?.ToString() ?? string.Empty;
+            if (_tag == 2) return _t2?.ToString() ?? string.Empty;
+            if (_tag == 3) return _t3?.ToString() ?? string.Empty;
+            if (_tag == 4) return _t4?.ToString() ?? string.Empty;
+            if (_tag == 5) return _t5?.ToString() ?? string.Empty;
+            if (_tag == 6) return _t6?.ToString() ?? string.Empty;
 
-            return value ?? string.Empty;
+            return string.Empty;
         }
 
         public static implicit operator Either<T1, T2, T3, T4, T5, T6>(T1 value) => new Either<T1, T2, T3, T4, T5, T6>(value);
@@ -853,14 +701,14 @@ namespace ContainerExpressions.Containers
     /// </summary>
     public readonly struct Either<T1, T2, T3, T4, T5, T6, T7> : IEquatable<Either<T1, T2, T3, T4, T5, T6, T7>>
     {
-        private readonly int _tag;
-        private readonly T1 _t1;
-        private readonly T2 _t2;
-        private readonly T3 _t3;
-        private readonly T4 _t4;
-        private readonly T5 _t5;
-        private readonly T6 _t6;
-        private readonly T7 _t7;
+        internal readonly int _tag;
+        internal readonly T1 _t1;
+        internal readonly T2 _t2;
+        internal readonly T3 _t3;
+        internal readonly T4 _t4;
+        internal readonly T5 _t5;
+        internal readonly T6 _t6;
+        internal readonly T7 _t7;
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T1 t1)
@@ -953,73 +801,20 @@ namespace ContainerExpressions.Containers
             _t7 = t7;
         }
 
-        /// <summary>
-        /// Gets a type that each type of Either can transform to.
-        /// <para>Only one function will be invoked depending on what type is internally stored.</para>
-        /// </summary>
-        public TResult Match<TResult>(Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4, Func<T5, TResult> f5, Func<T6, TResult> f6, Func<T7, TResult> f7)
-        {
-            if (_tag == 1)
-                return f1(_t1);
-            if (_tag == 2)
-                return f2(_t2);
-            if (_tag == 3)
-                return f3(_t3);
-            if (_tag == 4)
-                return f4(_t4);
-            if (_tag == 5)
-                return f5(_t5);
-            if (_tag == 6)
-                return f6(_t6);
-            if (_tag == 7)
-                return f7(_t7);
-
-            throw new InvalidOperationException("The internal type was not set, you must assign Either a type at least once.");
-        }
-
-        public bool TryGetT1(out T1 t1) { if (_tag == 1) { t1 = _t1; return true; }; t1 = default; return false; }
-        public bool TryGetT2(out T2 t2) { if (_tag == 2) { t2 = _t2; return true; }; t2 = default; return false; }
-        public bool TryGetT3(out T3 t3) { if (_tag == 3) { t3 = _t3; return true; }; t3 = default; return false; }
-        public bool TryGetT4(out T4 t4) { if (_tag == 4) { t4 = _t4; return true; }; t4 = default; return false; }
-        public bool TryGetT5(out T5 t5) { if (_tag == 5) { t5 = _t5; return true; }; t5 = default; return false; }
-        public bool TryGetT6(out T6 t6) { if (_tag == 6) { t6 = _t6; return true; }; t6 = default; return false; }
-        public bool TryGetT7(out T7 t7) { if (_tag == 7) { t7 = _t7; return true; }; t7 = default; return false; }
-
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
         {
-            string value = null;
+            if (_tag == 0) return string.Empty;
 
-            if (_tag == 1)
-            {
-                value = _t1?.ToString();
-            }
-            else if (_tag == 2)
-            {
-                value = _t2?.ToString();
-            }
-            else if (_tag == 3)
-            {
-                value = _t3?.ToString();
-            }
-            else if (_tag == 4)
-            {
-                value = _t4?.ToString();
-            }
-            else if (_tag == 5)
-            {
-                value = _t5?.ToString();
-            }
-            else if (_tag == 6)
-            {
-                value = _t6?.ToString();
-            }
-            else if (_tag == 7)
-            {
-                value = _t7?.ToString();
-            }
+            if (_tag == 1) return _t1?.ToString() ?? string.Empty;
+            if (_tag == 2) return _t2?.ToString() ?? string.Empty;
+            if (_tag == 3) return _t3?.ToString() ?? string.Empty;
+            if (_tag == 4) return _t4?.ToString() ?? string.Empty;
+            if (_tag == 5) return _t5?.ToString() ?? string.Empty;
+            if (_tag == 6) return _t6?.ToString() ?? string.Empty;
+            if (_tag == 7) return _t7?.ToString() ?? string.Empty;
 
-            return value ?? string.Empty;
+            return string.Empty;
         }
 
         public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7>(T1 value) => new Either<T1, T2, T3, T4, T5, T6, T7>(value);
@@ -1129,15 +924,15 @@ namespace ContainerExpressions.Containers
     /// </summary>
     public readonly struct Either<T1, T2, T3, T4, T5, T6, T7, T8> : IEquatable<Either<T1, T2, T3, T4, T5, T6, T7, T8>>
     {
-        private readonly int _tag;
-        private readonly T1 _t1;
-        private readonly T2 _t2;
-        private readonly T3 _t3;
-        private readonly T4 _t4;
-        private readonly T5 _t5;
-        private readonly T6 _t6;
-        private readonly T7 _t7;
-        private readonly T8 _t8;
+        internal readonly int _tag;
+        internal readonly T1 _t1;
+        internal readonly T2 _t2;
+        internal readonly T3 _t3;
+        internal readonly T4 _t4;
+        internal readonly T5 _t5;
+        internal readonly T6 _t6;
+        internal readonly T7 _t7;
+        internal readonly T8 _t8;
 
         /// <summary>A container that internally holds one, of many possible types.</summary>
         public Either(T1 t1)
@@ -1251,80 +1046,21 @@ namespace ContainerExpressions.Containers
             _t8 = t8;
         }
 
-        /// <summary>
-        /// Gets a type that each type of Either can transform to.
-        /// <para>Only one function will be invoked depending on what type is internally stored.</para>
-        /// </summary>
-        public TResult Match<TResult>(Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4, Func<T5, TResult> f5, Func<T6, TResult> f6, Func<T7, TResult> f7, Func<T8, TResult> f8)
-        {
-            if (_tag == 1)
-                return f1(_t1);
-            if (_tag == 2)
-                return f2(_t2);
-            if (_tag == 3)
-                return f3(_t3);
-            if (_tag == 4)
-                return f4(_t4);
-            if (_tag == 5)
-                return f5(_t5);
-            if (_tag == 6)
-                return f6(_t6);
-            if (_tag == 7)
-                return f7(_t7);
-            if (_tag == 8)
-                return f8(_t8);
-
-            throw new InvalidOperationException("The internal type was not set, you must assign Either a type at least once.");
-        }
-
-        public bool TryGetT1(out T1 t1) { if (_tag == 1) { t1 = _t1; return true; }; t1 = default; return false; }
-        public bool TryGetT2(out T2 t2) { if (_tag == 2) { t2 = _t2; return true; }; t2 = default; return false; }
-        public bool TryGetT3(out T3 t3) { if (_tag == 3) { t3 = _t3; return true; }; t3 = default; return false; }
-        public bool TryGetT4(out T4 t4) { if (_tag == 4) { t4 = _t4; return true; }; t4 = default; return false; }
-        public bool TryGetT5(out T5 t5) { if (_tag == 5) { t5 = _t5; return true; }; t5 = default; return false; }
-        public bool TryGetT6(out T6 t6) { if (_tag == 6) { t6 = _t6; return true; }; t6 = default; return false; }
-        public bool TryGetT7(out T7 t7) { if (_tag == 7) { t7 = _t7; return true; }; t7 = default; return false; }
-        public bool TryGetT8(out T8 t8) { if (_tag == 8) { t8 = _t8; return true; }; t8 = default; return false; }
-
         /// <summary>Returns the underlying type's value's string representation.</summary>
         public override string ToString()
         {
-            string value = null;
+            if (_tag == 0) return string.Empty;
 
-            if (_tag == 1)
-            {
-                value = _t1?.ToString();
-            }
-            else if (_tag == 2)
-            {
-                value = _t2?.ToString();
-            }
-            else if (_tag == 3)
-            {
-                value = _t3?.ToString();
-            }
-            else if (_tag == 4)
-            {
-                value = _t4?.ToString();
-            }
-            else if (_tag == 5)
-            {
-                value = _t5?.ToString();
-            }
-            else if (_tag == 6)
-            {
-                value = _t6?.ToString();
-            }
-            else if (_tag == 7)
-            {
-                value = _t7?.ToString();
-            }
-            else if (_tag == 8)
-            {
-                value = _t8?.ToString();
-            }
+            if (_tag == 1) return _t1?.ToString() ?? string.Empty;
+            if (_tag == 2) return _t2?.ToString() ?? string.Empty;
+            if (_tag == 3) return _t3?.ToString() ?? string.Empty;
+            if (_tag == 4) return _t4?.ToString() ?? string.Empty;
+            if (_tag == 5) return _t5?.ToString() ?? string.Empty;
+            if (_tag == 6) return _t6?.ToString() ?? string.Empty;
+            if (_tag == 7) return _t7?.ToString() ?? string.Empty;
+            if (_tag == 8) return _t8?.ToString() ?? string.Empty;
 
-            return value ?? string.Empty;
+            return string.Empty;
         }
 
         public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T1 value) => new Either<T1, T2, T3, T4, T5, T6, T7, T8>(value);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ContainerExpressions.Containers.Internal;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -11,8 +12,8 @@ namespace ContainerExpressions.Containers.Extensions
     {
         // TODO: Ensure all exceptions are thrown in another class / method, to improve the chance of them having a cold jit; and these being inlined at runtime.
 
-        public static void ThrowError<T>(this T ex) where T : Exception => Exception(ex);
-        public static void ThrowError(this ExceptionDispatchInfo ex) => Exception(ex);
+        public static void ThrowError<T>(this T ex) where T : Exception => Throw.Exception(ex);
+        public static void ThrowError(this ExceptionDispatchInfo ex) => Throw.Exception(ex);
 
         public static T ThrowIfNull<T>(
             this T target,
@@ -22,7 +23,7 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             ) where T : class
         {
-            if (target == null) ArgumentNullException(argument);
+            if (target == null) Throw.ArgumentNullException(argument);
             return target;
         }
 
@@ -34,7 +35,7 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             ) where T : struct
         {
-            if (EqualityComparer<T>.Default.Equals(target, default)) ArgumentOutOfRangeException(argument);
+            if (EqualityComparer<T>.Default.Equals(target, default)) Throw.ArgumentOutOfRangeException(argument);
             return target;
         }
 
@@ -46,7 +47,7 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             )
         {
-            if (string.IsNullOrEmpty(target)) ArgumentOutOfRangeException(argument);
+            if (string.IsNullOrEmpty(target)) Throw.ArgumentOutOfRangeException(argument);
             return target;
         }
 
@@ -58,7 +59,7 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             )
         {
-            if (target == null || target.Length == 0) ArgumentOutOfRangeException(argument);
+            if (target == null || target.Length == 0) Throw.ArgumentOutOfRangeException(argument);
             return target;
         }
 
@@ -70,7 +71,7 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             )
         {
-            if (target == null || !target.Any()) ArgumentOutOfRangeException(argument);
+            if (target == null || !target.Any()) Throw.ArgumentOutOfRangeException(argument);
             return target;
         }
 
@@ -82,7 +83,7 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             )
         {
-            if (target == null || target.Count == 0) ArgumentOutOfRangeException(argument);
+            if (target == null || target.Count == 0) Throw.ArgumentOutOfRangeException(argument);
             return target;
         }
 
@@ -96,7 +97,7 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             ) where T : struct, IComparable<T>
         {
-            if (target.CompareTo(min) < 0) ArgumentOutOfRangeException(argument);
+            if (target.CompareTo(min) < 0) Throw.ArgumentOutOfRangeException(argument);
             return target;
         }
 
@@ -110,7 +111,7 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             ) where T : struct, IComparable<T>
         {
-            if (target.CompareTo(max) > 0) ArgumentOutOfRangeException(argument);
+            if (target.CompareTo(max) > 0) Throw.ArgumentOutOfRangeException(argument);
             return target;
         }
 
@@ -155,7 +156,7 @@ namespace ContainerExpressions.Containers.Extensions
                 if (task.Exception.InnerExceptions.Count == 1) task.Exception.InnerException.ThrowError();
                 else task.Exception.ThrowError();
             }
-            if (task.Status == TaskStatus.Canceled) TaskCanceledException(task);
+            if (task.Status == TaskStatus.Canceled) Throw.TaskCanceledException(task);
         }
     }
 }
