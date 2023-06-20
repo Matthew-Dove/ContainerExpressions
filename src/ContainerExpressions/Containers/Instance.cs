@@ -138,23 +138,23 @@ namespace ContainerExpressions.Containers
         public static ValueTask<TResult> ValueOf<TResult>() => ValueInstanceAsync<TResult>.Result;
         public static ResponseAsync<TResult> ResponseOf<TResult>() => InstanceResponseAsync<TResult>.Result;
 
-        public static void Create<TResult>(TResult result)
+        public static void Create<TResult>(TResult result) where TResult : class
         {
-            if (EqualityComparer<TResult>.Default.Equals(result, default)) throw new ArgumentException($"Invalid value for type: {typeof(TResult)}.", nameof(result));
+            if (result is null) throw new ArgumentNullException($"Invalid value for type: {typeof(TResult)}.", nameof(result));
             if (InstanceAsync<TResult>._result is not null) throw new InvalidOperationException($"The value has already been set for type: {typeof(TResult)}.");
             InstanceAsync<TResult>._result = Task.FromResult(result);
         }
 
-        public static void CreateValue<TResult>(TResult result)
+        public static void CreateValue<TResult>(TResult result) where TResult : class
         {
-            if (EqualityComparer<TResult>.Default.Equals(result, default)) throw new ArgumentException($"Invalid value for type: {typeof(TResult)}.", nameof(result));
+            if (result is null) throw new ArgumentNullException($"Invalid value for type: {typeof(TResult)}.", nameof(result));
             if (!EqualityComparer<TResult>.Default.Equals(ValueInstanceAsync<TResult>._result, default)) throw new InvalidOperationException($"The value has already been set for type: {typeof(TResult)}.");
             ValueInstanceAsync<TResult>._result = result;
         }
 
-        public static void CreateResponse<TResult>(TResult result)
+        public static void CreateResponse<TResult>(TResult result) where TResult : class
         {
-            if (EqualityComparer<TResult>.Default.Equals(result, default)) throw new ArgumentException($"Invalid value for type: {typeof(TResult)}.", nameof(result));
+            if (result is null) throw new ArgumentNullException($"Invalid value for type: {typeof(TResult)}.", nameof(result));
             if (InstanceResponseAsync<TResult>._result is not null) throw new InvalidOperationException($"The value has already been set for type: {typeof(TResult)}.");
             InstanceResponseAsync<TResult>._result = new State<TResult>(result);
         }

@@ -69,30 +69,7 @@ namespace Tests.ContainerExpressions.Containers
         public async Task InstanceAsync_Task_Value()
         {
             var result = await InstanceAsync.Of<int>();
-            Assert.IsTrue(result == 0 || result == 1);
-        }
-
-        [TestMethod]
-        public async Task InstanceAsync_Task_CustomValue()
-        {
-            InstanceAsync.Create(1);
-            var result = await InstanceAsync.Of<int>();
-            Assert.AreEqual(1, result);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void InstanceAsync_Task_CustomValue_CannotSetDefault()
-        {
-            InstanceAsync.Create(default(int));
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void InstanceAsync_Task_CustomValue_CannotSetTwice()
-        {
-            InstanceAsync.Create(1);
-            InstanceAsync.Create(1);
+            Assert.AreEqual(default(int), result);
         }
 
         [TestMethod]
@@ -111,7 +88,7 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void InstanceAsync_Task_CustomReference_CannotSetDefault()
         {
             InstanceAsync.Create(default(string));
@@ -133,30 +110,7 @@ namespace Tests.ContainerExpressions.Containers
         public async Task InstanceAsync_ValueTask_Value()
         {
             var result = await InstanceAsync.ValueOf<int>();
-            Assert.IsTrue(result == 0 || result == 1);
-        }
-
-        [TestMethod]
-        public async Task InstanceAsync_ValueTask_CustomValue()
-        {
-            InstanceAsync.CreateValue(1);
-            var result = await InstanceAsync.ValueOf<int>();
-            Assert.AreEqual(1, result);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void InstanceAsync_ValueTask_CustomValue_CannotSetDefault()
-        {
-            InstanceAsync.CreateValue(default(int));
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void InstanceAsync_ValueTask_CustomValue_CannotSetTwice()
-        {
-            InstanceAsync.CreateValue(1);
-            InstanceAsync.CreateValue(1);
+            Assert.AreEqual(default(int), result);
         }
 
         [TestMethod]
@@ -175,7 +129,7 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void InstanceAsync_ValueTask_CustomReference_CannotSetDefault()
         {
             InstanceAsync.CreateValue(default(string));
@@ -197,30 +151,7 @@ namespace Tests.ContainerExpressions.Containers
         public async Task InstanceAsync_ResponseAsync_Value()
         {
             var result = await InstanceAsync.ResponseOf<int>();
-            Assert.IsTrue(result == 0 || result == 1);
-        }
-
-        [TestMethod]
-        public async Task InstanceAsync_ResponseAsync_CustomValue()
-        {
-            InstanceAsync.CreateResponse(1);
-            var result = await InstanceAsync.ResponseOf<int>();
-            Assert.AreEqual(1, result);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void InstanceAsync_ResponseAsync_CustomValue_CannotSetDefault()
-        {
-            InstanceAsync.CreateResponse(default(int));
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void InstanceAsync_ResponseAsync_CustomValue_CannotSetTwice()
-        {
-            InstanceAsync.CreateResponse(1);
-            InstanceAsync.CreateResponse(1);
+            Assert.AreEqual(default(int), result);
         }
 
         [TestMethod]
@@ -239,7 +170,7 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void InstanceAsync_ResponseAsync_CustomReference_CannotSetDefault()
         {
             InstanceAsync.CreateResponse(default(string));
