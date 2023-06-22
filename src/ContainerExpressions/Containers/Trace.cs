@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ContainerExpressions.Containers.Internal;
+using System;
 
 namespace ContainerExpressions.Containers
 {
@@ -15,7 +16,7 @@ namespace ContainerExpressions.Containers
         public static void SetLogger(Action<string> logger)
         {
             if (logger == null)
-                throw new ArgumentNullException(nameof(logger));
+                Throw.ArgumentNullException(nameof(logger));
 
             _logger = logger;
         }

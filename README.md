@@ -461,16 +461,16 @@ public sealed class Index : Alias<int> {
 The above custom type `Index` works great, but it has one big problem.  
 It forces you to create a reference class (_`Index`_) for a value struct (_`int`_).  
 This might be ok if `T` was a reference type too, but quite wasteful when `T` is a value type.  
-To get around this, we also have a struct alias type: `A<T>`.  
+To get around this, we also have a struct alias type: `ValueAlias<T>`.  
 Structs are not as versatile as classes, for example they cannot implement inheritance - which is how `Alias<T>` works today (it is abstract, so there is no runtime penality for doing this_).  
 There are two work arounds I have for you:  
 
 1) Use a file, or global [using directive](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/using-directive) (_a complier feature_).
 
 ```cs
-global using Index = ContainerExpressions.Containers.A<int>; // Put this in GlobalUsings.cs file.
+global using Index = ContainerExpressions.Containers.ValueAlias<int>; // Put this in GlobalUsings.cs file.
 // OR
-using Index = ContainerExpressions.Containers.A<int>; // Put this in the local file - not as useful as the Index name won't work everywhere.
+using Index = ContainerExpressions.Containers.ValueAlias<int>; // Put this in the local file - not as useful as the Index name won't work everywhere.
 ```
 
 That solution is pretty good, you get a descriptive name; and a type overload.  
@@ -485,34 +485,34 @@ But you do miss out on a few things:
 /// <summary>The current element's index.</summary>
 public readonly struct Index
 {
-	public A<int> Value { get; }
+	public ValueAlias<int> Value { get; }
 	public Index(int value) { Value = new(value); }
-
-	public static implicit operator A<int>(Index alias) => alias.Value;
-	public static implicit operator Index(A<int> value) => new(value.Value);
 	public static implicit operator int(Index alias) => alias.Value.Value;
-	public static implicit operator Index(int value) => new(value);
-
 	public override string ToString() => Value.ToString();
 }
 ```
 
-This gets you everything in `Alias<int>`, missing from `A<int>` - but in struct form!  
+This gets you everything in `Alias<int>`, missing from `ValueAlias<int>` - but in struct form!  
 I cannot make this struct for you unfortunately, you will have to copy + paste it; and replace the `int` with your desired type.  
 That said, this should be possible if using [Source Generators](https://learn.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview), but I haven't played with them yet. 
 
 Be aware that `Index` is not safe to do `Equals` comparison on, or to use in collections such as a `Dictionary`.  
-For such cases you would need to expose the underlying `A<T>`, so cast it first, or access it directly though the `Value` property.  
+For such cases you would need to expose the underlying `ValueAlias<T>`, so cast it first, or access it directly though the `Value` property.  
 Note: the reference type `Alias<T>` does not have this problem, and is safe to use anywhere you would use `T`.  
 
-You could do away with the the helper methods for a more concise version, you'd just need to manually access the underlying alias type (_`A<int>`_) though the `Value` property:  
+You could do away with the the helper methods for a more concise version, you'd just need to manually access the underlying alias type (_`ValueAlias<int>`_) though the `Value` property:  
 
 ```cs
 public readonly struct Index
 {
-	public A<int> Value { get; }
+	public ValueAlias<int> Value { get; }
 	public Index(int value) { Value = new(value); }
 }
+```
+
+You can use it "as is" without wrapping it too:
+```cs
+var index = new ValueAlias<int>(1);
 ```
 
 You might ask - why am I using `Index` in so many examples? When would you wrap a plain `int`?  
@@ -1096,7 +1096,7 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * Expanded the function targets for `Funnel`. Was only `T`, now includes: `Response<T>`, `Task<T>`, and `Task<Response<T>>`.
 * Added equals overloads to `Either`, so you can easily compare some `T` value to the `Either` container.
 * Added `TryGetT*` to `Either`, allowing access to the types without going though `Match<TResult>`.
-* Added a struct version of `Alias<T>` called `A<T>`.
+* Added a struct version of `Alias<T>` called `ValueAlias<T>`.
 * Added shared types to resue in containers, such as `OK`, `BadRequest`, `Error`, etc.
 * Created shared common lambda functions, such as `Lambda.Identity` to reflect the input as the output. i.e. instead of having to write `(x => x)`.
 * Added `TryGetValue()`, and `TryGetError()` to `Maybe`.

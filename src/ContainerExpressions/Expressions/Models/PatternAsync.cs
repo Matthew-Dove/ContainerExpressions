@@ -1,4 +1,5 @@
 ﻿using ContainerExpressions.Containers;
+using ContainerExpressions.Containers.Internal;
 using System;
 using System.Threading.Tasks;
 
@@ -14,9 +15,9 @@ namespace ContainerExpressions.Expressions.Models
         public PatternAsync(Func<TInput, bool> evaluate, Func<TInput, Task<Response<TResult>>> execute)
         {
             if (evaluate == null)
-                throw new ArgumentNullException(nameof(evaluate));
+                Throw.ArgumentNullException(nameof(evaluate));
             if (execute == null)
-                throw new ArgumentNullException(nameof(execute));
+                Throw.ArgumentNullException(nameof(execute));
 
             _evaluate = evaluate;
             _execute = execute;
@@ -39,9 +40,9 @@ namespace ContainerExpressions.Expressions.Models
         public PatternAsync(Func<TPivot, bool> evaluate, Func<TInput, Task<Response<TResult>>> execute)
         {
             if (evaluate == null)
-                throw new ArgumentNullException(nameof(evaluate));
+                Throw.ArgumentNullException(nameof(evaluate));
             if (execute == null)
-                throw new ArgumentNullException(nameof(execute));
+                Throw.ArgumentNullException(nameof(execute));
 
             _evaluate = evaluate;
             _execute = execute;

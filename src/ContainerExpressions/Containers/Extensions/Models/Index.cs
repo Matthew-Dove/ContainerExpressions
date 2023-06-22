@@ -3,7 +3,7 @@
     /// <summary>The current element's index.</summary>
     public readonly struct Index
     {
-        public A<int> Value { get; }
+        public ValueAlias<int> Value { get; }
         internal Index(int value) { Value = new(value); }
 
         public static implicit operator int(Index alias) => alias.Value.Value;

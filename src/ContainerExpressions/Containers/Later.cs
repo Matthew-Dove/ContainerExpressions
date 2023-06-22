@@ -1,4 +1,5 @@
 ﻿using ContainerExpressions.Containers.Extensions;
+using ContainerExpressions.Containers.Internal;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -74,7 +75,7 @@ namespace ContainerExpressions.Containers
         public Later(Func<T> func)
         {
             if (func == null)
-                throw new ArgumentNullException(nameof(func));
+                Throw.ArgumentNullException(nameof(func));
 
             _value = default;
             _func = func;
@@ -98,7 +99,7 @@ namespace ContainerExpressions.Containers
         public LaterAsync(Func<Task<T>> func)
         {
             if (func == null)
-                throw new ArgumentNullException(nameof(func));
+                Throw.ArgumentNullException(nameof(func));
 
             _lock = new object();
             _value = null;

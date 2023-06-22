@@ -3,7 +3,7 @@
     /// <summary>The total number of elements in the collection.</summary>
     public readonly struct Length
     {
-        public A<int> Value { get; }
+        public ValueAlias<int> Value { get; }
         internal Length(int value) { Value = new(value); }
 
         public static implicit operator int(Length alias) => alias.Value.Value;

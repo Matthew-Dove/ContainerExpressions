@@ -4,16 +4,38 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers.Extensions
 {
     public static class GuardExtensions
     {
-        // TODO: Ensure all exceptions are thrown in another class / method, to improve the chance of them having a cold jit; and these being inlined at runtime.
-
         public static void ThrowError<T>(this T ex) where T : Exception => Throw.Exception(ex);
         public static void ThrowError(this ExceptionDispatchInfo ex) => Throw.Exception(ex);
+
+        private static Either<string, ErrorMessage> GetMessage(string message, string argument, string predicate, string caller, string path, int line)
+        {
+            if (argument == string.Empty && predicate == string.Empty && caller == string.Empty && path == string.Empty && line == 0) return new ErrorMessage(message);
+            return new StringBuilder()
+                .Append("Message: ").AppendLine(message)
+                .Append("CallerArgumentExpression: ").AppendLine(argument)
+                .Append("CallerPredicateExpression: ").AppendLine(predicate)
+                .Append("CallerMemberName: ").AppendLine(caller)
+                .Append("CallerFilePath: ").AppendLine(path)
+                .Append("CallerLineNumber: ").Append(line)
+                .ToString();
+        }
+
+        private static Either<string, NotFound> GetMessage(string caller, string path, int line)
+        {
+            if (caller == string.Empty && path == string.Empty && line == 0) return new NotFound();
+            return new StringBuilder()
+                .Append("CallerMemberName: ").AppendLine(caller)
+                .Append("CallerFilePath: ").AppendLine(path)
+                .Append("CallerLineNumber: ").Append(line)
+                .ToString();
+        }
 
         public static T ThrowIfNull<T>(
             this T target,
@@ -23,7 +45,8 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             ) where T : class
         {
-            if (target == null) Throw.ArgumentNullException(argument);
+            if (target == null)
+                GetMessage(caller, path, line).Match(msg => Throw.ArgumentNullException(argument, msg), _ => Throw.ArgumentNullException(argument));
             return target;
         }
 
@@ -35,7 +58,8 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             ) where T : struct
         {
-            if (EqualityComparer<T>.Default.Equals(target, default)) Throw.ArgumentOutOfRangeException(argument);
+            if (EqualityComparer<T>.Default.Equals(target, default))
+                GetMessage(caller, path, line).Match(msg => Throw.ArgumentOutOfRangeException(argument, msg), _ => Throw.ArgumentOutOfRangeException(argument));
             return target;
         }
 
@@ -47,7 +71,8 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             )
         {
-            if (string.IsNullOrEmpty(target)) Throw.ArgumentOutOfRangeException(argument);
+            if (string.IsNullOrEmpty(target))
+                GetMessage(caller, path, line).Match(msg => Throw.ArgumentOutOfRangeException(argument, msg), _ => Throw.ArgumentOutOfRangeException(argument));
             return target;
         }
 
@@ -59,7 +84,8 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             )
         {
-            if (target == null || target.Length == 0) Throw.ArgumentOutOfRangeException(argument);
+            if (target == null || target.Length == 0)
+                GetMessage(caller, path, line).Match(msg => Throw.ArgumentOutOfRangeException(argument, msg), _ => Throw.ArgumentOutOfRangeException(argument));
             return target;
         }
 
@@ -71,7 +97,8 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             )
         {
-            if (target == null || !target.Any()) Throw.ArgumentOutOfRangeException(argument);
+            if (target == null || !target.Any())
+                GetMessage(caller, path, line).Match(msg => Throw.ArgumentOutOfRangeException(argument, msg), _ => Throw.ArgumentOutOfRangeException(argument));
             return target;
         }
 
@@ -83,7 +110,8 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             )
         {
-            if (target == null || target.Count == 0) Throw.ArgumentOutOfRangeException(argument);
+            if (target == null || target.Count == 0)
+                GetMessage(caller, path, line).Match(msg => Throw.ArgumentOutOfRangeException(argument, msg), _ => Throw.ArgumentOutOfRangeException(argument));
             return target;
         }
 
@@ -97,7 +125,8 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             ) where T : struct, IComparable<T>
         {
-            if (target.CompareTo(min) < 0) Throw.ArgumentOutOfRangeException(argument);
+            if (target.CompareTo(min) < 0)
+                GetMessage($"{target} < {min} is not valid, {target} must be >= {min}.", argument, predicate, caller, path, line).Match(msg => Throw.ArgumentOutOfRangeException(argument, msg), errMsg => Throw.ArgumentOutOfRangeException(argument, errMsg));
             return target;
         }
 
@@ -111,9 +140,12 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             ) where T : struct, IComparable<T>
         {
-            if (target.CompareTo(max) > 0) Throw.ArgumentOutOfRangeException(argument);
+            if (target.CompareTo(max) > 0)
+                GetMessage($"{target} > {max} is not valid, {target} must be <= {max}.", argument, predicate, caller, path, line).Match(msg => Throw.ArgumentOutOfRangeException(argument, msg), errMsg => Throw.ArgumentOutOfRangeException(argument, errMsg));
             return target;
         }
+
+        #region ThrowIfFaultedOrCanceled
 
         /**
          * [ThrowIfFaultedOrCanceled]
@@ -121,13 +153,7 @@ namespace ContainerExpressions.Containers.Extensions
          * The purpose of this wrapper then, is to only throw a single exception (instead of aggregate exceptions); when there is only 1 error present.
         **/
 
-        public static Task ThrowIfFaultedOrCanceled(
-            this Task target,
-            [CallerArgumentExpression(nameof(target))] string argument = "",
-            [CallerMemberName] string caller = "",
-            [CallerFilePath] string path = "",
-            [CallerLineNumber] int line = 0
-            )
+        public static Task ThrowIfFaultedOrCanceled(this Task target)
         {
             if (target == null) return target;
             if (!target.IsCompleted) return target.ContinueWith(CheckStatus);
@@ -135,13 +161,7 @@ namespace ContainerExpressions.Containers.Extensions
             return target;
         }
 
-        public static Task<T> ThrowIfFaultedOrCanceled<T>(
-            this Task<T> target,
-            [CallerArgumentExpression(nameof(target))] string argument = "",
-            [CallerMemberName] string caller = "",
-            [CallerFilePath] string path = "",
-            [CallerLineNumber] int line = 0
-            )
+        public static Task<T> ThrowIfFaultedOrCanceled<T>(this Task<T> target)
         {
             if (target == null) return target;
             if (!target.IsCompleted) return target.ContinueWith(static t => { CheckStatus(t); return t.Result; });
@@ -153,11 +173,13 @@ namespace ContainerExpressions.Containers.Extensions
         {
             if (task.Status == TaskStatus.Faulted)
             {
-                if (task.Exception.InnerExceptions.Count == 1) task.Exception.InnerException.ThrowError();
-                else task.Exception.ThrowError();
+                if (task.Exception.InnerExceptions.Count == 1) Throw.Exception(task.Exception.InnerException);
+                else Throw.Exception(task.Exception);
             }
             if (task.Status == TaskStatus.Canceled) Throw.TaskCanceledException(task);
         }
+
+        #endregion
     }
 }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ContainerExpressions.Containers.Internal;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -120,13 +121,13 @@ namespace ContainerExpressions.Containers
             get
             {
                 if (_isValue) return _value; // Value types cannot be set due to the generic constraints placed on Instance.Create(), so we can return them without checking (as they are not null).
-                if (_value is null) throw new InvalidOperationException($"Must set a value for type: {typeof(T)}, before attempting to retrieve it.");
+                if (_value is null) Throw.InvalidOperationException($"Must set a value for type: {typeof(T)}, before attempting to retrieve it.");
                 return _value;
             }
             set
             {
-                if (value is null) throw new ArgumentNullException(nameof(Value), $"Invalid value for type: {typeof(T)}.");
-                if (_value is not null) throw new InvalidOperationException($"The value has already been set for type: {typeof(T)}."); // Value types cannot be set, so only need to check null.
+                if (value is null) Throw.ArgumentNullException(nameof(Value), $"Invalid value for type: {typeof(T)}.");
+                if (_value is not null) Throw.InvalidOperationException($"The value has already been set for type: {typeof(T)}."); // Value types cannot be set, so only need to check null.
                 _value = value;
             }
         }
@@ -140,22 +141,22 @@ namespace ContainerExpressions.Containers
 
         public static void Create<TResult>(TResult result) where TResult : class
         {
-            if (result is null) throw new ArgumentNullException($"Invalid value for type: {typeof(TResult)}.", nameof(result));
-            if (InstanceAsync<TResult>._result is not null) throw new InvalidOperationException($"The value has already been set for type: {typeof(TResult)}.");
+            if (result is null) Throw.ArgumentNullException($"Invalid value for type: {typeof(TResult)}.", nameof(result));
+            if (InstanceAsync<TResult>._result is not null) Throw.InvalidOperationException($"The value has already been set for type: {typeof(TResult)}.");
             InstanceAsync<TResult>._result = Task.FromResult(result);
         }
 
         public static void CreateValue<TResult>(TResult result) where TResult : class
         {
-            if (result is null) throw new ArgumentNullException($"Invalid value for type: {typeof(TResult)}.", nameof(result));
-            if (!EqualityComparer<TResult>.Default.Equals(ValueInstanceAsync<TResult>._result, default)) throw new InvalidOperationException($"The value has already been set for type: {typeof(TResult)}.");
+            if (result is null) Throw.ArgumentNullException($"Invalid value for type: {typeof(TResult)}.", nameof(result));
+            if (!EqualityComparer<TResult>.Default.Equals(ValueInstanceAsync<TResult>._result, default)) Throw.InvalidOperationException($"The value has already been set for type: {typeof(TResult)}.");
             ValueInstanceAsync<TResult>._result = result;
         }
 
         public static void CreateResponse<TResult>(TResult result) where TResult : class
         {
-            if (result is null) throw new ArgumentNullException($"Invalid value for type: {typeof(TResult)}.", nameof(result));
-            if (InstanceResponseAsync<TResult>._result is not null) throw new InvalidOperationException($"The value has already been set for type: {typeof(TResult)}.");
+            if (result is null) Throw.ArgumentNullException($"Invalid value for type: {typeof(TResult)}.", nameof(result));
+            if (InstanceResponseAsync<TResult>._result is not null) Throw.InvalidOperationException($"The value has already been set for type: {typeof(TResult)}.");
             InstanceResponseAsync<TResult>._result = new State<TResult>(result);
         }
     }

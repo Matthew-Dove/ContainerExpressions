@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ContainerExpressions.Containers.Internal;
+using System;
 using System.Collections.Generic;
 
 namespace ContainerExpressions.Containers
@@ -18,7 +19,7 @@ namespace ContainerExpressions.Containers
         private NotNull(T value)
         {
             if (value == null)
-                throw new ArgumentNullException(nameof(value));
+                Throw.ArgumentNullException(nameof(value));
 
             Value = value;
         }
@@ -67,7 +68,7 @@ namespace ContainerExpressions.Containers
         public NN(T value)
         {
             if (value == null)
-                throw new ArgumentNullException(nameof(value));
+                Throw.ArgumentNullException(nameof(value));
 
             Value = value;
         }

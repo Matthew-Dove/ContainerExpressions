@@ -1,1 +1,1 @@
-﻿global using static ContainerExpressions.Containers.Lambda;
+﻿global using ErrorMessage = ContainerExpressions.Containers.ValueAlias<string>;

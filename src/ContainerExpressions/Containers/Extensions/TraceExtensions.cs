@@ -97,7 +97,7 @@ namespace ContainerExpressions.Containers
 
             Exception ex;
             if (error is Exception e) ex = e;
-            else ex = new GenericErrorException<TError>(error, message);
+            else ex = new GenericErrorException<TError>(error, new ErrorMessage(message));
             Trace.Log(message);
             LogException(ex);
 
@@ -118,7 +118,7 @@ namespace ContainerExpressions.Containers
                 if (err == null) continue;
                 Exception ex;
                 if (error is Exception e) ex = e;
-                else ex = new GenericErrorException<TError>(err, message);
+                else ex = new GenericErrorException<TError>(err, new ErrorMessage(message));
                 LogException(ex);
             }
 
@@ -139,7 +139,7 @@ namespace ContainerExpressions.Containers
                 if (error[i] == null) continue;
                 Exception ex;
                 if (error is Exception e) ex = e;
-                else ex = new GenericErrorException<TError>(error[i], message);
+                else ex = new GenericErrorException<TError>(error[i], new ErrorMessage(message));
                 LogException(ex);
             }
 
@@ -156,7 +156,7 @@ namespace ContainerExpressions.Containers
                 if (error[i] == null) continue;
                 Exception ex;
                 if (error is Exception e) ex = e;
-                else ex = new GenericErrorException<TError>(error[i], message);
+                else ex = new GenericErrorException<TError>(error[i], new ErrorMessage(message));
                 LogException(ex);
             }
 
@@ -174,7 +174,7 @@ namespace ContainerExpressions.Containers
             var msg = format(error);
             Exception ex;
             if (error is Exception e) ex = e;
-            else ex = new GenericErrorException<TError>(error, msg);
+            else ex = new GenericErrorException<TError>(error, new ErrorMessage(msg));
             Trace.Log(msg);
             LogException(ex);
 
@@ -195,7 +195,7 @@ namespace ContainerExpressions.Containers
                 var msg = format(err);
                 Exception ex;
                 if (error is Exception e) ex = e;
-                else ex = new GenericErrorException<TError>(err, msg);
+                else ex = new GenericErrorException<TError>(err, new ErrorMessage(msg));
                 Trace.Log(msg);
                 LogException(ex);
             }
@@ -218,7 +218,7 @@ namespace ContainerExpressions.Containers
                 var msg = format(err, Index.From(i++));
                 Exception ex;
                 if (error is Exception e) ex = e;
-                else ex = new GenericErrorException<TError>(err, msg);
+                else ex = new GenericErrorException<TError>(err, new ErrorMessage(msg));
                 Trace.Log(msg);
                 LogException(ex);
             }
@@ -242,7 +242,7 @@ namespace ContainerExpressions.Containers
                 var msg = format(err, Index.From(i++), length);
                 Exception ex;
                 if (error is Exception e) ex = e;
-                else ex = new GenericErrorException<TError>(err, msg);
+                else ex = new GenericErrorException<TError>(err, new ErrorMessage(msg));
                 Trace.Log(msg);
                 LogException(ex);
             }
@@ -264,7 +264,7 @@ namespace ContainerExpressions.Containers
                 var msg = format(error[i]);
                 Exception ex;
                 if (error is Exception e) ex = e;
-                else ex = new GenericErrorException<TError>(error[i], msg);
+                else ex = new GenericErrorException<TError>(error[i], new ErrorMessage(msg));
                 Trace.Log(msg);
                 LogException(ex);
             }
@@ -286,7 +286,7 @@ namespace ContainerExpressions.Containers
                 var msg = format(error[i], Index.From(i));
                 Exception ex;
                 if (error is Exception e) ex = e;
-                else ex = new GenericErrorException<TError>(error[i], msg);
+                else ex = new GenericErrorException<TError>(error[i], new ErrorMessage(msg));
                 Trace.Log(msg);
                 LogException(ex);
             }
@@ -309,7 +309,7 @@ namespace ContainerExpressions.Containers
                 var msg = format(error[i], Index.From(i), length);
                 Exception ex;
                 if (error is Exception e) ex = e;
-                else ex = new GenericErrorException<TError>(error[i], msg);
+                else ex = new GenericErrorException<TError>(error[i], new ErrorMessage(msg));
                 Trace.Log(msg);
                 LogException(ex);
             }

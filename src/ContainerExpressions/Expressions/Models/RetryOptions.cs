@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ContainerExpressions.Containers.Internal;
+using System;
 using System.Threading;
 
 namespace ContainerExpressions.Expressions.Models
@@ -30,9 +31,9 @@ namespace ContainerExpressions.Expressions.Models
         public RetryOptions(int retries, int millisecondsDelay, bool withJitter)
         {
             if (retries < 1)
-                throw new ArgumentOutOfRangeException(nameof(retries), "Must be greater than 0.");
+                Throw.ArgumentOutOfRangeException(nameof(retries), "Must be greater than 0.");
             if (millisecondsDelay < 0)
-                throw new ArgumentOutOfRangeException(nameof(millisecondsDelay), "Cannot be negative.");
+                Throw.ArgumentOutOfRangeException(nameof(millisecondsDelay), "Cannot be negative.");
 
             Retries = retries;
             MillisecondsDelay = millisecondsDelay;
@@ -47,9 +48,9 @@ namespace ContainerExpressions.Expressions.Models
         public RetryOptions(int retries, Func<int, int> getMillisecondsDelay, bool withJitter)
         {
             if (retries < 1)
-                throw new ArgumentOutOfRangeException(nameof(retries), "Must be greater than 0.");
+                Throw.ArgumentOutOfRangeException(nameof(retries), "Must be greater than 0.");
             if (getMillisecondsDelay == null)
-                throw new ArgumentNullException(nameof(getMillisecondsDelay));
+                Throw.ArgumentNullException(nameof(getMillisecondsDelay));
 
             Retries = retries;
             MillisecondsDelay = 0;
@@ -62,11 +63,11 @@ namespace ContainerExpressions.Expressions.Models
         public int GetMillisecondsDelay(int retryAttempt)
         {
             if (retryAttempt < 1)
-                throw new ArgumentOutOfRangeException(nameof(retryAttempt), "Must be greater than 0.");
+                Throw.ArgumentOutOfRangeException(nameof(retryAttempt), "Must be greater than 0.");
 
             var millisecondsDelay = _getMillisecondsDelay(retryAttempt);
             if (millisecondsDelay < 0)
-                throw new ArgumentOutOfRangeException(nameof(millisecondsDelay), "Cannot be negative.");
+                Throw.ArgumentOutOfRangeException(nameof(millisecondsDelay), "Cannot be negative.");
 
             if (WithJitter)
             {
