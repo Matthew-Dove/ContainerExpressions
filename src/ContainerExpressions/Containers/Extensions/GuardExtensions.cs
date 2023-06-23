@@ -11,12 +11,8 @@ namespace ContainerExpressions.Containers.Extensions
 {
     public static class GuardExtensions
     {
-        public static void ThrowError<T>(this T ex) where T : Exception => Throw.Exception(ex);
-        public static void ThrowError(this ExceptionDispatchInfo ex) => Throw.Exception(ex);
-
-        private static Either<string, ErrorMessage> GetMessage(string message, string argument, string predicate, string caller, string path, int line)
+        private static string GetMessage(string message, string argument, string predicate, string caller, string path, int line)
         {
-            if (argument == string.Empty && predicate == string.Empty && caller == string.Empty && path == string.Empty && line == 0) return new ErrorMessage(message);
             return new StringBuilder()
                 .Append("Message: ").AppendLine(message)
                 .Append("CallerArgumentExpression: ").AppendLine(argument)
@@ -27,15 +23,32 @@ namespace ContainerExpressions.Containers.Extensions
                 .ToString();
         }
 
-        private static Either<string, NotFound> GetMessage(string caller, string path, int line)
+        private static string GetMessage(string message, string argument, string caller, string path, int line)
         {
-            if (caller == string.Empty && path == string.Empty && line == 0) return new NotFound();
             return new StringBuilder()
+                .Append("Message: ").AppendLine(message)
+                .Append("CallerArgumentExpression: ").AppendLine(argument)
                 .Append("CallerMemberName: ").AppendLine(caller)
                 .Append("CallerFilePath: ").AppendLine(path)
                 .Append("CallerLineNumber: ").Append(line)
                 .ToString();
         }
+
+        public static void ThrowError<T>(
+            this T ex,
+            [CallerArgumentExpression(nameof(ex))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            ) where T : Exception => Throw.Exception(ex.AddCallerAttributes(argument, caller, path, line));
+
+        public static void ThrowError(
+            this ExceptionDispatchInfo ex,
+            [CallerArgumentExpression(nameof(ex))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            ) => Throw.Exception(ex.SourceException.AddCallerAttributes(argument, caller, path, line));
 
         public static T ThrowIfNull<T>(
             this T target,
@@ -45,8 +58,7 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             ) where T : class
         {
-            if (target == null)
-                GetMessage(caller, path, line).Match(msg => Throw.ArgumentNullException(argument, msg), _ => Throw.ArgumentNullException(argument));
+            if (target == null) Throw.ArgumentNullException(argument, GetMessage($"{argument} cannot be null.", argument, caller, path, line));
             return target;
         }
 
@@ -58,8 +70,7 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             ) where T : struct
         {
-            if (EqualityComparer<T>.Default.Equals(target, default))
-                GetMessage(caller, path, line).Match(msg => Throw.ArgumentOutOfRangeException(argument, msg), _ => Throw.ArgumentOutOfRangeException(argument));
+            if (EqualityComparer<T>.Default.Equals(target, default)) Throw.ArgumentOutOfRangeException(argument, GetMessage($"{argument} cannot be default.", argument, caller, path, line));
             return target;
         }
 
@@ -71,8 +82,7 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             )
         {
-            if (string.IsNullOrEmpty(target))
-                GetMessage(caller, path, line).Match(msg => Throw.ArgumentOutOfRangeException(argument, msg), _ => Throw.ArgumentOutOfRangeException(argument));
+            if (string.IsNullOrEmpty(target)) Throw.ArgumentOutOfRangeException(argument, GetMessage($"{argument} cannot be null or empty.", argument, caller, path, line));
             return target;
         }
 
@@ -84,8 +94,7 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             )
         {
-            if (target == null || target.Length == 0)
-                GetMessage(caller, path, line).Match(msg => Throw.ArgumentOutOfRangeException(argument, msg), _ => Throw.ArgumentOutOfRangeException(argument));
+            if (target == null || target.Length == 0) Throw.ArgumentOutOfRangeException(argument, GetMessage($"{argument} cannot be null or empty.", argument, caller, path, line));
             return target;
         }
 
@@ -97,8 +106,7 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             )
         {
-            if (target == null || !target.Any())
-                GetMessage(caller, path, line).Match(msg => Throw.ArgumentOutOfRangeException(argument, msg), _ => Throw.ArgumentOutOfRangeException(argument));
+            if (target == null || !target.Any()) Throw.ArgumentOutOfRangeException(argument, GetMessage($"{argument} cannot be null or empty.", argument, caller, path, line));
             return target;
         }
 
@@ -110,8 +118,7 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             )
         {
-            if (target == null || target.Count == 0)
-                GetMessage(caller, path, line).Match(msg => Throw.ArgumentOutOfRangeException(argument, msg), _ => Throw.ArgumentOutOfRangeException(argument));
+            if (target == null || target.Count == 0) Throw.ArgumentOutOfRangeException(argument, GetMessage($"{argument} cannot be null or empty.", argument, caller, path, line));
             return target;
         }
 
@@ -125,8 +132,7 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             ) where T : struct, IComparable<T>
         {
-            if (target.CompareTo(min) < 0)
-                GetMessage($"{target} < {min} is not valid, {target} must be >= {min}.", argument, predicate, caller, path, line).Match(msg => Throw.ArgumentOutOfRangeException(argument, msg), errMsg => Throw.ArgumentOutOfRangeException(argument, errMsg));
+            if (target.CompareTo(min) < 0) Throw.ArgumentOutOfRangeException(argument, GetMessage($"{target} < {min} is not valid, {target} must be >= {min}.", argument, predicate, caller, path, line));
             return target;
         }
 
@@ -140,8 +146,7 @@ namespace ContainerExpressions.Containers.Extensions
             [CallerLineNumber] int line = 0
             ) where T : struct, IComparable<T>
         {
-            if (target.CompareTo(max) > 0)
-                GetMessage($"{target} > {max} is not valid, {target} must be <= {max}.", argument, predicate, caller, path, line).Match(msg => Throw.ArgumentOutOfRangeException(argument, msg), errMsg => Throw.ArgumentOutOfRangeException(argument, errMsg));
+            if (target.CompareTo(max) > 0) Throw.ArgumentOutOfRangeException(argument, GetMessage($"{target} > {max} is not valid, {target} must be <= {max}.", argument, predicate, caller, path, line));
             return target;
         }
 
@@ -153,52 +158,44 @@ namespace ContainerExpressions.Containers.Extensions
          * The purpose of this wrapper then, is to only throw a single exception (instead of aggregate exceptions); when there is only 1 error present.
         **/
 
-        public static Task ThrowIfFaultedOrCanceled(this Task target)
+        public static Task ThrowIfFaultedOrCanceled(
+            this Task target,
+            [CallerArgumentExpression(nameof(target))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
             if (target == null) return target;
-            if (!target.IsCompleted) return target.ContinueWith(CheckStatus);
-            CheckStatus(target);
+            if (!target.IsCompleted) return target.ContinueWith(t => CheckStatus(t, argument, caller, path, line));
+            CheckStatus(target, argument, caller, path, line);
             return target;
         }
 
-        public static Task<T> ThrowIfFaultedOrCanceled<T>(this Task<T> target)
+        public static Task<T> ThrowIfFaultedOrCanceled<T>(
+            this Task<T> target,
+            [CallerArgumentExpression(nameof(target))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
             if (target == null) return target;
-            if (!target.IsCompleted) return target.ContinueWith(static t => { CheckStatus(t); return t.Result; });
-            CheckStatus(target);
+            if (!target.IsCompleted) return target.ContinueWith(t => { CheckStatus(t, argument, caller, path, line); return t.Result; });
+            CheckStatus(target, argument, caller, path, line);
             return target;
         }
 
-        private static void CheckStatus(Task task)
+        private static void CheckStatus(Task task, string argument, string caller, string path, int line)
         {
             if (task.Status == TaskStatus.Faulted)
             {
-                if (task.Exception.InnerExceptions.Count == 1) Throw.Exception(task.Exception.InnerException);
-                else Throw.Exception(task.Exception);
+                if (task.Exception.InnerExceptions.Count == 1) Throw.Exception(task.Exception.InnerException.AddCallerAttributes(argument, caller, path, line));
+                else Throw.Exception(task.Exception.AddCallerAttributes(argument, caller, path, line));
             }
-            if (task.Status == TaskStatus.Canceled) Throw.TaskCanceledException(task);
+            if (task.Status == TaskStatus.Canceled) Throw.TaskCanceledException(GetMessage("A task was canceled.", argument, caller, path, line));
         }
 
         #endregion
     }
 }
-
-#if !NETCOREAPP3_0_OR_GREATER
-namespace System.Runtime.CompilerServices
-{
-    /// <summary>
-    /// Contains the source code passed to a method's parameter, determined at compile time.
-    /// <para>For example this could be a variable name (foo), an expression (foo > bar), or some object creation (new { foo = bar}).</para>
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
-    internal sealed class CallerArgumentExpressionAttribute : Attribute
-    {
-        public string ParameterName { get; }
-
-        public CallerArgumentExpressionAttribute(string parameterName)
-        {
-            ParameterName = parameterName;
-        }
-    }
-}
-#endif

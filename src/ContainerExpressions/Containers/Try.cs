@@ -2,6 +2,7 @@
 using ContainerExpressions.Expressions.Models;
 using System;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers
@@ -16,11 +17,28 @@ namespace ContainerExpressions.Containers
         /// <param name="ex">The exception sent to the logger from the Try container.</param>
         public static string GetCallerAttributes(this Exception ex)
         {
-            if (ex?.Data is not null)
-            {
-                if (ex.Data.Contains(DataKey)) return ex.Data[DataKey].ToString();
-            }
+            if (ex?.Data is not null && ex.Data.Contains(DataKey)) return ex.Data[DataKey].ToString();
             return string.Empty;
+        }
+
+        internal static T AddCallerAttributes<T>(this T ex, string argumentExpression, string memberName, string filePath, int lineNumber) where T : Exception
+        {
+            if (ex is null) return ex;
+            return AddCallerAttributes(ex, ex.Message, argumentExpression, memberName, filePath, lineNumber);
+        }
+
+        internal static T AddCallerAttributes<T>(this T ex, string message, string argumentExpression, string memberName, string filePath, int lineNumber) where T : Exception
+        {
+            var data = new StringBuilder()
+                .Append("Message: ").AppendLine(message)
+                .Append("CallerArgumentExpression: ").AppendLine(argumentExpression)
+                .Append("CallerMemberName: ").AppendLine(memberName)
+                .Append("CallerFilePath: ").AppendLine(filePath)
+                .Append("CallerLineNumber: ").Append(lineNumber)
+                .ToString();
+
+            if (ex?.Data is not null && !ex.Data.Contains(DataKey)) ex.Data.Add(DataKey, data);
+            return ex;
         }
 
         internal static Response<Action<Exception>> GetExceptionLogger() => _logger;
@@ -182,3 +200,23 @@ namespace ContainerExpressions.Containers
         }
     }
 }
+
+#if !NETCOREAPP3_0_OR_GREATER
+namespace System.Runtime.CompilerServices
+{
+    /// <summary>
+    /// Contains the source code passed to a method's parameter, determined at compile time.
+    /// <para>For example this could be a variable name (foo), an expression (foo > bar), or some object creation (new { foo = bar}).</para>
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
+    internal sealed class CallerArgumentExpressionAttribute : Attribute
+    {
+        public string ParameterName { get; }
+
+        public CallerArgumentExpressionAttribute(string parameterName)
+        {
+            ParameterName = parameterName;
+        }
+    }
+}
+#endif

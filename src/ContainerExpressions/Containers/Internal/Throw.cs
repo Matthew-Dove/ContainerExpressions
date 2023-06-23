@@ -18,5 +18,6 @@ namespace ContainerExpressions.Containers.Internal
         public static void InvalidOperationException(string message) => throw new InvalidOperationException(message);
 
         public static void TaskCanceledException(Task task) => throw new TaskCanceledException(task);
+        public static void TaskCanceledException(string message) => throw new TaskCanceledException(message);
     }
 }

@@ -1,6 +1,5 @@
 ﻿using ContainerExpressions.Containers;
 using System;
-using System.Text;
 
 namespace ContainerExpressions.Expressions.Models
 {
@@ -33,18 +32,7 @@ namespace ContainerExpressions.Expressions.Models
             {
                 try
                 {
-                    if (!(_argument == string.Empty && _caller == string.Empty && _path == string.Empty && _line == 0))
-                    {
-                        var data = new StringBuilder()
-                            .Append("CallerArgumentExpression: ").AppendLine(_argument)
-                            .Append("CallerMemberName: ").AppendLine(_caller)
-                            .Append("CallerFilePath: ").AppendLine(_path)
-                            .Append("CallerLineNumber: ").Append(_line)
-                            .ToString();
-
-                        ex.Data?.Add(Try.DataKey, data);
-                    }
-
+                    ex.AddCallerAttributes(ex.Message, _argument, _caller, _path, _line);
                     _logger.Value(ex);
                 }
                 catch (AggregateException ae)

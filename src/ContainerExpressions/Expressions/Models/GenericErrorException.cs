@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ContainerExpressions.Containers;
+using System;
 using System.Text;
 
 namespace ContainerExpressions.Expressions.Models
@@ -24,18 +25,18 @@ namespace ContainerExpressions.Expressions.Models
             string memberName = "",
             string filePath = "",
             int lineNumber = 0
-        ) : base(Format(message, argumentExpression, memberName, filePath, lineNumber)) { Error = error; }
-
-        private static string Format(string message, string argumentExpression, string memberName, string filePath, int lineNumber)
+        ) : base(Format(error, message))
         {
-            if (argumentExpression == string.Empty && memberName == string.Empty && filePath == string.Empty && lineNumber == 0) return message;
+            Error = error;
+            this.AddCallerAttributes(argumentExpression, memberName, filePath, lineNumber);
+        }
+
+        private static string Format(TError error, string message)
+        {
             return new StringBuilder()
                 .AppendLine()
                 .Append("Message: ").AppendLine(message)
-                .Append("CallerArgumentExpression: ").AppendLine(argumentExpression)
-                .Append("CallerMemberName: ").AppendLine(memberName)
-                .Append("CallerFilePath: ").AppendLine(filePath)
-                .Append("CallerLineNumber: ").Append(lineNumber)
+                .Append("Error: ").AppendLine(error?.ToString() ?? string.Empty)
                 .ToString();
         }
     }
