@@ -29,7 +29,7 @@ namespace ContainerExpressions.Containers
             )
         {
             if (action == null) Throw.ArgumentNullException(nameof(action));
-            return PaddedCage(action, ExceptionLogger.Create(_logger));
+            return PaddedCage(action, ExceptionLogger.Create(_logger, argument, caller, path, line));
         }
 
         private static Response PaddedCage(Action action, ExceptionLogger error)
@@ -41,6 +41,13 @@ namespace ContainerExpressions.Containers
                 action();
                 response = response.AsValid();
             }
+            catch (AggregateException ae)
+            {
+                foreach (var e in ae.Flatten().InnerExceptions)
+                {
+                    error.Log(e);
+                }
+            }
             catch (Exception ex)
             {
                 error.Log(ex);
@@ -51,7 +58,7 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Wraps a function in error protecting code.</summary>
         public static Response<T> Run<T>(
-        Func<T> func,
+            Func<T> func,
             [CallerArgumentExpression(nameof(func))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -59,7 +66,7 @@ namespace ContainerExpressions.Containers
             )
         {
             if (func == null) Throw.ArgumentNullException(nameof(func));
-            return PaddedCage(func, ExceptionLogger.Create(_logger));
+            return PaddedCage(func, ExceptionLogger.Create(_logger, argument, caller, path, line));
         }
 
         private static Response<T> PaddedCage<T>(Func<T> func, ExceptionLogger error)
@@ -70,6 +77,13 @@ namespace ContainerExpressions.Containers
             {
                 var result = func();
                 response = response.With(result);
+            }
+            catch (AggregateException ae)
+            {
+                foreach (var e in ae.Flatten().InnerExceptions)
+                {
+                    error.Log(e);
+                }
             }
             catch (Exception ex)
             {
@@ -89,7 +103,7 @@ namespace ContainerExpressions.Containers
             )
         {
             if (action == null) Throw.ArgumentNullException(nameof(action));
-            return PaddedCageAsync(action, ExceptionLogger.Create(_logger));
+            return PaddedCageAsync(action, ExceptionLogger.Create(_logger, argument, caller, path, line));
         }
 
         private static async Task<Response> PaddedCageAsync(Func<Task> func, ExceptionLogger error)
@@ -126,7 +140,7 @@ namespace ContainerExpressions.Containers
             )
         {
             if (func == null) Throw.ArgumentNullException(nameof(func));
-            return PaddedCageAsync(func, ExceptionLogger.Create(_logger));
+            return PaddedCageAsync(func, ExceptionLogger.Create(_logger, argument, caller, path, line));
         }
 
         private static async Task<Response<T>> PaddedCageAsync<T>(Func<Task<T>> func, ExceptionLogger error)
