@@ -1,5 +1,4 @@
-﻿using ContainerExpressions.Containers;
-using System;
+﻿using System;
 using System.Text;
 
 namespace ContainerExpressions.Expressions.Models
@@ -30,7 +29,6 @@ namespace ContainerExpressions.Expressions.Models
         private static string Format(string message, string argumentExpression, string memberName, string filePath, int lineNumber)
         {
             if (argumentExpression == string.Empty && memberName == string.Empty && filePath == string.Empty && lineNumber == 0) return message;
-
             return new StringBuilder()
                 .AppendLine()
                 .Append("Message: ").AppendLine(message)

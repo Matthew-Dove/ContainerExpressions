@@ -6,8 +6,6 @@ namespace ContainerExpressions.Expressions.Models
 {
     internal readonly struct ExceptionLogger
     {
-        private const string _dataKey = "ContainerExpressions.Caller";
-
         private readonly Response<Action<Exception>> _logger;
         private readonly string _argument;
         private readonly string _caller;
@@ -44,7 +42,7 @@ namespace ContainerExpressions.Expressions.Models
                             .Append("CallerLineNumber: ").Append(_line)
                             .ToString();
 
-                        ex.Data?.Add(_dataKey, data);
+                        ex.Data?.Add(Try.DataKey, data);
                     }
 
                     _logger.Value(ex);

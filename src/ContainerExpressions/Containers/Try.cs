@@ -9,6 +9,20 @@ namespace ContainerExpressions.Containers
     /// <summary>Wraps a function in error protecting code.</summary>
     public static class Try
     {
+        /// <summary>Caller attributes are added the the exception's data dictionary, with this as the key.</summary>
+        public const string DataKey = "ContainerExpressions.Caller";
+
+        /// <summary>Gets the caller values, or empty string if they don't exist on the exception.</summary>
+        /// <param name="ex">The exception sent to the logger from the Try container.</param>
+        public static string GetCallerAttributes(this Exception ex)
+        {
+            if (ex?.Data is not null)
+            {
+                if (ex.Data.Contains(DataKey)) return ex.Data[DataKey].ToString();
+            }
+            return string.Empty;
+        }
+
         internal static Response<Action<Exception>> GetExceptionLogger() => _logger;
         private static Response<Action<Exception>> _logger = new Response<Action<Exception>>();
 

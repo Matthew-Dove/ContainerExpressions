@@ -86,21 +86,21 @@ namespace ContainerExpressions.Containers
          * 
          * [Void]
          * Response
-         * Task<Response>
-         * Func<Response>
-         * Func<Task<Response>>
+         * Task{Response}
+         * Func{Response}
+         * Func{Task{Response}}
          * 
          * [Value]
          * T
-         * Task<T>
-         * Func<T>
-         * Func<Task<T>>
+         * Task{T}
+         * Func{T}
+         * Func{Task{T}}
          * 
          * [Response and Value]
-         * Response<T>
-         * Task<Response<T>>
-         * Func<Response<T>>
-         * Func<Task<Response<T>>>
+         * Response{T}
+         * Task{Response{T}}
+         * Func{Response{T}}
+         * Func{Task{Response{T}}}
         **/
 
         /// <summary>Converts the target into a Response Unit, based on the original response's IsValid state.</summary>
