@@ -17,27 +17,23 @@ namespace ContainerExpressions.Containers
         /// <param name="ex">The exception sent to the logger from the Try container.</param>
         public static string GetCallerAttributes(this Exception ex)
         {
-            if (ex?.Data is not null && ex.Data.Contains(DataKey)) return ex.Data[DataKey].ToString();
-            return string.Empty;
+            if (ex.Data.Contains(DataKey)) return ex.Data[DataKey].ToString();
+            return ex.Message;
         }
 
         internal static T AddCallerAttributes<T>(this T ex, string argumentExpression, string memberName, string filePath, int lineNumber) where T : Exception
         {
-            if (ex is null) return ex;
-            return AddCallerAttributes(ex, ex.Message, argumentExpression, memberName, filePath, lineNumber);
-        }
-
-        internal static T AddCallerAttributes<T>(this T ex, string message, string argumentExpression, string memberName, string filePath, int lineNumber) where T : Exception
-        {
-            var data = new StringBuilder()
-                .Append("Message: ").AppendLine(message)
-                .Append("CallerArgumentExpression: ").AppendLine(argumentExpression)
-                .Append("CallerMemberName: ").AppendLine(memberName)
-                .Append("CallerFilePath: ").AppendLine(filePath)
-                .Append("CallerLineNumber: ").Append(lineNumber)
-                .ToString();
-
-            if (ex?.Data is not null && !ex.Data.Contains(DataKey)) ex.Data.Add(DataKey, data);
+            if (!ex.Data.Contains(DataKey) && (argumentExpression != string.Empty || memberName != string.Empty || filePath != string.Empty || lineNumber != 0))
+            {
+                ex.Data.Add(DataKey, new StringBuilder()
+                    .Append("Message: ").AppendLine(ex.Message)
+                    .Append("CallerArgumentExpression: ").AppendLine(argumentExpression)
+                    .Append("CallerMemberName: ").AppendLine(memberName)
+                    .Append("CallerFilePath: ").AppendLine(filePath)
+                    .Append("CallerLineNumber: ").Append(lineNumber)
+                    .ToString()
+                );
+            }
             return ex;
         }
 

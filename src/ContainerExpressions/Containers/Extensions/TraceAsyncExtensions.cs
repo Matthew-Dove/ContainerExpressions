@@ -1,6 +1,6 @@
 ﻿using ContainerExpressions.Containers.Internal;
 using System;
-using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers
@@ -11,62 +11,92 @@ namespace ContainerExpressions.Containers
         #region TError
 
         /// <summary>Logs exceptions from faulted tasks.</summary>
-        public static Task LogErrorAsync(this Task task)
+        public static Task LogErrorAsync(
+            this Task task,
+            [CallerArgumentExpression(nameof(task))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
             if (task == null) return default;
-            if (!task.IsCompleted) return task.ContinueWith(static t => { if (t.IsFaulted) TraceExtensions.LogException(t.Exception); t.Wait(); });
-            if (task.IsFaulted) TraceExtensions.LogException(task.Exception);
+            if (!task.IsCompleted) return task.ContinueWith(t => { if (t.IsFaulted) TraceExtensions.LogException(t.Exception, argument, caller, path, line); t.Wait(); });
+            if (task.IsFaulted) TraceExtensions.LogException(task.Exception, argument, caller, path, line);
             return task;
         }
 
         /// <summary>Logs exceptions from faulted tasks.</summary>
-        public static Task<T> LogErrorAsync<T>(this Task<T> task)
+        public static Task<T> LogErrorAsync<T>(
+            this Task<T> task,
+            [CallerArgumentExpression(nameof(task))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
             if (task == null) return default;
-            if (!task.IsCompleted) return task.ContinueWith(static t => { if (t.IsFaulted) TraceExtensions.LogException(t.Exception); return t.Result; });
-            if (task.IsFaulted) TraceExtensions.LogException(task.Exception);
+            if (!task.IsCompleted) return task.ContinueWith(t => { if (t.IsFaulted) TraceExtensions.LogException(t.Exception, argument, caller, path, line); return t.Result; });
+            if (task.IsFaulted) TraceExtensions.LogException(task.Exception, argument, caller, path, line);
             return task;
         }
 
         /// <summary>Logs exceptions from faulted tasks.</summary>
-        public static Task<Response> LogErrorAsync(this Task<Response> task)
+        public static Task<Response> LogErrorAsync(
+            this Task<Response> task,
+            [CallerArgumentExpression(nameof(task))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
             if (task == null) return default;
 
-            if (!task.IsCompleted) return task.ContinueWith(static t => {
-                if (t.IsFaulted) TraceExtensions.LogException(t.Exception);
+            if (!task.IsCompleted) return task.ContinueWith(t => {
+                if (t.IsFaulted) TraceExtensions.LogException(t.Exception, argument, caller, path, line);
                 return t.Status == TaskStatus.RanToCompletion ? t.Result : Response.Error;
             });
 
-            if (task.IsFaulted) TraceExtensions.LogException(task.Exception);
+            if (task.IsFaulted) TraceExtensions.LogException(task.Exception, argument, caller, path, line);
             return task.Status == TaskStatus.RanToCompletion ? task : Pool.ResponseError;
         }
 
         /// <summary>Logs exceptions from faulted tasks.</summary>
-        public static Task<Response<T>> LogErrorAsync<T>(this Task<Response<T>> task)
+        public static Task<Response<T>> LogErrorAsync<T>(
+            this Task<Response<T>> task,
+            [CallerArgumentExpression(nameof(task))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
             if (task == null) return default;
 
-            if (!task.IsCompleted) return task.ContinueWith(static t => {
-                if (t.IsFaulted) TraceExtensions.LogException(t.Exception);
+            if (!task.IsCompleted) return task.ContinueWith(t => {
+                if (t.IsFaulted) TraceExtensions.LogException(t.Exception, argument, caller, path, line);
                 return t.Status == TaskStatus.RanToCompletion ? t.Result : Response<T>.Error;
             });
 
-            if (task.IsFaulted) TraceExtensions.LogException(task.Exception);
+            if (task.IsFaulted) TraceExtensions.LogException(task.Exception, argument, caller, path, line);
             return task.Status == TaskStatus.RanToCompletion ? task : Pool<T>.ResponseError;
         }
 
         /// <summary>Logs exceptions from faulted tasks.</summary>
-        public static Task<Response<Unit>> LogErrorAsync(this Task<Response<Unit>> task)
+        public static Task<Response<Unit>> LogErrorAsync(
+            this Task<Response<Unit>> task,
+            [CallerArgumentExpression(nameof(task))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
             if (task == null) return default;
 
-            if (!task.IsCompleted) return task.ContinueWith(static t => {
-                if (t.IsFaulted) TraceExtensions.LogException(t.Exception);
+            if (!task.IsCompleted) return task.ContinueWith(t => {
+                if (t.IsFaulted) TraceExtensions.LogException(t.Exception, argument, caller, path, line);
                 return t.Status == TaskStatus.RanToCompletion ? t.Result : Unit.ResponseError;
             });
 
-            if (task.IsFaulted) TraceExtensions.LogException(task.Exception);
+            if (task.IsFaulted) TraceExtensions.LogException(task.Exception, argument, caller, path, line);
             return task.Status == TaskStatus.RanToCompletion ? task : Pool.UnitResponseError;
         }
 
@@ -77,20 +107,37 @@ namespace ContainerExpressions.Containers
         /// <summary>Logs a trace step.</summary>
         /// <param name="message">The message to trace.</param>
         /// <returns>The initial value.</returns>
-        public static Task<T> LogValueAsync<T>(this Task<T> value, string message) => value.ContinueWith(x => {
-            if (x.Status == TaskStatus.RanToCompletion) Trace.Log(message);
-            else if (x.Status == TaskStatus.Faulted) TraceExtensions.LogException(x.Exception);
-            return x.Result;
-        });
+        public static Task<T> LogValueAsync<T>(
+            this Task<T> task, Message message,
+            [CallerArgumentExpression(nameof(task))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            ) =>
+            task.ContinueWith(x =>
+            {
+                if (x.Status == TaskStatus.RanToCompletion) Trace.Log(message);
+                else if (x.Status == TaskStatus.Faulted) TraceExtensions.LogException(x.Exception, argument, caller, path, line);
+                return x.Result;
+            });
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="format">The message to trace.</param>
         /// <returns>The initial value.</returns>
-        public static Task<T> LogValueAsync<T>(this Task<T> value, Func<T, string> format) => value.ContinueWith(x => {
-            if (x.Status == TaskStatus.RanToCompletion) Trace.Log(format(x.Result));
-            else if (x.Status == TaskStatus.Faulted) TraceExtensions.LogException(x.Exception);
-            return x.Result;
-        });
+        public static Task<T> LogValueAsync<T>(
+            this Task<T> task,
+            Func<T, string> format,
+            [CallerArgumentExpression(nameof(task))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            ) =>
+            task.ContinueWith(x =>
+            {
+                if (x.Status == TaskStatus.RanToCompletion) Trace.Log(format(x.Result));
+                else if (x.Status == TaskStatus.Faulted) TraceExtensions.LogException(x.Exception, argument, caller, path, line);
+                return x.Result;
+            });
 
         #endregion
 
@@ -324,16 +371,24 @@ namespace ContainerExpressions.Containers
         /// <param name="value">A function that takes some TValue instance, and returns a message for tracing.</param>
         /// <param name="error">A function that takes some TError instance, and returns a message for tracing.</param>
         /// <returns>The same Maybe as the input.</returns>
-        public static Task<Maybe<TValue, TError>> LogAsync<TValue, TError>(this Task<Maybe<TValue, TError>> maybe, Func<TValue, string> value, Func<TError, string> error) =>
+        public static Task<Maybe<TValue, TError>> LogAsync<TValue, TError>(
+            this Task<Maybe<TValue, TError>> maybe,
+            Func<TValue, string> value,
+            Func<TError, string> error,
+            [CallerArgumentExpression(nameof(maybe))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            ) =>
             maybe.ContinueWith(x =>
             {
                 var message = x.Result.Match(value, error);
                 Trace.Log(message);
 
-                if (!x.Result._hasValue && x.Result._error is Exception ex)
+                if (!x.Result._hasValue)
                 {
-                    TraceExtensions.LogException(ex);
-                    foreach (var ae in x.Result.AggregateErrors.Select(y => y as Exception)) { TraceExtensions.LogException(ae); }
+                    TraceExtensions.LogErrorValue(x.Result._error, argument, caller, path, line);
+                    TraceExtensions.LogErrorValue(x.Result.AggregateErrors, argument, caller, path, line);
                 }
 
                 return x.Result;
@@ -343,16 +398,24 @@ namespace ContainerExpressions.Containers
         /// <param name="value">A message to trace when Maybe contains some instance of TValue.</param>
         /// <param name="error">A message to trace when Maybe contains some instance of TError.</param>
         /// <returns>The same Maybe as the input.</returns>
-        public static Task<Maybe<TValue, TError>> LogAsync<TValue, TError>(this Task<Maybe<TValue, TError>> maybe, string value, string error) =>
+        public static Task<Maybe<TValue, TError>> LogAsync<TValue, TError>(
+            this Task<Maybe<TValue, TError>> maybe,
+            string value,
+            string error,
+            [CallerArgumentExpression(nameof(maybe))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            ) =>
             maybe.ContinueWith(x =>
             {
                 var message = x.Result._hasValue ? value : error;
                 Trace.Log(message);
 
-                if (!x.Result._hasValue && x.Result._error is Exception ex)
+                if (!x.Result._hasValue)
                 {
-                    TraceExtensions.LogException(ex);
-                    foreach (var ae in x.Result.AggregateErrors.Select(y => y as Exception)) { TraceExtensions.LogException(ae); }
+                    TraceExtensions.LogErrorValue(x.Result._error, argument, caller, path, line);
+                    TraceExtensions.LogErrorValue(x.Result.AggregateErrors, argument, caller, path, line);
                 }
 
                 return x.Result;
@@ -362,7 +425,15 @@ namespace ContainerExpressions.Containers
         /// <param name="value">A function that takes some TValue instance, and returns a message for tracing.</param>
         /// <param name="error">A function that takes some Exception instance, and returns a message for tracing.</param>
         /// <returns>The same Maybe as the input.</returns>
-        public static Task<Maybe<TValue>> LogAsync<TValue>(this Task<Maybe<TValue>> maybe, Func<TValue, string> value, Func<Exception, string> error) =>
+        public static Task<Maybe<TValue>> LogAsync<TValue>(
+            this Task<Maybe<TValue>> maybe,
+            Func<TValue, string> value,
+            Func<Exception, string> error,
+            [CallerArgumentExpression(nameof(maybe))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            ) =>
             maybe.ContinueWith(x =>
             {
                 var message = x.Result.Match(value, error);
@@ -370,8 +441,8 @@ namespace ContainerExpressions.Containers
 
                 if (!x.Result._hasValue)
                 {
-                    TraceExtensions.LogException(x.Result._error);
-                    foreach (var ae in x.Result.AggregateErrors) { TraceExtensions.LogException(ae); }
+                    TraceExtensions.LogError(x.Result._error, argument, caller, path, line);
+                    TraceExtensions.LogError(x.Result.AggregateErrors, argument, caller, path, line);
                 }
 
                 return x.Result;
@@ -381,7 +452,15 @@ namespace ContainerExpressions.Containers
         /// <param name="value">A message to trace when Maybe contains some instance of TValue.</param>
         /// <param name="error">A message to trace when Maybe contains some instance of Exception.</param>
         /// <returns>The same Maybe as the input.</returns>
-        public static Task<Maybe<TValue>> LogAsync<TValue>(this Task<Maybe<TValue>> maybe, string value, string error) =>
+        public static Task<Maybe<TValue>> LogAsync<TValue>(
+            this Task<Maybe<TValue>> maybe,
+            string value,
+            string error,
+            [CallerArgumentExpression(nameof(maybe))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            ) =>
             maybe.ContinueWith(x =>
             {
                 var message = x.Result._hasValue ? value : error;
@@ -389,8 +468,8 @@ namespace ContainerExpressions.Containers
 
                 if (!x.Result._hasValue)
                 {
-                    TraceExtensions.LogException(x.Result._error);
-                    foreach (var ae in x.Result.AggregateErrors) { TraceExtensions.LogException(ae); }
+                    TraceExtensions.LogError(x.Result._error, argument, caller, path, line);
+                    TraceExtensions.LogError(x.Result.AggregateErrors, argument, caller, path, line);
                 }
 
                 return x.Result;

@@ -32,7 +32,7 @@ namespace ContainerExpressions.Expressions.Models
             {
                 try
                 {
-                    ex.AddCallerAttributes(ex.Message, _argument, _caller, _path, _line);
+                    ex.AddCallerAttributes(_argument, _caller, _path, _line);
                     _logger.Value(ex);
                 }
                 catch (AggregateException ae)

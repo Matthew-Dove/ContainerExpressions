@@ -151,6 +151,32 @@ private static void Persist(Widget widget)
 
 Note: there is also Try.RunAsync() for asynchronous functions.
 
+When logging exceptions from Container Expressions, you can find additional Caller Attribte information in the exception's data dictionary.  
+The key can be found in the constant: `Try.DataKey`.  
+Preferably you can use the provided extension method: `string GetCallerAttributes(Exception)`.  
+For example logging out the data:
+
+```cs
+// The logger is setup once at startup.
+Try.SetExceptionLogger(ex => Console.WriteLine($"{ex}\n\n{ex.GetCallerAttributes()}"));
+
+Action error = () => { throw new Exception("I am an error!"); };
+Response result = Try.Run(error); // Response is not valid, as an exception was thrown, and caught.
+
+// Console Output:
+"""
+System.Exception: I am an error!
+   at Tests.ContainerExpressions.Containers.TryTests.<>c.<Base_MethodThrowsError_ErrorIsCaught>b__1_1() in C:\GitHub\ContainerExpressions\src\Tests.ContainerExpressions\Containers\TryTests.cs:line 36
+   at ContainerExpressions.Containers.Try.PaddedCage(Action action, ExceptionLogger error) in C:\GitHub\ContainerExpressions\src\ContainerExpressions\Containers\Try.cs:line 69
+
+Message: I am an error!
+CallerArgumentExpression: error
+CallerMemberName: Base_MethodThrowsError_ErrorIsCaught
+CallerFilePath: C:\GitHub\ContainerExpressions\src\Tests.ContainerExpressions\Containers\TryTests.cs
+CallerLineNumber: 38
+"""
+```
+
 ## Either`<T>`
 
 If you have a function that can benefit from returning one type, from a selection of types, then Either is what you're looking for.  

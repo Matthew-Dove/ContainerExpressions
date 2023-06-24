@@ -1,6 +1,4 @@
-﻿using ContainerExpressions.Containers;
-using System;
-using System.Text;
+﻿using System;
 
 namespace ContainerExpressions.Expressions.Models
 {
@@ -10,34 +8,19 @@ namespace ContainerExpressions.Expressions.Models
     {
         public TError Error { get; }
 
-        internal GenericErrorException(
-            TError error,
-            string argumentExpression = "",
-            string memberName = "",
-            string filePath = "",
-            int lineNumber = 0
-        ) : this(error, new ErrorMessage(string.Empty), argumentExpression, memberName, filePath, lineNumber) { }
+        internal GenericErrorException(TError error) : this(error, string.Empty) { }
 
-        internal GenericErrorException(
-            TError error,
-            ErrorMessage message,
-            string argumentExpression = "",
-            string memberName = "",
-            string filePath = "",
-            int lineNumber = 0
-        ) : base(Format(error, message))
-        {
-            Error = error;
-            this.AddCallerAttributes(argumentExpression, memberName, filePath, lineNumber);
-        }
+        internal GenericErrorException(TError error, string message) : base(Format(error, message)) { Error = error; }
 
         private static string Format(TError error, string message)
         {
-            return new StringBuilder()
-                .AppendLine()
-                .Append("Message: ").AppendLine(message)
-                .Append("Error: ").AppendLine(error?.ToString() ?? string.Empty)
-                .ToString();
+            var err = error?.ToString() ?? string.Empty;
+
+            // Avoid creating a new string if we don't need to combine these two.
+            if (message == string.Empty) return err;
+            if (err == string.Empty) return message;
+
+            return $"{message} {err}";
         }
     }
 }

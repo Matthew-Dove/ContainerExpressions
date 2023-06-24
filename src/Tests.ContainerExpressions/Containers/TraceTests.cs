@@ -319,7 +319,7 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public async Task Async_T_LogsMessage()
         {
-            var message = "story";
+            var message = new Message("story");
 
             var response = await Task.FromResult(true).LogValueAsync(message);
 
