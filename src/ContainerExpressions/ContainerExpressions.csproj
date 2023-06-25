@@ -13,7 +13,7 @@
     <PackageOutputPath>..//../nupkg</PackageOutputPath>
     <id>ContainerExpressions</id>
     <Authors>Matthew Dove</Authors>
-    <Version>9.0.0</Version>
+    <Version>10.0.0</Version>
     <Copyright>Matthew Dove. All rights reserved.</Copyright>
     <PackageLicenseExpression></PackageLicenseExpression>
     <RepositoryUrl>https://github.com/Matthew-Dove/ContainerExpressions</RepositoryUrl>
@@ -27,19 +27,20 @@ Expressions are designed to work on top of containers, helping in common use cas
 
 For example the Response container's "utility" is to let the caller know if some T value was generated without error.
 The expression Retry will attempt to get the T value after x time delay for n attempts, a good combo for intermittent networking errors.</Description>
-    <PackageReleaseNotes>&gt; Updated additional **Pack** details in the solution file (*debug symbols, xml comments, readme file, etc*).
-&gt; New extension method for `Response`, and `Response&lt;T&gt;` types (*both sync, and async*) called `Unpack()` - which flattens response containers.
-&gt; When `Try.SetExceptionLogger()` is configured, exceptions logged though `LogError()` - or found in `Response`, and `Maybe` containers, are sent though.
-&gt; Added a `LogError` extension method, so you can which forwards exceptions to the logger setup for: `Try.SetExceptionLogger`.
-&gt; Expanded the function targets for `Funnel`. Was only `T`, now includes: `Response&lt;T&gt;`, `Task&lt;T&gt;`, and `Task&lt;Response&lt;T&gt;&gt;`.
-&gt; Added equals overloads to `Either`, so you can easily compare some `T` value to the `Either` container.
-&gt; Added `TryGetT*` to `Either`, allowing access to the types without going though `Match&lt;TResult&gt;`.
-&gt; Added a struct version of `Alias&lt;T&gt;` called `A&lt;T&gt;`.
-&gt; Added shared types to resue in containers, such as `OK`, `BadRequest`, `Error`, etc.
-&gt; Created shared common lambda functions, such as `Lambda.Identity` to reflect the input as the output. i.e. instead of having to write `(x =&gt; x)`.
-&gt; Added `TryGetValue()`, and `TryGetError()` to `Maybe`.
-&gt; Added `Unpack` to `Maybe`.
-&gt; Created a new container `Cache:` store readonly default values for reference types (*i.e. instead of using null*).</PackageReleaseNotes>
+    <PackageReleaseNotes>* Renamed `Cache` to `Instance`, as the former name lead to confusion on what the container did.
+* Added custom awaiters for `Response` types wrapping `Task` / `ValueTask`.
+* Created `ResponseTask` to make casting between `Task`, and `Response` easier (*`ResponseValueTask` is also available for `ValueTask` sources*).
+* `ResponseAsync&lt;T&gt;` is a task-like type that can be used on `async` functions to catch, and log exceptions thrown in a method.
+* Added async method builders for `Task`, and `ValueTask` to safely create `Response` types.
+* Added a value type verion of `Later&lt;T&gt;` - `ValueLater&lt;T&gt;`.
+* `Maybe&lt;TValue&gt;`, and `Maybe&lt;TValue, TError&gt;` now have a method  `TryGetAggregateErrors`, which provides easy access to the aggregate errors (*should they exist*).
+* `Maybe&lt;TValue&gt;`, and `Maybe&lt;TValue, TError&gt;` now have a method  `TryGetAllErrors`, which provides easy access all errors - top level and aggregate (*should they exist*).
+* Added `TryGetT*` to the `Either&lt;T*&gt;` containers. To retrieve the value if it's present.
+* Added `WhenT*` to the `Either&lt;T*&gt;` containers. Execute a `Func`, or `Action` on the value if it's present.
+* Added an `Action` overload to the `Match` method for the `Either&lt;T*&gt;` containers.
+* `Async` versions for the `TryGetT*`, `WhenT*`, and `Match` methods on the `Either&lt;T*&gt;` containers.
+* Renamed `A&lt;T&gt;` to `ValueAlias&lt;T&gt;`, which follows the .net naming conventions of value types.
+* Added Caller Attributes to the `Try` container, and error logging functions, to provide more context.</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageIcon>dove.png</PackageIcon>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
