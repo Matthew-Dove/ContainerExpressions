@@ -113,6 +113,10 @@ namespace ContainerExpressions.Containers
     /// </summary>
     file static class Instance<T>
     {
+        private static readonly string _setValueBeforeRetrieving = $"Must set a value for type: {typeof(T)}, before attempting to retrieve it.";
+        private static readonly string _cannotSetNullValue = $"Invalid value for type: {typeof(T)}.";
+        private static readonly string _onlySetValueOnce = $"The value has already been set for type: {typeof(T)}.";
+
         private static readonly bool _isValue = typeof(T).IsValueType;
         private static T _value = default;
 
@@ -121,13 +125,13 @@ namespace ContainerExpressions.Containers
             get
             {
                 if (_isValue) return _value; // Value types cannot be set due to the generic constraints placed on Instance.Create(), so we can return them without checking (as they are not null).
-                if (_value is null) Throw.InvalidOperationException($"Must set a value for type: {typeof(T)}, before attempting to retrieve it.");
+                if (_value is null) Throw.InvalidOperationException(_setValueBeforeRetrieving);
                 return _value;
             }
             set
             {
-                if (value is null) Throw.ArgumentNullException(nameof(Value), $"Invalid value for type: {typeof(T)}.");
-                if (_value is not null) Throw.InvalidOperationException($"The value has already been set for type: {typeof(T)}."); // Value types cannot be set, so only need to check null.
+                if (value is null) Throw.ArgumentNullException(nameof(Value), _cannotSetNullValue);
+                if (_value is not null) Throw.InvalidOperationException(_onlySetValueOnce); // Value types cannot be set, so only need to check null.
                 _value = value;
             }
         }
@@ -141,28 +145,31 @@ namespace ContainerExpressions.Containers
 
         public static void Create<TResult>(TResult result) where TResult : class
         {
-            if (result is null) Throw.ArgumentNullException($"Invalid value for type: {typeof(TResult)}.", nameof(result));
-            if (InstanceAsync<TResult>._result is not null) Throw.InvalidOperationException($"The value has already been set for type: {typeof(TResult)}.");
+            if (result is null) Throw.ArgumentNullException(InstanceAsync<TResult>.CannotSetNullValue, nameof(result));
+            if (InstanceAsync<TResult>._result is not null) Throw.InvalidOperationException(InstanceAsync<TResult>.OnlySetValueOnce);
             InstanceAsync<TResult>._result = Task.FromResult(result);
         }
 
         public static void CreateValue<TResult>(TResult result) where TResult : class
         {
-            if (result is null) Throw.ArgumentNullException($"Invalid value for type: {typeof(TResult)}.", nameof(result));
-            if (!EqualityComparer<TResult>.Default.Equals(ValueInstanceAsync<TResult>._result, default)) Throw.InvalidOperationException($"The value has already been set for type: {typeof(TResult)}.");
+            if (result is null) Throw.ArgumentNullException(ValueInstanceAsync<TResult>.CannotSetNullValue, nameof(result));
+            if (!EqualityComparer<TResult>.Default.Equals(ValueInstanceAsync<TResult>._result, default)) Throw.InvalidOperationException(ValueInstanceAsync<TResult>.OnlySetValueOnce);
             ValueInstanceAsync<TResult>._result = result;
         }
 
         public static void CreateResponse<TResult>(TResult result) where TResult : class
         {
-            if (result is null) Throw.ArgumentNullException($"Invalid value for type: {typeof(TResult)}.", nameof(result));
-            if (InstanceResponseAsync<TResult>._result is not null) Throw.InvalidOperationException($"The value has already been set for type: {typeof(TResult)}.");
+            if (result is null) Throw.ArgumentNullException(InstanceResponseAsync<TResult>.CannotSetNullValue, nameof(result));
+            if (InstanceResponseAsync<TResult>._result is not null) Throw.InvalidOperationException(InstanceResponseAsync<TResult>.OnlySetValueOnce);
             InstanceResponseAsync<TResult>._result = new State<TResult>(result);
         }
     }
 
     file static class InstanceAsync<T>
     {
+        internal static readonly string CannotSetNullValue = $"Invalid value for type: {typeof(T)}.";
+        internal static readonly string OnlySetValueOnce = $"The value has already been set for type: {typeof(T)}.";
+
         private static readonly Task<T> _instance = Task.FromResult<T>(default);
         internal static Task<T> _result = default;
         public static Task<T> Result { get { return _result ?? _instance; } }
@@ -170,12 +177,18 @@ namespace ContainerExpressions.Containers
 
     file static class ValueInstanceAsync<T>
     {
+        internal static readonly string CannotSetNullValue = $"Invalid value for type: {typeof(T)}.";
+        internal static readonly string OnlySetValueOnce = $"The value has already been set for type: {typeof(T)}.";
+
         internal static T _result = default;
         public static ValueTask<T> Result { get { return new ValueTask<T>(_result); } }
     }
 
     file static class InstanceResponseAsync<T>
     {
+        internal static readonly string CannotSetNullValue = $"Invalid value for type: {typeof(T)}.";
+        internal static readonly string OnlySetValueOnce = $"The value has already been set for type: {typeof(T)}.";
+
         private static readonly State<T> _instance = new(default(T));
         internal static State<T> _result = default;
         public static ResponseAsync<T> Result { get { return new ResponseAsync<T>(_result ?? _instance); } }

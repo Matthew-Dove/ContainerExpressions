@@ -50,7 +50,5 @@ namespace ContainerExpressions.Containers
             }
             return aggregation;
         }
-
-        // TODO: Filter<T>(Func<T, bool> predicate) | SelectMany | Concat (Another Loop, or an array) | Distinct<T>(IEqualityComparer<T> compare)
     }
 }

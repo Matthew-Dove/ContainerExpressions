@@ -2,6 +2,7 @@
 
 namespace ContainerExpressions.Containers.Common.Models
 {
+    // Used to convert method groups, and delegates into Funcs / Actions, so they can be targeted by extension methods.
     public readonly struct Parameters
     {
         public Func<TResult> ToFunc<TResult>(Func<TResult> func) => func;

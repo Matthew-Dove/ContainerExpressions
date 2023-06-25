@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers.Internal
 {
+    // Jit will keep these methods cold, until they are used (as long as they only throw exceptions as a single instruction).
     internal static class Throw
     {
         public static void Exception<T>(T ex) where T : Exception => throw ex;

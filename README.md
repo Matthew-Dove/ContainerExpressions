@@ -1122,7 +1122,7 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * Expanded the function targets for `Funnel`. Was only `T`, now includes: `Response<T>`, `Task<T>`, and `Task<Response<T>>`.
 * Added equals overloads to `Either`, so you can easily compare some `T` value to the `Either` container.
 * Added `TryGetT*` to `Either`, allowing access to the types without going though `Match<TResult>`.
-* Added a struct version of `Alias<T>` called `ValueAlias<T>`.
+* Added a struct version of `Alias<T>` called `A<T>`.
 * Added shared types to resue in containers, such as `OK`, `BadRequest`, `Error`, etc.
 * Created shared common lambda functions, such as `Lambda.Identity` to reflect the input as the output. i.e. instead of having to write `(x => x)`.
 * Added `TryGetValue()`, and `TryGetError()` to `Maybe`.
@@ -1143,3 +1143,5 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * Added `WhenT*` to the `Either<T*>` containers. Execute a `Func`, or `Action` on the value if it's present.
 * Added an `Action` overload to the `Match` method for the `Either<T*>` containers.
 * `Async` versions for the `TryGetT*`, `WhenT*`, and `Match` methods on the `Either<T*>` containers.
+* Renamed `A<T>` to `ValueAlias<T>`, which follows the .net naming conventions of value types.
+* Added Caller Attributes to the `Try` container, and error logging functions, to provide more context.
