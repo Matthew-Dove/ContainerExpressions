@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -118,8 +117,6 @@ namespace ContainerExpressions.Containers
         /// <summary>Turn a function that returns a Response, into one that returns a Response Unit.</summary>
         public static Func<Response<Unit>> ToUnit(this Func<Response> func) => () => func().ToUnit();
 
-
-
         #endregion
 
         #region Lift
@@ -140,37 +137,82 @@ namespace ContainerExpressions.Containers
         public static Func<Response> Lift(this Action func) { return () => { func(); return new Response(true); }; }
 
         /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
+        public static Func<T1, Response> Lift<T1>(this Action<T1> func) { return (t1) => { func(t1); return new Response(true); }; }
+
+        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
+        public static Func<T1, T2, Response> Lift<T1, T2>(this Action<T1, T2> func) { return (t1, t2) => { func(t1, t2); return new Response(true); }; }
+
+        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
+        public static Func<T1, T2, T3, Response> Lift<T1, T2, T3>(this Action<T1, T2, T3> func) { return (t1, t2, t3) => { func(t1, t2, t3); return new Response(true); }; }
+
+        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
+        public static Func<T1, T2, T3, T4, Response> Lift<T1, T2, T3, T4>(this Action<T1, T2, T3, T4> func) { return (t1, t2, t3, t4) => { func(t1, t2, t3, t4); return new Response(true); }; }
+
+        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
+        public static Func<T1, T2, T3, T4, T5, Response> Lift<T1, T2, T3, T4, T5>(this Action<T1, T2, T3, T4, T5> func) { return (t1, t2, t3, t4, t5) => { func(t1, t2, t3, t4, t5); return new Response(true); }; }
+
+        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
+        public static Func<T1, T2, T3, T4, T5, T6, Response> Lift<T1, T2, T3, T4, T5, T6>(this Action<T1, T2, T3, T4, T5, T6> func) { return (t1, t2, t3, t4, t5, t6) => { func(t1, t2, t3, t4, t5, t6); return new Response(true); }; }
+
+        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
+        public static Func<T1, T2, T3, T4, T5, T6, T7, Response> Lift<T1, T2, T3, T4, T5, T6, T7>(this Action<T1, T2, T3, T4, T5, T6, T7> func) { return (t1, t2, t3, t4, t5, t6, t7) => { func(t1, t2, t3, t4, t5, t6, t7); return new Response(true); }; }
+
+        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
+        public static Func<T1, T2, T3, T4, T5, T6, T7, T8, Response> Lift<T1, T2, T3, T4, T5, T6, T7, T8>(this Action<T1, T2, T3, T4, T5, T6, T7, T8> func) { return (t1, t2, t3, t4, t5, t6, t7, t8) => { func(t1, t2, t3, t4, t5, t6, t7, t8); return new Response(true); }; }
+
+        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
         public static Func<Response<T>> Lift<T>(this Func<T> func) => () => Create(func());
+
+        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
+        public static Func<T1, Response<TResult>> Lift<T1, TResult>(this Func<T1, TResult> func) => new Func<T1, Response<TResult>>((t1) => Create(func(t1)));
+
+        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
+        public static Func<T1, T2, Response<TResult>> Lift<T1, T2, TResult>(this Func<T1, T2, TResult> func) => new Func<T1, T2, Response<TResult>>((t1, t2) => Create(func(t1, t2)));
+
+        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
+        public static Func<T1, T2, T3, Response<TResult>> Lift<T1, T2, T3, TResult>(this Func<T1, T2, T3, TResult> func) => new Func<T1, T2, T3, Response<TResult>>((t1, t2, t3) => Create(func(t1, t2, t3)));
+
+        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
+        public static Func<T1, T2, T3, T4, Response<TResult>> Lift<T1, T2, T3, T4, TResult>(this Func<T1, T2, T3, T4, TResult> func) => new Func<T1, T2, T3, T4, Response<TResult>>((t1, t2, t3, t4) => Create(func(t1, t2, t3, t4)));
+
+        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
+        public static Func<T1, T2, T3, T4, T5, Response<TResult>> Lift<T1, T2, T3, T4, T5, TResult>(this Func<T1, T2, T3, T4, T5, TResult> func) => new Func<T1, T2, T3, T4, T5, Response<TResult>>((t1, t2, t3, t4, t5) => Create(func(t1, t2, t3, t4, t5)));
+
+        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
+        public static Func<T1, T2, T3, T4, T5, T6, Response<TResult>> Lift<T1, T2, T3, T4, T5, T6, TResult>(this Func<T1, T2, T3, T4, T5, T6, TResult> func) => new Func<T1, T2, T3, T4, T5, T6, Response<TResult>>((t1, t2, t3, t4, t5, t6) => Create(func(t1, t2, t3, t4, t5, t6)));
+
+        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
+        public static Func<T1, T2, T3, T4, T5, T6, T7, Response<TResult>> Lift<T1, T2, T3, T4, T5, T6, T7, TResult>(this Func<T1, T2, T3, T4, T5, T6, T7, TResult> func) => new Func<T1, T2, T3, T4, T5, T6, T7, Response<TResult>>((t1, t2, t3, t4, t5, t6, t7) => Create(func(t1, t2, t3, t4, t5, t6, t7)));
+
+        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
+        public static Func<T1, T2, T3, T4, T5, T6, T7, T8, Response<TResult>> Lift<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> func) => new Func<T1, T2, T3, T4, T5, T6, T7, T8, Response<TResult>>((t1, t2, t3, t4, t5, t6, t7, t8) => Create(func(t1, t2, t3, t4, t5, t6, t7, t8)));
 
         /// <summary>Turn an async function that doesn't return a Response, into one that does.</summary>
         public static Func<Task<Response<T>>> LiftAsync<T>(this Func<Task<T>> func) => () => func().ContinueWith(TaskToResponse);
 
-        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
-        public static Func<T, Response<TResult>> Lift<T, TResult>(this Func<T, TResult> func) => new Func<T, Response<TResult>>(x => Create(func(x)));
-
-
-
-
-
+        /// <summary>Turn an async function that doesn't return a task Response, into one that does.</summary>
+        public static Func<T1, Task<Response<TResult>>> LiftAsync<T1, TResult>(this Func<T1, Task<TResult>> func) => new Func<T1, Task<Response<TResult>>>((t1) => func(t1).ContinueWith(TaskToResponse));
 
         /// <summary>Turn an async function that doesn't return a task Response, into one that does.</summary>
-        public static Func<T, Task<Response<TResult>>> LiftAsync<T, TResult>(this Func<T, Task<TResult>> func) => new Func<T, Task<Response<TResult>>>(x => func(x).ContinueWith(TaskToResponse));
+        public static Func<T1, T2, Task<Response<TResult>>> LiftAsync<T1, T2, TResult>(this Func<T1, T2, Task<TResult>> func) => new Func<T1, T2, Task<Response<TResult>>>((t1, t2) => func(t1, t2).ContinueWith(TaskToResponse));
 
+        /// <summary>Turn an async function that doesn't return a task Response, into one that does.</summary>
+        public static Func<T1, T2, T3, Task<Response<TResult>>> LiftAsync<T1, T2, T3, TResult>(this Func<T1, T2, T3, Task<TResult>> func) => new Func<T1, T2, T3, Task<Response<TResult>>>((t1, t2, t3) => func(t1, t2, t3).ContinueWith(TaskToResponse));
 
-        public static Func<T, Task<Response<TResult>>> LiftAsync2<T, TResult>(this Func<T, Task<TResult>> func, T value)
-        {
-            //var result = func(value).ContinueWith(TaskToResponse);
+        /// <summary>Turn an async function that doesn't return a task Response, into one that does.</summary>
+        public static Func<T1, T2, T3, T4, Task<Response<TResult>>> LiftAsync<T1, T2, T3, T4, TResult>(this Func<T1, T2, T3, T4, Task<TResult>> func) => new Func<T1, T2, T3, T4, Task<Response<TResult>>>((t1, t2, t3, t4) => func(t1, t2, t3, t4).ContinueWith(TaskToResponse));
 
-            return new Func<T, Task<Response<TResult>>>(x => func(x).ContinueWith(TaskToResponse));
-        }
+        /// <summary>Turn an async function that doesn't return a task Response, into one that does.</summary>
+        public static Func<T1, T2, T3, T4, T5, Task<Response<TResult>>> LiftAsync<T1, T2, T3, T4, T5, TResult>(this Func<T1, T2, T3, T4, T5, Task<TResult>> func) => new Func<T1, T2, T3, T4, T5, Task<Response<TResult>>>((t1, t2, t3, t4, t5) => func(t1, t2, t3, t4, t5).ContinueWith(TaskToResponse));
 
+        /// <summary>Turn an async function that doesn't return a task Response, into one that does.</summary>
+        public static Func<T1, T2, T3, T4, T5, T6, Task<Response<TResult>>> LiftAsync<T1, T2, T3, T4, T5, T6, TResult>(this Func<T1, T2, T3, T4, T5, T6, Task<TResult>> func) => new Func<T1, T2, T3, T4, T5, T6, Task<Response<TResult>>>((t1, t2, t3, t4, t5, t6) => func(t1, t2, t3, t4, t5, t6).ContinueWith(TaskToResponse));
 
+        /// <summary>Turn an async function that doesn't return a task Response, into one that does.</summary>
+        public static Func<T1, T2, T3, T4, T5, T6, T7, Task<Response<TResult>>> LiftAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(this Func<T1, T2, T3, T4, T5, T6, T7, Task<TResult>> func) => new Func<T1, T2, T3, T4, T5, T6, T7, Task<Response<TResult>>>((t1, t2, t3, t4, t5, t6, t7) => func(t1, t2, t3, t4, t5, t6, t7).ContinueWith(TaskToResponse));
 
-        /// <summary>Turn a function that doesn't return a Response, into one that does.</summary>
-        public static Func<T, Response> Lift<T>(this Action<T> func) { return x => { func(x); return new Response(true); }; }
-
-
-
+        /// <summary>Turn an async function that doesn't return a task Response, into one that does.</summary>
+        public static Func<T1, T2, T3, T4, T5, T6, T7, T8, Task<Response<TResult>>> LiftAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Func<T1, T2, T3, T4, T5, T6, T7, T8, Task<TResult>> func) => new Func<T1, T2, T3, T4, T5, T6, T7, T8, Task<Response<TResult>>>((t1, t2, t3, t4, t5, t6, t7, t8) => func(t1, t2, t3, t4, t5, t6, t7, t8).ContinueWith(TaskToResponse));
 
         #endregion
 
@@ -180,16 +222,16 @@ namespace ContainerExpressions.Containers
          * For bind we have the following input => output scenarios.
          * Where input is the extension method type target, and output is the the return type from the func.
          * 
-         * T        => Response<TResult>
-         * Task<T>  => Response<TResult>
-         * T        => Task<Response<TResult>>
-         * Task<T>  => Task<Response<TResult>>
+         * T        => Response{TResult}
+         * Task{T}  => Response{TResult}
+         * T        => Task{Response{TResult}}
+         * Task{T}  => Task{Response{TResult}}
          * 
          * While above is the main use case, we also want to cover void scenarios where Response<TResult> is replaced with Response.
-         * i.e. T => Task<Response<TResult>> becomes T => Task<Response>.
+         * i.e. T => Task{Response{TResult}} becomes T => Task{Response}.
         **/
 
-        /** T => Response<TResult> **/
+        /** T => Response{TResult} **/
 
         /// <summary>Executes the bind func, passing in T as an argument.</summary>
         public static Response<TResult> BindValue<T, TResult>(this T value, Func<T, Response<TResult>> func) => func(value);
@@ -217,7 +259,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Executes the bind func, passing in T as an argument.</summary>
         public static Task<Response> BindValueAsync<T>(this Task<T> value, Func<T, Task<Response>> func) => value.ContinueWith(TaskToResponse).ContinueWith(x => x.Result ? func(x.Result) : Task.FromResult(new Response())).Unwrap();
 
-        /** Response => Response<TResult> **/
+        /** Response => Response{TResult} **/
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Response<T> Bind<T>(this Response response, Func<Response<T>> func) => response ? func() : new Response<T>();
@@ -245,7 +287,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Task<Response> BindAsync(this Task<Response> response, Func<Task<Response>> func) => response.ContinueWith(x => x.Result ? func() : Task.FromResult(new Response())).Unwrap();
 
-        /** Response<T> => Response<Result> **/
+        /** Response{T} => Response{Result} **/
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Response<TResult> Bind<T, TResult>(this Response<T> response, Func<T, Response<TResult>> func) => response ? func(response) : new Response<TResult>();
@@ -259,7 +301,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Task<Response<TResult>> BindAsync<T, TResult>(this Task<Response<T>> response, Func<T, Task<Response<TResult>>> func) => response.ContinueWith(x => x.Result ? func(x.Result) : Task.FromResult(new Response<TResult>())).Unwrap();
 
-        /** Response<T> => Response **/
+        /** Response{T} => Response **/
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Response Bind<T>(this Response<T> response, Func<T, Response> func) => response ? func(response) : new Response();
