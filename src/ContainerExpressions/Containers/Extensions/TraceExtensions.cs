@@ -411,6 +411,38 @@ namespace ContainerExpressions.Containers
             return ex;
         }
 
+        // Log without caturing any caller attributes, so the logs are not confusing (i.e. exposing internal methods / expressions).
+        internal static TError LogErrorPlain<TError>(this TError ex) where TError : Exception
+        {
+            if (ex == null) return default;
+            LogException(ex, string.Empty, string.Empty, string.Empty, 0);
+            return ex;
+        }
+
+        /// <summary>Logs an exception.</summary>
+        /// <param name="ex">The exception to log.</param>
+        /// <returns>The initial exception.</returns>
+        public static AggregateException LogError(
+            this AggregateException ex,
+            [CallerArgumentExpression(nameof(ex))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        {
+            if (ex == null) return default;
+            LogException(ex, argument, caller, path, line);
+            return ex;
+        }
+
+        // Log without caturing any caller attributes, so the logs are not confusing (i.e. exposing internal methods / expressions).
+        internal static AggregateException LogErrorPlain(this AggregateException ex)
+        {
+            if (ex == null) return default;
+            LogException(ex, string.Empty, string.Empty, string.Empty, 0);
+            return ex;
+        }
+
         /// <summary>Logs many exceptions.</summary>
         /// <param name="ex">The exceptions to log.</param>
         /// <returns>The exceptions originally provided.</returns>

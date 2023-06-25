@@ -123,14 +123,14 @@ namespace ContainerExpressions.Containers
         {
             if (response.Value.IsCompleted)
             {
-                if (response.Value.Status == TaskStatus.Faulted) response.Value.Exception.LogError();
+                if (response.Value.Status == TaskStatus.Faulted) response.Value.Exception.LogErrorPlain();
                 if (response.Value.Status == TaskStatus.RanToCompletion) return _success.GetAwaiter();
                 return InstanceAsync.Of<Response>().GetAwaiter();
             }
 
             return response.Value.ContinueWith(static t =>
             {
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogErrorPlain();
                 if (t.Status == TaskStatus.RanToCompletion) return Response.Success;
                 return Response.Error;
             }).GetAwaiter();
@@ -141,14 +141,14 @@ namespace ContainerExpressions.Containers
         {
             if (response.Value.IsCompleted)
             {
-                if (response.Value.Status == TaskStatus.Faulted) response.Value.Exception.LogError();
+                if (response.Value.Status == TaskStatus.Faulted) response.Value.Exception.LogErrorPlain();
                 if (response.Value.Status == TaskStatus.RanToCompletion) return Task.FromResult(Response<T>.Success(response.Value.GetAwaiter().GetResult())).GetAwaiter();
                 return InstanceAsync.Of<Response<T>>().GetAwaiter();
             }
 
             return response.Value.ContinueWith(static t =>
             {
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogErrorPlain();
                 if (t.Status == TaskStatus.RanToCompletion) return Response<T>.Success(t.GetAwaiter().GetResult());
                 return Response<T>.Error;
             }).GetAwaiter();

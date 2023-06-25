@@ -17,7 +17,7 @@ namespace ContainerExpressions.Containers
         {
             if (value.Status == TaskStatus.Faulted)
             {
-                value.Exception.LogError();
+                value.Exception.LogErrorPlain();
             }
             return new Response(value.Status == TaskStatus.RanToCompletion);
         }
@@ -31,7 +31,7 @@ namespace ContainerExpressions.Containers
         {
             if (value.Status == TaskStatus.Faulted)
             {
-                value.Exception.LogError();
+                value.Exception.LogErrorPlain();
             }
             return value.Status == TaskStatus.RanToCompletion ? new Response<T>(value.Result) : new Response<T>();
         }

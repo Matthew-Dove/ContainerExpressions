@@ -60,7 +60,7 @@ namespace ContainerExpressions.Containers
             _isCompleted = true;
             Tcs = default;
             _continuation = default;
-            ex.LogError();
+            ex.LogErrorPlain();
         }
 
         public State()
@@ -121,7 +121,7 @@ namespace ContainerExpressions.Containers
         // Called by the state machine when the method has thrown an exception.
         internal void SetException(Exception ex)
         {
-            ex.LogError();
+            ex.LogErrorPlain();
             _state.IsCompleted = true;
             _state.Continuation?.Invoke();
             _state.Tcs?.SetResult(new Response<T>());
@@ -292,13 +292,13 @@ namespace ContainerExpressions.Containers
                 return result.ContinueWith(static t =>
                 {
                     if (t.Status == TaskStatus.RanToCompletion) return new Response(true);
-                    if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                    if (t.Status == TaskStatus.Faulted) t.Exception.LogErrorPlain();
                     return new Response();
                 }).GetAwaiter();
             }
             catch (Exception ex)
             {
-                ex.LogError();
+                ex.LogErrorPlain();
                 return Pool.ResponseError.GetAwaiter();
             }
         }
@@ -314,13 +314,13 @@ namespace ContainerExpressions.Containers
                 return result.ContinueWith(static t =>
                 {
                     if (t.Status == TaskStatus.RanToCompletion) return new Response<T>(t.Result);
-                    if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                    if (t.Status == TaskStatus.Faulted) t.Exception.LogErrorPlain();
                     return new Response<T>();
                 }).GetAwaiter();
             }
             catch (Exception ex)
             {
-                ex.LogError();
+                ex.LogErrorPlain();
                 return Pool<T>.ResponseError.GetAwaiter();
             }
         }
@@ -336,13 +336,13 @@ namespace ContainerExpressions.Containers
                 return result.ContinueWith(static t =>
                 {
                     if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result;
-                    if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                    if (t.Status == TaskStatus.Faulted) t.Exception.LogErrorPlain();
                     return new Response();
                 }).GetAwaiter();
             }
             catch (Exception ex)
             {
-                ex.LogError();
+                ex.LogErrorPlain();
                 return Pool.ResponseError.GetAwaiter();
             }
         }
@@ -358,13 +358,13 @@ namespace ContainerExpressions.Containers
                 return result.ContinueWith(static t =>
                 {
                     if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result;
-                    if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                    if (t.Status == TaskStatus.Faulted) t.Exception.LogErrorPlain();
                     return new Response<T>();
                 }).GetAwaiter();
             }
             catch (Exception ex)
             {
-                ex.LogError();
+                ex.LogErrorPlain();
                 return Pool<T>.ResponseError.GetAwaiter();
             }
         }
@@ -380,20 +380,20 @@ namespace ContainerExpressions.Containers
                 if (result.IsCompleted)
                 {
                     if (result.IsCompletedSuccessfully) return new ValueTask<Response>(Response.Success).GetAwaiter();
-                    if (result.IsFaulted) result.AsTask().Exception.LogError();
+                    if (result.IsFaulted) result.AsTask().Exception.LogErrorPlain();
                     return new ValueTask<Response>(Response.Error).GetAwaiter();
                 }
 
                 return new ValueTask<Response>(result.AsTask().ContinueWith(static t =>
                 {
                     if (t.Status == TaskStatus.RanToCompletion) return Response.Success;
-                    if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                    if (t.Status == TaskStatus.Faulted) t.Exception.LogErrorPlain();
                     return Response.Error;
                 })).GetAwaiter();
             }
             catch (Exception ex)
             {
-                ex.LogError();
+                ex.LogErrorPlain();
                 return new ValueTask<Response>(Response.Error).GetAwaiter();
             }
         }
@@ -409,20 +409,20 @@ namespace ContainerExpressions.Containers
                 if (result.IsCompleted)
                 {
                     if (result.IsCompletedSuccessfully) return new ValueTask<Response<T>>(Response.Create(result.Result)).GetAwaiter();
-                    if (result.IsFaulted) result.AsTask().Exception.LogError();
+                    if (result.IsFaulted) result.AsTask().Exception.LogErrorPlain();
                     return new ValueTask<Response<T>>(Response<T>.Error).GetAwaiter();
                 }
 
                 return new ValueTask<Response<T>>(result.AsTask().ContinueWith(static t =>
                 {
                     if (t.Status == TaskStatus.RanToCompletion) return Response.Create(t.Result);
-                    if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                    if (t.Status == TaskStatus.Faulted) t.Exception.LogErrorPlain();
                     return new Response<T>();
                 })).GetAwaiter();
             }
             catch (Exception ex)
             {
-                ex.LogError();
+                ex.LogErrorPlain();
                 return new ValueTask<Response<T>>(Response<T>.Error).GetAwaiter();
             }
         }
@@ -438,20 +438,20 @@ namespace ContainerExpressions.Containers
                 if (result.IsCompleted)
                 {
                     if (result.IsCompletedSuccessfully) return result.GetAwaiter();
-                    if (result.IsFaulted) result.AsTask().Exception.LogError();
+                    if (result.IsFaulted) result.AsTask().Exception.LogErrorPlain();
                     return new ValueTask<Response>(new Response()).GetAwaiter();
                 }
 
                 return new ValueTask<Response>(result.AsTask().ContinueWith(static t =>
                 {
                     if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result;
-                    if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                    if (t.Status == TaskStatus.Faulted) t.Exception.LogErrorPlain();
                     return new Response();
                 })).GetAwaiter();
             }
             catch (Exception ex)
             {
-                ex.LogError();
+                ex.LogErrorPlain();
                 return new ValueTask<Response>(new Response()).GetAwaiter();
             }
         }
@@ -467,20 +467,20 @@ namespace ContainerExpressions.Containers
                 if (result.IsCompleted)
                 {
                     if (result.IsCompletedSuccessfully) return result.GetAwaiter();
-                    if (result.IsFaulted) result.AsTask().Exception.LogError();
+                    if (result.IsFaulted) result.AsTask().Exception.LogErrorPlain();
                     return new ValueTask<Response<T>>(new Response<T>()).GetAwaiter();
                 }
 
                 return new ValueTask<Response<T>>(result.AsTask().ContinueWith(static t =>
                 {
                     if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result;
-                    if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                    if (t.Status == TaskStatus.Faulted) t.Exception.LogErrorPlain();
                     return new Response<T>();
                 })).GetAwaiter();
             }
             catch (Exception ex)
             {
-                ex.LogError();
+                ex.LogErrorPlain();
                 return new ValueTask<Response<T>>(new Response<T>()).GetAwaiter();
             }
         }
@@ -600,7 +600,7 @@ namespace ContainerExpressions.Containers
 
         public void SetResult(T result) => _tcs.SetResult(result);
 
-        public void SetException(Exception ex) { ex.LogError(); if (_isResponseType) _tcs.SetResult(default(T)); else _tcs.SetException(ex); }
+        public void SetException(Exception ex) { ex.LogErrorPlain(); if (_isResponseType) _tcs.SetResult(default(T)); else _tcs.SetException(ex); }
 
         public void SetStateMachine(IAsyncStateMachine _) { }
 
