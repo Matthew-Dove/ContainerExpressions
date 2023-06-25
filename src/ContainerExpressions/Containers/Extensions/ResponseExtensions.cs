@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers
@@ -69,9 +71,16 @@ namespace ContainerExpressions.Containers
         public static T GetValueOrDefault<T>(this Response<T> response, T defaultValue) => response ? response : defaultValue;
 
         /// <summary>Gets the value, unless the state is invalid, or the task failed, then the default value is returned.</summary>
-        public static Task<T> GetValueOrDefaultAsync<T>(this Task<Response<T>> response, T defaultValue) => response.ContinueWith(t =>
+        public static Task<T> GetValueOrDefaultAsync<T>(
+            this Task<Response<T>> response,
+            T defaultValue,
+            [CallerArgumentExpression(nameof(response))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            ) => response.ContinueWith(t =>
         {
-            if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+            if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
             if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result.Value;
             return defaultValue;
         });
@@ -388,31 +397,43 @@ namespace ContainerExpressions.Containers
         }
 
         /// <summary>Flattens nested Response types into a single one.</summary>
-        public static Task<Response> UnpackAsync(this Task<Response<Response>> response)
+        public static Task<Response> UnpackAsync(
+            this Task<Response<Response>> response,
+            [CallerArgumentExpression(nameof(response))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
-            return response.ContinueWith(static t =>
+            return response.ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result.Value;
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
                 return new Response();
             });
         }
 
         /// <summary>Flattens nested Response types into a single one.</summary>
-        public static Task<Response> UnpackAsync(this Task<Response<Task<Response>>> response)
+        public static Task<Response> UnpackAsync(
+            this Task<Response<Task<Response>>> response,
+            [CallerArgumentExpression(nameof(response))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
-            return response.ContinueWith(static t =>
+            return response.ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result.Value;
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
                 return Task.FromResult(new Response());
-            }).ContinueWith(static t =>
+            }).ContinueWith(t =>
             {
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
                 if (t.Status == TaskStatus.RanToCompletion)
                 {
                     if (t.Result.Status == TaskStatus.RanToCompletion) return t.Result.Result;
-                    if (t.Result.Status == TaskStatus.Faulted) t.Exception.LogError();
+                    if (t.Result.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
                 }
                 return new Response();
             });
@@ -426,31 +447,43 @@ namespace ContainerExpressions.Containers
         }
 
         /// <summary>Flattens nested Response types into a single one.</summary>
-        public static Task<Response<T>> UnpackAsync<T>(this Task<Response<Response<T>>> response)
+        public static Task<Response<T>> UnpackAsync<T>(
+            this Task<Response<Response<T>>> response,
+            [CallerArgumentExpression(nameof(response))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
-            return response.ContinueWith(static t =>
+            return response.ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result.Value;
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
                 return new Response<T>();
             });
         }
 
         /// <summary>Flattens nested Response types into a single one.</summary>
-        public static Task<Response<T>> UnpackAsync<T>(this Task<Response<Task<Response<T>>>> response)
+        public static Task<Response<T>> UnpackAsync<T>(
+            this Task<Response<Task<Response<T>>>> response,
+            [CallerArgumentExpression(nameof(response))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
-            return response.ContinueWith(static t =>
+            return response.ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result.Value;
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
                 return Task.FromResult(new Response<T>());
-            }).ContinueWith(static t =>
+            }).ContinueWith(t =>
             {
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
                 if (t.Status == TaskStatus.RanToCompletion)
                 {
                     if (t.Result.Status == TaskStatus.RanToCompletion && t.Result.Result.IsValid) return t.Result.Result;
-                    if (t.Result.Status == TaskStatus.Faulted) t.Exception.LogError();
+                    if (t.Result.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
                 }
                 return new Response<T>();
             });

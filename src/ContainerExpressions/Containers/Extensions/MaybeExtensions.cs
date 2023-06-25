@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace ContainerExpressions.Containers
@@ -45,26 +46,40 @@ namespace ContainerExpressions.Containers
         public static Task<Response<TValue>> ToResponseAsync<TValue, TError>(this Task<Maybe<TValue, TError>> maybe) => maybe.MatchAsync(x => new Response<TValue>(x), _ => new Response<TValue>());
 
         /// <summary>Creates a Maybe, that wraps a Task. When the task is successful, the value is set, otherwise the error is set.</summary>
-        public static Task<Maybe<Unit, TError>> ToMaybeTaskAsync<TError>(this Task value, TError error)
+        public static Task<Maybe<Unit, TError>> ToMaybeTaskAsync<TError>(
+            this Task value,
+            TError error,
+            [CallerArgumentExpression(nameof(value))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
             return value.ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.Faulted)
                 {
-                    t.Exception.LogError();
+                    t.Exception.LogError(argument, caller, path, line);
                 }
                 return t.Status == TaskStatus.RanToCompletion ? Unit<TError>.MaybeValue : Unit<TError>.MaybeError(error);
             });
         }
 
         /// <summary>Creates a Maybe, that wraps a Task. When the task is successful, the value is set, otherwise the error is set.</summary>
-        public static Task<Maybe<TValue, TError>> ToMaybeTaskAsync<TValue, TError>(this Task<TValue> value, TError error)
+        public static Task<Maybe<TValue, TError>> ToMaybeTaskAsync<TValue, TError>(
+            this Task<TValue> value,
+            TError error,
+            [CallerArgumentExpression(nameof(value))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
             return value.ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.Faulted)
                 {
-                    t.Exception.LogError();
+                    t.Exception.LogError(argument, caller, path, line);
                 }
                 return t.Status == TaskStatus.RanToCompletion ? new Maybe<TValue, TError>(t.Result) : new Maybe<TValue, TError>(error);
             });
@@ -805,18 +820,32 @@ namespace ContainerExpressions.Containers
         }
 
         /// <summary>Flattens nested Maybe types into a single one.</summary>
-        public static Task<Maybe<TValue, TError>> UnpackAsync<TValue, TError>(this Task<Maybe<Maybe<TValue, TError>, TError>> maybe, TError error)
+        public static Task<Maybe<TValue, TError>> UnpackAsync<TValue, TError>(
+            this Task<Maybe<Maybe<TValue, TError>, TError>> maybe,
+            TError error,
+            [CallerArgumentExpression(nameof(maybe))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
             return maybe.ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.RanToCompletion) return t.Result.Unpack();
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
                 return new Maybe<TValue, TError>(error);
             });
         }
 
         /// <summary>Flattens nested Maybe types into a single one.</summary>
-        public static Task<Maybe<TValue, TError>> UnpackAsync<TValue, TError>(this Task<Maybe<Task<Maybe<TValue, TError>>, TError>> maybe, TError error)
+        public static Task<Maybe<TValue, TError>> UnpackAsync<TValue, TError>(
+            this Task<Maybe<Task<Maybe<TValue, TError>>, TError>> maybe,
+            TError error,
+            [CallerArgumentExpression(nameof(maybe))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
             return maybe.ContinueWith(t =>
             {
@@ -825,14 +854,14 @@ namespace ContainerExpressions.Containers
                     if (t.Result._hasValue) return t.Result._value;
                     return Task.FromResult(Maybe.CreateError<TValue, TError>(t.Result._error));
                 }
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
                 return Task.FromResult(Maybe.CreateError<TValue, TError>(error));
             }).ContinueWith(t =>
             {
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
                 if (t.Status == TaskStatus.RanToCompletion)
                 {
-                    if (t.Result.Status == TaskStatus.Faulted) t.Exception.LogError();
+                    if (t.Result.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
                     if (t.Result.Status == TaskStatus.RanToCompletion) return t.Result.Result;
                 }
                 return new Maybe<TValue, TError>(error);

@@ -220,59 +220,83 @@ namespace ContainerExpressions.Containers
         #region Task Converters
 
         // Safely run the ValueTask, and convert the result into a Response.
-        public static ValueTask<Response> AsResponse(this ValueTask task)
+        public static ValueTask<Response> AsResponse(
+            this ValueTask task,
+            [CallerArgumentExpression(nameof(task))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
             if (task.IsCompleted)
             {
                 if (task.IsCompletedSuccessfully) return new ValueTask<Response>(Response.Success);
-                if (task.IsFaulted) task.AsTask().Exception.LogError();
+                if (task.IsFaulted) task.AsTask().Exception.LogError(argument, caller, path, line);
                 return new ValueTask<Response>(Response.Error);
             }
 
-            return new ValueTask<Response>(task.AsTask().ContinueWith(static t =>
+            return new ValueTask<Response>(task.AsTask().ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.RanToCompletion) return Response.Success;
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
                 return Response.Error;
             }));
         }
 
         // Safely run the ValueTask{T}, and convert the T, into a Response{T}.
-        public static ValueTask<Response<T>> AsResponse<T>(this ValueTask<T> task)
+        public static ValueTask<Response<T>> AsResponse<T>(
+            this ValueTask<T> task,
+            [CallerArgumentExpression(nameof(task))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
             if (task.IsCompleted)
             {
                 if (task.IsCompletedSuccessfully) return new ValueTask<Response<T>>(Response.Create(task.Result));
-                if (task.IsFaulted) task.AsTask().Exception.LogError();
+                if (task.IsFaulted) task.AsTask().Exception.LogError(argument, caller, path, line);
                 return new ValueTask<Response<T>>(Response.Create<T>());
             }
 
-            return new ValueTask<Response<T>>(task.AsTask().ContinueWith(static t =>
+            return new ValueTask<Response<T>>(task.AsTask().ContinueWith(t =>
             {
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
                 if (t.Status == TaskStatus.RanToCompletion) return Response.Create(t.Result);
                 return Response.Create<T>();
             }));
         }
 
         // Safely run the Task, and convert the result into a Response.
-        public static Task<Response> AsResponse(this Task task)
+        public static Task<Response> AsResponse(
+            this Task task,
+            [CallerArgumentExpression(nameof(task))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
-            return task.ContinueWith(static t =>
+            return task.ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.RanToCompletion) return new Response(true);
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
                 return new Response();
             });
         }
 
         // Safely run the Task{T}, and convert the T, into a Response{T}.
-        public static Task<Response<T>> AsResponse<T>(this Task<T> task)
+        public static Task<Response<T>> AsResponse<T>(
+            this Task<T> task,
+            [CallerArgumentExpression(nameof(task))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
         {
-            return task.ContinueWith(static t =>
+            return task.ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.RanToCompletion) return new Response<T>(t.Result);
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError();
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
                 return new Response<T>();
             });
         }
