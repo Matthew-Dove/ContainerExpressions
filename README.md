@@ -682,37 +682,6 @@ var count = Expression.Compose(identity.Log(trace), increment.Log(trace), increm
 // The value of the int is 2.
 ````
 
-## Match`<T>`
-
-Let's say you'd like to do different things based on the state of some input.  
-For example summing an array of integers, you have three states, the array is null, the array is empty, the array has more then zero elements.  
-You can have a pattern for each state (or a subset of the states), and have different behaviour for each pattern.  
-
-In the example below when the input is null, we return an invalid response, when the input has no elements, we return 0, otherwise we return the sum of the array's elements.
-
-```cs
-var input = new int[] { 1, 2, 3 };
-
-var result = Expression.Match(input,
-    Pattern.Create<int[], int>(x => x == null, _ => Response.Create<int>()), // When null, return an invalid response.
-    Pattern.Create<int[], int>(x => x.Length == 0, _ => Response.Create(0)), // When empty, return 0.
-    Pattern.Create<int[], int>(x => x.Length > 0, Sum) // When more than zero elements exist, sum them, and return that result.
-);
-
-// Sum all elements in the array.
-static Response<int> Sum(int[] numbers)
-{
-	var count = 0;
-	for (int i = 0; i < numbers.Length; i++)
-	{
-		count += numbers[i];
-	}
-	return Response.Create(count);
-}
-```
-
-Note: there is also Expression.MatchAsync() for asynchronous patterns.
-
 ## Retry`<T>`
 
 Execute the same function until it's Response is valid, or you run out of retries as defined by the options.  
@@ -1145,3 +1114,12 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * `Async` versions for the `TryGetT*`, `WhenT*`, and `Match` methods on the `Either<T*>` containers.
 * Renamed `A<T>` to `ValueAlias<T>`, which follows the .net naming conventions of value types.
 * Added Caller Attributes to the `Try` container, and error logging functions, to provide more context.
+
+## 11.0.0
+
+* This version's breaking change is around removing types that haven't provided value, or have been out classed by C# / .NET improvements.
+* Created a repo for the dead types: [Containers.Experimental](https://github.com/Matthew-Dove/Containers.Experimental).
+* Removed the `Loop<T>` type (_speed improvements are coming to linq in .net 8_).
+* Removed the `Match<T>` type (_pattern matching is now a C# language feature_).
+* Removed the type `ResponseValueTask<T>` type (_made redundant by ResponseAsync_).
+* Removed the type `ResponseTask<T>` type (_made redundant by ResponseAsync_).
