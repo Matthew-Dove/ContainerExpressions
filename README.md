@@ -989,61 +989,6 @@ All these types can be safely converted to `Response` / `Response<T>` using the 
 * `Response<Task<Response<Response<T>>>>`
 * `Response<Task<Response<Task<Response<T>>>>>`
 
-## ResponseValueTask`<T>`
-
-A helper type for the `Response` custom awaiters.  
-`ResponseValueTask<T>` serves as a bridge between `Task<T>` / `ValueTask<T>`, and `Response<T>`.  
-The core difference between `ResponseValueTask<T>`, and `Response<T>`; is `ResponseValueTask<T>` is constrained to be a `ValueTask<T>`.  
-This allows us to cast easily from some `Task<T>`, to `ResponseValueTask<T>`, and then down to `Response<T>`.  
-For example:
-
-```cs
-// Function to call.
-static async Task<int> Divide(int numerator, int denominator)
-{
-    var quotient = numerator / denominator;
-    await Task.Delay(1);
-    return quotient;
-}
-
-// Calling code.
-ResponseValueTask<int> successResponse = Divide(1, 1); 
-Response<int> success = await successResponse; // Response<int> success = Divide(1, 1); is not possible to cast; so we use ResponseValueTask<int>.
-
-ResponseValueTask<int> errorResponse = Divide(1, 0); // This would normally be a runtime exception.
-Response<int> error = await errorResponse;
-
-Assert.IsTrue(success);
-Assert.AreEqual(1, success);
-Assert.IsFalse(error);
-```
-
-Writing out the types on seperate lines is not necessary (*i.e.*):
-
-```cs
-Response<int> success = await new ResponseValueTask<int>(Divide(1, 1)); // OK.
-Response<int> error = await new ResponseValueTask<int>(Divide(1, 0)); // Fail (but no runtime exception).
-
-Assert.IsTrue(success);
-Assert.AreEqual(1, success);
-Assert.IsFalse(error);
-```
-
-It's fine to use `var` too, as it's the awaiter that determines the type:
-
-```cs
-// No need to wrap Task<T> types in try catches anymore!
-var success = await new ResponseValueTask<int>(Divide(1, 1));
-var error = await new ResponseValueTask<int>(Divide(1, 0));
-```
-
-## ResponseTask`<T>`
-
-`ResponseTask<T>`, has all the properties of `ResponseValueTask<T>` - except it only works with `Task`, not `ValueTask`, or some pre-calculated value of `T`.  
-This is the one you should be using 90% of the time, as `ResponseValueTask<T>` is only better in specific scenarios (*for all the same reasons as .net's `ValueTask`*).  
-
-**Note:** Exceptions on a **Faulted** `Task` will be logged though to `Try.SetExceptionLogger()` subscribers, so make sure to set this at program startup.  
-
 # Credits
 * [Icon](https://www.flaticon.com/free-icon/bird_2630452) made by [Vitaly Gorbachev](https://www.flaticon.com/authors/vitaly-gorbachev) from [Flaticon](https://www.flaticon.com/)
 
