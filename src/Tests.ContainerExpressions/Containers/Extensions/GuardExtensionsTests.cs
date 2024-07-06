@@ -28,7 +28,7 @@ namespace Tests.ContainerExpressions.Containers.Extensions
             var ex = new Exception("error");
             var di = ExceptionDispatchInfo.Capture(ex);
 
-            di.ThrowError();
+            di.ThrowDispatchError();
         }
 
         [TestMethod]

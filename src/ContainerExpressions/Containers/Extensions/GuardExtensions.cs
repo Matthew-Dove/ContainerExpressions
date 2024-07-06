@@ -34,21 +34,29 @@ namespace ContainerExpressions.Containers.Extensions
                 .ToString();
         }
 
-        public static void ThrowError<T>(
+        public static T ThrowError<T>(
             this T ex,
             [CallerArgumentExpression(nameof(ex))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
             [CallerLineNumber] int line = 0
-            ) where T : Exception => Throw.Exception(ex.AddCallerAttributes(argument, caller, path, line));
+            ) where T : Exception { Throw.Exception(ex.AddCallerAttributes(argument, caller, path, line)); return default; }
 
-        public static void ThrowError(
+        public static void ThrowDispatchError(
             this ExceptionDispatchInfo ex,
             [CallerArgumentExpression(nameof(ex))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
             [CallerLineNumber] int line = 0
             ) => Throw.Exception(ex.SourceException.AddCallerAttributes(argument, caller, path, line));
+
+        public static T ThrowDispatchError<T>(
+            this ExceptionDispatchInfo ex,
+            [CallerArgumentExpression(nameof(ex))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            ) { Throw.Exception(ex.SourceException.AddCallerAttributes(argument, caller, path, line)); return default; }
 
         public static T ThrowIfNull<T>(
             this T target,
