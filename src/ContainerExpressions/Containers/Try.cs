@@ -47,6 +47,15 @@ namespace ContainerExpressions.Containers
             _logger = Response.Create(logger);
         }
 
+        /// <summary>Formats and writes a error log message.</summary>
+        /// <param name="exception">The exception to log.</param>
+        /// <param name="message">Format string of the log message in message template format: "User {User} logged in!".</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        public static void SetFormattedExceptionLogger(Exception exception, string message, params object[] args)
+        {
+
+        }
+
         /// <summary>Wraps a function in error protecting code.</summary>
         public static Response Run(
             Action action,
