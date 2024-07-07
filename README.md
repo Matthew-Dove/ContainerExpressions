@@ -1068,3 +1068,7 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * Removed the `Match<T>` type (_pattern matching is now a C# language feature_).
 * Removed the type `ResponseValueTask<T>` type (_made redundant by ResponseAsync_).
 * Removed the type `ResponseTask<T>` type (_made redundant by ResponseAsync_).
+
+## 11.1.0
+
+* Changed exception throwing function from `void ThrowError<T>` to `T ThrowError<T>`, allowing it to be used in more places (*such as switch pattern matching*).
