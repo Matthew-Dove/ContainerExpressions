@@ -1069,6 +1069,7 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * Removed the type `ResponseValueTask<T>` type (_made redundant by ResponseAsync_).
 * Removed the type `ResponseTask<T>` type (_made redundant by ResponseAsync_).
 
-## 11.1.0
+## 12.0.0
 
-* Changed exception throwing function from `void ThrowError<T>` to `T ThrowError<T>`, allowing it to be used in more places (*such as switch pattern matching*).
+* Changed exception throwing function from `void ThrowError<T>` to `T ThrowError<T>`, allowing it to be used in more places that need a result (*such as switch pattern matching*).
+* Removed `WhenT1Async`, due to the use of generics there was no difference between that, and `WhenT1` (*i.e. the non-async version*).

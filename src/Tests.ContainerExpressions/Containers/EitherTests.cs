@@ -260,7 +260,7 @@ namespace Tests.ContainerExpressions.Containers
         public async Task WhenAsyncFunc_T1()
         {
             var either = new Either<string, int>("1");
-            var number = either.WhenT1Async(When.Self.FuncAsync, out Task<int> num);
+            var number = either.WhenT1(When.Self.FuncAsync, out Task<int> num);
 
             var n = await num;
 
@@ -272,7 +272,7 @@ namespace Tests.ContainerExpressions.Containers
         public async Task WhenAsyncFunc_T2()
         {
             var either = new Either<string, int>(1);
-            var number = either.WhenT2Async(Lambda.IdentityAsync, out Task<int> num);
+            var number = either.WhenT2(Lambda.IdentityAsync, out Task<int> num);
 
             var n = await num;
 
@@ -285,8 +285,8 @@ namespace Tests.ContainerExpressions.Containers
         {
             Check.IsCalled = false;
             var either = new Either<string, int>("1");
-            var number = either.WhenT1Async(When.Self.ActionAsync, out Task task1);
-            var response = either.WhenT1Async(static x => { Check.IsCalled = true; return Task.CompletedTask; }, out Task task2);
+            var number = either.WhenT1(When.Self.ActionAsync, out Task task1);
+            var response = either.WhenT1(static x => { Check.IsCalled = true; return Task.CompletedTask; }, out Task task2);
 
             await Task.WhenAll(task1, task2);
 
@@ -300,8 +300,8 @@ namespace Tests.ContainerExpressions.Containers
         {
             Check.IsCalled = false;
             var either = new Either<string, int>(1);
-            var number = either.WhenT2Async(static x => When.Self.ActionAsync(x.ToString()), out Task task1);
-            var response = either.WhenT2Async(static x => { Check.IsCalled = true; return Task.CompletedTask; }, out Task task2);
+            var number = either.WhenT2(static x => When.Self.ActionAsync(x.ToString()), out Task task1);
+            var response = either.WhenT2(static x => { Check.IsCalled = true; return Task.CompletedTask; }, out Task task2);
 
             await Task.WhenAll(task1, task2);
 

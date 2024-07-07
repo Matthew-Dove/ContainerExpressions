@@ -18,16 +18,10 @@ public static class EitherExtensions
     public static bool WhenT1<T1, T2, TResult>(this Either<T1, T2> either, Func<T1, TResult> func, out TResult result) { if (either._tag == 1) { result = func(either._t1); return true; }; result = default; return false; }
     public static bool WhenT2<T1, T2, TResult>(this Either<T1, T2> either, Func<T2, TResult> func, out TResult result) { if (either._tag == 2) { result = func(either._t2); return true; }; result = default; return false; }
 
-    public static bool WhenT1Async<T1, T2, TResult>(this Either<T1, T2> either, Func<T1, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 1) { result = func(either._t1); return true; }; result = default; return false; }
-    public static bool WhenT2Async<T1, T2, TResult>(this Either<T1, T2> either, Func<T2, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 2) { result = func(either._t2); return true; }; result = default; return false; }
-
     // WhenT# Action
 
     public static bool WhenT1<T1, T2>(this Either<T1, T2> either, Action<T1> action) { if (either._tag == 1) { action(either._t1); return true; } return false; }
     public static bool WhenT2<T1, T2>(this Either<T1, T2> either, Action<T2> action) { if (either._tag == 2) { action(either._t2); return true; } return false; }
-
-    public static bool WhenT1Async<T1, T2>(this Either<T1, T2> either, Func<T1, Task> action, out Task task) { if (either._tag == 1) { task = action(either._t1); return true; } task = default; return false; }
-    public static bool WhenT2Async<T1, T2>(this Either<T1, T2> either, Func<T2, Task> action, out Task task) { if (either._tag == 2) { task = action(either._t2); return true; } task = default;  return false; }
 
     // Match Func
 
@@ -84,19 +78,11 @@ public static class EitherExtensions
     public static bool WhenT2<T1, T2, T3, TResult>(this Either<T1, T2, T3> either, Func<T2, TResult> func, out TResult result) { if (either._tag == 2) { result = func(either._t2); return true; }; result = default; return false; }
     public static bool WhenT3<T1, T2, T3, TResult>(this Either<T1, T2, T3> either, Func<T3, TResult> func, out TResult result) { if (either._tag == 3) { result = func(either._t3); return true; }; result = default; return false; }
 
-    public static bool WhenT1Async<T1, T2, T3, TResult>(this Either<T1, T2, T3> either, Func<T1, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 1) { result = func(either._t1); return true; }; result = default; return false; }
-    public static bool WhenT2Async<T1, T2, T3, TResult>(this Either<T1, T2, T3> either, Func<T2, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 2) { result = func(either._t2); return true; }; result = default; return false; }
-    public static bool WhenT3Async<T1, T2, T3, TResult>(this Either<T1, T2, T3> either, Func<T3, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 3) { result = func(either._t3); return true; }; result = default; return false; }
-
     // WhenT# Action
 
     public static bool WhenT1<T1, T2, T3>(this Either<T1, T2, T3> either, Action<T1> action) { if (either._tag == 1) { action(either._t1); return true; } return false; }
     public static bool WhenT2<T1, T2, T3>(this Either<T1, T2, T3> either, Action<T2> action) { if (either._tag == 2) { action(either._t2); return true; } return false; }
     public static bool WhenT3<T1, T2, T3>(this Either<T1, T2, T3> either, Action<T3> action) { if (either._tag == 3) { action(either._t3); return true; } return false; }
-
-    public static bool WhenT1Async<T1, T2, T3>(this Either<T1, T2, T3> either, Func<T1, Task> action, out Task task) { if (either._tag == 1) { task = action(either._t1); return true; } task = default; return false; }
-    public static bool WhenT2Async<T1, T2, T3>(this Either<T1, T2, T3> either, Func<T2, Task> action, out Task task) { if (either._tag == 2) { task = action(either._t2); return true; } task = default; return false; }
-    public static bool WhenT3Async<T1, T2, T3>(this Either<T1, T2, T3> either, Func<T3, Task> action, out Task task) { if (either._tag == 3) { task = action(either._t3); return true; } task = default; return false; }
 
     // Match Func
 
@@ -159,22 +145,12 @@ public static class EitherExtensions
     public static bool WhenT3<T1, T2, T3, T4, TResult>(this Either<T1, T2, T3, T4> either, Func<T3, TResult> func, out TResult result) { if (either._tag == 3) { result = func(either._t3); return true; }; result = default; return false; }
     public static bool WhenT4<T1, T2, T3, T4, TResult>(this Either<T1, T2, T3, T4> either, Func<T4, TResult> func, out TResult result) { if (either._tag == 4) { result = func(either._t4); return true; }; result = default; return false; }
 
-    public static bool WhenT1Async<T1, T2, T3, T4, TResult>(this Either<T1, T2, T3, T4> either, Func<T1, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 1) { result = func(either._t1); return true; }; result = default; return false; }
-    public static bool WhenT2Async<T1, T2, T3, T4, TResult>(this Either<T1, T2, T3, T4> either, Func<T2, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 2) { result = func(either._t2); return true; }; result = default; return false; }
-    public static bool WhenT3Async<T1, T2, T3, T4, TResult>(this Either<T1, T2, T3, T4> either, Func<T3, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 3) { result = func(either._t3); return true; }; result = default; return false; }
-    public static bool WhenT4Async<T1, T2, T3, T4, TResult>(this Either<T1, T2, T3, T4> either, Func<T4, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 4) { result = func(either._t4); return true; }; result = default; return false; }
-
     // WhenT# Action
 
     public static bool WhenT1<T1, T2, T3, T4>(this Either<T1, T2, T3, T4> either, Action<T1> action) { if (either._tag == 1) { action(either._t1); return true; } return false; }
     public static bool WhenT2<T1, T2, T3, T4>(this Either<T1, T2, T3, T4> either, Action<T2> action) { if (either._tag == 2) { action(either._t2); return true; } return false; }
     public static bool WhenT3<T1, T2, T3, T4>(this Either<T1, T2, T3, T4> either, Action<T3> action) { if (either._tag == 3) { action(either._t3); return true; } return false; }
     public static bool WhenT4<T1, T2, T3, T4>(this Either<T1, T2, T3, T4> either, Action<T4> action) { if (either._tag == 4) { action(either._t4); return true; } return false; }
-
-    public static bool WhenT1Async<T1, T2, T3, T4>(this Either<T1, T2, T3, T4> either, Func<T1, Task> action, out Task task) { if (either._tag == 1) { task = action(either._t1); return true; } task = default; return false; }
-    public static bool WhenT2Async<T1, T2, T3, T4>(this Either<T1, T2, T3, T4> either, Func<T2, Task> action, out Task task) { if (either._tag == 2) { task = action(either._t2); return true; } task = default; return false; }
-    public static bool WhenT3Async<T1, T2, T3, T4>(this Either<T1, T2, T3, T4> either, Func<T3, Task> action, out Task task) { if (either._tag == 3) { task = action(either._t3); return true; } task = default; return false; }
-    public static bool WhenT4Async<T1, T2, T3, T4>(this Either<T1, T2, T3, T4> either, Func<T4, Task> action, out Task task) { if (either._tag == 4) { task = action(either._t4); return true; } task = default; return false; }
 
     // Match Func
 
@@ -243,12 +219,6 @@ public static class EitherExtensions
     public static bool WhenT4<T1, T2, T3, T4, T5, TResult>(this Either<T1, T2, T3, T4, T5> either, Func<T4, TResult> func, out TResult result) { if (either._tag == 4) { result = func(either._t4); return true; }; result = default; return false; }
     public static bool WhenT5<T1, T2, T3, T4, T5, TResult>(this Either<T1, T2, T3, T4, T5> either, Func<T5, TResult> func, out TResult result) { if (either._tag == 5) { result = func(either._t5); return true; }; result = default; return false; }
 
-    public static bool WhenT1Async<T1, T2, T3, T4, T5, TResult>(this Either<T1, T2, T3, T4, T5> either, Func<T1, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 1) { result = func(either._t1); return true; }; result = default; return false; }
-    public static bool WhenT2Async<T1, T2, T3, T4, T5, TResult>(this Either<T1, T2, T3, T4, T5> either, Func<T2, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 2) { result = func(either._t2); return true; }; result = default; return false; }
-    public static bool WhenT3Async<T1, T2, T3, T4, T5, TResult>(this Either<T1, T2, T3, T4, T5> either, Func<T3, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 3) { result = func(either._t3); return true; }; result = default; return false; }
-    public static bool WhenT4Async<T1, T2, T3, T4, T5, TResult>(this Either<T1, T2, T3, T4, T5> either, Func<T4, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 4) { result = func(either._t4); return true; }; result = default; return false; }
-    public static bool WhenT5Async<T1, T2, T3, T4, T5, TResult>(this Either<T1, T2, T3, T4, T5> either, Func<T5, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 5) { result = func(either._t5); return true; }; result = default; return false; }
-
     // WhenT# Action
 
     public static bool WhenT1<T1, T2, T3, T4, T5>(this Either<T1, T2, T3, T4, T5> either, Action<T1> action) { if (either._tag == 1) { action(either._t1); return true; } return false; }
@@ -256,12 +226,6 @@ public static class EitherExtensions
     public static bool WhenT3<T1, T2, T3, T4, T5>(this Either<T1, T2, T3, T4, T5> either, Action<T3> action) { if (either._tag == 3) { action(either._t3); return true; } return false; }
     public static bool WhenT4<T1, T2, T3, T4, T5>(this Either<T1, T2, T3, T4, T5> either, Action<T4> action) { if (either._tag == 4) { action(either._t4); return true; } return false; }
     public static bool WhenT5<T1, T2, T3, T4, T5>(this Either<T1, T2, T3, T4, T5> either, Action<T5> action) { if (either._tag == 5) { action(either._t5); return true; } return false; }
-
-    public static bool WhenT1Async<T1, T2, T3, T4, T5>(this Either<T1, T2, T3, T4, T5> either, Func<T1, Task> action, out Task task) { if (either._tag == 1) { task = action(either._t1); return true; } task = default; return false; }
-    public static bool WhenT2Async<T1, T2, T3, T4, T5>(this Either<T1, T2, T3, T4, T5> either, Func<T2, Task> action, out Task task) { if (either._tag == 2) { task = action(either._t2); return true; } task = default; return false; }
-    public static bool WhenT3Async<T1, T2, T3, T4, T5>(this Either<T1, T2, T3, T4, T5> either, Func<T3, Task> action, out Task task) { if (either._tag == 3) { task = action(either._t3); return true; } task = default; return false; }
-    public static bool WhenT4Async<T1, T2, T3, T4, T5>(this Either<T1, T2, T3, T4, T5> either, Func<T4, Task> action, out Task task) { if (either._tag == 4) { task = action(either._t4); return true; } task = default; return false; }
-    public static bool WhenT5Async<T1, T2, T3, T4, T5>(this Either<T1, T2, T3, T4, T5> either, Func<T5, Task> action, out Task task) { if (either._tag == 5) { task = action(either._t5); return true; } task = default; return false; }
 
     // Match Func
 
@@ -336,13 +300,6 @@ public static class EitherExtensions
     public static bool WhenT5<T1, T2, T3, T4, T5, T6, TResult>(this Either<T1, T2, T3, T4, T5, T6> either, Func<T5, TResult> func, out TResult result) { if (either._tag == 5) { result = func(either._t5); return true; }; result = default; return false; }
     public static bool WhenT6<T1, T2, T3, T4, T5, T6, TResult>(this Either<T1, T2, T3, T4, T5, T6> either, Func<T6, TResult> func, out TResult result) { if (either._tag == 6) { result = func(either._t6); return true; }; result = default; return false; }
 
-    public static bool WhenT1Async<T1, T2, T3, T4, T5, T6, TResult>(this Either<T1, T2, T3, T4, T5, T6> either, Func<T1, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 1) { result = func(either._t1); return true; }; result = default; return false; }
-    public static bool WhenT2Async<T1, T2, T3, T4, T5, T6, TResult>(this Either<T1, T2, T3, T4, T5, T6> either, Func<T2, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 2) { result = func(either._t2); return true; }; result = default; return false; }
-    public static bool WhenT3Async<T1, T2, T3, T4, T5, T6, TResult>(this Either<T1, T2, T3, T4, T5, T6> either, Func<T3, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 3) { result = func(either._t3); return true; }; result = default; return false; }
-    public static bool WhenT4Async<T1, T2, T3, T4, T5, T6, TResult>(this Either<T1, T2, T3, T4, T5, T6> either, Func<T4, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 4) { result = func(either._t4); return true; }; result = default; return false; }
-    public static bool WhenT5Async<T1, T2, T3, T4, T5, T6, TResult>(this Either<T1, T2, T3, T4, T5, T6> either, Func<T5, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 5) { result = func(either._t5); return true; }; result = default; return false; }
-    public static bool WhenT6Async<T1, T2, T3, T4, T5, T6, TResult>(this Either<T1, T2, T3, T4, T5, T6> either, Func<T6, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 6) { result = func(either._t6); return true; }; result = default; return false; }
-
     // WhenT# Action
 
     public static bool WhenT1<T1, T2, T3, T4, T5, T6>(this Either<T1, T2, T3, T4, T5, T6> either, Action<T1> action) { if (either._tag == 1) { action(either._t1); return true; } return false; }
@@ -351,13 +308,6 @@ public static class EitherExtensions
     public static bool WhenT4<T1, T2, T3, T4, T5, T6>(this Either<T1, T2, T3, T4, T5, T6> either, Action<T4> action) { if (either._tag == 4) { action(either._t4); return true; } return false; }
     public static bool WhenT5<T1, T2, T3, T4, T5, T6>(this Either<T1, T2, T3, T4, T5, T6> either, Action<T5> action) { if (either._tag == 5) { action(either._t5); return true; } return false; }
     public static bool WhenT6<T1, T2, T3, T4, T5, T6>(this Either<T1, T2, T3, T4, T5, T6> either, Action<T6> action) { if (either._tag == 6) { action(either._t6); return true; } return false; }
-
-    public static bool WhenT1Async<T1, T2, T3, T4, T5, T6>(this Either<T1, T2, T3, T4, T5, T6> either, Func<T1, Task> action, out Task task) { if (either._tag == 1) { task = action(either._t1); return true; } task = default; return false; }
-    public static bool WhenT2Async<T1, T2, T3, T4, T5, T6>(this Either<T1, T2, T3, T4, T5, T6> either, Func<T2, Task> action, out Task task) { if (either._tag == 2) { task = action(either._t2); return true; } task = default; return false; }
-    public static bool WhenT3Async<T1, T2, T3, T4, T5, T6>(this Either<T1, T2, T3, T4, T5, T6> either, Func<T3, Task> action, out Task task) { if (either._tag == 3) { task = action(either._t3); return true; } task = default; return false; }
-    public static bool WhenT4Async<T1, T2, T3, T4, T5, T6>(this Either<T1, T2, T3, T4, T5, T6> either, Func<T4, Task> action, out Task task) { if (either._tag == 4) { task = action(either._t4); return true; } task = default; return false; }
-    public static bool WhenT5Async<T1, T2, T3, T4, T5, T6>(this Either<T1, T2, T3, T4, T5, T6> either, Func<T5, Task> action, out Task task) { if (either._tag == 5) { task = action(either._t5); return true; } task = default; return false; }
-    public static bool WhenT6Async<T1, T2, T3, T4, T5, T6>(this Either<T1, T2, T3, T4, T5, T6> either, Func<T6, Task> action, out Task task) { if (either._tag == 6) { task = action(either._t6); return true; } task = default; return false; }
 
     // Match Func
 
@@ -438,14 +388,6 @@ public static class EitherExtensions
     public static bool WhenT6<T1, T2, T3, T4, T5, T6, T7, TResult>(this Either<T1, T2, T3, T4, T5, T6, T7> either, Func<T6, TResult> func, out TResult result) { if (either._tag == 6) { result = func(either._t6); return true; }; result = default; return false; }
     public static bool WhenT7<T1, T2, T3, T4, T5, T6, T7, TResult>(this Either<T1, T2, T3, T4, T5, T6, T7> either, Func<T7, TResult> func, out TResult result) { if (either._tag == 7) { result = func(either._t7); return true; }; result = default; return false; }
 
-    public static bool WhenT1Async<T1, T2, T3, T4, T5, T6, T7, TResult>(this Either<T1, T2, T3, T4, T5, T6, T7> either, Func<T1, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 1) { result = func(either._t1); return true; }; result = default; return false; }
-    public static bool WhenT2Async<T1, T2, T3, T4, T5, T6, T7, TResult>(this Either<T1, T2, T3, T4, T5, T6, T7> either, Func<T2, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 2) { result = func(either._t2); return true; }; result = default; return false; }
-    public static bool WhenT3Async<T1, T2, T3, T4, T5, T6, T7, TResult>(this Either<T1, T2, T3, T4, T5, T6, T7> either, Func<T3, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 3) { result = func(either._t3); return true; }; result = default; return false; }
-    public static bool WhenT4Async<T1, T2, T3, T4, T5, T6, T7, TResult>(this Either<T1, T2, T3, T4, T5, T6, T7> either, Func<T4, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 4) { result = func(either._t4); return true; }; result = default; return false; }
-    public static bool WhenT5Async<T1, T2, T3, T4, T5, T6, T7, TResult>(this Either<T1, T2, T3, T4, T5, T6, T7> either, Func<T5, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 5) { result = func(either._t5); return true; }; result = default; return false; }
-    public static bool WhenT6Async<T1, T2, T3, T4, T5, T6, T7, TResult>(this Either<T1, T2, T3, T4, T5, T6, T7> either, Func<T6, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 6) { result = func(either._t6); return true; }; result = default; return false; }
-    public static bool WhenT7Async<T1, T2, T3, T4, T5, T6, T7, TResult>(this Either<T1, T2, T3, T4, T5, T6, T7> either, Func<T7, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 7) { result = func(either._t7); return true; }; result = default; return false; }
-
     // WhenT# Action
 
     public static bool WhenT1<T1, T2, T3, T4, T5, T6, T7>(this Either<T1, T2, T3, T4, T5, T6, T7> either, Action<T1> action) { if (either._tag == 1) { action(either._t1); return true; } return false; }
@@ -455,14 +397,6 @@ public static class EitherExtensions
     public static bool WhenT5<T1, T2, T3, T4, T5, T6, T7>(this Either<T1, T2, T3, T4, T5, T6, T7> either, Action<T5> action) { if (either._tag == 5) { action(either._t5); return true; } return false; }
     public static bool WhenT6<T1, T2, T3, T4, T5, T6, T7>(this Either<T1, T2, T3, T4, T5, T6, T7> either, Action<T6> action) { if (either._tag == 6) { action(either._t6); return true; } return false; }
     public static bool WhenT7<T1, T2, T3, T4, T5, T6, T7>(this Either<T1, T2, T3, T4, T5, T6, T7> either, Action<T7> action) { if (either._tag == 7) { action(either._t7); return true; } return false; }
-
-    public static bool WhenT1Async<T1, T2, T3, T4, T5, T6, T7>(this Either<T1, T2, T3, T4, T5, T6, T7> either, Func<T1, Task> action, out Task task) { if (either._tag == 1) { task = action(either._t1); return true; } task = default; return false; }
-    public static bool WhenT2Async<T1, T2, T3, T4, T5, T6, T7>(this Either<T1, T2, T3, T4, T5, T6, T7> either, Func<T2, Task> action, out Task task) { if (either._tag == 2) { task = action(either._t2); return true; } task = default; return false; }
-    public static bool WhenT3Async<T1, T2, T3, T4, T5, T6, T7>(this Either<T1, T2, T3, T4, T5, T6, T7> either, Func<T3, Task> action, out Task task) { if (either._tag == 3) { task = action(either._t3); return true; } task = default; return false; }
-    public static bool WhenT4Async<T1, T2, T3, T4, T5, T6, T7>(this Either<T1, T2, T3, T4, T5, T6, T7> either, Func<T4, Task> action, out Task task) { if (either._tag == 4) { task = action(either._t4); return true; } task = default; return false; }
-    public static bool WhenT5Async<T1, T2, T3, T4, T5, T6, T7>(this Either<T1, T2, T3, T4, T5, T6, T7> either, Func<T5, Task> action, out Task task) { if (either._tag == 5) { task = action(either._t5); return true; } task = default; return false; }
-    public static bool WhenT6Async<T1, T2, T3, T4, T5, T6, T7>(this Either<T1, T2, T3, T4, T5, T6, T7> either, Func<T6, Task> action, out Task task) { if (either._tag == 6) { task = action(either._t6); return true; } task = default; return false; }
-    public static bool WhenT7Async<T1, T2, T3, T4, T5, T6, T7>(this Either<T1, T2, T3, T4, T5, T6, T7> either, Func<T7, Task> action, out Task task) { if (either._tag == 7) { task = action(either._t7); return true; } task = default; return false; }
 
     // Match Func
 
@@ -549,15 +483,6 @@ public static class EitherExtensions
     public static bool WhenT7<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Func<T7, TResult> func, out TResult result) { if (either._tag == 7) { result = func(either._t7); return true; }; result = default; return false; }
     public static bool WhenT8<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Func<T8, TResult> func, out TResult result) { if (either._tag == 8) { result = func(either._t8); return true; }; result = default; return false; }
 
-    public static bool WhenT1Async<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Func<T1, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 1) { result = func(either._t1); return true; }; result = default; return false; }
-    public static bool WhenT2Async<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Func<T2, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 2) { result = func(either._t2); return true; }; result = default; return false; }
-    public static bool WhenT3Async<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Func<T3, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 3) { result = func(either._t3); return true; }; result = default; return false; }
-    public static bool WhenT4Async<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Func<T4, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 4) { result = func(either._t4); return true; }; result = default; return false; }
-    public static bool WhenT5Async<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Func<T5, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 5) { result = func(either._t5); return true; }; result = default; return false; }
-    public static bool WhenT6Async<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Func<T6, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 6) { result = func(either._t6); return true; }; result = default; return false; }
-    public static bool WhenT7Async<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Func<T7, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 7) { result = func(either._t7); return true; }; result = default; return false; }
-    public static bool WhenT8Async<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Func<T8, Task<TResult>> func, out Task<TResult> result) { if (either._tag == 8) { result = func(either._t8); return true; }; result = default; return false; }
-
     // WhenT# Action
 
     public static bool WhenT1<T1, T2, T3, T4, T5, T6, T7, T8>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Action<T1> action) { if (either._tag == 1) { action(either._t1); return true; } return false; }
@@ -568,15 +493,6 @@ public static class EitherExtensions
     public static bool WhenT6<T1, T2, T3, T4, T5, T6, T7, T8>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Action<T6> action) { if (either._tag == 6) { action(either._t6); return true; } return false; }
     public static bool WhenT7<T1, T2, T3, T4, T5, T6, T7, T8>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Action<T7> action) { if (either._tag == 7) { action(either._t7); return true; } return false; }
     public static bool WhenT8<T1, T2, T3, T4, T5, T6, T7, T8>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Action<T8> action) { if (either._tag == 8) { action(either._t8); return true; } return false; }
-
-    public static bool WhenT1Async<T1, T2, T3, T4, T5, T6, T7, T8>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Func<T1, Task> action, out Task task) { if (either._tag == 1) { task = action(either._t1); return true; } task = default; return false; }
-    public static bool WhenT2Async<T1, T2, T3, T4, T5, T6, T7, T8>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Func<T2, Task> action, out Task task) { if (either._tag == 2) { task = action(either._t2); return true; } task = default; return false; }
-    public static bool WhenT3Async<T1, T2, T3, T4, T5, T6, T7, T8>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Func<T3, Task> action, out Task task) { if (either._tag == 3) { task = action(either._t3); return true; } task = default; return false; }
-    public static bool WhenT4Async<T1, T2, T3, T4, T5, T6, T7, T8>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Func<T4, Task> action, out Task task) { if (either._tag == 4) { task = action(either._t4); return true; } task = default; return false; }
-    public static bool WhenT5Async<T1, T2, T3, T4, T5, T6, T7, T8>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Func<T5, Task> action, out Task task) { if (either._tag == 5) { task = action(either._t5); return true; } task = default; return false; }
-    public static bool WhenT6Async<T1, T2, T3, T4, T5, T6, T7, T8>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Func<T6, Task> action, out Task task) { if (either._tag == 6) { task = action(either._t6); return true; } task = default; return false; }
-    public static bool WhenT7Async<T1, T2, T3, T4, T5, T6, T7, T8>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Func<T7, Task> action, out Task task) { if (either._tag == 7) { task = action(either._t7); return true; } task = default; return false; }
-    public static bool WhenT8Async<T1, T2, T3, T4, T5, T6, T7, T8>(this Either<T1, T2, T3, T4, T5, T6, T7, T8> either, Func<T8, Task> action, out Task task) { if (either._tag == 8) { task = action(either._t8); return true; } task = default; return false; }
 
     // Match Func
 
