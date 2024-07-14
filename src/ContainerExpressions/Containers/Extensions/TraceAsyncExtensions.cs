@@ -108,7 +108,7 @@ namespace ContainerExpressions.Containers
         /// <param name="message">The message to trace.</param>
         /// <returns>The initial value.</returns>
         public static Task<T> LogValueAsync<T>(
-            this Task<T> task, Message message,
+            this Task<T> task, Format message,
             [CallerArgumentExpression(nameof(task))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -122,11 +122,11 @@ namespace ContainerExpressions.Containers
             });
 
         /// <summary>Logs a trace step.</summary>
-        /// <param name="format">The message to trace.</param>
+        /// <param name="message">The message to trace.</param>
         /// <returns>The initial value.</returns>
         public static Task<T> LogValueAsync<T>(
             this Task<T> task,
-            Func<T, string> format,
+            Func<T, Format> message,
             [CallerArgumentExpression(nameof(task))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -134,7 +134,7 @@ namespace ContainerExpressions.Containers
             ) =>
             task.ContinueWith(x =>
             {
-                if (x.Status == TaskStatus.RanToCompletion) Trace.Log(format(x.Result));
+                if (x.Status == TaskStatus.RanToCompletion) Trace.Log(message(x.Result));
                 else if (x.Status == TaskStatus.Faulted) TraceExtensions.LogException(x.Exception, argument, caller, path, line);
                 return x.Result;
             });
@@ -147,7 +147,7 @@ namespace ContainerExpressions.Containers
         /// <param name="response">The Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Task<Response> LogAsync(this Task<Response> response, string success)
+        public static Task<Response> LogAsync(this Task<Response> response, Format success)
         {
             return response.ContinueWith(x =>
             {
@@ -165,7 +165,7 @@ namespace ContainerExpressions.Containers
         /// <param name="success">The message to trace when the response is in a valid state.</param>
         /// <param name="fail">The message to trace when the response is in an invalid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Task<Response> LogAsync(this Task<Response> response, string success, string fail)
+        public static Task<Response> LogAsync(this Task<Response> response, Format success, Format fail)
         {
             return response.ContinueWith(x =>
             {
@@ -190,7 +190,7 @@ namespace ContainerExpressions.Containers
         /// <param name="response">The Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Task<Response<T>> LogAsync<T>(this Task<Response<T>> response, string success)
+        public static Task<Response<T>> LogAsync<T>(this Task<Response<T>> response, Format success)
         {
             return response.ContinueWith(x =>
             {
@@ -207,7 +207,7 @@ namespace ContainerExpressions.Containers
         /// <param name="response">The Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Task<Response<T>> LogAsync<T>(this Task<Response<T>> response, Func<T, string> success)
+        public static Task<Response<T>> LogAsync<T>(this Task<Response<T>> response, Func<T, Format> success)
         {
             return response.ContinueWith(x =>
             {
@@ -225,7 +225,7 @@ namespace ContainerExpressions.Containers
         /// <param name="success">The message to trace when the response is in a valid state.</param>
         /// <param name="fail">The message to trace when the response is in an invalid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Task<Response<T>> LogAsync<T>(this Task<Response<T>> response, Func<T, string> success, string fail)
+        public static Task<Response<T>> LogAsync<T>(this Task<Response<T>> response, Func<T, Format> success, Format fail)
         {
             return response.ContinueWith(x =>
             {
@@ -247,7 +247,7 @@ namespace ContainerExpressions.Containers
         /// <param name="success">The message to trace when the response is in a valid state.</param>
         /// <param name="fail">The message to trace when the response is in an invalid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Task<Response<T>> LogAsync<T>(this Task<Response<T>> response, string success, string fail)
+        public static Task<Response<T>> LogAsync<T>(this Task<Response<T>> response, Format success, Format fail)
         {
             return response.ContinueWith(x =>
             {
@@ -272,27 +272,27 @@ namespace ContainerExpressions.Containers
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<Task<Response<T>>> LogAsync<T>(this Func<Task<Response<T>>> func, string success) => () => func().ContinueWith(x => x.Result.Log(success));
+        public static Func<Task<Response<T>>> LogAsync<T>(this Func<Task<Response<T>>> func, Format success) => () => func().ContinueWith(x => x.Result.Log(success));
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <param name="fail">The message to trace when the response is in an invalid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<Task<Response<T>>> LogAsync<T>(this Func<Task<Response<T>>> func, string success, string fail) => () => func().ContinueWith(x => x.Result.Log(success, fail));
+        public static Func<Task<Response<T>>> LogAsync<T>(this Func<Task<Response<T>>> func, Format success, Format fail) => () => func().ContinueWith(x => x.Result.Log(success, fail));
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<Task<Response<T>>> LogAsync<T>(this Func<Task<Response<T>>> func, Func<T, string> success) => () => func().ContinueWith(x => x.Result.Log(success));
+        public static Func<Task<Response<T>>> LogAsync<T>(this Func<Task<Response<T>>> func, Func<T, Format> success) => () => func().ContinueWith(x => x.Result.Log(success));
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <param name="fail">The message to trace when the response is in an invalid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<Task<Response<T>>> LogAsync<T>(this Func<Task<Response<T>>> func, Func<T, string> success, string fail) => () => func().ContinueWith(x => x.Result.Log(success, fail));
+        public static Func<Task<Response<T>>> LogAsync<T>(this Func<Task<Response<T>>> func, Func<T, Format> success, Format fail) => () => func().ContinueWith(x => x.Result.Log(success, fail));
 
         #endregion
 
@@ -302,27 +302,27 @@ namespace ContainerExpressions.Containers
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, string success) => x => func(x).ContinueWith(y => y.Result.Log(success));
+        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, Format success) => x => func(x).ContinueWith(y => y.Result.Log(success));
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <param name="fail">The message to trace when the response is in an invalid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, string success, string fail) => x => func(x).ContinueWith(y => y.Result.Log(success, fail));
+        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, Format success, Format fail) => x => func(x).ContinueWith(y => y.Result.Log(success, fail));
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, Func<TResult, string> success) => x => func(x).ContinueWith(y => y.Result.Log(success));
+        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, Func<TResult, Format> success) => x => func(x).ContinueWith(y => y.Result.Log(success));
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <param name="fail">The message to trace when the response is in an invalid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, Func<TResult, string> success, string fail) => x => func(x).ContinueWith(y => y.Result.Log(success, fail));
+        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, Func<TResult, Format> success, Format fail) => x => func(x).ContinueWith(y => y.Result.Log(success, fail));
 
         #endregion
 
@@ -332,7 +332,7 @@ namespace ContainerExpressions.Containers
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, Func<T, TResult, string> success) => x =>
+        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, Func<T, TResult, Format> success) => x =>
             func(x).ContinueWith(y =>
             {
                 if (y.Result)
@@ -348,7 +348,7 @@ namespace ContainerExpressions.Containers
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <param name="fail">The message to trace when the response is in an invalid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, Func<T, TResult, string> success, string fail) => x =>
+        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, Func<T, TResult, Format> success, Format fail) => x =>
             func(x).ContinueWith(y =>
             {
                 if (y.Result)
@@ -373,8 +373,8 @@ namespace ContainerExpressions.Containers
         /// <returns>The same Maybe as the input.</returns>
         public static Task<Maybe<TValue, TError>> LogAsync<TValue, TError>(
             this Task<Maybe<TValue, TError>> maybe,
-            Func<TValue, string> value,
-            Func<TError, string> error,
+            Func<TValue, Format> value,
+            Func<TError, Format> error,
             [CallerArgumentExpression(nameof(maybe))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -400,8 +400,8 @@ namespace ContainerExpressions.Containers
         /// <returns>The same Maybe as the input.</returns>
         public static Task<Maybe<TValue, TError>> LogAsync<TValue, TError>(
             this Task<Maybe<TValue, TError>> maybe,
-            string value,
-            string error,
+            Format value,
+            Format error,
             [CallerArgumentExpression(nameof(maybe))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -427,8 +427,8 @@ namespace ContainerExpressions.Containers
         /// <returns>The same Maybe as the input.</returns>
         public static Task<Maybe<TValue>> LogAsync<TValue>(
             this Task<Maybe<TValue>> maybe,
-            Func<TValue, string> value,
-            Func<Exception, string> error,
+            Func<TValue, Format> value,
+            Func<Exception, Format> error,
             [CallerArgumentExpression(nameof(maybe))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -454,8 +454,8 @@ namespace ContainerExpressions.Containers
         /// <returns>The same Maybe as the input.</returns>
         public static Task<Maybe<TValue>> LogAsync<TValue>(
             this Task<Maybe<TValue>> maybe,
-            string value,
-            string error,
+            Format value,
+            Format error,
             [CallerArgumentExpression(nameof(maybe))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",

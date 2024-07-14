@@ -18,7 +18,7 @@ namespace Tests.ContainerExpressions.Examples
             Trace.SetLogger(log => logs.Add(log));
 
             // Create a function to trace the incrementing.
-            Func<int, string> trace = x => string.Format("The value of the int is {0}.", x);
+            Func<int, Format> trace = x => string.Format("The value of the int is {0}.", x);
 
             // Some functions that keep incrementing their input.
             Func<Response<int>> identity = () => Response.Create(0);

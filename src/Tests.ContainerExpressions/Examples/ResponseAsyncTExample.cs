@@ -34,8 +34,8 @@ namespace Tests.ContainerExpressions.Examples
 
         private static async ResponseAsync<int> GetError()
         {
+            await Task.CompletedTask;
             throw new Exception(_theQuestion);
-            return await Task.FromResult(_theAnswer);
         }
     }
 }

@@ -90,7 +90,7 @@ namespace ContainerExpressions.Containers
         /**
          * Overloaded types to target for containers.
          * Note: Actions, and Funcs can take N additional input parameters.
-         * Note: All actions map to Func<Response>, as they don't return a type; and async void methods don't return a Task either.
+         * Note: All actions map to Func{Response}, as they don't return a type; and async void methods don't return a Task either.
          * 
          * [Void]
          * Response
@@ -227,7 +227,7 @@ namespace ContainerExpressions.Containers
          * T        => Task{Response{TResult}}
          * Task{T}  => Task{Response{TResult}}
          * 
-         * While above is the main use case, we also want to cover void scenarios where Response<TResult> is replaced with Response.
+         * While above is the main use case, we also want to cover void scenarios where Response{TResult} is replaced with Response.
          * i.e. T => Task{Response{TResult}} becomes T => Task{Response}.
         **/
 

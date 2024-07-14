@@ -46,25 +46,25 @@ namespace ContainerExpressions.Containers
              * The following Primitives / ValueTypes / Structs have not been added, as it's unlikely they'll be used.
              * They can always be added manually, using the Create() method at startup if required.
              * This list should not be considered exhaustive, there will only be more to come as the language evolves over time.
-             * > Int16
-             * > Int64
-             * > Int128
-             * > IntPtr
-             * > UInt16
-             * > UInt32
-             * > UInt64
-             * > UInt128
-             * > UIntPtr
-             * > DateOnly
-             * > DateTime
-             * > DateTimeOffset
-             * > Guid
-             * > BigInteger
-             * > Complex
-             * > SByte
-             * > TimeOnly
-             * > TimeSpan
-             * > Enum
+             * - Int16
+             * - Int64
+             * - Int128
+             * - IntPtr
+             * - UInt16
+             * - UInt32
+             * - UInt64
+             * - UInt128
+             * - UIntPtr
+             * - DateOnly
+             * - DateTime
+             * - DateTimeOffset
+             * - Guid
+             * - BigInteger
+             * - Complex
+             * - SByte
+             * - TimeOnly
+             * - TimeSpan
+             * - Enum
             **/
 
             Create(Array.Empty<bool>());

@@ -142,7 +142,7 @@ namespace Tests.ContainerExpressions.Containers
         public void ValidResponseT_LogsSuccessFunc()
         {
             var answer = 42;
-            Func<int, string> success = x => string.Format("Hello World! * {0}", x);
+            Func<int, Format> success = x => string.Format("Hello World! * {0}", x);
 
             var response = new Response<int>(answer).Log(success);
 
@@ -153,7 +153,7 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public void InValidResponseT_DoesNotLogSuccessFunc()
         {
-            Func<int, string> success = x => string.Format("Hello World! * {0}", x);
+            Func<int, Format> success = x => string.Format("Hello World! * {0}", x);
 
             var response = new Response<int>().Log(success);
 
@@ -164,7 +164,7 @@ namespace Tests.ContainerExpressions.Containers
         public void ValidResponseT_LogsSuccessFuncNotFailMessage()
         {
             var answer = 42;
-            Func<int, string> success = x => string.Format("Hello World! * {0}", x);
+            Func<int, Format> success = x => string.Format("Hello World! * {0}", x);
             var fail = "Goodbye Cruel World!";
 
             var response = new Response<int>(answer).Log(success, fail);
@@ -176,7 +176,7 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public void InValidResponseT_LogsFailMessageNotSuccessFunc()
         {
-            Func<int, string> success = x => string.Format("Hello World! * {0}", x);
+            Func<int, Format> success = x => string.Format("Hello World! * {0}", x);
             var fail = "Goodbye Cruel World!";
 
             var response = new Response<int>().Log(success, fail);
@@ -191,7 +191,7 @@ namespace Tests.ContainerExpressions.Containers
             var traceSteps = 0;
             Func<Response<int>> identity = () => Response.Create(0);
             Func<int, Response<int>> increment = x => Response.Create(x + 1);
-            Func<int, string> counter = x => { traceSteps++; return string.Format("The value of the int is {0}.", x); };
+            Func<int, Format> counter = x => { traceSteps++; return string.Format("The value of the int is {0}.", x); };
 
             var count = Expression.Compose(identity.Log(counter), increment.Log(counter), increment.Log(counter));
 
@@ -221,7 +221,7 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public void TraceWithInputAndOutput()
         {
-            Func<int, int, string> trace = (input, output) => $"Input: {input}, Output: {output}.";
+            Func<int, int, Format> trace = (input, output) => $"Input: {input}, Output: {output}.";
             Func<Response<int>> identity = () => Response.Create(0);
             Func<int, Response<int>> increment = x => Response.Create(x + 1);
 
@@ -239,7 +239,7 @@ namespace Tests.ContainerExpressions.Containers
         public void Maybe_ValueError_Func_Valid()
         {
             var input = Guid.NewGuid();
-            Func<Guid, string> trace = x => x.ToString();
+            Func<Guid, Format> trace = x => x.ToString();
 
             var maybe = new Maybe<Guid, string>(input).Log(trace, x => string.Empty);
 
@@ -250,7 +250,7 @@ namespace Tests.ContainerExpressions.Containers
         public void Maybe_ValueError_Func_NotValid()
         {
             var input = Guid.NewGuid();
-            Func<Guid, string> trace = x => x.ToString();
+            Func<Guid, Format> trace = x => x.ToString();
 
             var maybe = new Maybe<string, Guid>(input).Log(x => string.Empty, trace);
 
@@ -277,7 +277,7 @@ namespace Tests.ContainerExpressions.Containers
         public void Maybe_Value_Func_Valid()
         {
             var input = Guid.NewGuid();
-            Func<Guid, string> trace = x => x.ToString();
+            Func<Guid, Format> trace = x => x.ToString();
 
             var maybe = new Maybe<Guid>(input).Log(trace, x => string.Empty);
 
@@ -289,7 +289,7 @@ namespace Tests.ContainerExpressions.Containers
         {
             var msg = "error";
             var input = new Exception(msg);
-            Func<Exception, string> trace = x => x.Message;
+            Func<Exception, Format> trace = x => x.Message;
 
             var maybe = new Maybe<Guid>(input).Log(x => string.Empty, trace);
 
@@ -319,7 +319,7 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public async Task Async_T_LogsMessage()
         {
-            var message = new Message("story");
+            var message = new Format("story");
 
             var response = await Task.FromResult(true).LogValueAsync(message);
 
@@ -331,7 +331,7 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public async Task Async_TFunc_LogsMessage()
         {
-            var response = await Task.FromResult("Hello").LogValueAsync(x => $"{x} World!");
+            var response = await Task.FromResult("Hello").LogValueAsync(x => "{x} World!".WithArgs(x));
 
             Assert.AreEqual("Hello", response);
             Assert.AreEqual(1, _messages.Count);
@@ -367,7 +367,7 @@ namespace Tests.ContainerExpressions.Containers
         public async Task Async_Maybe_ValueError_Func_Valid()
         {
             var input = Guid.NewGuid();
-            Func<Guid, string> trace = x => x.ToString();
+            Func<Guid, Format> trace = x => x.ToString();
 
             var maybe = await Task.FromResult(new Maybe<Guid, string>(input)).LogAsync(trace, x => string.Empty);
 
@@ -378,7 +378,7 @@ namespace Tests.ContainerExpressions.Containers
         public async Task Async_Maybe_ValueError_Func_NotValid()
         {
             var input = Guid.NewGuid();
-            Func<Guid, string> trace = x => x.ToString();
+            Func<Guid, Format> trace = x => x.ToString();
 
             var maybe = await Task.FromResult(new Maybe<string, Guid>(input)).LogAsync(x => string.Empty, trace);
 
@@ -389,7 +389,7 @@ namespace Tests.ContainerExpressions.Containers
         public async Task Async_Maybe_Value_Func_Valid()
         {
             var input = Guid.NewGuid();
-            Func<Guid, string> trace = x => x.ToString();
+            Func<Guid, Format> trace = x => x.ToString();
 
             var maybe = await Task.FromResult(new Maybe<Guid>(input)).LogAsync(trace, x => string.Empty);
 
@@ -401,7 +401,7 @@ namespace Tests.ContainerExpressions.Containers
         {
             var msg = "error";
             var input = new Exception(msg);
-            Func<Exception, string> trace = x => x.Message;
+            Func<Exception, Format> trace = x => x.Message;
 
             var maybe = await Task.FromResult(new Maybe<Guid>(input)).LogAsync(x => string.Empty, trace);
 
@@ -433,9 +433,12 @@ namespace Tests.ContainerExpressions.Containers
             Assert.AreEqual(2, _messages.Count);
             Assert.AreEqual(Format(target), _messages[0]);
             Assert.AreEqual(Format(target), _messages[1]);
+            Assert.AreEqual(_messages[0], Format(target));
+            Assert.AreEqual(_messages[1], Format(target));
+            Assert.AreEqual(Format(target), Format(target));
         }
 
-        private static string Format(int x) => $"Value is: {x}.";
+        private static Format Format(int x) => "Value is: {x}.".WithArgs(x);
 
         [TestMethod]
         public async Task Ambiguous_Call_Between_Task_T_And_Task_ResponseT_For_Func_T_String()
@@ -454,6 +457,9 @@ namespace Tests.ContainerExpressions.Containers
             Assert.AreEqual(2, _messages.Count);
             Assert.AreEqual(Format(target.Result), _messages[0]);
             Assert.AreEqual(Format(target.Result), _messages[1]);
+            Assert.AreEqual(_messages[0], Format(target.Result));
+            Assert.AreEqual(_messages[1], Format(target.Result));
+            Assert.AreEqual(Format(target.Result), Format(target.Result));
         }
 
         #endregion

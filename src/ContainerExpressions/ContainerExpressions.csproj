@@ -52,14 +52,15 @@ The expression Retry will attempt to get the T value after x time delay for n at
     <PackageTags>containers;functional;types</PackageTags>
     <PackageId>ContainerExpressions</PackageId>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;1591;1573</NoWarn>
+    <NoWarn>1701;1702;1591;1573;1587</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;1591;1573</NoWarn>
+    <NoWarn>1701;1702;1591;1573;1587</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

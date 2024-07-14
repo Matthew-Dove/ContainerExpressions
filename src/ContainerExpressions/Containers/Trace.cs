@@ -1,5 +1,6 @@
 ﻿using ContainerExpressions.Containers.Internal;
 using System;
+using System.Text.RegularExpressions;
 
 namespace ContainerExpressions.Containers
 {
@@ -9,7 +10,9 @@ namespace ContainerExpressions.Containers
         private static Action<string> _logger = null;
         private static Action<string, object[]> _formattedLogger = null;
 
-        internal static void Log(string message, params object[] args)
+        internal static void Log(Format format) => Log(format.Message, format.Args);
+
+        private static void Log(string message, params object[] args)
         {
             if (_formattedLogger != null)
             {
@@ -19,7 +22,7 @@ namespace ContainerExpressions.Containers
             {
                 if (args != null && args.Length != 0)
                 {
-                    message = string.Format(message, args);
+                    message = FormatHelper.NamedPlaceholders(message, args);
                 }
                 _logger(message);
             }
@@ -49,6 +52,28 @@ namespace ContainerExpressions.Containers
             if (formattedLogger == null) Throw.ArgumentNullException(nameof(formattedLogger));
 
             _formattedLogger = formattedLogger;
+        }
+    }
+
+    internal static class FormatHelper
+    {
+        private const string LEN_MISMATCH_ERR = "The number of args ({0}) does not match the number of parameters ({1}) in the message template.";
+
+        public static string NamedPlaceholders(string template, params object[] args)
+        {
+            var regex = new Regex(@"{(\w+)}");
+            var matches = regex.Matches(template);
+
+            if (matches.Count != args.Length) Throw.ArgumentOutOfRangeException(nameof(args), string.Format(LEN_MISMATCH_ERR, args.Length, matches.Count));
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                var target = matches[i].Value;
+                var value = args[i].ToString();
+                template = template.Replace(target, value);
+            }
+
+            return template;
         }
     }
 }

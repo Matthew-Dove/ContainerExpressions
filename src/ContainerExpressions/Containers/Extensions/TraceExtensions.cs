@@ -118,7 +118,7 @@ namespace ContainerExpressions.Containers
         /// <returns>The initial error.</returns>
         public static TError LogErrorValue<TError>(
             this TError error,
-            Message message,
+            Format message,
             [CallerArgumentExpression(nameof(error))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -142,7 +142,7 @@ namespace ContainerExpressions.Containers
         /// <returns>The errors originally provided.</returns>
         public static IEnumerable<TError> LogErrorValue<TError>(
             this IEnumerable<TError> error,
-            Message message,
+            Format message,
             [CallerArgumentExpression(nameof(error))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -170,7 +170,7 @@ namespace ContainerExpressions.Containers
         /// <returns>The errors originally provided.</returns>
         public static TError[] LogErrorValue<TError>(
             this TError[] error,
-            Message message,
+            Format message,
             [CallerArgumentExpression(nameof(error))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -194,11 +194,11 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Logs a custom error type.</summary>
         /// <param name="error">The custom error type to log (i.e. not an exception).</param>
-        /// <param name="format">The message to trace.</param>
+        /// <param name="message">The message to trace.</param>
         /// <returns>The initial error.</returns>
         public static TError LogErrorValue<TError>(
             this TError error,
-            Func<TError, string> format,
+            Func<TError, Format> message,
             [CallerArgumentExpression(nameof(error))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -207,7 +207,7 @@ namespace ContainerExpressions.Containers
         {
             if (error == null) return default;
 
-            var msg = format(error);
+            var msg = message(error);
             Exception ex;
             if (error is Exception e) ex = e;
             else ex = new GenericErrorException<TError>(error, msg);
@@ -219,11 +219,11 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Logs custom error types.</summary>
         /// <param name="error">The custom error types to log (i.e. not exceptions).</param>
-        /// <param name="format">The messages to trace, one for each error.</param>
+        /// <param name="message">The messages to trace, one for each error.</param>
         /// <returns>The errors originally provided.</returns>
         public static IEnumerable<TError> LogErrorValue<TError>(
             this IEnumerable<TError> error,
-            Func<TError, string> format,
+            Func<TError, Format> message,
             [CallerArgumentExpression(nameof(error))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -235,7 +235,7 @@ namespace ContainerExpressions.Containers
             foreach (var err in error)
             {
                 if (err == null) continue;
-                var msg = format(err);
+                var msg = message(err);
                 Exception ex;
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(err, msg);
@@ -248,11 +248,11 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Logs custom error types.</summary>
         /// <param name="error">The custom error types to log (i.e. not exceptions).</param>
-        /// <param name="format">The messages to trace, one for each error.</param>
+        /// <param name="message">The messages to trace, one for each error.</param>
         /// <returns>The errors originally provided.</returns>
         public static IEnumerable<TError> LogErrorValue<TError>(
             this IEnumerable<TError> error,
-            Func<TError, Index, string> format,
+            Func<TError, Index, Format> message,
             [CallerArgumentExpression(nameof(error))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -265,7 +265,7 @@ namespace ContainerExpressions.Containers
             foreach (var err in error)
             {
                 if (err == null) continue;
-                var msg = format(err, Index.From(i++));
+                var msg = message(err, Index.From(i++));
                 Exception ex;
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(err, msg);
@@ -278,11 +278,11 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Logs custom error types.</summary>
         /// <param name="error">The custom error types to log (i.e. not exceptions).</param>
-        /// <param name="format">The messages to trace, one for each error.</param>
+        /// <param name="message">The messages to trace, one for each error.</param>
         /// <returns>The errors originally provided.</returns>
         public static IEnumerable<TError> LogErrorValue<TError>(
             this IEnumerable<TError> error,
-            Func<TError, Index, Length, string> format,
+            Func<TError, Index, Length, Format> message,
             [CallerArgumentExpression(nameof(error))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -296,7 +296,7 @@ namespace ContainerExpressions.Containers
             foreach (var err in error)
             {
                 if (err == null) continue;
-                var msg = format(err, Index.From(i++), length);
+                var msg = message(err, Index.From(i++), length);
                 Exception ex;
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(err, msg);
@@ -309,11 +309,11 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Logs custom error types.</summary>
         /// <param name="error">The custom error types to log (i.e. not exceptions).</param>
-        /// <param name="format">The messages to trace, one for each error.</param>
+        /// <param name="message">The messages to trace, one for each error.</param>
         /// <returns>The errors originally provided.</returns>
         public static TError[] LogErrorValue<TError>(
             this TError[] error,
-            Func<TError, string> format,
+            Func<TError, Format> message,
             [CallerArgumentExpression(nameof(error))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -325,7 +325,7 @@ namespace ContainerExpressions.Containers
             for (int i = 0; i < error.Length; i++)
             {
                 if (error[i] == null) continue;
-                var msg = format(error[i]);
+                var msg = message(error[i]);
                 Exception ex;
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(error[i], msg);
@@ -338,11 +338,11 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Logs custom error types.</summary>
         /// <param name="error">The custom error types to log (i.e. not exceptions).</param>
-        /// <param name="format">The messages to trace, one for each error.</param>
+        /// <param name="message">The messages to trace, one for each error.</param>
         /// <returns>The errors originally provided.</returns>
         public static TError[] LogErrorValue<TError>(
             this TError[] error,
-            Func<TError, Index, string> format,
+            Func<TError, Index, Format> message,
             [CallerArgumentExpression(nameof(error))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -354,7 +354,7 @@ namespace ContainerExpressions.Containers
             for (int i = 0; i < error.Length; i++)
             {
                 if (error[i] == null) continue;
-                var msg = format(error[i], Index.From(i));
+                var msg = message(error[i], Index.From(i));
                 Exception ex;
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(error[i], msg);
@@ -367,11 +367,11 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Logs custom error types.</summary>
         /// <param name="error">The custom error types to log (i.e. not exceptions).</param>
-        /// <param name="format">The messages to trace, one for each error.</param>
+        /// <param name="message">The messages to trace, one for each error.</param>
         /// <returns>The errors originally provided.</returns>
         public static TError[] LogErrorValue<TError>(
             this TError[] error,
-            Func<TError, Index, Length, string> format,
+            Func<TError, Index, Length, Format> message,
             [CallerArgumentExpression(nameof(error))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -384,7 +384,7 @@ namespace ContainerExpressions.Containers
             for (int i = 0; i < error.Length; i++)
             {
                 if (error[i] == null) continue;
-                var msg = format(error[i], Index.From(i), length);
+                var msg = message(error[i], Index.From(i), length);
                 Exception ex;
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(error[i], msg);
@@ -481,7 +481,7 @@ namespace ContainerExpressions.Containers
         /// <returns>The initial exception.</returns>
         public static TError LogError<TError>(
             this TError ex,
-            Message message,
+            Format message,
             [CallerArgumentExpression(nameof(ex))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -500,7 +500,7 @@ namespace ContainerExpressions.Containers
         /// <returns>The exceptions originally provided.</returns>
         public static IEnumerable<TError> LogError<TError>(
             this IEnumerable<TError> ex,
-            Message message,
+            Format message,
             [CallerArgumentExpression(nameof(ex))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -519,7 +519,7 @@ namespace ContainerExpressions.Containers
         /// <returns>The exceptions originally provided.</returns>
         public static TError[] LogError<TError>(
             this TError[] ex,
-            Message message,
+            Format message,
             [CallerArgumentExpression(nameof(ex))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -534,11 +534,11 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Logs an exception.</summary>
         /// <param name="ex">The exception to log.</param>
-        /// <param name="format">The message to trace.</param>
+        /// <param name="message">The message to trace.</param>
         /// <returns>The initial exception.</returns>
         public static TError LogError<TError>(
             this TError ex,
-            Func<TError, string> format,
+            Func<TError, Format> message,
             [CallerArgumentExpression(nameof(ex))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -546,18 +546,18 @@ namespace ContainerExpressions.Containers
             ) where TError : Exception
         {
             if (ex == null) return default;
-            Trace.Log(format(ex));
+            Trace.Log(message(ex));
             LogException(ex, argument, caller, path, line);
             return ex;
         }
 
         /// <summary>Logs many exceptions.</summary>
         /// <param name="ex">The exceptions to log.</param>
-        /// <param name="format">The messages to trace, one for each error.</param>
+        /// <param name="message">The messages to trace, one for each error.</param>
         /// <returns>The exceptions originally provided.</returns>
         public static IEnumerable<TError> LogError<TError>(
             this IEnumerable<TError> ex,
-            Func<TError, string> format,
+            Func<TError, Format> message,
             [CallerArgumentExpression(nameof(ex))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -565,17 +565,17 @@ namespace ContainerExpressions.Containers
             ) where TError : Exception
         {
             if (ex == null) return default;
-            foreach (var e in ex) { Trace.Log(format(e)); LogException(e, argument, caller, path, line); }
+            foreach (var e in ex) { Trace.Log(message(e)); LogException(e, argument, caller, path, line); }
             return ex;
         }
 
         /// <summary>Logs many exceptions.</summary>
         /// <param name="ex">The exceptions to log.</param>
-        /// <param name="format">The messages to trace, one for each error.</param>
+        /// <param name="message">The messages to trace, one for each error.</param>
         /// <returns>The exceptions originally provided.</returns>
         public static IEnumerable<TError> LogError<TError>(
             this IEnumerable<TError> ex,
-            Func<TError, Index, string> format,
+            Func<TError, Index, Format> message,
             [CallerArgumentExpression(nameof(ex))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -584,17 +584,17 @@ namespace ContainerExpressions.Containers
         {
             if (ex == null) return default;
             int i = 0;
-            foreach (var e in ex) { Trace.Log(format(e, Index.From(i++))); LogException(e, argument, caller, path, line); }
+            foreach (var e in ex) { Trace.Log(message(e, Index.From(i++))); LogException(e, argument, caller, path, line); }
             return ex;
         }
 
         /// <summary>Logs many exceptions.</summary>
         /// <param name="ex">The exceptions to log.</param>
-        /// <param name="format">The messages to trace, one for each error.</param>
+        /// <param name="message">The messages to trace, one for each error.</param>
         /// <returns>The exceptions originally provided.</returns>
         public static IEnumerable<TError> LogError<TError>(
             this IEnumerable<TError> ex,
-            Func<TError, Index, Length, string> format,
+            Func<TError, Index, Length, Format> message,
             [CallerArgumentExpression(nameof(ex))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -604,17 +604,17 @@ namespace ContainerExpressions.Containers
             if (ex == null) return default;
             int i = 0, count = ex is List<TError> lst ? lst.Count : ex.Count();
             var length = Length.From(count);
-            foreach (var e in ex) { Trace.Log(format(e, Index.From(i++), length)); LogException(e, argument, caller, path, line); }
+            foreach (var e in ex) { Trace.Log(message(e, Index.From(i++), length)); LogException(e, argument, caller, path, line); }
             return ex;
         }
 
         /// <summary>Logs many exceptions.</summary>
         /// <param name="ex">The exceptions to log.</param>
-        /// <param name="format">The messages to trace, one for each error.</param>
+        /// <param name="message">The messages to trace, one for each error.</param>
         /// <returns>The exceptions originally provided.</returns>
         public static TError[] LogError<TError>(
             this TError[] ex,
-            Func<TError, string> format,
+            Func<TError, Format> message,
             [CallerArgumentExpression(nameof(ex))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -622,18 +622,18 @@ namespace ContainerExpressions.Containers
             ) where TError : Exception
         {
             if (ex == null) return default;
-            for (int i = 0; i < ex.Length; i++) { Trace.Log(format(ex[i])); LogException(ex[i], argument, caller, path, line); }
+            for (int i = 0; i < ex.Length; i++) { Trace.Log(message(ex[i])); LogException(ex[i], argument, caller, path, line); }
             return ex;
         }
 
         /// <summary>Logs many exceptions.</summary>
         /// <typeparam name="TError"></typeparam>
         /// <param name="ex">The exceptions to log.</param>
-        /// <param name="format">The messages to trace, one for each error</param>
+        /// <param name="message">The messages to trace, one for each error</param>
         /// <returns>The exceptions originally provided.</returns>
         public static TError[] LogError<TError>(
             this TError[] ex,
-            Func<TError, Index, string> format,
+            Func<TError, Index, Format> message,
             [CallerArgumentExpression(nameof(ex))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -641,17 +641,17 @@ namespace ContainerExpressions.Containers
             ) where TError : Exception
         {
             if (ex == null) return default;
-            for (int i = 0; i < ex.Length; i++) { Trace.Log(format(ex[i], Index.From(i))); LogException(ex[i], argument, caller, path, line); }
+            for (int i = 0; i < ex.Length; i++) { Trace.Log(message(ex[i], Index.From(i))); LogException(ex[i], argument, caller, path, line); }
             return ex;
         }
 
         /// <summary>Logs many exceptions.</summary>
         /// <param name="ex">The exceptions to log.</param>
-        /// <param name="format">The messages to trace, one for each error</param>
+        /// <param name="message">The messages to trace, one for each error</param>
         /// <returns>The exceptions originally provided.</returns>
         public static TError[] LogError<TError>(
             this TError[] ex,
-            Func<TError, Index, Length, string> format,
+            Func<TError, Index, Length, Format> message,
             [CallerArgumentExpression(nameof(ex))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -660,7 +660,7 @@ namespace ContainerExpressions.Containers
         {
             if (ex == null) return default;
             var length = Length.From(ex.Length);
-            for (int i = 0; i < ex.Length; i++) { Trace.Log(format(ex[i], Index.From(i), length)); LogException(ex[i], argument, caller, path, line); }
+            for (int i = 0; i < ex.Length; i++) { Trace.Log(message(ex[i], Index.From(i), length)); LogException(ex[i], argument, caller, path, line); }
             return ex;
         }
 
@@ -671,7 +671,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Logs a trace step.</summary>
         /// <param name="message">The message to trace.</param>
         /// <returns>The initial value.</returns>
-        public static T LogValue<T>(this T value, string message)
+        public static T LogValue<T>(this T value, Format message)
         {
             Trace.Log(message);
             return value;
@@ -680,7 +680,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Logs a trace step.</summary>
         /// <param name="format">The message to trace.</param>
         /// <returns>The initial value.</returns>
-        public static T LogValue<T>(this T value, Func<T, string> format)
+        public static T LogValue<T>(this T value, Func<T, Format> format)
         {
             Trace.Log(format(value));
             return value;
@@ -694,7 +694,7 @@ namespace ContainerExpressions.Containers
         /// <param name="response">The Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Response Log(this Response response, string success)
+        public static Response Log(this Response response, Format success)
         {
             if (response.IsValid)
             {
@@ -709,7 +709,7 @@ namespace ContainerExpressions.Containers
         /// <param name="success">The message to trace when the response is in a valid state.</param>
         /// <param name="fail">The message to trace when the response is in an invalid state.</param>
         /// <returns>The same response as the input.</returns>
-        public static Response Log(this Response response, string success, string fail)
+        public static Response Log(this Response response, Format success, Format fail)
         {
             if (response.IsValid)
             {
@@ -731,7 +731,7 @@ namespace ContainerExpressions.Containers
         /// <param name="response">The Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Response<T> Log<T>(this Response<T> response, string success)
+        public static Response<T> Log<T>(this Response<T> response, Format success)
         {
             if (response.IsValid)
             {
@@ -745,7 +745,7 @@ namespace ContainerExpressions.Containers
         /// <param name="response">The Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Response<T> Log<T>(this Response<T> response, Func<T, string> success)
+        public static Response<T> Log<T>(this Response<T> response, Func<T, Format> success)
         {
             if (response.IsValid)
             {
@@ -760,7 +760,7 @@ namespace ContainerExpressions.Containers
         /// <param name="success">The message to trace when the response is in a valid state.</param>
         /// <param name="fail">The message to trace when the response is in an invalid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Response<T> Log<T>(this Response<T> response, Func<T, string> success, string fail)
+        public static Response<T> Log<T>(this Response<T> response, Func<T, Format> success, Format fail)
         {
             if (response.IsValid)
             {
@@ -779,7 +779,7 @@ namespace ContainerExpressions.Containers
         /// <param name="success">The message to trace when the response is in a valid state.</param>
         /// <param name="fail">The message to trace when the response is in an invalid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Response<T> Log<T>(this Response<T> response, string success, string fail)
+        public static Response<T> Log<T>(this Response<T> response, Format success, Format fail)
         {
             if (response.IsValid)
             {
@@ -801,27 +801,27 @@ namespace ContainerExpressions.Containers
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<Response<T>> Log<T>(this Func<Response<T>> func, string success) => () => func().Log(success);
+        public static Func<Response<T>> Log<T>(this Func<Response<T>> func, Format success) => () => func().Log(success);
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <param name="fail">The message to trace when the response is in an invalid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<Response<T>> Log<T>(this Func<Response<T>> func, string success, string fail) => () => func().Log(success, fail);
+        public static Func<Response<T>> Log<T>(this Func<Response<T>> func, Format success, Format fail) => () => func().Log(success, fail);
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<Response<T>> Log<T>(this Func<Response<T>> func, Func<T, string> success) => () => func().Log(success);
+        public static Func<Response<T>> Log<T>(this Func<Response<T>> func, Func<T, Format> success) => () => func().Log(success);
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <param name="fail">The message to trace when the response is in an invalid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<Response<T>> Log<T>(this Func<Response<T>> func, Func<T, string> success, string fail) => () => func().Log(success, fail);
+        public static Func<Response<T>> Log<T>(this Func<Response<T>> func, Func<T, Format> success, Format fail) => () => func().Log(success, fail);
 
         #endregion
 
@@ -831,27 +831,27 @@ namespace ContainerExpressions.Containers
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<T, Response<TResult>> Log<T, TResult>(this Func<T, Response<TResult>> func, string success) => x => func(x).Log(success);
+        public static Func<T, Response<TResult>> Log<T, TResult>(this Func<T, Response<TResult>> func, Format success) => x => func(x).Log(success);
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <param name="fail">The message to trace when the response is in an invalid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<T, Response<TResult>> Log<T, TResult>(this Func<T, Response<TResult>> func, string success, string fail) => x => func(x).Log(success, fail);
+        public static Func<T, Response<TResult>> Log<T, TResult>(this Func<T, Response<TResult>> func, Format success, Format fail) => x => func(x).Log(success, fail);
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace f the response is in a valid state.</param>
         /// <returns>The same response from the input.</returns>i
-        public static Func<T, Response<TResult>> Log<T, TResult>(this Func<T, Response<TResult>> func, Func<TResult, string> success) => x => func(x).Log(success);
+        public static Func<T, Response<TResult>> Log<T, TResult>(this Func<T, Response<TResult>> func, Func<TResult, Format> success) => x => func(x).Log(success);
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <param name="fail">The message to trace when the response is in an invalid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<T, Response<TResult>> Log<T, TResult>(this Func<T, Response<TResult>> func, Func<TResult, string> success, string fail) => x => func(x).Log(success, fail);
+        public static Func<T, Response<TResult>> Log<T, TResult>(this Func<T, Response<TResult>> func, Func<TResult, Format> success, Format fail) => x => func(x).Log(success, fail);
 
         #endregion
 
@@ -861,7 +861,7 @@ namespace ContainerExpressions.Containers
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<T, Response<TResult>> Log<T, TResult>(this Func<T, Response<TResult>> func, Func<T, TResult, string> success) => x => {
+        public static Func<T, Response<TResult>> Log<T, TResult>(this Func<T, Response<TResult>> func, Func<T, TResult, Format> success) => x => {
             var result = func(x);
             if (result)
             {
@@ -875,7 +875,7 @@ namespace ContainerExpressions.Containers
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <param name="fail">The message to trace when the response is in an invalid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<T, Response<TResult>> Log<T, TResult>(this Func<T, Response<TResult>> func, Func<T, TResult, string> success, string fail) => x => {
+        public static Func<T, Response<TResult>> Log<T, TResult>(this Func<T, Response<TResult>> func, Func<T, TResult, Format> success, Format fail) => x => {
             var result = func(x);
             if (result)
             {
@@ -898,8 +898,8 @@ namespace ContainerExpressions.Containers
         /// <returns>The same Maybe as the input.</returns>
         public static Maybe<TValue, TError> Log<TValue, TError>(
             this Maybe<TValue, TError> maybe,
-            Func<TValue, string> value,
-            Func<TError, string> error,
+            Func<TValue, Format> value,
+            Func<TError, Format> error,
             [CallerArgumentExpression(nameof(maybe))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -924,8 +924,8 @@ namespace ContainerExpressions.Containers
         /// <returns>The same Maybe as the input.</returns>
         public static Maybe<TValue, TError> Log<TValue, TError>(
             this Maybe<TValue, TError> maybe,
-            string value,
-            string error,
+            Format value,
+            Format error,
             [CallerArgumentExpression(nameof(maybe))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -950,8 +950,8 @@ namespace ContainerExpressions.Containers
         /// <returns>The same Maybe as the input.</returns>
         public static Maybe<TValue> Log<TValue>(
             this Maybe<TValue> maybe,
-            Func<TValue, string> value,
-            Func<Exception, string> error,
+            Func<TValue, Format> value,
+            Func<Exception, Format> error,
             [CallerArgumentExpression(nameof(maybe))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -976,8 +976,8 @@ namespace ContainerExpressions.Containers
         /// <returns>The same Maybe as the input.</returns>
         public static Maybe<TValue> Log<TValue>(
             this Maybe<TValue> maybe,
-            string value,
-            string error,
+            Format value,
+            Format error,
             [CallerArgumentExpression(nameof(maybe))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
