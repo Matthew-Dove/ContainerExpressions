@@ -25,7 +25,7 @@ namespace ContainerExpressions.Containers
             if ((other.Args is null || other.Args.Length == 0) && (Args is null || Args.Length == 0)) return other.Message.Equals(Message);
             
             return
-                (other.Message.Equals(Message) && other.Args.Length == Args.Length && (other.Args.Length == 0 || other.Args.SequenceEqual(Args)))
+                (other.Args.Length == Args.Length && (other.Args.Length == 0 || other.Args.SequenceEqual(Args)) && other.Message.Equals(Message))
                 ||
                 ((other.Args is null || other.Args.Length == 0) && other.Message.Equals(GetMessageTemplate(Message, Args)))
                 ||
