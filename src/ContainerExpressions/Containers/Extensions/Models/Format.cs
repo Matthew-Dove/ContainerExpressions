@@ -6,6 +6,8 @@ namespace ContainerExpressions.Containers
     /// <summary>A formatted message to trace via the logger.</summary>
     public readonly struct Format : IEquatable<string>, IEquatable<Format>
     {
+        public static readonly Format Default = default;
+
         internal readonly string Message { get; }
         internal readonly object[] Args { get; }
 

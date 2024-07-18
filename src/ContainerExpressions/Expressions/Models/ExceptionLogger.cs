@@ -5,21 +5,25 @@ namespace ContainerExpressions.Expressions.Models
 {
     internal readonly struct ExceptionLogger
     {
-        private readonly Response<Action<Exception>> _logger;
+        private readonly Action<Exception> _logger;
+        private readonly Action<Exception, string, object[]> _formattedLogger;
+        private readonly Format _template;
         private readonly string _argument;
         private readonly string _caller;
         private readonly string _path;
         private readonly int _line;
 
         public ExceptionLogger(
-            Response<Action<Exception>> logger,
-            string argument = "",
-            string caller = "",
-            string path = "",
-            int line = 0
+            Format template,
+            string argument,
+            string caller,
+            string path,
+            int line
             )
         {
-            _logger = logger;
+            _logger = Try.Logger;
+            _formattedLogger = Try.FormattedLogger;
+            _template = template;
             _argument = argument;
             _caller = caller;
             _path = path;
@@ -28,41 +32,53 @@ namespace ContainerExpressions.Expressions.Models
 
         public void Log(Exception ex)
         {
-            if (_logger.IsValid && ex != null)
+            if (ex == null) return;
+
+            try
             {
-                try
+                if (_formattedLogger != null)
                 {
-                    ex.AddCallerAttributes(_argument, _caller, _path, _line);
-                    _logger.Value(ex);
-                }
-                catch (AggregateException ae)
-                {
-                    Console.WriteLine("Error logging an exception in the Try Container.");
-                    foreach (var e in ae.Flatten().InnerExceptions)
+                    var template = _template;
+                    if (Format.Default.Equals(template) || string.IsNullOrEmpty(template.Message))
                     {
-                        Console.WriteLine(e);
+                        template = new Format("{ExceptionMessage}", ex.Message);
                     }
-                    Console.WriteLine("The original error that was attempting to be logged is below.");
-                    Console.WriteLine(ex);
+                    ex.AddCallerAttributes(_argument, _caller, _path, _line, Format.Default);
+                    _formattedLogger(ex, template.Message, template.Args);
                 }
-                catch (Exception logError)
+                else if (_logger != null)
                 {
-                    Console.WriteLine("Error logging an exception in the Try Container.");
-                    Console.WriteLine(logError);
-                    Console.WriteLine("The original error that was attempting to be logged is below.");
-                    Console.WriteLine(ex);
+                    ex.AddCallerAttributes(_argument, _caller, _path, _line, _template);
+                    _logger(ex);
                 }
+            }
+            catch (AggregateException ae)
+            {
+                Console.WriteLine("Error logging an exception in the Try Container.");
+                foreach (var e in ae.Flatten().InnerExceptions)
+                {
+                    Console.WriteLine(e);
+                }
+                Console.WriteLine("The original error that was attempting to be logged is below.");
+                Console.WriteLine(ex);
+            }
+            catch (Exception logError)
+            {
+                Console.WriteLine("Error logging an exception in the Try Container.");
+                Console.WriteLine(logError);
+                Console.WriteLine("The original error that was attempting to be logged is below.");
+                Console.WriteLine(ex);
             }
         }
 
         public static ExceptionLogger Create(
-            Response<Action<Exception>> logger,
-            string argument = "",
-            string caller = "",
-            string path = "",
-            int line = 0
+            Format template,
+            string argument,
+            string caller,
+            string path,
+            int line
             ) => new (
-                logger,
+                template,
                 argument,
                 caller,
                 path,

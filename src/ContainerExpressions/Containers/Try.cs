@@ -13,6 +13,33 @@ namespace ContainerExpressions.Containers
         /// <summary>Caller attributes are added the the exception's data dictionary, with this as the key.</summary>
         public const string DataKey = "ContainerExpressions.Caller";
 
+        internal static Action<Exception> Logger = null;
+        internal static Action<Exception, string, object[]> FormattedLogger = null;
+
+        /// <summary>
+        /// Set your desired logger implementation here.
+        /// <para>It is recommend that the logger be stateless.</para>
+        /// <para>Only one logger instance is used at a time, the formatted logger takes precedence.</para>
+        /// </summary>
+        public static void SetExceptionLogger(Action<Exception> logger)
+        {
+            if (logger == null) Throw.ArgumentNullException(nameof(logger));
+            Logger = logger;
+        }
+
+        /// <summary>
+        /// Formats and writes a error log message.
+        /// <para>First argument is the exception to log.</para>
+        /// <para>Second argument is the message - format string of the log message in message template format: i.e. "User {User} logged in!"</para>
+        /// <para>Third argument is the message args - an object array that contains zero or more objects to format.</para>
+        /// <para>Only one logger instance is used at a time, the formatted logger takes precedence.</para>
+        /// </summary>
+        public static void SetFormattedExceptionLogger(Action<Exception, string, object[]> formattedLogger)
+        {
+            if (formattedLogger == null) Throw.ArgumentNullException(nameof(formattedLogger));
+            FormattedLogger = formattedLogger;
+        }
+
         /// <summary>Gets the caller values, or empty string if they don't exist on the exception.</summary>
         /// <param name="ex">The exception sent to the logger from the Try container.</param>
         public static string GetCallerAttributes(this Exception ex)
@@ -21,44 +48,31 @@ namespace ContainerExpressions.Containers
             return ex.Message;
         }
 
-        internal static T AddCallerAttributes<T>(this T ex, string argumentExpression, string memberName, string filePath, int lineNumber) where T : Exception
+        internal static T AddCallerAttributes<T>(this T ex, string argumentExpression, string memberName, string filePath, int lineNumber, Format template) where T : Exception
         {
             if (!ex.Data.Contains(DataKey) && (argumentExpression != string.Empty || memberName != string.Empty || filePath != string.Empty || lineNumber != 0))
             {
-                ex.Data.Add(DataKey, new StringBuilder()
+                var sb = new StringBuilder()
                     .Append("Message: ").AppendLine(ex.Message)
                     .Append("CallerArgumentExpression: ").AppendLine(argumentExpression)
                     .Append("CallerMemberName: ").AppendLine(memberName)
                     .Append("CallerFilePath: ").AppendLine(filePath)
-                    .Append("CallerLineNumber: ").Append(lineNumber)
-                    .ToString()
-                );
+                    .Append("CallerLineNumber: ").Append(lineNumber);
+
+                if (!Format.Default.Equals(template))
+                {
+                    sb.AppendLine().Append("Template: ").Append(template.ToString());
+                }
+
+                ex.Data.Add(DataKey, sb.ToString());
             }
             return ex;
-        }
-
-        internal static Response<Action<Exception>> GetExceptionLogger() => _logger;
-        private static Response<Action<Exception>> _logger = new Response<Action<Exception>>();
-
-        /// <summary>If you'd like to log errors as they come, add your stateless error logger here, if a logger already exists, it'll be overwritten.</summary>
-        public static void SetExceptionLogger(Action<Exception> logger)
-        {
-            if (logger == null) Throw.ArgumentNullException(nameof(logger));
-            _logger = Response.Create(logger);
-        }
-
-        /// <summary>Formats and writes a error log message.</summary>
-        /// <param name="exception">The exception to log.</param>
-        /// <param name="message">Format string of the log message in message template format: "User {User} logged in!".</param>
-        /// <param name="args">An object array that contains zero or more objects to format.</param>
-        public static void SetFormattedExceptionLogger(Exception exception, string message, params object[] args)
-        {
-
         }
 
         /// <summary>Wraps a function in error protecting code.</summary>
         public static Response Run(
             Action action,
+            Format message = default,
             [CallerArgumentExpression(nameof(action))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -66,7 +80,7 @@ namespace ContainerExpressions.Containers
             )
         {
             if (action == null) Throw.ArgumentNullException(nameof(action));
-            return PaddedCage(action, ExceptionLogger.Create(_logger, argument, caller, path, line));
+            return PaddedCage(action, ExceptionLogger.Create(message, argument, caller, path, line));
         }
 
         private static Response PaddedCage(Action action, ExceptionLogger error)
@@ -96,6 +110,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Wraps a function in error protecting code.</summary>
         public static Response<T> Run<T>(
             Func<T> func,
+            Format message = default,
             [CallerArgumentExpression(nameof(func))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -103,7 +118,7 @@ namespace ContainerExpressions.Containers
             )
         {
             if (func == null) Throw.ArgumentNullException(nameof(func));
-            return PaddedCage(func, ExceptionLogger.Create(_logger, argument, caller, path, line));
+            return PaddedCage(func, ExceptionLogger.Create(message, argument, caller, path, line));
         }
 
         private static Response<T> PaddedCage<T>(Func<T> func, ExceptionLogger error)
@@ -133,6 +148,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Wraps a function in error protecting code.</summary>
         public static Task<Response> RunAsync(
             Func<Task> action,
+            Format message = default,
             [CallerArgumentExpression(nameof(action))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -140,7 +156,7 @@ namespace ContainerExpressions.Containers
             )
         {
             if (action == null) Throw.ArgumentNullException(nameof(action));
-            return PaddedCageAsync(action, ExceptionLogger.Create(_logger, argument, caller, path, line));
+            return PaddedCageAsync(action, ExceptionLogger.Create(message, argument, caller, path, line));
         }
 
         private static async Task<Response> PaddedCageAsync(Func<Task> func, ExceptionLogger error)
@@ -170,6 +186,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Wraps a function in error protecting code.</summary>
         public static Task<Response<T>> RunAsync<T>(
             Func<Task<T>> func,
+            Format message = default,
             [CallerArgumentExpression(nameof(func))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -177,7 +194,7 @@ namespace ContainerExpressions.Containers
             )
         {
             if (func == null) Throw.ArgumentNullException(nameof(func));
-            return PaddedCageAsync(func, ExceptionLogger.Create(_logger, argument, caller, path, line));
+            return PaddedCageAsync(func, ExceptionLogger.Create(message, argument, caller, path, line));
         }
 
         private static async Task<Response<T>> PaddedCageAsync<T>(Func<Task<T>> func, ExceptionLogger error)

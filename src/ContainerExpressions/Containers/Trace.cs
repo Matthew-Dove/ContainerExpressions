@@ -10,7 +10,10 @@ namespace ContainerExpressions.Containers
         private static Action<string> _logger = null;
         private static Action<string, object[]> _formattedLogger = null;
 
-        internal static void Log(Format format) => Log(format.Message, format.Args);
+        internal static void Log(Format format)
+        {
+            if (!Format.Default.Equals(format) && !string.IsNullOrEmpty(format.Message)) Log(format.Message, format.Args);
+        }
 
         private static void Log(string message, params object[] args)
         {
@@ -33,7 +36,6 @@ namespace ContainerExpressions.Containers
         /// <para>It is recommend that the logger be stateless.</para>
         /// <para>Only one logger instance is used at a time, the formatted logger takes precedence.</para>
         /// </summary>
-        /// <param name="logger">A function that will log the incoming message.</param>
         public static void SetLogger(Action<string> logger)
         {
             if (logger == null) Throw.ArgumentNullException(nameof(logger));

@@ -13,6 +13,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Logs exceptions from faulted tasks.</summary>
         public static Task LogErrorAsync(
             this Task task,
+            Format message = default,
             [CallerArgumentExpression(nameof(task))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -20,14 +21,15 @@ namespace ContainerExpressions.Containers
             )
         {
             if (task == null) return default;
-            if (!task.IsCompleted) return task.ContinueWith(t => { if (t.IsFaulted) TraceExtensions.LogException(t.Exception, argument, caller, path, line); t.Wait(); });
-            if (task.IsFaulted) TraceExtensions.LogException(task.Exception, argument, caller, path, line);
+            if (!task.IsCompleted) return task.ContinueWith(t => { if (t.IsFaulted) TraceExtensions.LogException(t.Exception, message, argument, caller, path, line); });
+            if (task.IsFaulted) TraceExtensions.LogException(task.Exception, message, argument, caller, path, line);
             return task;
         }
 
         /// <summary>Logs exceptions from faulted tasks.</summary>
         public static Task<T> LogErrorAsync<T>(
             this Task<T> task,
+            Format message = default,
             [CallerArgumentExpression(nameof(task))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -35,14 +37,15 @@ namespace ContainerExpressions.Containers
             )
         {
             if (task == null) return default;
-            if (!task.IsCompleted) return task.ContinueWith(t => { if (t.IsFaulted) TraceExtensions.LogException(t.Exception, argument, caller, path, line); return t.Result; });
-            if (task.IsFaulted) TraceExtensions.LogException(task.Exception, argument, caller, path, line);
+            if (!task.IsCompleted) return task.ContinueWith(t => { if (t.IsFaulted) TraceExtensions.LogException(t.Exception, message, argument, caller, path, line); return t.Result; });
+            if (task.IsFaulted) TraceExtensions.LogException(task.Exception, message, argument, caller, path, line);
             return task;
         }
 
         /// <summary>Logs exceptions from faulted tasks.</summary>
         public static Task<Response> LogErrorAsync(
             this Task<Response> task,
+            Format message = default,
             [CallerArgumentExpression(nameof(task))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -52,17 +55,18 @@ namespace ContainerExpressions.Containers
             if (task == null) return default;
 
             if (!task.IsCompleted) return task.ContinueWith(t => {
-                if (t.IsFaulted) TraceExtensions.LogException(t.Exception, argument, caller, path, line);
+                if (t.IsFaulted) TraceExtensions.LogException(t.Exception, message, argument, caller, path, line);
                 return t.Status == TaskStatus.RanToCompletion ? t.Result : Response.Error;
             });
 
-            if (task.IsFaulted) TraceExtensions.LogException(task.Exception, argument, caller, path, line);
+            if (task.IsFaulted) TraceExtensions.LogException(task.Exception, message, argument, caller, path, line);
             return task.Status == TaskStatus.RanToCompletion ? task : Pool.ResponseError;
         }
 
         /// <summary>Logs exceptions from faulted tasks.</summary>
         public static Task<Response<T>> LogErrorAsync<T>(
             this Task<Response<T>> task,
+            Format message = default,
             [CallerArgumentExpression(nameof(task))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -72,17 +76,18 @@ namespace ContainerExpressions.Containers
             if (task == null) return default;
 
             if (!task.IsCompleted) return task.ContinueWith(t => {
-                if (t.IsFaulted) TraceExtensions.LogException(t.Exception, argument, caller, path, line);
+                if (t.IsFaulted) TraceExtensions.LogException(t.Exception, message, argument, caller, path, line);
                 return t.Status == TaskStatus.RanToCompletion ? t.Result : Response<T>.Error;
             });
 
-            if (task.IsFaulted) TraceExtensions.LogException(task.Exception, argument, caller, path, line);
+            if (task.IsFaulted) TraceExtensions.LogException(task.Exception, message, argument, caller, path, line);
             return task.Status == TaskStatus.RanToCompletion ? task : Pool<T>.ResponseError;
         }
 
         /// <summary>Logs exceptions from faulted tasks.</summary>
         public static Task<Response<Unit>> LogErrorAsync(
             this Task<Response<Unit>> task,
+            Format message = default,
             [CallerArgumentExpression(nameof(task))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -92,11 +97,11 @@ namespace ContainerExpressions.Containers
             if (task == null) return default;
 
             if (!task.IsCompleted) return task.ContinueWith(t => {
-                if (t.IsFaulted) TraceExtensions.LogException(t.Exception, argument, caller, path, line);
+                if (t.IsFaulted) TraceExtensions.LogException(t.Exception, message, argument, caller, path, line);
                 return t.Status == TaskStatus.RanToCompletion ? t.Result : Unit.ResponseError;
             });
 
-            if (task.IsFaulted) TraceExtensions.LogException(task.Exception, argument, caller, path, line);
+            if (task.IsFaulted) TraceExtensions.LogException(task.Exception, message, argument, caller, path, line);
             return task.Status == TaskStatus.RanToCompletion ? task : Pool.UnitResponseError;
         }
 
@@ -105,37 +110,92 @@ namespace ContainerExpressions.Containers
         #region T
 
         /// <summary>Logs a trace step.</summary>
-        /// <param name="message">The message to trace.</param>
+        /// <param name="success">The message to trace when the task runs to completion.</param>
         /// <returns>The initial value.</returns>
         public static Task<T> LogValueAsync<T>(
-            this Task<T> task, Format message,
-            [CallerArgumentExpression(nameof(task))] string argument = "",
-            [CallerMemberName] string caller = "",
-            [CallerFilePath] string path = "",
-            [CallerLineNumber] int line = 0
+            this Task<T> task,
+            Format success
             ) =>
             task.ContinueWith(x =>
             {
-                if (x.Status == TaskStatus.RanToCompletion) Trace.Log(message);
-                else if (x.Status == TaskStatus.Faulted) TraceExtensions.LogException(x.Exception, argument, caller, path, line);
+                if (x.Status == TaskStatus.RanToCompletion)
+                {
+                    Trace.Log(success);
+                }
+                else
+                {
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
+                }
+
                 return x.Result;
             });
 
         /// <summary>Logs a trace step.</summary>
-        /// <param name="message">The message to trace.</param>
+        /// <param name="success">The message to trace when the task runs to completion.</param>
+        /// <param name="fail">The message to trace when the task is faulted.</param>
         /// <returns>The initial value.</returns>
         public static Task<T> LogValueAsync<T>(
             this Task<T> task,
-            Func<T, Format> message,
-            [CallerArgumentExpression(nameof(task))] string argument = "",
-            [CallerMemberName] string caller = "",
-            [CallerFilePath] string path = "",
-            [CallerLineNumber] int line = 0
+            Format success,
+            Format fail
             ) =>
             task.ContinueWith(x =>
             {
-                if (x.Status == TaskStatus.RanToCompletion) Trace.Log(message(x.Result));
-                else if (x.Status == TaskStatus.Faulted) TraceExtensions.LogException(x.Exception, argument, caller, path, line);
+                if (x.Status == TaskStatus.RanToCompletion)
+                {
+                    Trace.Log(success);
+                }
+                else
+                {
+                    Trace.Log(fail);
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
+                }
+
+                return x.Result;
+            });
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="success">The message to trace when the task runs to completion.</param>
+        /// <returns>The initial value.</returns>
+        public static Task<T> LogValueAsync<T>(
+            this Task<T> task,
+            Func<T, Format> success
+            ) =>
+            task.ContinueWith(x =>
+            {
+                if (x.Status == TaskStatus.RanToCompletion)
+                {
+                    Trace.Log(success(x.Result));
+                }
+                else
+                {
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
+                }
+
+                return x.Result;
+            });
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="success">The message to trace when the task runs to completion.</param>
+        /// <param name="fail">The message to trace when the task is faulted.</param>
+        /// <returns>The initial value.</returns>
+        public static Task<T> LogValueAsync<T>(
+            this Task<T> task,
+            Func<T, Format> success,
+            Format fail
+            ) =>
+            task.ContinueWith(x =>
+            {
+                if (x.Status == TaskStatus.RanToCompletion)
+                {
+                    Trace.Log(success(x.Result));
+                }
+                else
+                {
+                    Trace.Log(fail);
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
+                }
+
                 return x.Result;
             });
 
@@ -151,12 +211,16 @@ namespace ContainerExpressions.Containers
         {
             return response.ContinueWith(x =>
             {
-                if (x.Result.IsValid)
+                if (x.Status == TaskStatus.RanToCompletion && x.Result.IsValid)
                 {
                     Trace.Log(success);
                 }
+                else
+                {
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
+                }
 
-                return x.Result;
+                return x.Status == TaskStatus.RanToCompletion ? x.Result : Response.Error;
             });
         }
 
@@ -169,16 +233,17 @@ namespace ContainerExpressions.Containers
         {
             return response.ContinueWith(x =>
             {
-                if (x.Result.IsValid)
+                if (x.Status == TaskStatus.RanToCompletion && x.Result.IsValid)
                 {
                     Trace.Log(success);
                 }
                 else
                 {
                     Trace.Log(fail);
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
                 }
 
-                return x.Result;
+                return x.Status == TaskStatus.RanToCompletion ? x.Result : Response.Error;
             });
         }
 
@@ -194,12 +259,16 @@ namespace ContainerExpressions.Containers
         {
             return response.ContinueWith(x =>
             {
-                if (x.Result.IsValid)
+                if (x.Status == TaskStatus.RanToCompletion && x.Result.IsValid)
                 {
                     Trace.Log(success);
                 }
+                else
+                {
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
+                }
 
-                return x.Result;
+                return x.Status == TaskStatus.RanToCompletion ? x.Result : Response<T>.Error;
             });
         }
 
@@ -211,12 +280,16 @@ namespace ContainerExpressions.Containers
         {
             return response.ContinueWith(x =>
             {
-                if (x.Result.IsValid)
+                if (x.Status == TaskStatus.RanToCompletion && x.Result.IsValid)
                 {
                     Trace.Log(success(x.Result.Value));
                 }
+                else
+                {
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
+                }
 
-                return x.Result;
+                return x.Status == TaskStatus.RanToCompletion ? x.Result : Response<T>.Error;
             });
         }
 
@@ -229,16 +302,17 @@ namespace ContainerExpressions.Containers
         {
             return response.ContinueWith(x =>
             {
-                if (x.Result.IsValid)
+                if (x.Status == TaskStatus.RanToCompletion && x.Result.IsValid)
                 {
                     Trace.Log(success(x.Result.Value));
                 }
                 else
                 {
                     Trace.Log(fail);
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
                 }
 
-                return x.Result;
+                return x.Status == TaskStatus.RanToCompletion ? x.Result : Response<T>.Error;
             });
         }
 
@@ -251,16 +325,17 @@ namespace ContainerExpressions.Containers
         {
             return response.ContinueWith(x =>
             {
-                if (x.Result.IsValid)
+                if (x.Status == TaskStatus.RanToCompletion && x.Result.IsValid)
                 {
                     Trace.Log(success);
                 }
                 else
                 {
                     Trace.Log(fail);
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
                 }
 
-                return x.Result;
+                return x.Status == TaskStatus.RanToCompletion ? x.Result : Response<T>.Error;
             });
         }
 
@@ -272,27 +347,81 @@ namespace ContainerExpressions.Containers
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<Task<Response<T>>> LogAsync<T>(this Func<Task<Response<T>>> func, Format success) => () => func().ContinueWith(x => x.Result.Log(success));
+        public static Func<Task<Response<T>>> LogAsync<T>(this Func<Task<Response<T>>> func, Format success) => () =>
+            func().ContinueWith(x =>
+            {
+                if (x.Status == TaskStatus.RanToCompletion && x.Result.IsValid)
+                {
+                    Trace.Log(success);
+                }
+                else
+                {
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
+                }
+
+                return x.Status == TaskStatus.RanToCompletion ? x.Result : Response<T>.Error;
+            });
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <param name="fail">The message to trace when the response is in an invalid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<Task<Response<T>>> LogAsync<T>(this Func<Task<Response<T>>> func, Format success, Format fail) => () => func().ContinueWith(x => x.Result.Log(success, fail));
+        public static Func<Task<Response<T>>> LogAsync<T>(this Func<Task<Response<T>>> func, Format success, Format fail) => () =>
+            func().ContinueWith(x =>
+            {
+                if (x.Status == TaskStatus.RanToCompletion && x.Result.IsValid)
+                {
+                    Trace.Log(success);
+                }
+                else
+                {
+                    Trace.Log(fail);
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
+                }
+
+                return x.Status == TaskStatus.RanToCompletion ? x.Result : Response<T>.Error;
+            });
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<Task<Response<T>>> LogAsync<T>(this Func<Task<Response<T>>> func, Func<T, Format> success) => () => func().ContinueWith(x => x.Result.Log(success));
+        public static Func<Task<Response<T>>> LogAsync<T>(this Func<Task<Response<T>>> func, Func<T, Format> success) => () =>
+            func().ContinueWith(x =>
+            {
+                if (x.Status == TaskStatus.RanToCompletion && x.Result.IsValid)
+                {
+                    Trace.Log(success(x.Result.Value));
+                }
+                else
+                {
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
+                }
+
+                return x.Status == TaskStatus.RanToCompletion ? x.Result : Response<T>.Error;
+            });
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <param name="fail">The message to trace when the response is in an invalid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<Task<Response<T>>> LogAsync<T>(this Func<Task<Response<T>>> func, Func<T, Format> success, Format fail) => () => func().ContinueWith(x => x.Result.Log(success, fail));
+        public static Func<Task<Response<T>>> LogAsync<T>(this Func<Task<Response<T>>> func, Func<T, Format> success, Format fail) => () =>
+            func().ContinueWith(x =>
+            {
+                if (x.Status == TaskStatus.RanToCompletion && x.Result.IsValid)
+                {
+                    Trace.Log(success(x.Result.Value));
+                }
+                else
+                {
+                    Trace.Log(fail);
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
+                }
+
+                return x.Status == TaskStatus.RanToCompletion ? x.Result : Response<T>.Error;
+            });
 
         #endregion
 
@@ -302,27 +431,81 @@ namespace ContainerExpressions.Containers
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, Format success) => x => func(x).ContinueWith(y => y.Result.Log(success));
+        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, Format success) => x =>
+            func(x).ContinueWith(y =>
+            {
+                if (y.Status == TaskStatus.RanToCompletion && y.Result.IsValid)
+                {
+                    Trace.Log(success);
+                }
+                else
+                {
+                    if (y.Status == TaskStatus.Faulted) y.Exception.LogErrorPlain();
+                }
+
+                return y.Status == TaskStatus.RanToCompletion ? y.Result : Response<TResult>.Error;
+            });
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <param name="fail">The message to trace when the response is in an invalid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, Format success, Format fail) => x => func(x).ContinueWith(y => y.Result.Log(success, fail));
+        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, Format success, Format fail) => x =>
+            func(x).ContinueWith(y =>
+            {
+                if (y.Status == TaskStatus.RanToCompletion && y.Result.IsValid)
+                {
+                    Trace.Log(success);
+                }
+                else
+                {
+                    Trace.Log(fail);
+                    if (y.Status == TaskStatus.Faulted) y.Exception.LogErrorPlain();
+                }
+
+                return y.Status == TaskStatus.RanToCompletion ? y.Result : Response<TResult>.Error;
+            });
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, Func<TResult, Format> success) => x => func(x).ContinueWith(y => y.Result.Log(success));
+        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, Func<TResult, Format> success) => x =>
+            func(x).ContinueWith(y =>
+            {
+                if (y.Status == TaskStatus.RanToCompletion && y.Result.IsValid)
+                {
+                    Trace.Log(success(y.Result.Value));
+                }
+                else
+                {
+                    if (y.Status == TaskStatus.Faulted) y.Exception.LogErrorPlain();
+                }
+
+                return y.Status == TaskStatus.RanToCompletion ? y.Result : Response<TResult>.Error;
+            });
 
         /// <summary>Logs a trace step.</summary>
         /// <param name="func">A function to the Response Container.</param>
         /// <param name="success">The message to trace if the response is in a valid state.</param>
         /// <param name="fail">The message to trace when the response is in an invalid state.</param>
         /// <returns>The same response from the input.</returns>
-        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, Func<TResult, Format> success, Format fail) => x => func(x).ContinueWith(y => y.Result.Log(success, fail));
+        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, Func<TResult, Format> success, Format fail) => x =>
+            func(x).ContinueWith(y =>
+            {
+                if (y.Status == TaskStatus.RanToCompletion && y.Result.IsValid)
+                {
+                    Trace.Log(success(y.Result.Value));
+                }
+                else
+                {
+                    Trace.Log(fail);
+                    if (y.Status == TaskStatus.Faulted) y.Exception.LogErrorPlain();
+                }
+
+                return y.Status == TaskStatus.RanToCompletion ? y.Result : Response<TResult>.Error;
+            });
 
         #endregion
 
@@ -335,12 +518,16 @@ namespace ContainerExpressions.Containers
         public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, Func<T, TResult, Format> success) => x =>
             func(x).ContinueWith(y =>
             {
-                if (y.Result)
+                if (y.Status == TaskStatus.RanToCompletion && y.Result)
                 {
                     Trace.Log(success(x, y.Result));
                 }
+                else
+                {
+                    if (y.Status == TaskStatus.Faulted) y.Exception.LogErrorPlain();
+                }
 
-                return y.Result;
+                return y.Status == TaskStatus.RanToCompletion ? y.Result : Response<TResult>.Error;
             });
 
         /// <summary>Logs a trace step.</summary>
@@ -351,16 +538,17 @@ namespace ContainerExpressions.Containers
         public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, Func<T, TResult, Format> success, Format fail) => x =>
             func(x).ContinueWith(y =>
             {
-                if (y.Result)
+                if (y.Status == TaskStatus.RanToCompletion && y.Result)
                 {
                     Trace.Log(success(x, y.Result));
                 }
                 else
                 {
                     Trace.Log(fail);
+                    if (y.Status == TaskStatus.Faulted) y.Exception.LogErrorPlain();
                 }
 
-                return y.Result;
+                return y.Status == TaskStatus.RanToCompletion ? y.Result : Response<TResult>.Error;
             });
 
         #endregion
@@ -382,13 +570,18 @@ namespace ContainerExpressions.Containers
             ) =>
             maybe.ContinueWith(x =>
             {
+                if (x.Status == TaskStatus.Faulted)
+                {
+                    x.Exception.LogErrorPlain();
+                }
+
                 var message = x.Result.Match(value, error);
                 Trace.Log(message);
 
                 if (!x.Result._hasValue)
                 {
-                    TraceExtensions.LogErrorValue(x.Result._error, argument, caller, path, line);
-                    TraceExtensions.LogErrorValue(x.Result.AggregateErrors, argument, caller, path, line);
+                    TraceExtensions.LogErrorValue(x.Result._error, message, argument, caller, path, line);
+                    TraceExtensions.LogErrorValue(x.Result.AggregateErrors, message, argument, caller, path, line);
                 }
 
                 return x.Result;
@@ -409,13 +602,19 @@ namespace ContainerExpressions.Containers
             ) =>
             maybe.ContinueWith(x =>
             {
+                if (x.Status == TaskStatus.Faulted)
+                {
+                    Trace.Log(error);
+                    x.Exception.LogErrorPlain();
+                }
+
                 var message = x.Result._hasValue ? value : error;
                 Trace.Log(message);
 
                 if (!x.Result._hasValue)
                 {
-                    TraceExtensions.LogErrorValue(x.Result._error, argument, caller, path, line);
-                    TraceExtensions.LogErrorValue(x.Result.AggregateErrors, argument, caller, path, line);
+                    TraceExtensions.LogErrorValue(x.Result._error, message, argument, caller, path, line);
+                    TraceExtensions.LogErrorValue(x.Result.AggregateErrors, message, argument, caller, path, line);
                 }
 
                 return x.Result;
@@ -436,13 +635,18 @@ namespace ContainerExpressions.Containers
             ) =>
             maybe.ContinueWith(x =>
             {
+                if (x.Status == TaskStatus.Faulted)
+                {
+                    x.Exception.LogErrorPlain();
+                }
+
                 var message = x.Result.Match(value, error);
                 Trace.Log(message);
 
                 if (!x.Result._hasValue)
                 {
-                    TraceExtensions.LogError(x.Result._error, argument, caller, path, line);
-                    TraceExtensions.LogError(x.Result.AggregateErrors, argument, caller, path, line);
+                    TraceExtensions.LogError(x.Result._error, message, argument, caller, path, line);
+                    TraceExtensions.LogError(x.Result.AggregateErrors, message, argument, caller, path, line);
                 }
 
                 return x.Result;
@@ -463,13 +667,19 @@ namespace ContainerExpressions.Containers
             ) =>
             maybe.ContinueWith(x =>
             {
+                if (x.Status == TaskStatus.Faulted)
+                {
+                    Trace.Log(error);
+                    x.Exception.LogErrorPlain();
+                }
+
                 var message = x.Result._hasValue ? value : error;
                 Trace.Log(message);
 
                 if (!x.Result._hasValue)
                 {
-                    TraceExtensions.LogError(x.Result._error, argument, caller, path, line);
-                    TraceExtensions.LogError(x.Result.AggregateErrors, argument, caller, path, line);
+                    TraceExtensions.LogError(x.Result._error, message, argument, caller, path, line);
+                    TraceExtensions.LogError(x.Result.AggregateErrors, message, argument, caller, path, line);
                 }
 
                 return x.Result;

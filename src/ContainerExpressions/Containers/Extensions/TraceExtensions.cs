@@ -14,6 +14,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Logs an exception, will check for aggregate exceptions, and log them out individually.</summary>
         internal static void LogException(
             Exception ex,
+            Format message,
             string argument = "",
             string caller = "",
             string path = "",
@@ -21,19 +22,19 @@ namespace ContainerExpressions.Containers
             )
         {
             if (ex == null) return;
-            var logger = ExceptionLogger.Create(Try.GetExceptionLogger(), argument, caller, path, line);
-            if (ex is AggregateException ae) { LogAggregatedExceptions(logger, ae); }
-            else { logger.Log(ex); LogException(ex.InnerException); }
+            var logger = ExceptionLogger.Create(message, argument, caller, path, line);
+            if (ex is AggregateException ae) { LogAggregatedExceptions(logger, ae, message, argument, caller, path, line); }
+            else { logger.Log(ex); LogException(ex.InnerException, message, argument, caller, path, line); }
         }
 
         /// <summary>Recursively walks through an AggregateException, and logs out all the "real" exceptions.</summary>
-        private static void LogAggregatedExceptions(ExceptionLogger logger, AggregateException ae)
+        private static void LogAggregatedExceptions(ExceptionLogger logger, AggregateException ae, Format message, string argument, string caller, string path, int line)
         {
             if (ae == null) return;
             foreach (var e in ae.Flatten().InnerExceptions)
             {
-                if (e is AggregateException ex) { LogAggregatedExceptions(logger, ex); } // Flattened exceptions can still contain aggregate exceptions themselves.
-                else { logger.Log(e); LogException(e.InnerException); }
+                if (e is AggregateException ex) { LogAggregatedExceptions(logger, ex, message, argument, caller, path, line); } // Flattened exceptions can still contain aggregate exceptions themselves.
+                else { logger.Log(e); LogException(e.InnerException, message, argument, caller, path, line); }
             }
         }
 
@@ -46,6 +47,7 @@ namespace ContainerExpressions.Containers
         /// <returns>The initial error.</returns>
         public static TError LogErrorValue<TError>(
             this TError error,
+            Format message = default,
             [CallerArgumentExpression(nameof(error))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -57,7 +59,7 @@ namespace ContainerExpressions.Containers
             Exception ex;
             if (error is Exception e) ex = e;
             else ex = new GenericErrorException<TError>(error);
-            LogException(ex, argument, caller, path, line);
+            LogException(ex, message, argument, caller, path, line);
 
             return error;
         }
@@ -67,6 +69,7 @@ namespace ContainerExpressions.Containers
         /// <returns>The errors originally provided.</returns>
         public static IEnumerable<TError> LogErrorValue<TError>(
             this IEnumerable<TError> error,
+            Format message = default,
             [CallerArgumentExpression(nameof(error))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -81,7 +84,7 @@ namespace ContainerExpressions.Containers
                 Exception ex;
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(err);
-                LogException(ex, argument, caller, path, line);
+                LogException(ex, message, argument, caller, path, line);
             }
 
             return error;
@@ -92,6 +95,7 @@ namespace ContainerExpressions.Containers
         /// <returns>The errors originally provided.</returns>
         public static TError[] LogErrorValue<TError>(
             this TError[] error,
+            Format message = default,
             [CallerArgumentExpression(nameof(error))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -106,7 +110,7 @@ namespace ContainerExpressions.Containers
                 Exception ex;
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(error[i]);
-                LogException(ex, argument, caller, path, line);
+                LogException(ex, message, argument, caller, path, line);
             }
 
             return error;
@@ -118,7 +122,7 @@ namespace ContainerExpressions.Containers
         /// <returns>The initial error.</returns>
         public static TError LogErrorValue<TError>(
             this TError error,
-            Format message,
+            Format message = default,
             [CallerArgumentExpression(nameof(error))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -131,7 +135,7 @@ namespace ContainerExpressions.Containers
             if (error is Exception e) ex = e;
             else ex = new GenericErrorException<TError>(error, message);
             Trace.Log(message);
-            LogException(ex, argument, caller, path, line);
+            LogException(ex, message, argument, caller, path, line);
 
             return error;
         }
@@ -142,7 +146,7 @@ namespace ContainerExpressions.Containers
         /// <returns>The errors originally provided.</returns>
         public static IEnumerable<TError> LogErrorValue<TError>(
             this IEnumerable<TError> error,
-            Format message,
+            Format message = default,
             [CallerArgumentExpression(nameof(error))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -158,7 +162,7 @@ namespace ContainerExpressions.Containers
                 Exception ex;
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(err, message);
-                LogException(ex, argument, caller, path, line);
+                LogException(ex, message, argument, caller, path, line);
             }
 
             return error;
@@ -170,7 +174,7 @@ namespace ContainerExpressions.Containers
         /// <returns>The errors originally provided.</returns>
         public static TError[] LogErrorValue<TError>(
             this TError[] error,
-            Format message,
+            Format message = default,
             [CallerArgumentExpression(nameof(error))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -186,7 +190,7 @@ namespace ContainerExpressions.Containers
                 Exception ex;
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(error[i], message);
-                LogException(ex, argument, caller, path, line);
+                LogException(ex, message, argument, caller, path, line);
             }
 
             return error;
@@ -212,7 +216,7 @@ namespace ContainerExpressions.Containers
             if (error is Exception e) ex = e;
             else ex = new GenericErrorException<TError>(error, msg);
             Trace.Log(msg);
-            LogException(ex);
+            LogException(ex, msg, argument, caller, path, line);
 
             return error;
         }
@@ -240,7 +244,7 @@ namespace ContainerExpressions.Containers
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(err, msg);
                 Trace.Log(msg);
-                LogException(ex, argument, caller, path, line);
+                LogException(ex, msg, argument, caller, path, line);
             }
 
             return error;
@@ -270,7 +274,7 @@ namespace ContainerExpressions.Containers
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(err, msg);
                 Trace.Log(msg);
-                LogException(ex, argument, caller, path, line);
+                LogException(ex, msg, argument, caller, path, line);
             }
 
             return error;
@@ -301,7 +305,7 @@ namespace ContainerExpressions.Containers
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(err, msg);
                 Trace.Log(msg);
-                LogException(ex, argument, caller, path, line);
+                LogException(ex, msg, argument, caller, path, line);
             }
 
             return error;
@@ -330,7 +334,7 @@ namespace ContainerExpressions.Containers
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(error[i], msg);
                 Trace.Log(msg);
-                LogException(ex, argument, caller, path, line);
+                LogException(ex, msg, argument, caller, path, line);
             }
 
             return error;
@@ -359,7 +363,7 @@ namespace ContainerExpressions.Containers
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(error[i], msg);
                 Trace.Log(msg);
-                LogException(ex, argument, caller, path, line);
+                LogException(ex, msg, argument, caller, path, line);
             }
 
             return error;
@@ -389,7 +393,7 @@ namespace ContainerExpressions.Containers
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(error[i], msg);
                 Trace.Log(msg);
-                LogException(ex, argument, caller, path, line);
+                LogException(ex, msg, argument, caller, path, line);
             }
 
             return error;
@@ -400,6 +404,7 @@ namespace ContainerExpressions.Containers
         /// <returns>The initial exception.</returns>
         public static TError LogError<TError>(
             this TError ex,
+            Format message = default,
             [CallerArgumentExpression(nameof(ex))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -407,15 +412,15 @@ namespace ContainerExpressions.Containers
             ) where TError : Exception
         {
             if (ex == null) return default;
-            LogException(ex, argument, caller, path, line);
+            LogException(ex, message, argument, caller, path, line);
             return ex;
         }
 
         // Log without caturing any caller attributes, so the logs are not confusing (i.e. exposing internal methods / expressions).
-        internal static TError LogErrorPlain<TError>(this TError ex) where TError : Exception
+        internal static TError LogErrorPlain<TError>(this TError ex, Format message = default) where TError : Exception
         {
             if (ex == null) return default;
-            LogException(ex, string.Empty, string.Empty, string.Empty, 0);
+            LogException(ex, message, string.Empty, string.Empty, string.Empty, 0);
             return ex;
         }
 
@@ -424,6 +429,7 @@ namespace ContainerExpressions.Containers
         /// <returns>The initial exception.</returns>
         public static AggregateException LogError(
             this AggregateException ex,
+            Format message = default,
             [CallerArgumentExpression(nameof(ex))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -431,15 +437,15 @@ namespace ContainerExpressions.Containers
             )
         {
             if (ex == null) return default;
-            LogException(ex, argument, caller, path, line);
+            LogException(ex, message, argument, caller, path, line);
             return ex;
         }
 
         // Log without caturing any caller attributes, so the logs are not confusing (i.e. exposing internal methods / expressions).
-        internal static AggregateException LogErrorPlain(this AggregateException ex)
+        internal static AggregateException LogErrorPlain(this AggregateException ex, Format message = default)
         {
             if (ex == null) return default;
-            LogException(ex, string.Empty, string.Empty, string.Empty, 0);
+            LogException(ex, message, string.Empty, string.Empty, string.Empty, 0);
             return ex;
         }
 
@@ -448,6 +454,7 @@ namespace ContainerExpressions.Containers
         /// <returns>The exceptions originally provided.</returns>
         public static IEnumerable<TError> LogError<TError>(
             this IEnumerable<TError> ex,
+            Format message = default,
             [CallerArgumentExpression(nameof(ex))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -455,7 +462,7 @@ namespace ContainerExpressions.Containers
             ) where TError : Exception
         {
             if (ex == null) return default;
-            foreach (var e in ex) LogException(e, argument, caller, path, line);
+            foreach (var e in ex) LogException(e, message, argument, caller, path, line);
             return ex;
         }
 
@@ -464,6 +471,7 @@ namespace ContainerExpressions.Containers
         /// <returns>The exceptions originally provided.</returns>
         public static TError[] LogError<TError>(
             this TError[] ex,
+            Format message = default,
             [CallerArgumentExpression(nameof(ex))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -471,7 +479,7 @@ namespace ContainerExpressions.Containers
             ) where TError : Exception
         {
             if (ex == null) return default;
-            for (int i = 0; i < ex.Length; i++) LogException(ex[i], argument, caller, path, line);
+            for (int i = 0; i < ex.Length; i++) LogException(ex[i], message, argument, caller, path, line);
             return ex;
         }
 
@@ -481,7 +489,7 @@ namespace ContainerExpressions.Containers
         /// <returns>The initial exception.</returns>
         public static TError LogError<TError>(
             this TError ex,
-            Format message,
+            Format message = default,
             [CallerArgumentExpression(nameof(ex))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -490,7 +498,7 @@ namespace ContainerExpressions.Containers
         {
             if (ex == null) return default;
             Trace.Log(message);
-            LogException(ex, argument, caller, path, line);
+            LogException(ex, message, argument, caller, path, line);
             return ex;
         }
 
@@ -500,7 +508,7 @@ namespace ContainerExpressions.Containers
         /// <returns>The exceptions originally provided.</returns>
         public static IEnumerable<TError> LogError<TError>(
             this IEnumerable<TError> ex,
-            Format message,
+            Format message = default,
             [CallerArgumentExpression(nameof(ex))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -509,7 +517,7 @@ namespace ContainerExpressions.Containers
         {
             if (ex == null) return default;
             Trace.Log(message);
-            foreach (var e in ex) LogException(e, argument, caller, path, line);
+            foreach (var e in ex) LogException(e, message, argument, caller, path, line);
             return ex;
         }
 
@@ -519,7 +527,7 @@ namespace ContainerExpressions.Containers
         /// <returns>The exceptions originally provided.</returns>
         public static TError[] LogError<TError>(
             this TError[] ex,
-            Format message,
+            Format message = default,
             [CallerArgumentExpression(nameof(ex))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -528,7 +536,7 @@ namespace ContainerExpressions.Containers
         {
             if (ex == null) return default;
             Trace.Log(message);
-            for (int i = 0; i < ex.Length; i++) LogException(ex[i], argument, caller, path, line);
+            for (int i = 0; i < ex.Length; i++) LogException(ex[i], message, argument, caller, path, line);
             return ex;
         }
 
@@ -546,8 +554,9 @@ namespace ContainerExpressions.Containers
             ) where TError : Exception
         {
             if (ex == null) return default;
-            Trace.Log(message(ex));
-            LogException(ex, argument, caller, path, line);
+            var msg = message(ex);
+            Trace.Log(msg);
+            LogException(ex, msg, argument, caller, path, line);
             return ex;
         }
 
@@ -565,7 +574,7 @@ namespace ContainerExpressions.Containers
             ) where TError : Exception
         {
             if (ex == null) return default;
-            foreach (var e in ex) { Trace.Log(message(e)); LogException(e, argument, caller, path, line); }
+            foreach (var e in ex) { var msg = message(e); Trace.Log(msg); LogException(e, msg, argument, caller, path, line); }
             return ex;
         }
 
@@ -584,7 +593,7 @@ namespace ContainerExpressions.Containers
         {
             if (ex == null) return default;
             int i = 0;
-            foreach (var e in ex) { Trace.Log(message(e, Index.From(i++))); LogException(e, argument, caller, path, line); }
+            foreach (var e in ex) { var msg = message(e, Index.From(i++)); Trace.Log(msg); LogException(e, msg, argument, caller, path, line); }
             return ex;
         }
 
@@ -604,7 +613,7 @@ namespace ContainerExpressions.Containers
             if (ex == null) return default;
             int i = 0, count = ex is List<TError> lst ? lst.Count : ex.Count();
             var length = Length.From(count);
-            foreach (var e in ex) { Trace.Log(message(e, Index.From(i++), length)); LogException(e, argument, caller, path, line); }
+            foreach (var e in ex) { var msg = message(e, Index.From(i++), length); Trace.Log(msg); LogException(e, msg, argument, caller, path, line); }
             return ex;
         }
 
@@ -622,7 +631,7 @@ namespace ContainerExpressions.Containers
             ) where TError : Exception
         {
             if (ex == null) return default;
-            for (int i = 0; i < ex.Length; i++) { Trace.Log(message(ex[i])); LogException(ex[i], argument, caller, path, line); }
+            for (int i = 0; i < ex.Length; i++) { var msg = message(ex[i]); Trace.Log(msg); LogException(ex[i], msg, argument, caller, path, line); }
             return ex;
         }
 
@@ -641,7 +650,7 @@ namespace ContainerExpressions.Containers
             ) where TError : Exception
         {
             if (ex == null) return default;
-            for (int i = 0; i < ex.Length; i++) { Trace.Log(message(ex[i], Index.From(i))); LogException(ex[i], argument, caller, path, line); }
+            for (int i = 0; i < ex.Length; i++) { var msg = message(ex[i], Index.From(i)); Trace.Log(msg); LogException(ex[i], msg, argument, caller, path, line); }
             return ex;
         }
 
@@ -660,7 +669,7 @@ namespace ContainerExpressions.Containers
         {
             if (ex == null) return default;
             var length = Length.From(ex.Length);
-            for (int i = 0; i < ex.Length; i++) { Trace.Log(message(ex[i], Index.From(i), length)); LogException(ex[i], argument, caller, path, line); }
+            for (int i = 0; i < ex.Length; i++) { var msg = message(ex[i], Index.From(i), length); Trace.Log(msg); LogException(ex[i], msg, argument, caller, path, line); }
             return ex;
         }
 
@@ -911,8 +920,8 @@ namespace ContainerExpressions.Containers
 
             if (!maybe._hasValue)
             {
-                LogErrorValue(maybe._error, argument, caller, path, line);
-                LogErrorValue(maybe.AggregateErrors, argument, caller, path, line);
+                LogErrorValue(maybe._error, Format.Default, argument, caller, path, line);
+                LogErrorValue(maybe.AggregateErrors, Format.Default, argument, caller, path, line);
             }
 
             return maybe;
@@ -937,8 +946,8 @@ namespace ContainerExpressions.Containers
 
             if (!maybe._hasValue)
             {
-                LogErrorValue(maybe._error, argument, caller, path, line);
-                LogErrorValue(maybe.AggregateErrors, argument, caller, path, line);
+                LogErrorValue(maybe._error, Format.Default, argument, caller, path, line);
+                LogErrorValue(maybe.AggregateErrors, Format.Default, argument, caller, path, line);
             }
 
             return maybe;
@@ -963,8 +972,8 @@ namespace ContainerExpressions.Containers
 
             if (!maybe._hasValue)
             {
-                LogError(maybe._error, argument, caller, path, line);
-                LogError(maybe.AggregateErrors, argument, caller, path, line);
+                LogError(maybe._error, Format.Default, argument, caller, path, line);
+                LogError(maybe.AggregateErrors, Format.Default, argument, caller, path, line);
             }
 
             return maybe;
@@ -989,8 +998,8 @@ namespace ContainerExpressions.Containers
 
             if (!maybe._hasValue)
             {
-                LogError(maybe._error, argument, caller, path, line);
-                LogError(maybe.AggregateErrors, argument, caller, path, line);
+                LogError(maybe._error, Format.Default, argument, caller, path, line);
+                LogError(maybe.AggregateErrors, Format.Default, argument, caller, path, line);
             }
 
             return maybe;
