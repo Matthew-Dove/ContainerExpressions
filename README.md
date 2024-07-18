@@ -1074,4 +1074,4 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * Changed exception throwing function from `void ThrowError<T>` to `T ThrowError<T>`, allowing it to be used in more places that need a result (*such as switch pattern matching*).
 * Removed `WhenT1Async`, due to the use of generics there was no difference between that, and `WhenT1` (*i.e. the non-async version*).
 * Removed the string alias `Message` used in logging, and replaced it with a `Format` type; which has the message template, as well as the args.
- 
+* Added a new formatted logger for trace messages (`Trace.SetFormattedLogger`), and error logs (`Try.SetFormattedExceptionLogger`).
