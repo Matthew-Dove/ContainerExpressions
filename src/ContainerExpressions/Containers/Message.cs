@@ -25,7 +25,7 @@ namespace ContainerExpressions.Containers
             return _reference;
         }
 
-        public TMessage Get<TMessage>()
+        public Response<TMessage> Get<TMessage>()
         {
             return MessageBase.Get(_reference, default(TMessage));
         }
@@ -40,10 +40,10 @@ namespace ContainerExpressions.Containers
             _dic.TryAdd(reference, message);
         }
 
-        public static TMessage Get(TReference reference)
+        public static Response<TMessage> Get(TReference reference)
         {
-            _dic.TryRemove(reference, out TMessage message);
-            return message;
+            var result = _dic.TryRemove(reference, out TMessage message);
+            return result ? Response.Create(message) : Response<TMessage>.Error;
         }
     }
 
@@ -54,7 +54,7 @@ namespace ContainerExpressions.Containers
             MessageCache<TReference, TMessage>.Set(reference, message);
         }
 
-        public static TMessage Get<TReference, TMessage>(TReference reference, TMessage message)
+        public static Response<TMessage> Get<TReference, TMessage>(TReference reference, TMessage message)
         {
             return MessageCache<TReference, TMessage>.Get(reference);
         }

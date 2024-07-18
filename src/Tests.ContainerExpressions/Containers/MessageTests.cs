@@ -25,7 +25,7 @@ namespace Tests.ContainerExpressions.Containers
             var reference = Guid.NewGuid().Message().Set(message);
 
             Assert.AreEqual(message, reference.Message().Get<int>());
-            Assert.AreEqual(default, reference.Message().Get<int>());
+            Assert.IsFalse(reference.Message().Get<int>());
         }
 
         [TestMethod]
@@ -33,7 +33,7 @@ namespace Tests.ContainerExpressions.Containers
         {
             var reference = Guid.NewGuid();
 
-            Assert.AreEqual(default, reference.Message().Get<int>());
+            Assert.IsFalse(reference.Message().Get<int>());
         }
     }
 }
