@@ -79,7 +79,7 @@ namespace ContainerExpressions.Containers
             [CallerLineNumber] int line = 0
             ) => response.ContinueWith(t =>
         {
-            if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
+            if (t.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
             if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result.Value;
             return defaultValue;
         });
@@ -450,7 +450,7 @@ namespace ContainerExpressions.Containers
             return response.ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result.Value;
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
                 return new Response();
             });
         }
@@ -467,15 +467,15 @@ namespace ContainerExpressions.Containers
             return response.ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result.Value;
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
                 return Task.FromResult(new Response());
             }).ContinueWith(t =>
             {
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
                 if (t.Status == TaskStatus.RanToCompletion)
                 {
                     if (t.Result.Status == TaskStatus.RanToCompletion) return t.Result.Result;
-                    if (t.Result.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
+                    if (t.Result.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
                 }
                 return new Response();
             });
@@ -500,7 +500,7 @@ namespace ContainerExpressions.Containers
             return response.ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result.Value;
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
                 return new Response<T>();
             });
         }
@@ -517,15 +517,15 @@ namespace ContainerExpressions.Containers
             return response.ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.RanToCompletion && t.Result.IsValid) return t.Result.Value;
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
                 return Task.FromResult(new Response<T>());
             }).ContinueWith(t =>
             {
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
                 if (t.Status == TaskStatus.RanToCompletion)
                 {
                     if (t.Result.Status == TaskStatus.RanToCompletion && t.Result.Result.IsValid) return t.Result.Result;
-                    if (t.Result.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
+                    if (t.Result.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
                 }
                 return new Response<T>();
             });

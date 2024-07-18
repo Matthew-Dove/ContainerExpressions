@@ -25,13 +25,17 @@ namespace ContainerExpressions.Containers
             if (other.Message is null && other.Args is null) return Message is null && Args is null;
             if (other.Message is null) return Message is null && other.Args.Length == Args.Length && (other.Args.Length == 0 || other.Args.SequenceEqual(Args));
             if ((other.Args is null || other.Args.Length == 0) && (Args is null || Args.Length == 0)) return other.Message.Equals(Message);
-            
+
+            if (Message is null && Args is null) return other.Message is null && other.Args is null;
+            if (Message is null) return other.Message is null && Args.Length == other.Args.Length && (Args.Length == 0 || Args.SequenceEqual(other.Args));
+            if ((Args is null || Args.Length == 0) && (other.Args is null || other.Args.Length == 0)) return Message.Equals(other.Message);
+
             return
                 (other.Args.Length == Args.Length && (other.Args.Length == 0 || other.Args.SequenceEqual(Args)) && other.Message.Equals(Message))
                 ||
-                ((other.Args is null || other.Args.Length == 0) && other.Message.Equals(GetMessageTemplate(Message, Args)))
+                (other.Args.Length == 0 && other.Message.Equals(GetMessageTemplate(Message, Args)))
                 ||
-                ((Args is null || Args.Length == 0) && Message.Equals(GetMessageTemplate(other.Message, other.Args)));
+                (Args.Length == 0 && Message.Equals(GetMessageTemplate(other.Message, other.Args)));
         }
 
         public override string ToString() => GetMessageTemplate(Message, Args);

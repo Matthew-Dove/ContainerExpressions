@@ -59,7 +59,7 @@ namespace ContainerExpressions.Containers
             {
                 if (t.Status == TaskStatus.Faulted)
                 {
-                    t.Exception.LogError(argument, caller, path, line);
+                    t.Exception.LogError(Format.Default, argument, caller, path, line);
                 }
                 return t.Status == TaskStatus.RanToCompletion ? Unit<TError>.MaybeValue : Unit<TError>.MaybeError(error);
             });
@@ -79,7 +79,7 @@ namespace ContainerExpressions.Containers
             {
                 if (t.Status == TaskStatus.Faulted)
                 {
-                    t.Exception.LogError(argument, caller, path, line);
+                    t.Exception.LogError(Format.Default, argument, caller, path, line);
                 }
                 return t.Status == TaskStatus.RanToCompletion ? new Maybe<TValue, TError>(t.Result) : new Maybe<TValue, TError>(error);
             });
@@ -832,7 +832,7 @@ namespace ContainerExpressions.Containers
             return maybe.ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.RanToCompletion) return t.Result.Unpack();
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
                 return new Maybe<TValue, TError>(error);
             });
         }
@@ -854,14 +854,14 @@ namespace ContainerExpressions.Containers
                     if (t.Result._hasValue) return t.Result._value;
                     return Task.FromResult(Maybe.CreateError<TValue, TError>(t.Result._error));
                 }
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
                 return Task.FromResult(Maybe.CreateError<TValue, TError>(error));
             }).ContinueWith(t =>
             {
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
                 if (t.Status == TaskStatus.RanToCompletion)
                 {
-                    if (t.Result.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
+                    if (t.Result.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
                     if (t.Result.Status == TaskStatus.RanToCompletion) return t.Result.Result;
                 }
                 return new Maybe<TValue, TError>(error);

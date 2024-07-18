@@ -44,80 +44,6 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Logs a custom error type.</summary>
         /// <param name="error">The custom error type to log (i.e. not an exception).</param>
-        /// <returns>The initial error.</returns>
-        public static TError LogErrorValue<TError>(
-            this TError error,
-            Format message = default,
-            [CallerArgumentExpression(nameof(error))] string argument = "",
-            [CallerMemberName] string caller = "",
-            [CallerFilePath] string path = "",
-            [CallerLineNumber] int line = 0
-            )
-        {
-            if (error == null) return default;
-
-            Exception ex;
-            if (error is Exception e) ex = e;
-            else ex = new GenericErrorException<TError>(error);
-            LogException(ex, message, argument, caller, path, line);
-
-            return error;
-        }
-
-        /// <summary>Logs custom error types.</summary>
-        /// <param name="error">The custom error types to log (i.e. not exceptions).</param>
-        /// <returns>The errors originally provided.</returns>
-        public static IEnumerable<TError> LogErrorValue<TError>(
-            this IEnumerable<TError> error,
-            Format message = default,
-            [CallerArgumentExpression(nameof(error))] string argument = "",
-            [CallerMemberName] string caller = "",
-            [CallerFilePath] string path = "",
-            [CallerLineNumber] int line = 0
-            )
-        {
-            if (error == null) return default;
-
-            foreach (var err in error)
-            {
-                if (err == null) continue;
-                Exception ex;
-                if (error is Exception e) ex = e;
-                else ex = new GenericErrorException<TError>(err);
-                LogException(ex, message, argument, caller, path, line);
-            }
-
-            return error;
-        }
-
-        /// <summary>Logs custom error types.</summary>
-        /// <param name="error">The custom error types to log (i.e. not exceptions).</param>
-        /// <returns>The errors originally provided.</returns>
-        public static TError[] LogErrorValue<TError>(
-            this TError[] error,
-            Format message = default,
-            [CallerArgumentExpression(nameof(error))] string argument = "",
-            [CallerMemberName] string caller = "",
-            [CallerFilePath] string path = "",
-            [CallerLineNumber] int line = 0
-            )
-        {
-            if (error == null) return default;
-
-            for (int i = 0; i < error.Length; i++)
-            {
-                if (error[i] == null) continue;
-                Exception ex;
-                if (error is Exception e) ex = e;
-                else ex = new GenericErrorException<TError>(error[i]);
-                LogException(ex, message, argument, caller, path, line);
-            }
-
-            return error;
-        }
-
-        /// <summary>Logs a custom error type.</summary>
-        /// <param name="error">The custom error type to log (i.e. not an exception).</param>
         /// <param name="message">The message to trace.</param>
         /// <returns>The initial error.</returns>
         public static TError LogErrorValue<TError>(
@@ -182,7 +108,7 @@ namespace ContainerExpressions.Containers
             )
         {
             if (error == null) return default;
-            
+
             Trace.Log(message);
             for (int i = 0; i < error.Length; i++)
             {
@@ -399,23 +325,6 @@ namespace ContainerExpressions.Containers
             return error;
         }
 
-        /// <summary>Logs an exception.</summary>
-        /// <param name="ex">The exception to log.</param>
-        /// <returns>The initial exception.</returns>
-        public static TError LogError<TError>(
-            this TError ex,
-            Format message = default,
-            [CallerArgumentExpression(nameof(ex))] string argument = "",
-            [CallerMemberName] string caller = "",
-            [CallerFilePath] string path = "",
-            [CallerLineNumber] int line = 0
-            ) where TError : Exception
-        {
-            if (ex == null) return default;
-            LogException(ex, message, argument, caller, path, line);
-            return ex;
-        }
-
         // Log without caturing any caller attributes, so the logs are not confusing (i.e. exposing internal methods / expressions).
         internal static TError LogErrorPlain<TError>(this TError ex, Format message = default) where TError : Exception
         {
@@ -446,40 +355,6 @@ namespace ContainerExpressions.Containers
         {
             if (ex == null) return default;
             LogException(ex, message, string.Empty, string.Empty, string.Empty, 0);
-            return ex;
-        }
-
-        /// <summary>Logs many exceptions.</summary>
-        /// <param name="ex">The exceptions to log.</param>
-        /// <returns>The exceptions originally provided.</returns>
-        public static IEnumerable<TError> LogError<TError>(
-            this IEnumerable<TError> ex,
-            Format message = default,
-            [CallerArgumentExpression(nameof(ex))] string argument = "",
-            [CallerMemberName] string caller = "",
-            [CallerFilePath] string path = "",
-            [CallerLineNumber] int line = 0
-            ) where TError : Exception
-        {
-            if (ex == null) return default;
-            foreach (var e in ex) LogException(e, message, argument, caller, path, line);
-            return ex;
-        }
-
-        /// <summary>Logs many exceptions.</summary>
-        /// <param name="ex">The exceptions to log.</param>
-        /// <returns>The exceptions originally provided.</returns>
-        public static TError[] LogError<TError>(
-            this TError[] ex,
-            Format message = default,
-            [CallerArgumentExpression(nameof(ex))] string argument = "",
-            [CallerMemberName] string caller = "",
-            [CallerFilePath] string path = "",
-            [CallerLineNumber] int line = 0
-            ) where TError : Exception
-        {
-            if (ex == null) return default;
-            for (int i = 0; i < ex.Length; i++) LogException(ex[i], message, argument, caller, path, line);
             return ex;
         }
 

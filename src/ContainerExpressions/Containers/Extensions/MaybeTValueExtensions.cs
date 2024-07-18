@@ -62,7 +62,7 @@ namespace ContainerExpressions.Containers
                 if (t.Status == TaskStatus.Faulted)
                 {
                     ex = t.Exception;
-                    t.Exception.LogError(argument, caller, path, line);
+                    t.Exception.LogError(Format.Default, argument, caller, path, line);
                 }
                 return t.Status == TaskStatus.RanToCompletion ? Unit.MaybeValue : Unit.MaybeError(ex);
             });
@@ -83,7 +83,7 @@ namespace ContainerExpressions.Containers
                 if (t.Status == TaskStatus.Faulted)
                 {
                     ex = t.Exception;
-                    t.Exception.LogError(argument, caller, path, line);
+                    t.Exception.LogError(Format.Default, argument, caller, path, line);
                 }
                 return t.Status == TaskStatus.RanToCompletion ? new Maybe<TValue>(t.Result) : new Maybe<TValue>(ex);
             });
@@ -446,7 +446,7 @@ namespace ContainerExpressions.Containers
             {
                 var ex = _taskExCache;
                 if (t.Status == TaskStatus.RanToCompletion) return t.Result.Unpack();
-                if (t.Status == TaskStatus.Faulted) { ex = t.Exception; t.Exception.LogError(argument, caller, path, line); }
+                if (t.Status == TaskStatus.Faulted) { ex = t.Exception; t.Exception.LogError(Format.Default, argument, caller, path, line); }
                 return new Maybe<TValue>(ex);
             });
         }
@@ -468,15 +468,15 @@ namespace ContainerExpressions.Containers
                     if (t.Result._hasValue) return t.Result._value;
                     return Task.FromResult(Maybe.CreateError<TValue>(t.Result._error));
                 }
-                if (t.Status == TaskStatus.Faulted) { ex = t.Exception; t.Exception.LogError(argument, caller, path, line); }
+                if (t.Status == TaskStatus.Faulted) { ex = t.Exception; t.Exception.LogError(Format.Default, argument, caller, path, line); }
                 return Task.FromResult(Maybe.CreateError<TValue>(ex));
             }).ContinueWith(t =>
             {
                 var ex = _taskExCache;
-                if (t.Status == TaskStatus.Faulted) { ex = t.Exception; t.Exception.LogError(argument, caller, path, line); }
+                if (t.Status == TaskStatus.Faulted) { ex = t.Exception; t.Exception.LogError(Format.Default, argument, caller, path, line); }
                 if (t.Status == TaskStatus.RanToCompletion)
                 {
-                    if (t.Result.Status == TaskStatus.Faulted) { ex = t.Exception; t.Exception.LogError(argument, caller, path, line); }
+                    if (t.Result.Status == TaskStatus.Faulted) { ex = t.Exception; t.Exception.LogError(Format.Default, argument, caller, path, line); }
                     if (t.Result.Status == TaskStatus.RanToCompletion) return t.Result.Result;
                 }
                 return new Maybe<TValue>(ex);

@@ -231,14 +231,14 @@ namespace ContainerExpressions.Containers
             if (task.IsCompleted)
             {
                 if (task.IsCompletedSuccessfully) return new ValueTask<Response>(Response.Success);
-                if (task.IsFaulted) task.AsTask().Exception.LogError(argument, caller, path, line);
+                if (task.IsFaulted) task.AsTask().Exception.LogError(Format.Default, argument, caller, path, line);
                 return new ValueTask<Response>(Response.Error);
             }
 
             return new ValueTask<Response>(task.AsTask().ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.RanToCompletion) return Response.Success;
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
                 return Response.Error;
             }));
         }
@@ -255,13 +255,13 @@ namespace ContainerExpressions.Containers
             if (task.IsCompleted)
             {
                 if (task.IsCompletedSuccessfully) return new ValueTask<Response<T>>(Response.Create(task.Result));
-                if (task.IsFaulted) task.AsTask().Exception.LogError(argument, caller, path, line);
+                if (task.IsFaulted) task.AsTask().Exception.LogError(Format.Default, argument, caller, path, line);
                 return new ValueTask<Response<T>>(Response.Create<T>());
             }
 
             return new ValueTask<Response<T>>(task.AsTask().ContinueWith(t =>
             {
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
                 if (t.Status == TaskStatus.RanToCompletion) return Response.Create(t.Result);
                 return Response.Create<T>();
             }));
@@ -279,7 +279,7 @@ namespace ContainerExpressions.Containers
             return task.ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.RanToCompletion) return new Response(true);
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
                 return new Response();
             });
         }
@@ -296,7 +296,7 @@ namespace ContainerExpressions.Containers
             return task.ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.RanToCompletion) return new Response<T>(t.Result);
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(argument, caller, path, line);
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
                 return new Response<T>();
             });
         }
