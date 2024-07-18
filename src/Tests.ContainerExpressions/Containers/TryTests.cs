@@ -15,7 +15,7 @@ namespace Tests.ContainerExpressions.Containers
             var isRan = false;
             var isErrorsLogged = false;
             Action action = () => { isRan = true; };
-            Try.SetExceptionLogger((ex) => { isErrorsLogged = true; });
+            Try.SetFormattedExceptionLogger((ex, _, _) => isErrorsLogged = true);
 
             var result = Try.Run(action);
 
@@ -55,7 +55,7 @@ namespace Tests.ContainerExpressions.Containers
             Action errorMethod = () => { throw new Exception(); };
 
             var result = Try.Run(errorMethod);
-            Try.SetExceptionLogger((ex) => loggerWasCalled = false);
+            Try.SetFormattedExceptionLogger((ex, _, _) => loggerWasCalled = false);
 
             Assert.IsFalse(result);
             Assert.IsTrue(loggerWasCalled);
@@ -71,7 +71,7 @@ namespace Tests.ContainerExpressions.Containers
             var answer = Guid.NewGuid();
             var isErrorsLogged = false;
             Func<Guid> func = () => answer;
-            Try.SetExceptionLogger((ex) => { isErrorsLogged = true; });
+            Try.SetFormattedExceptionLogger((ex, _, _) => isErrorsLogged = true);
 
             var result = Try.Run(func);
 

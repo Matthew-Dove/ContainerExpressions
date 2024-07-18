@@ -34,7 +34,7 @@ namespace Tests.ContainerExpressions.Examples
         public void Try_Example()
         {
             var errorsLogged = 0;
-            Try.SetExceptionLogger((_) => errorsLogged++);
+            Try.SetFormattedExceptionLogger((_, _, _) => errorsLogged++);
 
             var widget = new Widget();
             var result = Try.Run(() => Persist(widget));

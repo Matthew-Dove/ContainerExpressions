@@ -170,7 +170,7 @@ namespace Tests.ContainerExpressions.Containers
         public async Task Error_Logging()
         {
             var msg = string.Empty;
-            Try.SetExceptionLogger(ex => msg = ex.Message);
+            Try.SetFormattedExceptionLogger((ex, _, _) => msg = ex.Message);
 
             var result = await ThrowError();
 
