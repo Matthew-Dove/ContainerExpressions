@@ -16,7 +16,7 @@ namespace Tests.ContainerExpressions.Examples
         public async Task ResponseAsync_Captures_Exceptions()
         {
             var errorMessage = string.Empty;
-            Try.SetExceptionLogger(ex => errorMessage = ex.Message);
+            Try.SetFormattedExceptionLogger((ex, _, _) => errorMessage = ex.Message);
 
             var value = await GetValue();
             var error = await GetError();

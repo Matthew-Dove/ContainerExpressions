@@ -12,12 +12,16 @@ namespace Tests.ContainerExpressions.Containers
     public class TraceTests
     {
         private List<string> _messages = null;
+        private List<string> _errors = null;
 
         [TestInitialize]
         public void Initialize()
         {
             _messages = new List<string>();
             Trace.SetLogger(message => _messages.Add(message));
+
+            _errors = new List<string>();
+            Try.SetFormattedExceptionLogger((ex, msg, args) => _errors.Add(msg));
         }
 
         #region T
@@ -254,7 +258,7 @@ namespace Tests.ContainerExpressions.Containers
 
             var maybe = new Maybe<string, Guid>(input).Log(x => string.Empty, trace);
 
-            Assert.AreEqual(input, Guid.Parse(_messages.Single()));
+            Assert.AreEqual(input, Guid.Parse(_errors.Single()));
         }
 
         [TestMethod]
@@ -270,7 +274,7 @@ namespace Tests.ContainerExpressions.Containers
         {
             var maybe = new Maybe<int, string>("Input").Log("Value", "Error");
 
-            Assert.AreEqual("Error", _messages.Single());
+            Assert.AreEqual("Error", _errors.Single());
         }
 
         [TestMethod]
@@ -293,7 +297,7 @@ namespace Tests.ContainerExpressions.Containers
 
             var maybe = new Maybe<Guid>(input).Log(x => string.Empty, trace);
 
-            Assert.AreEqual(msg, _messages.Single());
+            Assert.AreEqual(msg, _errors.Single());
         }
 
         [TestMethod]
@@ -309,7 +313,7 @@ namespace Tests.ContainerExpressions.Containers
         {
             var maybe = new Maybe<string>(new Exception("Input")).Log("Value", "Error");
 
-            Assert.AreEqual("Error", _messages.Single());
+            Assert.AreEqual("Error", _errors.Single());
         }
 
         #endregion
@@ -382,7 +386,7 @@ namespace Tests.ContainerExpressions.Containers
 
             var maybe = await Task.FromResult(new Maybe<string, Guid>(input)).LogAsync(x => string.Empty, trace);
 
-            Assert.AreEqual(input, Guid.Parse(_messages.Single()));
+            Assert.AreEqual(input, Guid.Parse(_errors.Single()));
         }
 
         [TestMethod]
@@ -405,7 +409,7 @@ namespace Tests.ContainerExpressions.Containers
 
             var maybe = await Task.FromResult(new Maybe<Guid>(input)).LogAsync(x => string.Empty, trace);
 
-            Assert.AreEqual(msg, _messages.Single());
+            Assert.AreEqual(msg, _errors.Single());
         }
 
         #endregion

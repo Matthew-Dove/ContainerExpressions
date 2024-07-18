@@ -38,7 +38,7 @@ namespace Tests.ContainerExpressions.Containers
         public void Base_MethodThrowsError_LoggerIsCalled()
         {
             var loggerWasCalled = false;
-            Try.SetExceptionLogger((ex) => loggerWasCalled = true);
+            Try.SetFormattedExceptionLogger((ex, _, _) => loggerWasCalled = true);
             Action errorMethod = () => { throw new Exception(); };
 
             var result = Try.Run(errorMethod);
@@ -51,7 +51,7 @@ namespace Tests.ContainerExpressions.Containers
         public void Base_WhenLoggerIsRemoved_InstancesStillWorkWithTheLoggerTheyWhereCreatedWith()
         {
             var loggerWasCalled = false;
-            Try.SetExceptionLogger((ex) => loggerWasCalled = true);
+            Try.SetFormattedExceptionLogger((ex, _, _) => loggerWasCalled = true);
             Action errorMethod = () => { throw new Exception(); };
 
             var result = Try.Run(errorMethod);
@@ -94,7 +94,7 @@ namespace Tests.ContainerExpressions.Containers
         public void MethodThrowsError_LoggerIsCalled()
         {
             var loggerWasCalled = false;
-            Try.SetExceptionLogger((ex) => loggerWasCalled = true);
+            Try.SetFormattedExceptionLogger((ex, _, _) => loggerWasCalled = true);
             Func<int> errorMethod = () => { throw new Exception(); };
 
             var result = Try.Run(errorMethod);
@@ -107,11 +107,11 @@ namespace Tests.ContainerExpressions.Containers
         public void WhenLoggerIsRemoved_InstancesStillWorkWithTheLoggerTheyWhereCreatedWith()
         {
             var loggerWasCalled = false;
-            Try.SetExceptionLogger((ex) => loggerWasCalled = true);
+            Try.SetFormattedExceptionLogger((ex, _, _) => loggerWasCalled = true);
             Func<int> errorMethod = () => { throw new Exception(); };
 
             var result = Try.Run(errorMethod);
-            Try.SetExceptionLogger((ex) => loggerWasCalled = false);
+            Try.SetFormattedExceptionLogger((ex, _, _) => loggerWasCalled = false);
 
             Assert.IsFalse(result);
             Assert.IsTrue(loggerWasCalled);

@@ -60,7 +60,6 @@ namespace ContainerExpressions.Containers
             Exception ex;
             if (error is Exception e) ex = e;
             else ex = new GenericErrorException<TError>(error, message);
-            Trace.Log(message);
             LogException(ex, message, argument, caller, path, line);
 
             return error;
@@ -81,7 +80,6 @@ namespace ContainerExpressions.Containers
         {
             if (error == null) return default;
 
-            Trace.Log(message);
             foreach (var err in error)
             {
                 if (err == null) continue;
@@ -109,7 +107,6 @@ namespace ContainerExpressions.Containers
         {
             if (error == null) return default;
 
-            Trace.Log(message);
             for (int i = 0; i < error.Length; i++)
             {
                 if (error[i] == null) continue;
@@ -141,7 +138,6 @@ namespace ContainerExpressions.Containers
             Exception ex;
             if (error is Exception e) ex = e;
             else ex = new GenericErrorException<TError>(error, msg);
-            Trace.Log(msg);
             LogException(ex, msg, argument, caller, path, line);
 
             return error;
@@ -169,7 +165,6 @@ namespace ContainerExpressions.Containers
                 Exception ex;
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(err, msg);
-                Trace.Log(msg);
                 LogException(ex, msg, argument, caller, path, line);
             }
 
@@ -199,7 +194,6 @@ namespace ContainerExpressions.Containers
                 Exception ex;
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(err, msg);
-                Trace.Log(msg);
                 LogException(ex, msg, argument, caller, path, line);
             }
 
@@ -230,7 +224,6 @@ namespace ContainerExpressions.Containers
                 Exception ex;
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(err, msg);
-                Trace.Log(msg);
                 LogException(ex, msg, argument, caller, path, line);
             }
 
@@ -259,7 +252,6 @@ namespace ContainerExpressions.Containers
                 Exception ex;
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(error[i], msg);
-                Trace.Log(msg);
                 LogException(ex, msg, argument, caller, path, line);
             }
 
@@ -288,7 +280,6 @@ namespace ContainerExpressions.Containers
                 Exception ex;
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(error[i], msg);
-                Trace.Log(msg);
                 LogException(ex, msg, argument, caller, path, line);
             }
 
@@ -318,7 +309,6 @@ namespace ContainerExpressions.Containers
                 Exception ex;
                 if (error is Exception e) ex = e;
                 else ex = new GenericErrorException<TError>(error[i], msg);
-                Trace.Log(msg);
                 LogException(ex, msg, argument, caller, path, line);
             }
 
@@ -372,7 +362,6 @@ namespace ContainerExpressions.Containers
             ) where TError : Exception
         {
             if (ex == null) return default;
-            Trace.Log(message);
             LogException(ex, message, argument, caller, path, line);
             return ex;
         }
@@ -391,7 +380,6 @@ namespace ContainerExpressions.Containers
             ) where TError : Exception
         {
             if (ex == null) return default;
-            Trace.Log(message);
             foreach (var e in ex) LogException(e, message, argument, caller, path, line);
             return ex;
         }
@@ -410,7 +398,6 @@ namespace ContainerExpressions.Containers
             ) where TError : Exception
         {
             if (ex == null) return default;
-            Trace.Log(message);
             for (int i = 0; i < ex.Length; i++) LogException(ex[i], message, argument, caller, path, line);
             return ex;
         }
@@ -430,7 +417,6 @@ namespace ContainerExpressions.Containers
         {
             if (ex == null) return default;
             var msg = message(ex);
-            Trace.Log(msg);
             LogException(ex, msg, argument, caller, path, line);
             return ex;
         }
@@ -449,7 +435,7 @@ namespace ContainerExpressions.Containers
             ) where TError : Exception
         {
             if (ex == null) return default;
-            foreach (var e in ex) { var msg = message(e); Trace.Log(msg); LogException(e, msg, argument, caller, path, line); }
+            foreach (var e in ex) { var msg = message(e); LogException(e, msg, argument, caller, path, line); }
             return ex;
         }
 
@@ -468,7 +454,7 @@ namespace ContainerExpressions.Containers
         {
             if (ex == null) return default;
             int i = 0;
-            foreach (var e in ex) { var msg = message(e, Index.From(i++)); Trace.Log(msg); LogException(e, msg, argument, caller, path, line); }
+            foreach (var e in ex) { var msg = message(e, Index.From(i++)); LogException(e, msg, argument, caller, path, line); }
             return ex;
         }
 
@@ -488,7 +474,7 @@ namespace ContainerExpressions.Containers
             if (ex == null) return default;
             int i = 0, count = ex is List<TError> lst ? lst.Count : ex.Count();
             var length = Length.From(count);
-            foreach (var e in ex) { var msg = message(e, Index.From(i++), length); Trace.Log(msg); LogException(e, msg, argument, caller, path, line); }
+            foreach (var e in ex) { var msg = message(e, Index.From(i++), length); LogException(e, msg, argument, caller, path, line); }
             return ex;
         }
 
@@ -506,7 +492,7 @@ namespace ContainerExpressions.Containers
             ) where TError : Exception
         {
             if (ex == null) return default;
-            for (int i = 0; i < ex.Length; i++) { var msg = message(ex[i]); Trace.Log(msg); LogException(ex[i], msg, argument, caller, path, line); }
+            for (int i = 0; i < ex.Length; i++) { var msg = message(ex[i]); LogException(ex[i], msg, argument, caller, path, line); }
             return ex;
         }
 
@@ -525,7 +511,7 @@ namespace ContainerExpressions.Containers
             ) where TError : Exception
         {
             if (ex == null) return default;
-            for (int i = 0; i < ex.Length; i++) { var msg = message(ex[i], Index.From(i)); Trace.Log(msg); LogException(ex[i], msg, argument, caller, path, line); }
+            for (int i = 0; i < ex.Length; i++) { var msg = message(ex[i], Index.From(i)); LogException(ex[i], msg, argument, caller, path, line); }
             return ex;
         }
 
@@ -544,7 +530,7 @@ namespace ContainerExpressions.Containers
         {
             if (ex == null) return default;
             var length = Length.From(ex.Length);
-            for (int i = 0; i < ex.Length; i++) { var msg = message(ex[i], Index.From(i), length); Trace.Log(msg); LogException(ex[i], msg, argument, caller, path, line); }
+            for (int i = 0; i < ex.Length; i++) { var msg = message(ex[i], Index.From(i), length); LogException(ex[i], msg, argument, caller, path, line); }
             return ex;
         }
 
@@ -791,12 +777,12 @@ namespace ContainerExpressions.Containers
             )
         {
             var message = maybe.Match(value, error);
-            Trace.Log(message);
+            if (maybe._hasValue) Trace.Log(message);
 
             if (!maybe._hasValue)
             {
-                LogErrorValue(maybe._error, Format.Default, argument, caller, path, line);
-                LogErrorValue(maybe.AggregateErrors, Format.Default, argument, caller, path, line);
+                LogErrorValue(maybe._error, message, argument, caller, path, line);
+                LogErrorValue(maybe.AggregateErrors, message, argument, caller, path, line);
             }
 
             return maybe;
@@ -817,12 +803,12 @@ namespace ContainerExpressions.Containers
             )
         {
             var message = maybe._hasValue ? value : error;
-            Trace.Log(message);
+            if (maybe._hasValue) Trace.Log(message);
 
             if (!maybe._hasValue)
             {
-                LogErrorValue(maybe._error, Format.Default, argument, caller, path, line);
-                LogErrorValue(maybe.AggregateErrors, Format.Default, argument, caller, path, line);
+                LogErrorValue(maybe._error, message, argument, caller, path, line);
+                LogErrorValue(maybe.AggregateErrors, message, argument, caller, path, line);
             }
 
             return maybe;
@@ -843,12 +829,12 @@ namespace ContainerExpressions.Containers
             )
         {
             var message = maybe.Match(value, error);
-            Trace.Log(message);
+            if (maybe._hasValue) Trace.Log(message);
 
             if (!maybe._hasValue)
             {
-                LogError(maybe._error, Format.Default, argument, caller, path, line);
-                LogError(maybe.AggregateErrors, Format.Default, argument, caller, path, line);
+                LogError(maybe._error, message, argument, caller, path, line);
+                LogError(maybe.AggregateErrors, message, argument, caller, path, line);
             }
 
             return maybe;
@@ -869,12 +855,12 @@ namespace ContainerExpressions.Containers
             )
         {
             var message = maybe._hasValue ? value : error;
-            Trace.Log(message);
+            if (maybe._hasValue) Trace.Log(message);
 
             if (!maybe._hasValue)
             {
-                LogError(maybe._error, Format.Default, argument, caller, path, line);
-                LogError(maybe.AggregateErrors, Format.Default, argument, caller, path, line);
+                LogError(maybe._error, message, argument, caller, path, line);
+                LogError(maybe.AggregateErrors, message, argument, caller, path, line);
             }
 
             return maybe;

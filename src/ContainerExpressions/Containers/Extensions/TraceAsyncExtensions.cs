@@ -148,7 +148,7 @@ namespace ContainerExpressions.Containers
                 else
                 {
                     Trace.Log(fail);
-                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain(fail);
                 }
 
                 return x.Result;
@@ -193,7 +193,7 @@ namespace ContainerExpressions.Containers
                 else
                 {
                     Trace.Log(fail);
-                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain(fail);
                 }
 
                 return x.Result;
@@ -240,7 +240,7 @@ namespace ContainerExpressions.Containers
                 else
                 {
                     Trace.Log(fail);
-                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain(fail);
                 }
 
                 return x.Status == TaskStatus.RanToCompletion ? x.Result : Response.Error;
@@ -309,7 +309,7 @@ namespace ContainerExpressions.Containers
                 else
                 {
                     Trace.Log(fail);
-                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain(fail);
                 }
 
                 return x.Status == TaskStatus.RanToCompletion ? x.Result : Response<T>.Error;
@@ -332,7 +332,7 @@ namespace ContainerExpressions.Containers
                 else
                 {
                     Trace.Log(fail);
-                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain(fail);
                 }
 
                 return x.Status == TaskStatus.RanToCompletion ? x.Result : Response<T>.Error;
@@ -377,7 +377,7 @@ namespace ContainerExpressions.Containers
                 else
                 {
                     Trace.Log(fail);
-                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain(fail);
                 }
 
                 return x.Status == TaskStatus.RanToCompletion ? x.Result : Response<T>.Error;
@@ -417,7 +417,7 @@ namespace ContainerExpressions.Containers
                 else
                 {
                     Trace.Log(fail);
-                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain();
+                    if (x.Status == TaskStatus.Faulted) x.Exception.LogErrorPlain(fail);
                 }
 
                 return x.Status == TaskStatus.RanToCompletion ? x.Result : Response<T>.Error;
@@ -461,7 +461,7 @@ namespace ContainerExpressions.Containers
                 else
                 {
                     Trace.Log(fail);
-                    if (y.Status == TaskStatus.Faulted) y.Exception.LogErrorPlain();
+                    if (y.Status == TaskStatus.Faulted) y.Exception.LogErrorPlain(fail);
                 }
 
                 return y.Status == TaskStatus.RanToCompletion ? y.Result : Response<TResult>.Error;
@@ -501,7 +501,7 @@ namespace ContainerExpressions.Containers
                 else
                 {
                     Trace.Log(fail);
-                    if (y.Status == TaskStatus.Faulted) y.Exception.LogErrorPlain();
+                    if (y.Status == TaskStatus.Faulted) y.Exception.LogErrorPlain(fail);
                 }
 
                 return y.Status == TaskStatus.RanToCompletion ? y.Result : Response<TResult>.Error;
@@ -545,7 +545,7 @@ namespace ContainerExpressions.Containers
                 else
                 {
                     Trace.Log(fail);
-                    if (y.Status == TaskStatus.Faulted) y.Exception.LogErrorPlain();
+                    if (y.Status == TaskStatus.Faulted) y.Exception.LogErrorPlain(fail);
                 }
 
                 return y.Status == TaskStatus.RanToCompletion ? y.Result : Response<TResult>.Error;
@@ -576,7 +576,7 @@ namespace ContainerExpressions.Containers
                 }
 
                 var message = x.Result.Match(value, error);
-                Trace.Log(message);
+                if (x.Result._hasValue) Trace.Log(message);
 
                 if (!x.Result._hasValue)
                 {
@@ -604,12 +604,11 @@ namespace ContainerExpressions.Containers
             {
                 if (x.Status == TaskStatus.Faulted)
                 {
-                    Trace.Log(error);
-                    x.Exception.LogErrorPlain();
+                    x.Exception.LogErrorPlain(error);
                 }
 
                 var message = x.Result._hasValue ? value : error;
-                Trace.Log(message);
+                if (x.Result._hasValue) Trace.Log(message);
 
                 if (!x.Result._hasValue)
                 {
@@ -641,7 +640,7 @@ namespace ContainerExpressions.Containers
                 }
 
                 var message = x.Result.Match(value, error);
-                Trace.Log(message);
+                if (x.Result._hasValue) Trace.Log(message);
 
                 if (!x.Result._hasValue)
                 {
@@ -669,12 +668,11 @@ namespace ContainerExpressions.Containers
             {
                 if (x.Status == TaskStatus.Faulted)
                 {
-                    Trace.Log(error);
-                    x.Exception.LogErrorPlain();
+                    x.Exception.LogErrorPlain(error);
                 }
 
                 var message = x.Result._hasValue ? value : error;
-                Trace.Log(message);
+                if (x.Result._hasValue) Trace.Log(message);
 
                 if (!x.Result._hasValue)
                 {
