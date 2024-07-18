@@ -1,4 +1,4 @@
-﻿using ContainerExpressions.Containers.Extensions;
+﻿using ContainerExpressions.Containers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;

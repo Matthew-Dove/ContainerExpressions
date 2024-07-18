@@ -7,7 +7,7 @@ using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ContainerExpressions.Containers.Extensions
+namespace ContainerExpressions.Containers
 {
     public static class GuardExtensions
     {

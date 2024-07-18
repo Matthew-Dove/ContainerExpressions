@@ -1,5 +1,4 @@
-﻿using ContainerExpressions.Containers.Extensions;
-using ContainerExpressions.Containers.Internal;
+﻿using ContainerExpressions.Containers.Internal;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
