@@ -37,6 +37,30 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
+        public void Tag_Set_Keep_Remove()
+        {
+            var message = 42;
+
+            var reference = Guid.NewGuid().Tag().Set(42);
+
+            Assert.AreEqual(message, reference.Tag().Get<int>(removeTag: false)); // Keep tag.
+            Assert.AreEqual(message, reference.Tag().Get<int>(removeTag: true)); // Remove Tag.
+            Assert.IsFalse(reference.Tag().Get<int>()); // Tag not found.
+        }
+
+        [TestMethod]
+        public void TagReference_Set_Keep_Remove()
+        {
+            var message = 42;
+
+            var reference = "hello world".TagReference().Set(42);
+
+            Assert.AreEqual(message, reference.TagReference().Get<int>(removeTag: false)); // Keep tag.
+            Assert.AreEqual(message, reference.TagReference().Get<int>(removeTag: true)); // Remove Tag.
+            Assert.IsFalse(reference.TagReference().Get<int>()); // Tag not found.
+        }
+
+        [TestMethod]
         public void TagReference_Set_Get_String()
         {
             var message = 42;
