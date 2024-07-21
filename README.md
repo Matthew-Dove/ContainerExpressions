@@ -989,8 +989,36 @@ All these types can be safely converted to `Response` / `Response<T>` using the 
 * `Response<Task<Response<Response<T>>>>`
 * `Response<Task<Response<Task<Response<T>>>>>`
 
+## Tag
+
+You can `Tag` any value, or reference type with a **message**, the **message** can be of any type.  
+
+`Tag<TReference>` has two methods, **Get**, and **Set**: `Response<TMessage> Get<TMessage>(bool)`, and `TReference Set<TMessage>(TMessage)`.  
+**Get:** Retrieves a **message** from a tagged object. By default the **message** is removed once read, but there is an option to keep it.  
+**Set:** Stores a **message** on a tagged object. If the object already has the same typed **message** on it, it will be overwritten.
+
+`Tag` is useful for when you want to add extra data to an object, but you don't want to break the method signatures, or you don't control the object.  
+
+Example:  
+Here we are adding a `Datetime` **message** to a `Guid` object.  
+Note the method's signature does not change, neither does the `Guid` model itself; and we're still able to pull the extra data out.  
+```cs
+private static Guid GenerateGuid()
+{
+    // Tag a Guid, with the datetime it was created.
+    return Guid.NewGuid().Tag().Set(DateTime.UtcNow);
+}
+
+Guid guid = GenerateGuid(); // 7db88344-5309-46dc-a535-1c3f0e029f69
+DateTime created = guid.Tag().Get<DateTime>(); // 21/07/2024 1:43:04 PM
+```
+
+`Tag` is thread safe, and works in one of two ways:  
+**Value Types:** Using the `Equals`, and `GetHashCode` methods to find a **message** given an object.  
+**Reference Types:** Using the pointer's address in memory to uniquely identify the object, and match it to a **message**.  
+
 # Credits
-* [Icon](https://www.flaticon.com/free-icon/bird_2630452) made by [Vitaly Gorbachev](https://www.flaticon.com/authors/vitaly-gorbachev) from [Flaticon](https://www.flaticon.com/)
+* [Icon](https://www.flaticon.com/free-icon/bird_2630452) made by [Vitaly Gorbachev](https://www.flaticon.com/authors/vitaly-gorbachev) from [Flaticon]
 
 # Changelog
 
@@ -1075,3 +1103,4 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * Removed `WhenT1Async`, due to the use of generics there was no difference between that, and `WhenT1` (*i.e. the non-async version*).
 * Removed the string alias `Message` used in logging, and replaced it with a `Format` type; which has the message template, as well as the args.
 * Added a new formatted logger for trace messages (`Trace.SetFormattedLogger`), and error logs (`Try.SetFormattedExceptionLogger`).
+* Created a `Tag` extension method to set, and get messages on objects.

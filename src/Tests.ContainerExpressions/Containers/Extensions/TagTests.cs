@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace Tests.ContainerExpressions.Containers
+namespace Tests.ContainerExpressions.Containers.Extensions
 {
     [TestClass]
     public class TagTests
@@ -114,7 +114,7 @@ namespace Tests.ContainerExpressions.Containers
             var reference = message.TagReference().Set(message);
 
             Assert.IsFalse(new MyClass1().TagReference().Get<MyClass1>());
-            Assert.ReferenceEquals(message.MyProperty2, reference.TagReference().Get<MyClass1>().Value.MyProperty2);
+            ReferenceEquals(message.MyProperty2, reference.TagReference().Get<MyClass1>().Value.MyProperty2);
         }
     }
 }
