@@ -39,9 +39,11 @@ namespace ContainerExpressions.Containers
         /// <para>Tag is thread safe, the object's Equals, and GetHashCode methods are used to store, and retrieve the message.</para>
         /// </summary>
         /// <param name="removeTag">When true, the tag will be removed from the object.</param>
-        public Response<TMessage> Get<TMessage>(bool removeTag = true)
+        /// <param name="key">When a custom key is specified, that will be used to find the tag; instead of the TReference's Equals, and GetHashCode methods.</param>
+        public Response<TMessage> Get<TMessage>(bool removeTag = true, string key = null)
         {
-            return TagBase.Get(_reference, default(TMessage), removeTag);
+            if (string.IsNullOrEmpty(key)) return TagBase.Get(_reference, default(TMessage), removeTag);
+            return TagBase.GetKey(default(TMessage), removeTag, key);
         }
 
         /// <summary>
@@ -49,9 +51,11 @@ namespace ContainerExpressions.Containers
         /// <para>Tag is thread safe, the object's Equals, and GetHashCode methods are used to store, and retrieve the message.</para>
         /// </summary>
         /// <param name="message">The message to store on the tagged object.</param>
-        public TReference Set<TMessage>(TMessage message)
+        /// <param name="key">When a custom key is specified, that will be used to find the tag; instead of the TReference's Equals, and GetHashCode methods.</param>
+        public TReference Set<TMessage>(TMessage message, string key = null)
         {
-            TagBase.Set(_reference, message);
+            if (string.IsNullOrEmpty(key)) TagBase.Set(_reference, message);
+            else TagBase.SetKey(message, key);
             return _reference;
         }
     }
@@ -90,7 +94,7 @@ namespace ContainerExpressions.Containers
 
     internal abstract class TagBase
     {
-        public static Response<TMessage> Get<TReference, TMessage>(TReference reference, TMessage message, bool removeTag)
+        public static Response<TMessage> Get<TReference, TMessage>(TReference reference, TMessage _, bool removeTag)
         {
             return TagCache<TReference, TMessage>.Get(reference, removeTag);
         }
@@ -100,7 +104,17 @@ namespace ContainerExpressions.Containers
             TagCache<TReference, TMessage>.Set(reference, message);
         }
 
-        public static Response<TMessage> GetReference<TReference, TMessage>(TReference reference, TMessage message, bool removeTag) where TReference : class
+        public static Response<TMessage> GetKey<TMessage>(TMessage _, bool removeTag, string key)
+        {
+            return TagKeyCache<TMessage>.Get(key, removeTag);
+        }
+
+        public static void SetKey<TMessage>(TMessage message, string key)
+        {
+            TagKeyCache<TMessage>.Set(key, message);
+        }
+
+        public static Response<TMessage> GetReference<TReference, TMessage>(TReference reference, TMessage _, bool removeTag) where TReference : class
         {
             var address = GetUnsafeReference(reference);
             return TagReferenceCache<TMessage>.Get(address, removeTag);
@@ -151,6 +165,9 @@ namespace ContainerExpressions.Containers
 
         // Map a key to a value, where the key is struct, or class; key matches are based on the Equals, and GetHashCode methods.
         internal sealed class TagCache<TReference, TMessage> : BaseCache<TReference, TMessage> { }
+
+        // Created a seperate class for custom keys, so the string value won't clash when tagging normal strings.
+        internal sealed class TagKeyCache<TMessage> : BaseCache<string, TMessage> { }
 
         // Created a seperate class for references, so the long address pointer won't clash with standard value type longs.
         internal sealed class TagReferenceCache<TMessage> : BaseCache<long, TMessage> { }

@@ -49,6 +49,28 @@ namespace Tests.ContainerExpressions.Containers.Extensions
         }
 
         [TestMethod]
+        public void TagKey_Set_Get_Struct()
+        {
+            var message = 42;
+            var key = "1337";
+
+            var reference = Guid.NewGuid().Tag().Set(message, key);
+
+            Assert.AreEqual(message, reference.Tag().Get<int>(key: key));
+        }
+
+        [TestMethod]
+        public void TagKey_Set_Get_Class()
+        {
+            var message = 42;
+            var key = "1337";
+
+            var reference = new object().Tag().Set(message, key);
+
+            Assert.AreEqual(message, reference.Tag().Get<int>(key: key));
+        }
+
+        [TestMethod]
         public void TagReference_Set_Keep_Remove()
         {
             var message = 42;
