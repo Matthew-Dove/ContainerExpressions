@@ -413,6 +413,12 @@ namespace ContainerExpressions.Containers
         /// Executes one of the functions when the input response is valid, otherwise an invalid response is returned.
         /// <para>When the condition is true the first function is executed, otherwise the second function is executed.</para>
         /// </summary>
+        public static Task<Response<T>> PivotAsync<T>(this Task<Response> response, bool condition, Func<Response<T>> func1, Func<Response<T>> func2) => response.ContinueWith(x => x.Result ? (condition ? func1() : func2()) : new Response<T>());
+
+        /// <summary>
+        /// Executes one of the functions when the input response is valid, otherwise an invalid response is returned.
+        /// <para>When the condition is true the first function is executed, otherwise the second function is executed.</para>
+        /// </summary>
         public static Response<TResult> Pivot<T, TResult>(this Response<T> response, bool condition, Func<T, Response<TResult>> func1, Func<T, Response<TResult>> func2) => response ? (condition ? func1(response) : func2(response)) : new Response<TResult>();
 
         /// <summary>
@@ -426,6 +432,12 @@ namespace ContainerExpressions.Containers
         /// <para>When the condition is true the first function is executed, otherwise the second function is executed.</para>
         /// </summary>
         public static Task<Response<TResult>> PivotAsync<T, TResult>(this Task<Response<T>> response, bool condition, Func<T, Task<Response<TResult>>> func1, Func<T, Task<Response<TResult>>> func2) => response.ContinueWith(x =>  x.Result ? (condition ? func1(x.Result) : func2(x.Result)) : Task.FromResult(new Response<TResult>())).Unwrap();
+
+        /// <summary>
+        /// Executes one of the functions when the input response is valid, otherwise an invalid response is returned.
+        /// <para>When the condition is true the first function is executed, otherwise the second function is executed.</para>
+        /// </summary>
+        public static Task<Response<TResult>> PivotAsync<T, TResult>(this Task<Response<T>> response, bool condition, Func<T, Response<TResult>> func1, Func<T, Response<TResult>> func2) => response.ContinueWith(x => x.Result ? (condition ? func1(x.Result) : func2(x.Result)) : new Response<TResult>());
 
         #endregion
 

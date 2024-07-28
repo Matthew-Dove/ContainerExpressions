@@ -288,7 +288,7 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
-        public void Response_IsValid_ConditionIsTrue_Func2Invoked()
+        public void Response_IsValid_ConditionIsFalse_Func2Invoked()
         {
             var isInvoked = false;
             var answer = 42;
@@ -301,6 +301,77 @@ namespace Tests.ContainerExpressions.Containters
             Assert.IsTrue(isInvoked);
             Assert.IsTrue(response);
             Assert.AreEqual(answer, response);
+        }
+
+        class PivotOverloadTest
+        {
+            public static Response<int> TrueFunc() => Response<int>.Success(0);
+            public static Response<int> FalseFunc() => Response<int>.Error;
+
+            public static Response<int> TrueFunc(string x) => Response<int>.Success(int.Parse(x));
+            public static Response<int> FalseFunc(string _) => Response<int>.Error;
+
+            public static Task<Response<int>> TrueFuncAsync() => Task.FromResult(TrueFunc());
+            public static Task<Response<int>> FalseFuncAsync() => Task.FromResult(FalseFunc());
+
+            public static Task<Response<int>> TrueFuncAsync(string x) => Task.FromResult(TrueFunc(x));
+            public static Task<Response<int>> FalseFuncAsync(string x) => Task.FromResult(FalseFunc(x));
+        }
+
+        [TestMethod]
+        public async Task Pivot_AsyncToSync_AsyncToAsync_OverloadIsOk()
+        {
+            var input = Task.FromResult(Response.Success);
+
+            // AsyncToSync
+
+            Func<Response<int>> trueFunc = () => Response<int>.Success(0);
+            Func<Response<int>> falseFunc = () => Response<int>.Error;
+
+            var response1 = await input.PivotAsync(true, trueFunc, falseFunc);
+            var response2 = await input.PivotAsync(true, PivotOverloadTest.TrueFunc, PivotOverloadTest.FalseFunc);
+
+            Assert.IsTrue(response1);
+            Assert.IsTrue(response2);
+
+            // AsyncToAsync
+
+            Func<Task<Response<int>>> trueFuncAsync = () => Task.FromResult(trueFunc());
+            Func<Task<Response<int>>> falseFuncAsync = () => Task.FromResult(falseFunc());
+
+            response1 = await input.PivotAsync(true, trueFuncAsync, falseFuncAsync);
+            response2 = await input.PivotAsync(true, PivotOverloadTest.TrueFuncAsync, PivotOverloadTest.FalseFuncAsync);
+
+            Assert.IsTrue(response1);
+            Assert.IsTrue(response2);
+        }
+
+        [TestMethod]
+        public async Task PivotWithInput_AsyncToSync_AsyncToAsync_OverloadIsOk()
+        {
+            var input = Task.FromResult(Response.Create(0.ToString()));
+
+            // AsyncToSync
+
+            Func<string, Response<int>> trueFunc = (x) => Response<int>.Success(int.Parse(x));
+            Func<string, Response<int>> falseFunc = (_) => Response<int>.Error;
+
+            var response1 = await input.PivotAsync(true, trueFunc, falseFunc);
+            var response2 = await input.PivotAsync(true, PivotOverloadTest.TrueFunc, PivotOverloadTest.FalseFunc);
+
+            Assert.IsTrue(response1);
+            Assert.IsTrue(response2);
+
+            // AsyncToAsync
+
+            Func<string, Task<Response<int>>> trueFuncAsync = (x) => Task.FromResult(trueFunc(x));
+            Func<string, Task<Response<int>>> falseFuncAsync = (x) => Task.FromResult(falseFunc(x));
+
+            response1 = await input.PivotAsync(true, trueFuncAsync, falseFuncAsync);
+            response2 = await input.PivotAsync(true, PivotOverloadTest.TrueFuncAsync, PivotOverloadTest.FalseFuncAsync);
+
+            Assert.IsTrue(response1);
+            Assert.IsTrue(response2);
         }
 
         [TestMethod]
