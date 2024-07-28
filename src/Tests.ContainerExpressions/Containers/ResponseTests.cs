@@ -375,6 +375,23 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
+        public async Task Pivot_WhenFuncConditionIsTrue_ResponseIsValid()
+        {
+            var answer = 42;
+            var input = Task.FromResult(Response.Create(answer.ToString()));
+            Func<string, bool> condition = x => int.TryParse(x, out int i) && i == answer;
+
+            Func<string, Task<Response<int>>> trueFuncAsync = x => Task.FromResult(Response<int>.Success(int.Parse(x)));
+            Func<string, Task<Response<int>>> falseFuncAsync = _ => Task.FromResult(Response<int>.Error);
+
+            var response1 = await input.PivotAsync(condition, trueFuncAsync, falseFuncAsync);
+            var response2 = await input.PivotAsync(condition, PivotOverloadTest.TrueFuncAsync, PivotOverloadTest.FalseFuncAsync);
+
+            Assert.IsTrue(response1);
+            Assert.IsTrue(response2);
+        }
+
+        [TestMethod]
         public void Response_IsValid_FuncIsInvoked()
         {
             var answer = 42;
