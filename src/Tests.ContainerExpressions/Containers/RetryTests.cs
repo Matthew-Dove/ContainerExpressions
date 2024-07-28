@@ -290,5 +290,17 @@ namespace Tests.ContainerExpressions.Containers
             Assert.IsFalse(result);
             Assert.AreEqual(2, retries);
         }
+
+        [TestMethod]
+        public async Task ResponseAsync_Retry_T8Args()
+        {
+            var retries = 0;
+            Func<int, int, int, int, int, int, int, int, ResponseAsync<string>> response = (_, _, _, _, _, _, _, _) => { retries++; return ResponseAsync.FromException<string>(new Exception("Error!")); };
+
+            var result = await response.RetryAsync()(1, 2, 3, 4, 5, 6, 7, 8);
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(2, retries);
+        }
     }
 }
