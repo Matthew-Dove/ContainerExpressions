@@ -266,5 +266,29 @@ namespace Tests.ContainerExpressions.Containers
             Assert.IsFalse(result);
             Assert.AreEqual(2, retries);
         }
+
+        [TestMethod]
+        public async Task ResponseAsync_Retry()
+        {
+            var retries = 0;
+            Func<ResponseAsync<int>> response = () => { retries++; return ResponseAsync.FromException<int>(new Exception("Error!")); };
+
+            var result = await response.RetryAsync();
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(2, retries);
+        }
+
+        [TestMethod]
+        public async Task ResponseAsync_Retry_TArg()
+        {
+            var retries = 0;
+            Func<int, ResponseAsync<int>> response = _ => { retries++; return ResponseAsync.FromException<int>(new Exception("Error!")); };
+
+            var result = await response.RetryAsync()(42);
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(2, retries);
+        }
     }
 }

@@ -111,5 +111,31 @@ namespace ContainerExpressions.Containers
         public static Func<T, Task<Response<TResult>>> RetryAsync<T, TResult>(this Func<T, Task<Response<TResult>>> func, RetryOptions options) => x => Repeat.ExecuteAsync(x, func, options);
 
         #endregion
+
+        #region () => ResponseAsync<T>
+
+        /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
+        public static Func<ResponseAsync<T>> RetryAsync<T>(this Func<ResponseAsync<T>> func) => () => Repeat.ExecuteAsync(func, RetryOptions.Create());
+
+        /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
+        public static Func<ResponseAsync<T>> RetryExponentialAsync<T>(this Func<ResponseAsync<T>> func) => () => Repeat.ExecuteAsync(func, RetryOptions.CreateExponential());
+
+        /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
+        public static Func<ResponseAsync<T>> RetryAsync<T>(this Func<ResponseAsync<T>> func, RetryOptions options) => () => Repeat.ExecuteAsync(func, options);
+
+        #endregion
+
+        #region T => ResponseAsync<TResult>
+
+        /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
+        public static Func<T, ResponseAsync<TResult>> RetryAsync<T, TResult>(this Func<T, ResponseAsync<TResult>> func) => x => Repeat.ExecuteAsync(x, func, RetryOptions.Create());
+
+        /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
+        public static Func<T, ResponseAsync<TResult>> RetryExponentialAsync<T, TResult>(this Func<T, ResponseAsync<TResult>> func) => x => Repeat.ExecuteAsync(x, func, RetryOptions.CreateExponential());
+
+        /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
+        public static Func<T, ResponseAsync<TResult>> RetryAsync<T, TResult>(this Func<T, ResponseAsync<TResult>> func, RetryOptions options) => x => Repeat.ExecuteAsync(x, func, options);
+
+        #endregion
     }
 }
