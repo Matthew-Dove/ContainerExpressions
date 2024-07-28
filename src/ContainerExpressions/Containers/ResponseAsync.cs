@@ -104,7 +104,7 @@ namespace ContainerExpressions.Containers
         // Called by the awaiter when the result is requested (either manually by getting the awaiter, or when using the await keyword).
         internal Response<T> GetValue()
         {
-            if (!_state.IsCompleted) return AsTask().GetAwaiter().GetResult();
+            if (!_state.IsCompleted) return ToTask().GetAwaiter().GetResult();
             var result = _state.Result;
             return result == default ? new Response<T>() : new Response<T>(result.Value); // If null, then a result was never set for this task.
         }
@@ -128,7 +128,7 @@ namespace ContainerExpressions.Containers
         }
 
         // Convert ResponseAsync{T} into a Task{T} type.
-        public Task<Response<T>> AsTask()
+        public Task<Response<T>> ToTask()
         {
             var tcs = _state.Tcs;
             if (tcs == default)
@@ -153,7 +153,7 @@ namespace ContainerExpressions.Containers
         }
 
         // Convert ResponseAsync{T} into a ValueTask{T} type.
-        public ValueTask<Response<T>> AsValueTask()
+        public ValueTask<Response<T>> ToValueTask()
         {
             ValueTask<Response<T>> vt;
 
@@ -165,7 +165,7 @@ namespace ContainerExpressions.Containers
             }
             else
             {
-                vt = new(AsTask()); // Task is currently running.
+                vt = new(ToTask()); // Task is currently running.
             }
 
             return vt;
@@ -205,8 +205,8 @@ namespace ContainerExpressions.Containers
         public static bool operator ==(ResponseAsync<T> left, ResponseAsync<T> right) => left.Equals(right);
         public static bool operator !=(ResponseAsync<T> left, ResponseAsync<T> right) => !left.Equals(right);
 
-        public static implicit operator Task<Response<T>>(ResponseAsync<T> response) => response.AsTask(); // Cast to Task{T}.
-        public static implicit operator ValueTask<Response<T>>(ResponseAsync<T> response) => response.AsValueTask(); // Cast to ValueTask{T}.
+        public static implicit operator Task<Response<T>>(ResponseAsync<T> response) => response.ToTask(); // Cast to Task{T}.
+        public static implicit operator ValueTask<Response<T>>(ResponseAsync<T> response) => response.ToValueTask(); // Cast to ValueTask{T}.
     }
 
     public static class ResponseAsync
@@ -220,7 +220,7 @@ namespace ContainerExpressions.Containers
         #region Task Converters
 
         // Safely run the ValueTask, and convert the result into a Response.
-        public static ValueTask<Response> AsResponse(
+        public static ValueTask<Response> ToResponse(
             this ValueTask task,
             [CallerArgumentExpression(nameof(task))] string argument = "",
             [CallerMemberName] string caller = "",
@@ -244,7 +244,7 @@ namespace ContainerExpressions.Containers
         }
 
         // Safely run the ValueTask{T}, and convert the T, into a Response{T}.
-        public static ValueTask<Response<T>> AsResponse<T>(
+        public static ValueTask<Response<T>> ToResponse<T>(
             this ValueTask<T> task,
             [CallerArgumentExpression(nameof(task))] string argument = "",
             [CallerMemberName] string caller = "",
@@ -268,7 +268,7 @@ namespace ContainerExpressions.Containers
         }
 
         // Safely run the Task, and convert the result into a Response.
-        public static Task<Response> AsResponse(
+        public static Task<Response> ToResponse(
             this Task task,
             [CallerArgumentExpression(nameof(task))] string argument = "",
             [CallerMemberName] string caller = "",
@@ -285,7 +285,7 @@ namespace ContainerExpressions.Containers
         }
 
         // Safely run the Task{T}, and convert the T, into a Response{T}.
-        public static Task<Response<T>> AsResponse<T>(
+        public static Task<Response<T>> ToResponse<T>(
             this Task<T> task,
             [CallerArgumentExpression(nameof(task))] string argument = "",
             [CallerMemberName] string caller = "",

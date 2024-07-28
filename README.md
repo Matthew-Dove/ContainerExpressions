@@ -1107,3 +1107,4 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * Created a `Tag` extension method to set, and get messages on objects.
 * Added a function overload to the extension method `Pivot`, to include the previous result as part of the `boolean` condition: `Func<T, bool> condition`.
 * Created a new extension method for `Response<T>`: **Validate<T>**. Validate determines if the state for `T` is valid or not, returning a valid response container if it is.
+* Renamed `AsTask`, `AsValueTask`, and `AsResponse` to: `ToTask`, `ToValueTask`, and `ToResponse` respectively. The **As** convention is used for casting objects, and these methods are creating new ones.

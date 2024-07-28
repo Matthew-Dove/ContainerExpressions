@@ -72,7 +72,7 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public async Task Happy_Path_WithTask()
         {
-            var result = await RunAwaitersWithTask().AsResponse();
+            var result = await RunAwaitersWithTask().ToResponse();
 
             Assert.IsTrue(result);
             Assert.AreEqual(_result, result);
@@ -81,7 +81,7 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public async Task Happy_Path_WithValueTask()
         {
-            var result = await RunAwaitersWithValueTask().AsResponse();
+            var result = await RunAwaitersWithValueTask().ToResponse();
 
             Assert.IsTrue(result);
             Assert.AreEqual(_result, result);
@@ -99,7 +99,7 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public void Happy_Path_WithTask_Blocking()
         {
-            var result = RunAwaitersWithTask().AsResponse().GetAwaiter().GetResult();
+            var result = RunAwaitersWithTask().ToResponse().GetAwaiter().GetResult();
 
             Assert.IsTrue(result);
             Assert.AreEqual(_result, result);
@@ -108,7 +108,7 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public void Happy_Path_WithValueTask_Blocking()
         {
-            var result = RunAwaitersWithValueTask().AsResponse().GetAwaiter().GetResult();
+            var result = RunAwaitersWithValueTask().ToResponse().GetAwaiter().GetResult();
 
             Assert.IsTrue(result);
             Assert.AreEqual(_result, result);
@@ -133,7 +133,7 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public async Task Many_Tasks()
         {
-            var results = await Task.WhenAll(RunAwaiters().AsTask(), RunAwaiters());
+            var results = await Task.WhenAll(RunAwaiters().ToTask(), RunAwaiters());
 
             var sum = results.Where(x => x).Sum(x => x);
 
@@ -216,7 +216,7 @@ namespace Tests.ContainerExpressions.Containers
             var isError = false;
 
             await Parallel.ForEachAsync(Enumerable.Repeat(0, _numThreads), async (_, _) => {
-                var result = await RunAwaiters().AsTask();
+                var result = await RunAwaiters().ToTask();
                 if (!result.IsTrue(x => x == _result)) Volatile.Write(ref isError, true);
             });
 
@@ -229,7 +229,7 @@ namespace Tests.ContainerExpressions.Containers
             var isError = false;
 
             await Parallel.ForEachAsync(Enumerable.Repeat(0, _numThreads), async (_, _) => {
-                var result = await RunAwaiters().AsValueTask();
+                var result = await RunAwaiters().ToValueTask();
                 if (!result.IsTrue(x => x == _result)) Volatile.Write(ref isError, true);
             });
 
