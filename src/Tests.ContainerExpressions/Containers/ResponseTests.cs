@@ -319,7 +319,7 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
-        public async Task Pivot_AsyncToSync_AsyncToAsync_OverloadIsOk()
+        public async Task Response_Pivot_AsyncToSync_AsyncToAsync_OverloadIsOk()
         {
             var input = Task.FromResult(Response.Success);
 
@@ -347,7 +347,7 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
-        public async Task PivotWithInput_AsyncToSync_AsyncToAsync_OverloadIsOk()
+        public async Task Response_PivotWithInput_AsyncToSync_AsyncToAsync_OverloadIsOk()
         {
             var input = Task.FromResult(Response.Create(0.ToString()));
 
@@ -375,7 +375,7 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
-        public async Task Pivot_WhenFuncConditionIsTrue_ResponseIsValid()
+        public async Task Response_Pivot_WhenFuncConditionIsTrue_ResponseIsValid()
         {
             var answer = 42;
             var input = Task.FromResult(Response.Create(answer.ToString()));
@@ -1506,6 +1506,90 @@ namespace Tests.ContainerExpressions.Containters
             var result = await input.UnpackAsync();
 
             Assert.IsFalse(result);
+        }
+
+        #endregion
+
+        #region Validate
+
+        [TestMethod]
+        public void Validate_Sync_ResponseIsValid()
+        {
+            var target = Response.Create(1);
+
+            var response = target.Validate(x => x > 0);
+
+            Assert.IsTrue(response);
+        }
+
+        [TestMethod]
+        public void Validate_Sync_ResponseIsNotValid()
+        {
+            var target = Response.Create(0);
+
+            var response = target.Validate(x => x > 0);
+
+            Assert.IsFalse(response);
+        }
+
+        [TestMethod]
+        public async Task Validate_Async_TaskIsValid()
+        {
+            var target = Task.FromResult(1);
+
+            var response = await target.ValidateTaskAsync(x => x > 0);
+
+            Assert.IsTrue(response);
+        }
+
+        [TestMethod]
+        public async Task Validate_Async_TaskIsNotValid()
+        {
+            var target = Task.FromResult(0);
+
+            var response = await target.ValidateTaskAsync(x => x > 0);
+
+            Assert.IsFalse(response);
+        }
+
+        [TestMethod]
+        public async Task Validate_Async_TaskIsError()
+        {
+            var target = Task.FromException<int>(new Exception("Error!"));
+
+            var response = await target.ValidateTaskAsync(x => x > 0);
+
+            Assert.IsFalse(response);
+        }
+
+        [TestMethod]
+        public async Task Validate_Async_ResponseIsValid()
+        {
+            var target = Task.FromResult(Response.Create(1));
+
+            var response = await target.ValidateAsync(x => x > 0);
+
+            Assert.IsTrue(response);
+        }
+
+        [TestMethod]
+        public async Task Validate_Async_ResponseIsNotValid()
+        {
+            var target = Task.FromResult(Response.Create(0));
+
+            var response = await target.ValidateAsync(x => x > 0);
+
+            Assert.IsFalse(response);
+        }
+
+        [TestMethod]
+        public async Task Validate_Async_TaskIsError_ResponseIsNotValid()
+        {
+            var target = Task.FromException<Response<int>>(new Exception("Error!"));
+
+            var response = await target.ValidateAsync(x => x > 0);
+
+            Assert.IsFalse(response);
         }
 
         #endregion

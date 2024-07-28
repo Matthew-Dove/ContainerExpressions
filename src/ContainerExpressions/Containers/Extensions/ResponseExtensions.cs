@@ -582,5 +582,21 @@ namespace ContainerExpressions.Containers
         }
 
         #endregion
+
+        #region Validate
+
+        /// <summary>Validate the value of T, to determine if it is in a valid state or not.</summary>
+        /// <param name="isValid">When true a valid Response container will be returned; otherwise an invalid one is returned.</param>
+        public static Response<T> Validate<T>(this Response<T> response, Func<T, bool> isValid) => response && isValid(response) ? Response<T>.Success(response) : Response<T>.Error;
+
+        /// <summary>Validate the value of T, to determine if it is in a valid state or not.</summary>
+        /// <param name="isValid">When true a valid Response container will be returned; otherwise an invalid one is returned.</param>
+        public static Task<Response<T>> ValidateAsync<T>(this Task<Response<T>> response, Func<T, bool> isValid) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result && isValid(x.Result) ? Response<T>.Success(x.Result) : Response<T>.Error);
+
+        /// <summary>Validate the value of T, to determine if it is in a valid state or not.</summary>
+        /// <param name="isValid">When true a valid Response container will be returned; otherwise an invalid one is returned.</param>
+        public static Task<Response<T>> ValidateTaskAsync<T>(this Task<T> response, Func<T, bool> isValid) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result && isValid(x.Result) ? Response<T>.Success(x.Result) : Response<T>.Error);
+
+        #endregion
     }
 }

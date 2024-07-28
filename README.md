@@ -60,6 +60,7 @@ Useful utilities for the `Response<T>` type:
 * `Response<T> With<T>` Create a new response container in a valid state, with the same type `T` as the original response.  
 * `Task<Response<T>> ToResponseTaskAsync<T>` Convert some `Task<T>` to `Task<Response<T>>`, in a valid state when the task did not fault; and finished executing.  
 * `Response<T> Unpack<T>` Converts `Response<Response<T>>` to `Response<T>`, which works much like `Task`'s `Unwrap` extension to flatten `Task<Task<T>>` to `Task<T>`.  
+* `Response<T> Validate<T>` Determines if `T` is in a valid state or not, and returns a valid response container if it is.   
 
 In general you will find various overloads for these extension methods.  
 They target `T`, `Response`, and `Response<T>`; with options for both sync, and async types.  
@@ -1104,3 +1105,5 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * Removed the string alias `Message` used in logging, and replaced it with a `Format` type; which has the message template, as well as the args.
 * Added a new formatted logger for trace messages (`Trace.SetFormattedLogger`), and error logs (`Try.SetFormattedExceptionLogger`).
 * Created a `Tag` extension method to set, and get messages on objects.
+* Added a function overload to the extension method `Pivot`, to include the previous result as part of the `boolean` condition: `Func<T, bool> condition`.
+* Created a new extension method for `Response<T>`: **Validate<T>**. Validate determines if the state for `T` is valid or not, returning a valid response container if it is.
