@@ -7,6 +7,30 @@ namespace ContainerExpressions.Containers
     /// <summary>Utility methods for the Response Container.</summary>
     public static class ResponseExtensions
     {
+        /**
+         * Overloaded types to target for containers.
+         * Note: Actions, and Funcs can take N additional input parameters.
+         * Note: All actions map to Func{Response}, as they don't return a type; and async void methods don't return a Task either.
+         * 
+         * [Void]
+         * Response
+         * Task{Response}
+         * Func{Response}
+         * Func{Task{Response}}
+         * 
+         * [Value]
+         * T
+         * Task{T}
+         * Func{T}
+         * Func{Task{T}}
+         * 
+         * [Response and Value]
+         * Response{T}
+         * Task{Response{T}}
+         * Func{Response{T}}
+         * Func{Task{Response{T}}}
+        **/
+
         #region Utilities
 
         /// <summary>
@@ -35,6 +59,20 @@ namespace ContainerExpressions.Containers
                 value.Exception.LogErrorPlain();
             }
             return value.Status == TaskStatus.RanToCompletion ? new Response<T>(value.Result) : new Response<T>();
+        }
+
+        /// <summary>
+        /// Extracts the value produced by a task, and puts it in a response container.
+        /// <para>Aggregate errors are logged (if any), the task is expected to be completed (i.e. from a continuation).</para>
+        /// </summary>
+        /// <returns>A valid response, when the task produces a value; otherwise an invalid response.</returns>
+        private static Response<T> TaskToResponse<T>(Task<Response<T>> value)
+        {
+            if (value.Status == TaskStatus.Faulted)
+            {
+                value.Exception.LogErrorPlain();
+            }
+            return value.Status == TaskStatus.RanToCompletion ? value.Result : new Response<T>();
         }
 
         #endregion
@@ -86,30 +124,6 @@ namespace ContainerExpressions.Containers
 
         /// <summary>When the Response is in a valid state the Func's result is returned, otherwise false is returned.</summary>
         public static bool IsTrue<T>(this Response<T> response, Func<T, bool> condition) => response ? condition(response) : false;
-
-        /**
-         * Overloaded types to target for containers.
-         * Note: Actions, and Funcs can take N additional input parameters.
-         * Note: All actions map to Func{Response}, as they don't return a type; and async void methods don't return a Task either.
-         * 
-         * [Void]
-         * Response
-         * Task{Response}
-         * Func{Response}
-         * Func{Task{Response}}
-         * 
-         * [Value]
-         * T
-         * Task{T}
-         * Func{T}
-         * Func{Task{T}}
-         * 
-         * [Response and Value]
-         * Response{T}
-         * Task{Response{T}}
-         * Func{Response{T}}
-         * Func{Task{Response{T}}}
-        **/
 
         /// <summary>Converts the target into a Response Unit, based on the original response's IsValid state.</summary>
         public static Response<Unit> ToUnit(this Response response) => response.IsValid ? Unit.ResponseSuccess : Unit.ResponseError;
@@ -265,13 +279,13 @@ namespace ContainerExpressions.Containers
         public static Response<T> Bind<T>(this Response response, Func<Response<T>> func) => response ? func() : new Response<T>();
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        public static Task<Response<T>> BindAsync<T>(this Task<Response> response, Func<Response<T>> func) => response.ContinueWith(x => x.Result ? func() : new Response<T>());
+        public static Task<Response<T>> BindAsync<T>(this Task<Response> response, Func<Response<T>> func) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result ? func() : new Response<T>());
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Task<Response<T>> BindAsync<T>(this Response response, Func<Task<Response<T>>> func) => response ? func() : Task.FromResult(new Response<T>());
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        public static Task<Response<T>> BindAsync<T>(this Task<Response> response, Func<Task<Response<T>>> func) => response.ContinueWith(x => x.Result ? func() : Task.FromResult(new Response<T>())).Unwrap();
+        public static Task<Response<T>> BindAsync<T>(this Task<Response> response, Func<Task<Response<T>>> func) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result ? func() : Task.FromResult(new Response<T>())).Unwrap();
 
         /** Response => Response **/
 
@@ -279,13 +293,13 @@ namespace ContainerExpressions.Containers
         public static Response Bind(this Response response, Func<Response> func) => response ? func() : new Response();
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        public static Task<Response> BindAsync(this Task<Response> response, Func<Response> func) => response.ContinueWith(x => x.Result ? func() : new Response());
+        public static Task<Response> BindAsync(this Task<Response> response, Func<Response> func) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result ? func() : new Response());
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Task<Response> BindAsync(this Response response, Func<Task<Response>> func) => response ? func() : Task.FromResult(new Response());
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        public static Task<Response> BindAsync(this Task<Response> response, Func<Task<Response>> func) => response.ContinueWith(x => x.Result ? func() : Task.FromResult(new Response())).Unwrap();
+        public static Task<Response> BindAsync(this Task<Response> response, Func<Task<Response>> func) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result ? func() : Task.FromResult(new Response())).Unwrap();
 
         /** Response{T} => Response{Result} **/
 
@@ -293,13 +307,13 @@ namespace ContainerExpressions.Containers
         public static Response<TResult> Bind<T, TResult>(this Response<T> response, Func<T, Response<TResult>> func) => response ? func(response) : new Response<TResult>();
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        public static Task<Response<TResult>> BindAsync<T, TResult>(this Task<Response<T>> response, Func<T, Response<TResult>> func) => response.ContinueWith(x => x.Result ? func(x.Result) : new Response<TResult>());
+        public static Task<Response<TResult>> BindAsync<T, TResult>(this Task<Response<T>> response, Func<T, Response<TResult>> func) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result ? func(x.Result) : new Response<TResult>());
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Task<Response<TResult>> BindAsync<T, TResult>(this Response<T> response, Func<T, Task<Response<TResult>>> func) => response ? func(response) : Task.FromResult(new Response<TResult>());
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        public static Task<Response<TResult>> BindAsync<T, TResult>(this Task<Response<T>> response, Func<T, Task<Response<TResult>>> func) => response.ContinueWith(x => x.Result ? func(x.Result) : Task.FromResult(new Response<TResult>())).Unwrap();
+        public static Task<Response<TResult>> BindAsync<T, TResult>(this Task<Response<T>> response, Func<T, Task<Response<TResult>>> func) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result ? func(x.Result) : Task.FromResult(new Response<TResult>())).Unwrap();
 
         /** Response{T} => Response **/
 
@@ -307,13 +321,13 @@ namespace ContainerExpressions.Containers
         public static Response Bind<T>(this Response<T> response, Func<T, Response> func) => response ? func(response) : new Response();
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        public static Task<Response> BindAsync<T>(this Task<Response<T>> response, Func<T, Response> func) => response.ContinueWith(x => x.Result ? func(x.Result) : new Response());
+        public static Task<Response> BindAsync<T>(this Task<Response<T>> response, Func<T, Response> func) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result ? func(x.Result) : new Response());
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
         public static Task<Response> BindAsync<T>(this Response<T> response, Func<T, Task<Response>> func) => response ? func(response) : Task.FromResult(new Response());
 
         /// <summary>Executes the bind func only if the input Response is valid, otherwise an invalid response is returned.</summary>
-        public static Task<Response> BindAsync<T>(this Task<Response<T>> response, Func<T, Task<Response>> func) => response.ContinueWith(x => x.Result ? func(x.Result) : Task.FromResult(new Response())).Unwrap();
+        public static Task<Response> BindAsync<T>(this Task<Response<T>> response, Func<T, Task<Response>> func) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result ? func(x.Result) : Task.FromResult(new Response())).Unwrap();
 
         #endregion
 
@@ -360,7 +374,7 @@ namespace ContainerExpressions.Containers
         /// <param name="response">The result of the last ran code.</param>
         /// <param name="value">The value to assign to response.</param>
         /// <returns>The calculated value, or an invalid response if the input was in an invalid state.</returns>
-        public static Task<Response<T>> TransformAsync<T>(this Task<Response> response, T value) => response.ContinueWith(x => x.Result ? Response.Create(value) : new Response<T>());
+        public static Task<Response<T>> TransformAsync<T>(this Task<Response> response, T value) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result ? Response.Create(value) : new Response<T>());
 
         /// <summary>Map the underlying Response type, to another type.</summary>
         /// <typeparam name="T">The type of the input response.</typeparam>
@@ -368,7 +382,7 @@ namespace ContainerExpressions.Containers
         /// <param name="response">The result of the last ran code.</param>
         /// <param name="func">An error free function that maps one type to another.</param>
         /// <returns>The mapped response, or an invalid response if the input was in an invalid state.</returns>
-        public static Task<Response<TResult>> TransformAsync<T, TResult>(this Task<Response<T>> response, Func<T, TResult> func) => response.ContinueWith(x => x.Result ? Response.Create(func(x.Result)) : new Response<TResult>());
+        public static Task<Response<TResult>> TransformAsync<T, TResult>(this Task<Response<T>> response, Func<T, TResult> func) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result ? Response.Create(func(x.Result)) : new Response<TResult>());
 
         /// <summary>Map the underlying Response type, to another type.</summary>
         /// <typeparam name="T1">The type of the input response.</typeparam>
@@ -407,13 +421,13 @@ namespace ContainerExpressions.Containers
         /// Executes one of the functions when the input response is valid, otherwise an invalid response is returned.
         /// <para>When the condition is true the first function is executed, otherwise the second function is executed.</para>
         /// </summary>
-        public static Task<Response<T>> PivotAsync<T>(this Task<Response> response, bool condition, Func<Task<Response<T>>> func1, Func<Task<Response<T>>> func2) => response.ContinueWith(x => x.Result ? (condition ? func1() : func2()) : Task.FromResult(new Response<T>())).Unwrap();
+        public static Task<Response<T>> PivotAsync<T>(this Task<Response> response, bool condition, Func<Task<Response<T>>> func1, Func<Task<Response<T>>> func2) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result ? (condition ? func1() : func2()) : Task.FromResult(new Response<T>())).Unwrap();
 
         /// <summary>
         /// Executes one of the functions when the input response is valid, otherwise an invalid response is returned.
         /// <para>When the condition is true the first function is executed, otherwise the second function is executed.</para>
         /// </summary>
-        public static Task<Response<T>> PivotAsync<T>(this Task<Response> response, bool condition, Func<Response<T>> func1, Func<Response<T>> func2) => response.ContinueWith(x => x.Result ? (condition ? func1() : func2()) : new Response<T>());
+        public static Task<Response<T>> PivotAsync<T>(this Task<Response> response, bool condition, Func<Response<T>> func1, Func<Response<T>> func2) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result ? (condition ? func1() : func2()) : new Response<T>());
 
         /// <summary>
         /// Executes one of the functions when the input response is valid, otherwise an invalid response is returned.
@@ -443,25 +457,25 @@ namespace ContainerExpressions.Containers
         /// Executes one of the functions when the input response is valid, otherwise an invalid response is returned.
         /// <para>When the condition is true the first function is executed, otherwise the second function is executed.</para>
         /// </summary>
-        public static Task<Response<TResult>> PivotAsync<T, TResult>(this Task<Response<T>> response, bool condition, Func<T, Task<Response<TResult>>> func1, Func<T, Task<Response<TResult>>> func2) => response.ContinueWith(x =>  x.Result ? (condition ? func1(x.Result) : func2(x.Result)) : Task.FromResult(new Response<TResult>())).Unwrap();
+        public static Task<Response<TResult>> PivotAsync<T, TResult>(this Task<Response<T>> response, bool condition, Func<T, Task<Response<TResult>>> func1, Func<T, Task<Response<TResult>>> func2) => response.ContinueWith(TaskToResponse).ContinueWith(x =>  x.Result ? (condition ? func1(x.Result) : func2(x.Result)) : Task.FromResult(new Response<TResult>())).Unwrap();
 
         /// <summary>
         /// Executes one of the functions when the input response is valid, otherwise an invalid response is returned.
         /// <para>When the condition is true the first function is executed, otherwise the second function is executed.</para>
         /// </summary>
-        public static Task<Response<TResult>> PivotAsync<T, TResult>(this Task<Response<T>> response, Func<T, bool> condition, Func<T, Task<Response<TResult>>> func1, Func<T, Task<Response<TResult>>> func2) => response.ContinueWith(x => x.Result ? (condition(x.Result) ? func1(x.Result) : func2(x.Result)) : Task.FromResult(new Response<TResult>())).Unwrap();
+        public static Task<Response<TResult>> PivotAsync<T, TResult>(this Task<Response<T>> response, Func<T, bool> condition, Func<T, Task<Response<TResult>>> func1, Func<T, Task<Response<TResult>>> func2) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result ? (condition(x.Result) ? func1(x.Result) : func2(x.Result)) : Task.FromResult(new Response<TResult>())).Unwrap();
 
         /// <summary>
         /// Executes one of the functions when the input response is valid, otherwise an invalid response is returned.
         /// <para>When the condition is true the first function is executed, otherwise the second function is executed.</para>
         /// </summary>
-        public static Task<Response<TResult>> PivotAsync<T, TResult>(this Task<Response<T>> response, bool condition, Func<T, Response<TResult>> func1, Func<T, Response<TResult>> func2) => response.ContinueWith(x => x.Result ? (condition ? func1(x.Result) : func2(x.Result)) : new Response<TResult>());
+        public static Task<Response<TResult>> PivotAsync<T, TResult>(this Task<Response<T>> response, bool condition, Func<T, Response<TResult>> func1, Func<T, Response<TResult>> func2) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result ? (condition ? func1(x.Result) : func2(x.Result)) : new Response<TResult>());
 
         /// <summary>
         /// Executes one of the functions when the input response is valid, otherwise an invalid response is returned.
         /// <para>When the condition is true the first function is executed, otherwise the second function is executed.</para>
         /// </summary>
-        public static Task<Response<TResult>> PivotAsync<T, TResult>(this Task<Response<T>> response, Func<T, bool> condition, Func<T, Response<TResult>> func1, Func<T, Response<TResult>> func2) => response.ContinueWith(x => x.Result ? (condition(x.Result) ? func1(x.Result) : func2(x.Result)) : new Response<TResult>());
+        public static Task<Response<TResult>> PivotAsync<T, TResult>(this Task<Response<T>> response, Func<T, bool> condition, Func<T, Response<TResult>> func1, Func<T, Response<TResult>> func2) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result ? (condition(x.Result) ? func1(x.Result) : func2(x.Result)) : new Response<TResult>());
 
         #endregion
 
