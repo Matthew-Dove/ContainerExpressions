@@ -220,7 +220,7 @@ namespace ContainerExpressions.Containers
         #region Task Converters
 
         // Safely run the ValueTask, and convert the result into a Response.
-        public static ValueTask<Response> ToResponse(
+        public static ValueTask<Response> AsResponse(
             this ValueTask task,
             [CallerArgumentExpression(nameof(task))] string argument = "",
             [CallerMemberName] string caller = "",
@@ -244,7 +244,7 @@ namespace ContainerExpressions.Containers
         }
 
         // Safely run the ValueTask{T}, and convert the T, into a Response{T}.
-        public static ValueTask<Response<T>> ToResponse<T>(
+        public static ValueTask<Response<T>> AsResponse<T>(
             this ValueTask<T> task,
             [CallerArgumentExpression(nameof(task))] string argument = "",
             [CallerMemberName] string caller = "",
@@ -268,7 +268,7 @@ namespace ContainerExpressions.Containers
         }
 
         // Safely run the Task, and convert the result into a Response.
-        public static Task<Response> ToResponse(
+        public static Task<Response> AsResponse(
             this Task task,
             [CallerArgumentExpression(nameof(task))] string argument = "",
             [CallerMemberName] string caller = "",
@@ -285,7 +285,7 @@ namespace ContainerExpressions.Containers
         }
 
         // Safely run the Task{T}, and convert the T, into a Response{T}.
-        public static Task<Response<T>> ToResponse<T>(
+        public static Task<Response<T>> AsResponse<T>(
             this Task<T> task,
             [CallerArgumentExpression(nameof(task))] string argument = "",
             [CallerMemberName] string caller = "",

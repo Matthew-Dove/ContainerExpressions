@@ -72,7 +72,7 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public async Task Happy_Path_WithTask()
         {
-            var result = await RunAwaitersWithTask().ToResponse();
+            var result = await RunAwaitersWithTask().AsResponse();
 
             Assert.IsTrue(result);
             Assert.AreEqual(_result, result);
@@ -81,7 +81,7 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public async Task Happy_Path_WithValueTask()
         {
-            var result = await RunAwaitersWithValueTask().ToResponse();
+            var result = await RunAwaitersWithValueTask().AsResponse();
 
             Assert.IsTrue(result);
             Assert.AreEqual(_result, result);
@@ -99,7 +99,7 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public void Happy_Path_WithTask_Blocking()
         {
-            var result = RunAwaitersWithTask().ToResponse().GetAwaiter().GetResult();
+            var result = RunAwaitersWithTask().AsResponse().GetAwaiter().GetResult();
 
             Assert.IsTrue(result);
             Assert.AreEqual(_result, result);
@@ -108,7 +108,7 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public void Happy_Path_WithValueTask_Blocking()
         {
-            var result = RunAwaitersWithValueTask().ToResponse().GetAwaiter().GetResult();
+            var result = RunAwaitersWithValueTask().AsResponse().GetAwaiter().GetResult();
 
             Assert.IsTrue(result);
             Assert.AreEqual(_result, result);
