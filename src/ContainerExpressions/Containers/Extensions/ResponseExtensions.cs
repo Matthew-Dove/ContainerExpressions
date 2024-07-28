@@ -593,9 +593,33 @@ namespace ContainerExpressions.Containers
         /// <param name="isValid">When true a valid Response container will be returned; otherwise an invalid one is returned.</param>
         public static Task<Response<T>> ValidateAsync<T>(this Task<Response<T>> response, Func<T, bool> isValid) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result && isValid(x.Result) ? Response<T>.Success(x.Result) : Response<T>.Error);
 
-        /// <summary>Validate the value of T, to determine if it is in a valid state or not.</summary>
-        /// <param name="isValid">When true a valid Response container will be returned; otherwise an invalid one is returned.</param>
-        public static Task<Response<T>> ValidateTaskAsync<T>(this Task<T> response, Func<T, bool> isValid) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result && isValid(x.Result) ? Response<T>.Success(x.Result) : Response<T>.Error);
+        #endregion
+
+        #region BindIf
+
+        /// <summary>Executes the bind func only if the input Response is valid, and the predicate is true; otherwise an invalid response is returned.</summary>
+        public static Response<TResult> BindIf<T, TResult>(this Response<T> response, bool predicate, Func<T, Response<TResult>> func) => response && predicate ? func(response) : new Response<TResult>();
+
+        /// <summary>Executes the bind func only if the input Response is valid, and the predicate is true; otherwise an invalid response is returned.</summary>
+        public static Response<TResult> BindIf<T, TResult>(this Response<T> response, Func<T, bool> predicate, Func<T, Response<TResult>> func) => response && predicate(response) ? func(response) : new Response<TResult>();
+
+        /// <summary>Executes the bind func only if the input Response is valid, and the predicate is true; otherwise an invalid response is returned.</summary>
+        public static Task<Response<TResult>> BindIfAsync<T, TResult>(this Task<Response<T>> response, bool predicate, Func<T, Response<TResult>> func) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result && predicate ? func(x.Result) : new Response<TResult>());
+
+        /// <summary>Executes the bind func only if the input Response is valid, and the predicate is true; otherwise an invalid response is returned.</summary>
+        public static Task<Response<TResult>> BindIfAsync<T, TResult>(this Task<Response<T>> response, Func<T, bool> predicate, Func<T, Response<TResult>> func) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result && predicate(x.Result) ? func(x.Result) : new Response<TResult>());
+
+        /// <summary>Executes the bind func only if the input Response is valid, and the predicate is true; otherwise an invalid response is returned.</summary>
+        public static Task<Response<TResult>> BindIfAsync<T, TResult>(this Response<T> response, bool predicate, Func<T, Task<Response<TResult>>> func) => response&& predicate ? func(response) : Task.FromResult(new Response<TResult>());
+
+        /// <summary>Executes the bind func only if the input Response is valid, and the predicate is true; otherwise an invalid response is returned.</summary>
+        public static Task<Response<TResult>> BindIfAsync<T, TResult>(this Response<T> response, Func<T, bool> predicate, Func<T, Task<Response<TResult>>> func) => response && predicate(response) ? func(response) : Task.FromResult(new Response<TResult>());
+
+        /// <summary>Executes the bind func only if the input Response is valid, and the predicate is true; otherwise an invalid response is returned.</summary>
+        public static Task<Response<TResult>> BindIfAsync<T, TResult>(this Task<Response<T>> response, bool predicate, Func<T, Task<Response<TResult>>> func) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result && predicate ? func(x.Result) : Task.FromResult(new Response<TResult>())).Unwrap();
+
+        /// <summary>Executes the bind func only if the input Response is valid, and the predicate is true; otherwise an invalid response is returned.</summary>
+        public static Task<Response<TResult>> BindIfAsync<T, TResult>(this Task<Response<T>> response, Func<T, bool> predicate, Func<T, Task<Response<TResult>>> func) => response.ContinueWith(TaskToResponse).ContinueWith(x => x.Result && predicate(x.Result) ? func(x.Result) : Task.FromResult(new Response<TResult>())).Unwrap();
 
         #endregion
     }

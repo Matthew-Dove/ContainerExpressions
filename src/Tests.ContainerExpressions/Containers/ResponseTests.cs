@@ -1533,36 +1533,6 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
-        public async Task Validate_Async_TaskIsValid()
-        {
-            var target = Task.FromResult(1);
-
-            var response = await target.ValidateTaskAsync(x => x > 0);
-
-            Assert.IsTrue(response);
-        }
-
-        [TestMethod]
-        public async Task Validate_Async_TaskIsNotValid()
-        {
-            var target = Task.FromResult(0);
-
-            var response = await target.ValidateTaskAsync(x => x > 0);
-
-            Assert.IsFalse(response);
-        }
-
-        [TestMethod]
-        public async Task Validate_Async_TaskIsError()
-        {
-            var target = Task.FromException<int>(new Exception("Error!"));
-
-            var response = await target.ValidateTaskAsync(x => x > 0);
-
-            Assert.IsFalse(response);
-        }
-
-        [TestMethod]
         public async Task Validate_Async_ResponseIsValid()
         {
             var target = Task.FromResult(Response.Create(1));
@@ -1590,6 +1560,61 @@ namespace Tests.ContainerExpressions.Containters
             var response = await target.ValidateAsync(x => x > 0);
 
             Assert.IsFalse(response);
+        }
+
+        #endregion
+
+        #region BindIf
+
+        [TestMethod]
+        public async Task BindIf_ResponseIsValid_PredicateIsTrue_BindIsExecuted()
+        {
+            var answer = 42;
+            var response = Task.FromResult(Response.Create(answer));
+            Func<int, bool> predicate = x => x > 0;
+            Func<int, Task<Response<string>>> func = x => Task.FromResult(Response.Create(x.ToString()));
+
+            var bind = await response.BindIfAsync(predicate, func);
+
+            Assert.IsTrue(bind);
+            Assert.AreEqual(answer.ToString(), bind);
+        }
+
+        [TestMethod]
+        public async Task BindIf_ResponseIsNotValid_PredicateIsTrue_BindIsNoExecuted()
+        {
+            var response = Task.FromResult(Response<int>.Error);
+            Func<int, bool> predicate = x => x > 0;
+            Func<int, Task<Response<string>>> func = x => Task.FromResult(Response.Create(x.ToString()));
+
+            var bind = await response.BindIfAsync(predicate, func);
+
+            Assert.IsFalse(bind);
+        }
+
+        [TestMethod]
+        public async Task BindIf_ResponseIsValid_PredicateIsNotTrue_BindIsNotExecuted()
+        {
+            var answer = -1;
+            var response = Task.FromResult(Response.Create(answer));
+            Func<int, bool> predicate = x => x > 0;
+            Func<int, Task<Response<string>>> func = x => Task.FromResult(Response.Create(x.ToString()));
+
+            var bind = await response.BindIfAsync(predicate, func);
+
+            Assert.IsFalse(bind);
+        }
+
+        [TestMethod]
+        public async Task BindIf_TaskHasError_BindIsNotExecuted()
+        {
+            var response = Task.FromException<Response<int>>(new Exception("Error!"));
+            Func<int, bool> predicate = x => x > 0;
+            Func<int, Task<Response<string>>> func = x => Task.FromResult(Response.Create(x.ToString()));
+
+            var bind = await response.BindIfAsync(predicate, func);
+
+            Assert.IsFalse(bind);
         }
 
         #endregion
