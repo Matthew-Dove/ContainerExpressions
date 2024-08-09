@@ -684,5 +684,297 @@ namespace ContainerExpressions.Containers
             });
 
         #endregion
+
+        #region () => ResponseAsync<T>
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="response">The Response Container.</param>
+        /// <param name="success">The message to trace when the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        public static async Task<Response<T>> LogAsync<T>(this ResponseAsync<T> response, Format success, Format fail = default)
+        {
+            var result = await response;
+
+            if (result) Trace.Log(success);
+            else Trace.Log(fail);
+
+            return result;
+        }
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="response">The Response Container.</param>
+        /// <param name="success">The message to trace when the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        public static async Task<Response<T>> LogAsync<T>(this ResponseAsync<T> response, Func<T, Format> success, Format fail = default)
+        {
+            var result = await response;
+
+            if (result) Trace.Log(success(result));
+            else Trace.Log(fail);
+
+            return result;
+        }
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="func">A function to the Response Container.</param>
+        /// <param name="success">The message to trace if the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        public static Func<Task<Response<T>>> LogAsync<T>(this Func<ResponseAsync<T>> func, Format success, Format fail = default) => async () =>
+        {
+            var result = await func();
+
+            if (result) Trace.Log(success);
+            else Trace.Log(fail);
+
+            return result;
+        };
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="func">A function to the Response Container.</param>
+        /// <param name="success">The message to trace if the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        public static Func<Task<Response<T>>> LogAsync<T>(this Func<ResponseAsync<T>> func, Func<T, Format> success, Format fail = default) => async () =>
+        {
+            var result = await func();
+
+            if (result) Trace.Log(success(result));
+            else Trace.Log(fail);
+
+            return result;
+        };
+
+        #endregion
+
+        #region TResult => ResponseAsync<T>
+
+        /** Format success **/
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="func">A function to the Response Container.</param>
+        /// <param name="success">The message to trace if the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, ResponseAsync<TResult>> func, Format success, Format fail = default) => async (x) =>
+        {
+            var result = await func(x);
+
+            if (result) Trace.Log(success);
+            else Trace.Log(fail);
+
+            return result;
+        };
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="func">A function to the Response Container.</param>
+        /// <param name="success">The message to trace if the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        public static Func<T1, T2, Task<Response<TResult>>> LogAsync<T1, T2, TResult>(this Func<T1, T2, ResponseAsync<TResult>> func, Format success, Format fail = default) => async (x1, x2) =>
+        {
+            var result = await func(x1, x2);
+
+            if (result) Trace.Log(success);
+            else Trace.Log(fail);
+
+            return result;
+        };
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="func">A function to the Response Container.</param>
+        /// <param name="success">The message to trace if the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        public static Func<T1, T2, T3, Task<Response<TResult>>> LogAsync<T1, T2, T3, TResult>(this Func<T1, T2, T3, ResponseAsync<TResult>> func, Format success, Format fail = default) => async (x1, x2, x3) =>
+        {
+            var result = await func(x1, x2, x3);
+
+            if (result) Trace.Log(success);
+            else Trace.Log(fail);
+
+            return result;
+        };
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="func">A function to the Response Container.</param>
+        /// <param name="success">The message to trace if the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        public static Func<T1, T2, T3, T4, Task<Response<TResult>>> LogAsync<T1, T2, T3, T4, TResult>(this Func<T1, T2, T3, T4, ResponseAsync<TResult>> func, Format success, Format fail = default) => async (x1, x2, x3, x4) =>
+        {
+            var result = await func(x1, x2, x3, x4);
+
+            if (result) Trace.Log(success);
+            else Trace.Log(fail);
+
+            return result;
+        };
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="func">A function to the Response Container.</param>
+        /// <param name="success">The message to trace if the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        public static Func<T1, T2, T3, T4, T5, Task<Response<TResult>>> LogAsync<T1, T2, T3, T4, T5, TResult>(this Func<T1, T2, T3, T4, T5, ResponseAsync<TResult>> func, Format success, Format fail = default) => async (x1, x2, x3, x4, x5) =>
+        {
+            var result = await func(x1, x2, x3, x4, x5);
+
+            if (result) Trace.Log(success);
+            else Trace.Log(fail);
+
+            return result;
+        };
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="func">A function to the Response Container.</param>
+        /// <param name="success">The message to trace if the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        public static Func<T1, T2, T3, T4, T5, T6, Task<Response<TResult>>> LogAsync<T1, T2, T3, T4, T5, T6, TResult>(this Func<T1, T2, T3, T4, T5, T6, ResponseAsync<TResult>> func, Format success, Format fail = default) => async (x1, x2, x3, x4, x5, x6) =>
+        {
+            var result = await func(x1, x2, x3, x4, x5, x6);
+
+            if (result) Trace.Log(success);
+            else Trace.Log(fail);
+
+            return result;
+        };
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="func">A function to the Response Container.</param>
+        /// <param name="success">The message to trace if the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        public static Func<T1, T2, T3, T4, T5, T6, T7, Task<Response<TResult>>> LogAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(this Func<T1, T2, T3, T4, T5, T6, T7, ResponseAsync<TResult>> func, Format success, Format fail = default) => async (x1, x2, x3, x4, x5, x6, x7) =>
+        {
+            var result = await func(x1, x2, x3, x4, x5, x6, x7);
+
+            if (result) Trace.Log(success);
+            else Trace.Log(fail);
+
+            return result;
+        };
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="func">A function to the Response Container.</param>
+        /// <param name="success">The message to trace if the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        public static Func<T1, T2, T3, T4, T5, T6, T7, T8, Task<Response<TResult>>> LogAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Func<T1, T2, T3, T4, T5, T6, T7, T8, ResponseAsync<TResult>> func, Format success, Format fail = default) => async (x1, x2, x3, x4, x5, x6, x7, x8) =>
+        {
+            var result = await func(x1, x2, x3, x4, x5, x6, x7, x8);
+
+            if (result) Trace.Log(success);
+            else Trace.Log(fail);
+
+            return result;
+        };
+
+        /** Func{TResult, Format} success **/
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="func">A function to the Response Container.</param>
+        /// <param name="success">The message to trace if the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        public static Func<T, Task<Response<TResult>>> LogAsync<T, TResult>(this Func<T, ResponseAsync<TResult>> func, Func<TResult, Format> success, Format fail = default) => async (x) =>
+        {
+            var result = await func(x);
+
+            if (result) Trace.Log(success(result));
+            else Trace.Log(fail);
+
+            return result;
+        };
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="func">A function to the Response Container.</param>
+        /// <param name="success">The message to trace if the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        public static Func<T1, T2, Task<Response<TResult>>> LogAsync<T1, T2, TResult>(this Func<T1, T2, ResponseAsync<TResult>> func, Func<TResult, Format> success, Format fail = default) => async (x1, x2) =>
+        {
+            var result = await func(x1, x2);
+
+            if (result) Trace.Log(success(result));
+            else Trace.Log(fail);
+
+            return result;
+        };
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="func">A function to the Response Container.</param>
+        /// <param name="success">The message to trace if the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        public static Func<T1, T2, T3, Task<Response<TResult>>> LogAsync<T1, T2, T3, TResult>(this Func<T1, T2, T3, ResponseAsync<TResult>> func, Func<TResult, Format> success, Format fail = default) => async (x1, x2, x3) =>
+        {
+            var result = await func(x1, x2, x3);
+
+            if (result) Trace.Log(success(result));
+            else Trace.Log(fail);
+
+            return result;
+        };
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="func">A function to the Response Container.</param>
+        /// <param name="success">The message to trace if the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        public static Func<T1, T2, T3, T4, Task<Response<TResult>>> LogAsync<T1, T2, T3, T4, TResult>(this Func<T1, T2, T3, T4, ResponseAsync<TResult>> func, Func<TResult, Format> success, Format fail = default) => async (x1, x2, x3, x4) =>
+        {
+            var result = await func(x1, x2, x3, x4);
+
+            if (result) Trace.Log(success(result));
+            else Trace.Log(fail);
+
+            return result;
+        };
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="func">A function to the Response Container.</param>
+        /// <param name="success">The message to trace if the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        public static Func<T1, T2, T3, T4, T5, Task<Response<TResult>>> LogAsync<T1, T2, T3, T4, T5, TResult>(this Func<T1, T2, T3, T4, T5, ResponseAsync<TResult>> func, Func<TResult, Format> success, Format fail = default) => async (x1, x2, x3, x4, x5) =>
+        {
+            var result = await func(x1, x2, x3, x4, x5);
+
+            if (result) Trace.Log(success(result));
+            else Trace.Log(fail);
+
+            return result;
+        };
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="func">A function to the Response Container.</param>
+        /// <param name="success">The message to trace if the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        public static Func<T1, T2, T3, T4, T5, T6, Task<Response<TResult>>> LogAsync<T1, T2, T3, T4, T5, T6, TResult>(this Func<T1, T2, T3, T4, T5, T6, ResponseAsync<TResult>> func, Func<TResult, Format> success, Format fail = default) => async (x1, x2, x3, x4, x5, x6) =>
+        {
+            var result = await func(x1, x2, x3, x4, x5, x6);
+
+            if (result) Trace.Log(success(result));
+            else Trace.Log(fail);
+
+            return result;
+        };
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="func">A function to the Response Container.</param>
+        /// <param name="success">The message to trace if the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        public static Func<T1, T2, T3, T4, T5, T6, T7, Task<Response<TResult>>> LogAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(this Func<T1, T2, T3, T4, T5, T6, T7, ResponseAsync<TResult>> func, Func<TResult, Format> success, Format fail = default) => async (x1, x2, x3, x4, x5, x6, x7) =>
+        {
+            var result = await func(x1, x2, x3, x4, x5, x6, x7);
+
+            if (result) Trace.Log(success(result));
+            else Trace.Log(fail);
+
+            return result;
+        };
+
+        /// <summary>Logs a trace step.</summary>
+        /// <param name="func">A function to the Response Container.</param>
+        /// <param name="success">The message to trace if the response is in a valid state.</param>
+        /// <param name="fail">The message to trace when the response is in an invalid state.</param>
+        public static Func<T1, T2, T3, T4, T5, T6, T7, T8, Task<Response<TResult>>> LogAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Func<T1, T2, T3, T4, T5, T6, T7, T8, ResponseAsync<TResult>> func, Func<TResult, Format> success, Format fail = default) => async (x1, x2, x3, x4, x5, x6, x7, x8) =>
+        {
+            var result = await func(x1, x2, x3, x4, x5, x6, x7, x8);
+
+            if (result) Trace.Log(success(result));
+            else Trace.Log(fail);
+
+            return result;
+        };
+
+        #endregion
     }
 }

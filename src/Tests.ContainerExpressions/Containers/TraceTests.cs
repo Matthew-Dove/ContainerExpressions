@@ -467,5 +467,209 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         #endregion
+
+        #region ResponseAsyncT
+
+        [TestMethod]
+        public async Task ValidResponseAsyncT_LogsMessage()
+        {
+            var success = "Hello World!";
+
+            var response = await new ResponseAsync<int>(42).LogAsync(success);
+
+            Assert.IsTrue(response);
+            Assert.AreEqual(1, _messages.Count);
+            Assert.AreEqual(success, _messages[0]);
+        }
+
+        [TestMethod]
+        public async Task InvalidResponseAsyncT_LogsMessage()
+        {
+            var success = "Hello World!";
+            var error = "Goodbye World!";
+
+            var response = await new ResponseAsync<int>(new Exception("Error!")).LogAsync(success, error);
+
+            Assert.IsFalse(response);
+            Assert.AreEqual(1, _messages.Count);
+            Assert.AreEqual(error, _messages[0]);
+        }
+
+        [TestMethod]
+        public async Task ValidResponseAsyncT_LogsFuncMessage()
+        {
+            var answer = 42;
+            Func<int, Format> success = x => "The answer is: {answer}.".WithArgs(x);
+
+            var response = await new ResponseAsync<int>(answer).LogAsync(success);
+
+            Assert.IsTrue(response);
+            Assert.AreEqual(answer, response);
+            Assert.AreEqual(1, _messages.Count);
+            Assert.AreEqual(success(answer), _messages[0]);
+        }
+
+        [TestMethod]
+        public async Task InvalidResponseAsyncT_LogsFuncMessage()
+        {
+            Func<int, Format> success = x => "The answer is: {answer}.".WithArgs(x);
+            var error = "The answer is lost to the void.";
+
+            var response = await new ResponseAsync<int>(new Exception("Error!")).LogAsync(success, error);
+
+            Assert.IsFalse(response);
+            Assert.AreEqual(1, _messages.Count);
+            Assert.AreEqual(error, _messages[0]);
+        }
+
+        [TestMethod]
+        public async Task ValidResponseAsyncFuncT_LogsMessage()
+        {
+            var success = "Hello World!";
+            Func<ResponseAsync<int>> func = () => new ResponseAsync<int>(42);
+
+            var response = await func.LogAsync(success);
+
+            Assert.IsTrue(response);
+            Assert.AreEqual(1, _messages.Count);
+            Assert.AreEqual(success, _messages[0]);
+        }
+
+        [TestMethod]
+        public async Task InvalidResponseAsyncFuncT_LogsMessage()
+        {
+            var success = "Hello World!";
+            var error = "Goodbye World!";
+            Func<ResponseAsync<int>> func = () => new ResponseAsync<int>(new Exception("Error!"));
+
+            var response = await func.LogAsync(success, error);
+
+            Assert.IsFalse(response);
+            Assert.AreEqual(1, _messages.Count);
+            Assert.AreEqual(error, _messages[0]);
+        }
+
+        [TestMethod]
+        public async Task ValidResponseAsyncFuncT_LogsFuncMessage()
+        {
+            var answer = 42;
+            Func<int, Format> success = x => "The answer is: {answer}.".WithArgs(x);
+            Func<ResponseAsync<int>> func = () => new ResponseAsync<int>(answer);
+
+            var response = await func.LogAsync(success);
+
+            Assert.IsTrue(response);
+            Assert.AreEqual(answer, response);
+            Assert.AreEqual(1, _messages.Count);
+            Assert.AreEqual(success(answer), _messages[0]);
+        }
+
+        [TestMethod]
+        public async Task InvalidResponseAsyncFuncT_LogsFuncMessage()
+        {
+            Func<int, Format> success = x => "The answer is: {answer}.".WithArgs(x);
+            var error = "The answer is lost to the void.";
+            Func<ResponseAsync<int>> func = () => new ResponseAsync<int>(new Exception("Error!"));
+
+            var response = await func.LogAsync(success, error);
+
+            Assert.IsFalse(response);
+            Assert.AreEqual(1, _messages.Count);
+            Assert.AreEqual(error, _messages[0]);
+        }
+
+        #endregion
+
+        #region TResult => ResponseAsyncT
+
+        [TestMethod]
+        public async Task ValidResponseAsyncFuncT_WithArg_LogsMessage()
+        {
+            var answer = 42;
+            var success = "Hello World!";
+            Func<int, ResponseAsync<int>> func = (x) => new ResponseAsync<int>(x);
+
+            var response = await func.LogAsync(success)(answer);
+
+            Assert.IsTrue(response);
+            Assert.AreEqual(answer, response);
+            Assert.AreEqual(1, _messages.Count);
+            Assert.AreEqual(success, _messages[0]);
+        }
+
+        [TestMethod]
+        public async Task ValidResponseAsyncFuncT_With8Args_LogsMessage()
+        {
+            var answer = 42;
+            var success = "Hello World!";
+            Func<int, int, int, int, int, int, int, int, ResponseAsync<int>> func = (x, _, _, _, _, _, _, _) => new ResponseAsync<int>(x);
+
+            var response = await func.LogAsync(success)(answer, default, default, default, default, default, default, default);
+
+            Assert.IsTrue(response);
+            Assert.AreEqual(answer, response);
+            Assert.AreEqual(1, _messages.Count);
+            Assert.AreEqual(success, _messages[0]);
+        }
+
+        [TestMethod]
+        public async Task InvalidResponseAsyncFuncTResultT_WithArg_LogsMessage()
+        {
+            var success = "Hello World!";
+            var error = "Goodbye World!";
+            Func<int, ResponseAsync<int>> func = (_) => new ResponseAsync<int>(new Exception("Error!"));
+
+            var response = await func.LogAsync(success, error)(42);
+
+            Assert.IsFalse(response);
+            Assert.AreEqual(1, _messages.Count);
+            Assert.AreEqual(error, _messages[0]);
+        }
+
+        [TestMethod]
+        public async Task ValidResponseAsyncFuncT_WithArg_LogsFuncMessage()
+        {
+            var answer = 42;
+            Func<int, Format> success = x => "The answer is: {answer}.".WithArgs(x);
+            Func<int, ResponseAsync<int>> func = (x) => new ResponseAsync<int>(x);
+
+            var response = await func.LogAsync(success)(answer);
+
+            Assert.IsTrue(response);
+            Assert.AreEqual(answer, response);
+            Assert.AreEqual(1, _messages.Count);
+            Assert.AreEqual(success(answer), _messages[0]);
+        }
+
+        [TestMethod]
+        public async Task ValidResponseAsyncFuncT_With8Args_LogsFuncMessage()
+        {
+            var answer = 42;
+            Func<int, Format> success = x => "The answer is: {answer}.".WithArgs(x);
+            Func<int, int, int, int, int, int, int, int, ResponseAsync<int>> func = (x, _, _, _, _, _, _, _) => new ResponseAsync<int>(x);
+
+            var response = await func.LogAsync(success)(answer, default, default, default, default, default, default, default);
+
+            Assert.IsTrue(response);
+            Assert.AreEqual(answer, response);
+            Assert.AreEqual(1, _messages.Count);
+            Assert.AreEqual(success(answer), _messages[0]);
+        }
+
+        [TestMethod]
+        public async Task InvalidResponseAsyncFuncTResultT_WithArg_LogsFuncMessage()
+        {
+            Func<int, Format> success = x => "The answer is: {answer}.".WithArgs(x);
+            var error = "The answer is lost to the void.";
+            Func<int, ResponseAsync<int>> func = (_) => new ResponseAsync<int>(new Exception("Error!"));
+
+            var response = await func.LogAsync(success, error)(42);
+
+            Assert.IsFalse(response);
+            Assert.AreEqual(1, _messages.Count);
+            Assert.AreEqual(error, _messages[0]);
+        }
+
+        #endregion
     }
 }

@@ -268,6 +268,19 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
+        public async Task ResponseAsync_DoesNotRetry_WhenValid()
+        {
+            var answer = 42;
+            var attempts = 0;
+            Func<ResponseAsync<int>> func = () => { attempts++; return ResponseAsync.FromResult(answer); };
+
+            var response = await Retry.ExecuteAsync(func);
+
+            Assert.AreEqual(answer, response);
+            Assert.AreEqual(1, attempts);
+        }
+
+        [TestMethod]
         public async Task ResponseAsync_Retry()
         {
             var retries = 0;
