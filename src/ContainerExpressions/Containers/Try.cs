@@ -16,6 +16,17 @@ namespace ContainerExpressions.Containers
         internal static Action<Exception> Logger = null;
         internal static Action<Exception, string, object[]> FormattedLogger = null;
 
+        static Try()
+        {
+            TaskScheduler.UnobservedTaskException += (_, e) =>
+            {
+                if (Run(() => e.Exception.LogError("UnobservedTaskException: {error}".WithArgs(e.Exception.InnerException.Message))))
+                {
+                    e.SetObserved();
+                }
+            };
+        }
+
         /// <summary>
         /// Set your desired logger implementation here.
         /// <para>It is recommend that the logger be stateless.</para>
