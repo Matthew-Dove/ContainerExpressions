@@ -374,13 +374,13 @@ namespace ContainerExpressions.Containers
         #region () => ResponseAsync<T>
 
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
-        public static ResponseAsync<T> ExecuteAsync<T>(Func<ResponseAsync<T>> func) => ExecuteAsync(func, RetryOptions.Create());
+        public static Task<Response<T>> ExecuteAsync<T>(Func<ResponseAsync<T>> func) => ExecuteAsync(func, RetryOptions.Create());
 
         /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
-        public static ResponseAsync<T> ExecuteExponentialAsync<T>(Func<ResponseAsync<T>> func) => ExecuteAsync(func, RetryOptions.CreateExponential());
+        public static Task<Response<T>> ExecuteExponentialAsync<T>(Func<ResponseAsync<T>> func) => ExecuteAsync(func, RetryOptions.CreateExponential());
 
         /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
-        public static async ResponseAsync<T> ExecuteAsync<T>(Func<ResponseAsync<T>> func, RetryOptions options)
+        public static async Task<Response<T>> ExecuteAsync<T>(Func<ResponseAsync<T>> func, RetryOptions options)
         {
             var response = await func();
             var retries = options.Retries;
@@ -391,7 +391,7 @@ namespace ContainerExpressions.Containers
                 response = await func();
             }
 
-            return response; // This is going to throw an "InvalidOperationException", as it casts to "ResponseAsync<T>"; if we don't get a valid "Response<T>" out of func.
+            return response;
         }
 
         #endregion
@@ -401,13 +401,13 @@ namespace ContainerExpressions.Containers
         /** T1 **/
 
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
-        public static ResponseAsync<TResult> ExecuteAsync<T, TResult>(T arg, Func<T, ResponseAsync<TResult>> func) => ExecuteAsync(arg, func, RetryOptions.Create());
+        public static Task<Response<TResult>> ExecuteAsync<T, TResult>(T arg, Func<T, ResponseAsync<TResult>> func) => ExecuteAsync(arg, func, RetryOptions.Create());
 
         /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
-        public static ResponseAsync<TResult> ExecuteExponentialAsync<T, TResult>(T arg, Func<T, ResponseAsync<TResult>> func) => ExecuteAsync(arg, func, RetryOptions.CreateExponential());
+        public static Task<Response<TResult>> ExecuteExponentialAsync<T, TResult>(T arg, Func<T, ResponseAsync<TResult>> func) => ExecuteAsync(arg, func, RetryOptions.CreateExponential());
 
         /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
-        public static async ResponseAsync<TResult> ExecuteAsync<T, TResult>(T arg, Func<T, ResponseAsync<TResult>> func, RetryOptions options)
+        public static async Task<Response<TResult>> ExecuteAsync<T, TResult>(T arg, Func<T, ResponseAsync<TResult>> func, RetryOptions options)
         {
             var response = await func(arg);
             var retries = options.Retries;
@@ -418,19 +418,19 @@ namespace ContainerExpressions.Containers
                 response = await func(arg);
             }
 
-            return response; // This is going to throw an "InvalidOperationException", as it casts to "ResponseAsync<T>"; if we don't get a valid "Response<T>" out of func.
+            return response;
         }
 
         /** T2 **/
 
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
-        public static ResponseAsync<TResult> ExecuteAsync<T1, T2, TResult>(T1 arg1, T2 arg2, Func<T1, T2, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, func, RetryOptions.Create());
+        public static Task<Response<TResult>> ExecuteAsync<T1, T2, TResult>(T1 arg1, T2 arg2, Func<T1, T2, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, func, RetryOptions.Create());
 
         /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
-        public static ResponseAsync<TResult> ExecuteExponentialAsync<T1, T2, TResult>(T1 arg1, T2 arg2, Func<T1, T2, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, func, RetryOptions.CreateExponential());
+        public static Task<Response<TResult>> ExecuteExponentialAsync<T1, T2, TResult>(T1 arg1, T2 arg2, Func<T1, T2, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, func, RetryOptions.CreateExponential());
 
         /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
-        public static async ResponseAsync<TResult> ExecuteAsync<T1, T2, TResult>(T1 arg1, T2 arg2, Func<T1, T2, ResponseAsync<TResult>> func, RetryOptions options)
+        public static async Task<Response<TResult>> ExecuteAsync<T1, T2, TResult>(T1 arg1, T2 arg2, Func<T1, T2, ResponseAsync<TResult>> func, RetryOptions options)
         {
             var response = await func(arg1, arg2);
             var retries = options.Retries;
@@ -441,19 +441,19 @@ namespace ContainerExpressions.Containers
                 response = await func(arg1, arg2);
             }
 
-            return response; // This is going to throw an "InvalidOperationException", as it casts to "ResponseAsync<T>"; if we don't get a valid "Response<T>" out of func.
+            return response;
         }
 
         /** T3 **/
 
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
-        public static ResponseAsync<TResult> ExecuteAsync<T1, T2, T3, TResult>(T1 arg1, T2 arg2, T3 arg3, Func<T1, T2, T3, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, func, RetryOptions.Create());
+        public static Task<Response<TResult>> ExecuteAsync<T1, T2, T3, TResult>(T1 arg1, T2 arg2, T3 arg3, Func<T1, T2, T3, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, func, RetryOptions.Create());
 
         /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
-        public static ResponseAsync<TResult> ExecuteExponentialAsync<T1, T2, T3, TResult>(T1 arg1, T2 arg2, T3 arg3, Func<T1, T2, T3, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, func, RetryOptions.CreateExponential());
+        public static Task<Response<TResult>> ExecuteExponentialAsync<T1, T2, T3, TResult>(T1 arg1, T2 arg2, T3 arg3, Func<T1, T2, T3, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, func, RetryOptions.CreateExponential());
 
         /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
-        public static async ResponseAsync<TResult> ExecuteAsync<T1, T2, T3, TResult>(T1 arg1, T2 arg2, T3 arg3, Func<T1, T2, T3, ResponseAsync<TResult>> func, RetryOptions options)
+        public static async Task<Response<TResult>> ExecuteAsync<T1, T2, T3, TResult>(T1 arg1, T2 arg2, T3 arg3, Func<T1, T2, T3, ResponseAsync<TResult>> func, RetryOptions options)
         {
             var response = await func(arg1, arg2, arg3);
             var retries = options.Retries;
@@ -464,19 +464,19 @@ namespace ContainerExpressions.Containers
                 response = await func(arg1, arg2, arg3);
             }
 
-            return response; // This is going to throw an "InvalidOperationException", as it casts to "ResponseAsync<T>"; if we don't get a valid "Response<T>" out of func.
+            return response;
         }
 
         /** T4 **/
 
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
-        public static ResponseAsync<TResult> ExecuteAsync<T1, T2, T3, T4, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, Func<T1, T2, T3, T4, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, arg4, func, RetryOptions.Create());
+        public static Task<Response<TResult>> ExecuteAsync<T1, T2, T3, T4, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, Func<T1, T2, T3, T4, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, arg4, func, RetryOptions.Create());
 
         /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
-        public static ResponseAsync<TResult> ExecuteExponentialAsync<T1, T2, T3, T4, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, Func<T1, T2, T3, T4, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, arg4, func, RetryOptions.CreateExponential());
+        public static Task<Response<TResult>> ExecuteExponentialAsync<T1, T2, T3, T4, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, Func<T1, T2, T3, T4, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, arg4, func, RetryOptions.CreateExponential());
 
         /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
-        public static async ResponseAsync<TResult> ExecuteAsync<T1, T2, T3, T4, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, Func<T1, T2, T3, T4, ResponseAsync<TResult>> func, RetryOptions options)
+        public static async Task<Response<TResult>> ExecuteAsync<T1, T2, T3, T4, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, Func<T1, T2, T3, T4, ResponseAsync<TResult>> func, RetryOptions options)
         {
             var response = await func(arg1, arg2, arg3, arg4);
             var retries = options.Retries;
@@ -487,19 +487,19 @@ namespace ContainerExpressions.Containers
                 response = await func(arg1, arg2, arg3, arg4);
             }
 
-            return response; // This is going to throw an "InvalidOperationException", as it casts to "ResponseAsync<T>"; if we don't get a valid "Response<T>" out of func.
+            return response;
         }
 
         /** T5 **/
 
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
-        public static ResponseAsync<TResult> ExecuteAsync<T1, T2, T3, T4, T5, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, Func<T1, T2, T3, T4, T5, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, arg4, arg5, func, RetryOptions.Create());
+        public static Task<Response<TResult>> ExecuteAsync<T1, T2, T3, T4, T5, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, Func<T1, T2, T3, T4, T5, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, arg4, arg5, func, RetryOptions.Create());
 
         /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
-        public static ResponseAsync<TResult> ExecuteExponentialAsync<T1, T2, T3, T4, T5, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, Func<T1, T2, T3, T4, T5, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, arg4, arg5, func, RetryOptions.CreateExponential());
+        public static Task<Response<TResult>> ExecuteExponentialAsync<T1, T2, T3, T4, T5, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, Func<T1, T2, T3, T4, T5, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, arg4, arg5, func, RetryOptions.CreateExponential());
 
         /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
-        public static async ResponseAsync<TResult> ExecuteAsync<T1, T2, T3, T4, T5, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, Func<T1, T2, T3, T4, T5, ResponseAsync<TResult>> func, RetryOptions options)
+        public static async Task<Response<TResult>> ExecuteAsync<T1, T2, T3, T4, T5, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, Func<T1, T2, T3, T4, T5, ResponseAsync<TResult>> func, RetryOptions options)
         {
             var response = await func(arg1, arg2, arg3, arg4, arg5);
             var retries = options.Retries;
@@ -510,19 +510,19 @@ namespace ContainerExpressions.Containers
                 response = await func(arg1, arg2, arg3, arg4, arg5);
             }
 
-            return response; // This is going to throw an "InvalidOperationException", as it casts to "ResponseAsync<T>"; if we don't get a valid "Response<T>" out of func.
+            return response;
         }
 
         /** T6 **/
 
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
-        public static ResponseAsync<TResult> ExecuteAsync<T1, T2, T3, T4, T5, T6, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, Func<T1, T2, T3, T4, T5, T6, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, arg4, arg5, arg6, func, RetryOptions.Create());
+        public static Task<Response<TResult>> ExecuteAsync<T1, T2, T3, T4, T5, T6, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, Func<T1, T2, T3, T4, T5, T6, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, arg4, arg5, arg6, func, RetryOptions.Create());
 
         /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
-        public static ResponseAsync<TResult> ExecuteExponentialAsync<T1, T2, T3, T4, T5, T6, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, Func<T1, T2, T3, T4, T5, T6, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, arg4, arg5, arg6, func, RetryOptions.CreateExponential());
+        public static Task<Response<TResult>> ExecuteExponentialAsync<T1, T2, T3, T4, T5, T6, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, Func<T1, T2, T3, T4, T5, T6, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, arg4, arg5, arg6, func, RetryOptions.CreateExponential());
 
         /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
-        public static async ResponseAsync<TResult> ExecuteAsync<T1, T2, T3, T4, T5, T6, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, Func<T1, T2, T3, T4, T5, T6, ResponseAsync<TResult>> func, RetryOptions options)
+        public static async Task<Response<TResult>> ExecuteAsync<T1, T2, T3, T4, T5, T6, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, Func<T1, T2, T3, T4, T5, T6, ResponseAsync<TResult>> func, RetryOptions options)
         {
             var response = await func(arg1, arg2, arg3, arg4, arg5, arg6);
             var retries = options.Retries;
@@ -533,19 +533,19 @@ namespace ContainerExpressions.Containers
                 response = await func(arg1, arg2, arg3, arg4, arg5, arg6);
             }
 
-            return response; // This is going to throw an "InvalidOperationException", as it casts to "ResponseAsync<T>"; if we don't get a valid "Response<T>" out of func.
+            return response;
         }
 
         /** T7 **/
 
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
-        public static ResponseAsync<TResult> ExecuteAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, Func<T1, T2, T3, T4, T5, T6, T7, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, arg4, arg5, arg6, arg7, func, RetryOptions.Create());
+        public static Task<Response<TResult>> ExecuteAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, Func<T1, T2, T3, T4, T5, T6, T7, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, arg4, arg5, arg6, arg7, func, RetryOptions.Create());
 
         /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
-        public static ResponseAsync<TResult> ExecuteExponentialAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, Func<T1, T2, T3, T4, T5, T6, T7, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, arg4, arg5, arg6, arg7, func, RetryOptions.CreateExponential());
+        public static Task<Response<TResult>> ExecuteExponentialAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, Func<T1, T2, T3, T4, T5, T6, T7, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, arg4, arg5, arg6, arg7, func, RetryOptions.CreateExponential());
 
         /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
-        public static async ResponseAsync<TResult> ExecuteAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, Func<T1, T2, T3, T4, T5, T6, T7, ResponseAsync<TResult>> func, RetryOptions options)
+        public static async Task<Response<TResult>> ExecuteAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, Func<T1, T2, T3, T4, T5, T6, T7, ResponseAsync<TResult>> func, RetryOptions options)
         {
             var response = await func(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
             var retries = options.Retries;
@@ -556,19 +556,19 @@ namespace ContainerExpressions.Containers
                 response = await func(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
             }
 
-            return response; // This is going to throw an "InvalidOperationException", as it casts to "ResponseAsync<T>"; if we don't get a valid "Response<T>" out of func.
+            return response;
         }
 
         /** T8 **/
 
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
-        public static ResponseAsync<TResult> ExecuteAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, Func<T1, T2, T3, T4, T5, T6, T7, T8, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, func, RetryOptions.Create());
+        public static Task<Response<TResult>> ExecuteAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, Func<T1, T2, T3, T4, T5, T6, T7, T8, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, func, RetryOptions.Create());
 
         /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
-        public static ResponseAsync<TResult> ExecuteExponentialAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, Func<T1, T2, T3, T4, T5, T6, T7, T8, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, func, RetryOptions.CreateExponential());
+        public static Task<Response<TResult>> ExecuteExponentialAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, Func<T1, T2, T3, T4, T5, T6, T7, T8, ResponseAsync<TResult>> func) => ExecuteAsync(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, func, RetryOptions.CreateExponential());
 
         /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
-        public static async ResponseAsync<TResult> ExecuteAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, Func<T1, T2, T3, T4, T5, T6, T7, T8, ResponseAsync<TResult>> func, RetryOptions options)
+        public static async Task<Response<TResult>> ExecuteAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, Func<T1, T2, T3, T4, T5, T6, T7, T8, ResponseAsync<TResult>> func, RetryOptions options)
         {
             var response = await func(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
             var retries = options.Retries;
@@ -579,7 +579,7 @@ namespace ContainerExpressions.Containers
                 response = await func(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
             }
 
-            return response; // This is going to throw an "InvalidOperationException", as it casts to "ResponseAsync<T>"; if we don't get a valid "Response<T>" out of func.
+            return response;
         }
 
         #endregion

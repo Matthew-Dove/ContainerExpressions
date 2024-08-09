@@ -194,13 +194,13 @@ namespace ContainerExpressions.Containers
         #region () => ResponseAsync<T>
 
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
-        public static Func<ResponseAsync<T>> RetryAsync<T>(this Func<ResponseAsync<T>> func) => () => Repeat.ExecuteAsync(func, RetryOptions.Create());
+        public static Func<Task<Response<T>>> RetryAsync<T>(this Func<ResponseAsync<T>> func) => () => Repeat.ExecuteAsync(func, RetryOptions.Create());
 
         /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
-        public static Func<ResponseAsync<T>> RetryExponentialAsync<T>(this Func<ResponseAsync<T>> func) => () => Repeat.ExecuteAsync(func, RetryOptions.CreateExponential());
+        public static Func<Task<Response<T>>> RetryExponentialAsync<T>(this Func<ResponseAsync<T>> func) => () => Repeat.ExecuteAsync(func, RetryOptions.CreateExponential());
 
         /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
-        public static Func<ResponseAsync<T>> RetryAsync<T>(this Func<ResponseAsync<T>> func, RetryOptions options) => () => Repeat.ExecuteAsync(func, options);
+        public static Func<Task<Response<T>>> RetryAsync<T>(this Func<ResponseAsync<T>> func, RetryOptions options) => () => Repeat.ExecuteAsync(func, options);
 
         #endregion
 
@@ -209,90 +209,90 @@ namespace ContainerExpressions.Containers
         /** T1 **/
 
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
-        public static Func<T, ResponseAsync<TResult>> RetryAsync<T, TResult>(this Func<T, ResponseAsync<TResult>> func) => x => Repeat.ExecuteAsync(x, func, RetryOptions.Create());
+        public static Func<T, Task<Response<TResult>>> RetryAsync<T, TResult>(this Func<T, ResponseAsync<TResult>> func) => x => Repeat.ExecuteAsync(x, func, RetryOptions.Create());
 
         /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
-        public static Func<T, ResponseAsync<TResult>> RetryExponentialAsync<T, TResult>(this Func<T, ResponseAsync<TResult>> func) => x => Repeat.ExecuteAsync(x, func, RetryOptions.CreateExponential());
+        public static Func<T, Task<Response<TResult>>> RetryExponentialAsync<T, TResult>(this Func<T, ResponseAsync<TResult>> func) => x => Repeat.ExecuteAsync(x, func, RetryOptions.CreateExponential());
 
         /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
-        public static Func<T, ResponseAsync<TResult>> RetryAsync<T, TResult>(this Func<T, ResponseAsync<TResult>> func, RetryOptions options) => x => Repeat.ExecuteAsync(x, func, options);
+        public static Func<T, Task<Response<TResult>>> RetryAsync<T, TResult>(this Func<T, ResponseAsync<TResult>> func, RetryOptions options) => x => Repeat.ExecuteAsync(x, func, options);
 
         /** T2 **/
 
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
-        public static Func<T1, T2, ResponseAsync<TResult>> RetryAsync<T1, T2, TResult>(this Func<T1, T2, ResponseAsync<TResult>> func) => (x1, x2) => Repeat.ExecuteAsync(x1, x2, func, RetryOptions.Create());
+        public static Func<T1, T2, Task<Response<TResult>>> RetryAsync<T1, T2, TResult>(this Func<T1, T2, ResponseAsync<TResult>> func) => (x1, x2) => Repeat.ExecuteAsync(x1, x2, func, RetryOptions.Create());
 
         /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
-        public static Func<T1, T2, ResponseAsync<TResult>> RetryExponentialAsync<T1, T2, TResult>(this Func<T1, T2, ResponseAsync<TResult>> func) => (x1, x2) => Repeat.ExecuteAsync(x1, x2,func, RetryOptions.CreateExponential());
+        public static Func<T1, T2, Task<Response<TResult>>> RetryExponentialAsync<T1, T2, TResult>(this Func<T1, T2, ResponseAsync<TResult>> func) => (x1, x2) => Repeat.ExecuteAsync(x1, x2,func, RetryOptions.CreateExponential());
 
         /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
-        public static Func<T1, T2, ResponseAsync<TResult>> RetryAsync<T1, T2, TResult>(this Func<T1, T2, ResponseAsync<TResult>> func, RetryOptions options) => (x1, x2) => Repeat.ExecuteAsync(x1, x2, func, options);
+        public static Func<T1, T2, Task<Response<TResult>>> RetryAsync<T1, T2, TResult>(this Func<T1, T2, ResponseAsync<TResult>> func, RetryOptions options) => (x1, x2) => Repeat.ExecuteAsync(x1, x2, func, options);
 
         /** T3 **/
 
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
-        public static Func<T1, T2, T3, ResponseAsync<TResult>> RetryAsync<T1, T2, T3, TResult>(this Func<T1, T2, T3, ResponseAsync<TResult>> func) => (x1, x2, x3) => Repeat.ExecuteAsync(x1, x2, x3, func, RetryOptions.Create());
+        public static Func<T1, T2, T3, Task<Response<TResult>>> RetryAsync<T1, T2, T3, TResult>(this Func<T1, T2, T3, ResponseAsync<TResult>> func) => (x1, x2, x3) => Repeat.ExecuteAsync(x1, x2, x3, func, RetryOptions.Create());
 
         /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
-        public static Func<T1, T2, T3, ResponseAsync<TResult>> RetryExponentialAsync<T1, T2, T3, TResult>(this Func<T1, T2, T3, ResponseAsync<TResult>> func) => (x1, x2, x3) => Repeat.ExecuteAsync(x1, x2, x3, func, RetryOptions.CreateExponential());
+        public static Func<T1, T2, T3, Task<Response<TResult>>> RetryExponentialAsync<T1, T2, T3, TResult>(this Func<T1, T2, T3, ResponseAsync<TResult>> func) => (x1, x2, x3) => Repeat.ExecuteAsync(x1, x2, x3, func, RetryOptions.CreateExponential());
 
         /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
-        public static Func<T1, T2, T3, ResponseAsync<TResult>> RetryAsync<T1, T2, T3, TResult>(this Func<T1, T2, T3, ResponseAsync<TResult>> func, RetryOptions options) => (x1, x2, x3) => Repeat.ExecuteAsync(x1, x2, x3, func, options);
+        public static Func<T1, T2, T3, Task<Response<TResult>>> RetryAsync<T1, T2, T3, TResult>(this Func<T1, T2, T3, ResponseAsync<TResult>> func, RetryOptions options) => (x1, x2, x3) => Repeat.ExecuteAsync(x1, x2, x3, func, options);
 
         /** T4 **/
 
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
-        public static Func<T1, T2, T3, T4, ResponseAsync<TResult>> RetryAsync<T1, T2, T3, T4, TResult>(this Func<T1, T2, T3, T4, ResponseAsync<TResult>> func) => (x1, x2, x3, x4) => Repeat.ExecuteAsync(x1, x2, x3, x4, func, RetryOptions.Create());
+        public static Func<T1, T2, T3, T4, Task<Response<TResult>>> RetryAsync<T1, T2, T3, T4, TResult>(this Func<T1, T2, T3, T4, ResponseAsync<TResult>> func) => (x1, x2, x3, x4) => Repeat.ExecuteAsync(x1, x2, x3, x4, func, RetryOptions.Create());
 
         /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
-        public static Func<T1, T2, T3, T4, ResponseAsync<TResult>> RetryExponentialAsync<T1, T2, T3, T4, TResult>(this Func<T1, T2, T3, T4, ResponseAsync<TResult>> func) => (x1, x2, x3, x4) => Repeat.ExecuteAsync(x1, x2, x3, x4, func, RetryOptions.CreateExponential());
+        public static Func<T1, T2, T3, T4, Task<Response<TResult>>> RetryExponentialAsync<T1, T2, T3, T4, TResult>(this Func<T1, T2, T3, T4, ResponseAsync<TResult>> func) => (x1, x2, x3, x4) => Repeat.ExecuteAsync(x1, x2, x3, x4, func, RetryOptions.CreateExponential());
 
         /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
-        public static Func<T1, T2, T3, T4, ResponseAsync<TResult>> RetryAsync<T1, T2, T3, T4, TResult>(this Func<T1, T2, T3, T4, ResponseAsync<TResult>> func, RetryOptions options) => (x1, x2, x3, x4) => Repeat.ExecuteAsync(x1, x2, x3, x4, func, options);
+        public static Func<T1, T2, T3, T4, Task<Response<TResult>>> RetryAsync<T1, T2, T3, T4, TResult>(this Func<T1, T2, T3, T4, ResponseAsync<TResult>> func, RetryOptions options) => (x1, x2, x3, x4) => Repeat.ExecuteAsync(x1, x2, x3, x4, func, options);
 
         /** T5 **/
 
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
-        public static Func<T1, T2, T3, T4, T5, ResponseAsync<TResult>> RetryAsync<T1, T2, T3, T4, T5, TResult>(this Func<T1, T2, T3, T4, T5, ResponseAsync<TResult>> func) => (x1, x2, x3, x4, x5) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, func, RetryOptions.Create());
+        public static Func<T1, T2, T3, T4, T5, Task<Response<TResult>>> RetryAsync<T1, T2, T3, T4, T5, TResult>(this Func<T1, T2, T3, T4, T5, ResponseAsync<TResult>> func) => (x1, x2, x3, x4, x5) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, func, RetryOptions.Create());
 
         /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
-        public static Func<T1, T2, T3, T4, T5, ResponseAsync<TResult>> RetryExponentialAsync<T1, T2, T3, T4, T5, TResult>(this Func<T1, T2, T3, T4, T5, ResponseAsync<TResult>> func) => (x1, x2, x3, x4, x5) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, func, RetryOptions.CreateExponential());
+        public static Func<T1, T2, T3, T4, T5, Task<Response<TResult>>> RetryExponentialAsync<T1, T2, T3, T4, T5, TResult>(this Func<T1, T2, T3, T4, T5, ResponseAsync<TResult>> func) => (x1, x2, x3, x4, x5) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, func, RetryOptions.CreateExponential());
 
         /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
-        public static Func<T1, T2, T3, T4, T5, ResponseAsync<TResult>> RetryAsync<T1, T2, T3, T4, T5, TResult>(this Func<T1, T2, T3, T4, T5, ResponseAsync<TResult>> func, RetryOptions options) => (x1, x2, x3, x4, x5) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, func, options);
+        public static Func<T1, T2, T3, T4, T5, Task<Response<TResult>>> RetryAsync<T1, T2, T3, T4, T5, TResult>(this Func<T1, T2, T3, T4, T5, ResponseAsync<TResult>> func, RetryOptions options) => (x1, x2, x3, x4, x5) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, func, options);
 
         /** T6 **/
 
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
-        public static Func<T1, T2, T3, T4, T5, T6, ResponseAsync<TResult>> RetryAsync<T1, T2, T3, T4, T5, T6, TResult>(this Func<T1, T2, T3, T4, T5, T6, ResponseAsync<TResult>> func) => (x1, x2, x3, x4, x5, x6) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, x6, func, RetryOptions.Create());
+        public static Func<T1, T2, T3, T4, T5, T6, Task<Response<TResult>>> RetryAsync<T1, T2, T3, T4, T5, T6, TResult>(this Func<T1, T2, T3, T4, T5, T6, ResponseAsync<TResult>> func) => (x1, x2, x3, x4, x5, x6) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, x6, func, RetryOptions.Create());
 
         /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
-        public static Func<T1, T2, T3, T4, T5, T6, ResponseAsync<TResult>> RetryExponentialAsync<T1, T2, T3, T4, T5, T6, TResult>(this Func<T1, T2, T3, T4, T5, T6, ResponseAsync<TResult>> func) => (x1, x2, x3, x4, x5, x6) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, x6, func, RetryOptions.CreateExponential());
+        public static Func<T1, T2, T3, T4, T5, T6, Task<Response<TResult>>> RetryExponentialAsync<T1, T2, T3, T4, T5, T6, TResult>(this Func<T1, T2, T3, T4, T5, T6, ResponseAsync<TResult>> func) => (x1, x2, x3, x4, x5, x6) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, x6, func, RetryOptions.CreateExponential());
 
         /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
-        public static Func<T1, T2, T3, T4, T5, T6, ResponseAsync<TResult>> RetryAsync<T1, T2, T3, T4, T5, T6, TResult>(this Func<T1, T2, T3, T4, T5, T6, ResponseAsync<TResult>> func, RetryOptions options) => (x1, x2, x3, x4, x5, x6) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, x6, func, options);
+        public static Func<T1, T2, T3, T4, T5, T6, Task<Response<TResult>>> RetryAsync<T1, T2, T3, T4, T5, T6, TResult>(this Func<T1, T2, T3, T4, T5, T6, ResponseAsync<TResult>> func, RetryOptions options) => (x1, x2, x3, x4, x5, x6) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, x6, func, options);
 
         /** T7 **/
 
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
-        public static Func<T1, T2, T3, T4, T5, T6, T7, ResponseAsync<TResult>> RetryAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(this Func<T1, T2, T3, T4, T5, T6, T7, ResponseAsync<TResult>> func) => (x1, x2, x3, x4, x5, x6, x7) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, x6, x7, func, RetryOptions.Create());
+        public static Func<T1, T2, T3, T4, T5, T6, T7, Task<Response<TResult>>> RetryAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(this Func<T1, T2, T3, T4, T5, T6, T7, ResponseAsync<TResult>> func) => (x1, x2, x3, x4, x5, x6, x7) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, x6, x7, func, RetryOptions.Create());
 
         /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
-        public static Func<T1, T2, T3, T4, T5, T6, T7, ResponseAsync<TResult>> RetryExponentialAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(this Func<T1, T2, T3, T4, T5, T6, T7, ResponseAsync<TResult>> func) => (x1, x2, x3, x4, x5, x6, x7) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, x6, x7, func, RetryOptions.CreateExponential());
+        public static Func<T1, T2, T3, T4, T5, T6, T7, Task<Response<TResult>>> RetryExponentialAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(this Func<T1, T2, T3, T4, T5, T6, T7, ResponseAsync<TResult>> func) => (x1, x2, x3, x4, x5, x6, x7) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, x6, x7, func, RetryOptions.CreateExponential());
 
         /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
-        public static Func<T1, T2, T3, T4, T5, T6, T7, ResponseAsync<TResult>> RetryAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(this Func<T1, T2, T3, T4, T5, T6, T7, ResponseAsync<TResult>> func, RetryOptions options) => (x1, x2, x3, x4, x5, x6, x7) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, x6, x7, func, options);
+        public static Func<T1, T2, T3, T4, T5, T6, T7, Task<Response<TResult>>> RetryAsync<T1, T2, T3, T4, T5, T6, T7, TResult>(this Func<T1, T2, T3, T4, T5, T6, T7, ResponseAsync<TResult>> func, RetryOptions options) => (x1, x2, x3, x4, x5, x6, x7) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, x6, x7, func, options);
 
         /** T8 **/
 
         /// <summary>Execute a function, and retries (using default values) if the Response is invalid.</summary>
-        public static Func<T1, T2, T3, T4, T5, T6, T7, T8, ResponseAsync<TResult>> RetryAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Func<T1, T2, T3, T4, T5, T6, T7, T8, ResponseAsync<TResult>> func) => (x1, x2, x3, x4, x5, x6, x7, x8) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, x6, x7, x8, func, RetryOptions.Create());
+        public static Func<T1, T2, T3, T4, T5, T6, T7, T8, Task<Response<TResult>>> RetryAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Func<T1, T2, T3, T4, T5, T6, T7, T8, ResponseAsync<TResult>> func) => (x1, x2, x3, x4, x5, x6, x7, x8) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, x6, x7, x8, func, RetryOptions.Create());
 
         /// <summary>Execute a function, and retries (using default exponential values) if the Response is invalid.</summary>
-        public static Func<T1, T2, T3, T4, T5, T6, T7, T8, ResponseAsync<TResult>> RetryExponentialAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Func<T1, T2, T3, T4, T5, T6, T7, T8, ResponseAsync<TResult>> func) => (x1, x2, x3, x4, x5, x6, x7, x8) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, x6, x7, x8, func, RetryOptions.CreateExponential());
+        public static Func<T1, T2, T3, T4, T5, T6, T7, T8, Task<Response<TResult>>> RetryExponentialAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Func<T1, T2, T3, T4, T5, T6, T7, T8, ResponseAsync<TResult>> func) => (x1, x2, x3, x4, x5, x6, x7, x8) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, x6, x7, x8, func, RetryOptions.CreateExponential());
 
         /// <summary>Execute a function, and retries (using custom values) if the Response is invalid.</summary>
-        public static Func<T1, T2, T3, T4, T5, T6, T7, T8, ResponseAsync<TResult>> RetryAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Func<T1, T2, T3, T4, T5, T6, T7, T8, ResponseAsync<TResult>> func, RetryOptions options) => (x1, x2, x3, x4, x5, x6, x7, x8) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, x6, x7, x8, func, options);
+        public static Func<T1, T2, T3, T4, T5, T6, T7, T8, Task<Response<TResult>>> RetryAsync<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Func<T1, T2, T3, T4, T5, T6, T7, T8, ResponseAsync<TResult>> func, RetryOptions options) => (x1, x2, x3, x4, x5, x6, x7, x8) => Repeat.ExecuteAsync(x1, x2, x3, x4, x5, x6, x7, x8, func, options);
 
         #endregion
     }
