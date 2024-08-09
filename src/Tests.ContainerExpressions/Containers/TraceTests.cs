@@ -671,5 +671,19 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         #endregion
+
+        #region ResponseAsyncT ErrorLog
+
+        [TestMethod]
+        public async Task LogErrorAsync_ResponseAsync()
+        {
+            var error = "The emptiness of my soul is matched only by the void of space.";
+
+            var response = await new ResponseAsync<int>(new Exception("Oh no!")).LogErrorAsync(error);
+
+            Assert.AreEqual(1, _errors.Count(x => x.Equals(error)));
+        }
+
+        #endregion
     }
 }

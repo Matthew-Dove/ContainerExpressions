@@ -105,6 +105,21 @@ namespace ContainerExpressions.Containers
             return task.Status == TaskStatus.RanToCompletion ? task : Pool.UnitResponseError;
         }
 
+        /// <summary>Logs an error message when the ResponseAsync operation has a runtime exception.</summary>
+        public static async Task<Response<T>> LogErrorAsync<T>(
+            this ResponseAsync<T> response,
+            Format message,
+            [CallerArgumentExpression(nameof(response))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        {
+            var result = await response;
+            if (!result) TraceExtensions.LogException(new Exception("ResponseAsync operation encountered a runtime exception."), message, argument, caller, path, line);
+            return result;
+        }
+
         #endregion
 
         #region T
