@@ -1029,7 +1029,7 @@ Short lived apps like containers, lambdas, CLIs would want to wait on the backgr
 Long lived apps like web servers, consoles, desktop apps might prefer to let the background jobs run without waiting for them.  
 
 Keep in mind `FireAndForget` does not store state, and resume it later on; it is ephemeral.  
-If the main process ends, all executing background jobs will be lost with it (*if you don't call WhenAll() on shutdown to let them wrap them up*).  
+If the main process ends, all executing background jobs will be lost with it (*if you don't call WhenAll() on shutdown to let them wrap up*).  
 
 Example: Add some tasks, and wait for them to finish.  
 ```cs
