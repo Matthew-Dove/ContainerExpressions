@@ -1019,6 +1019,35 @@ DateTime created = guid.Tag().Get<DateTime>(); // 21/07/2024 1:43:04 PM
 **Value Types:** Using the `Equals`, and `GetHashCode` methods to find a **message** given an object.  
 **Reference Types:** Using the pointer's address in memory to uniquely identify the object, and match it to a **message**.  
 
+## Fire And Forget
+
+A place to `push` tasks to, that can finish in the background while the program is doing other things.  
+The background tasks can be waited later on before completing the current request, or they can be left alone to clean themselves up.  
+
+Pick a strategy based on your execution model.  
+Short lived apps like containers, lambdas, CLIs would want to wait on the background jobs to finish, before returning.  
+Long lived apps like web servers, consoles, desktop apps might prefer to let the background jobs run without waiting for them.  
+
+Keep in mind `FireAndForget` does not store state, and resume it later on; it is ephemeral.  
+If the main process ends, all executing background jobs will be lost with it (*if you don't call WhenAll() on shutdown to let them wrap them up*).  
+
+Example: Add some tasks, and wait for them to finish.  
+```cs
+// Push several tasks to "FireAndForget".
+FireAndForget.Push(Task.FromResult(42));
+FireAndForget.Push(Task.Delay(0));
+FireAndForget.Push(Task.CompletedTask);
+
+// If the tasks are very quick, they will finish; and remove themselves before you can wait for them.
+// Longer running tasks have a higher chance of still existing, and then needing to be waited on.
+var completedTasks = await FireAndForget.WhenAll(); // Returns the number of tasks that were awaited (between 0, and 3 in this case).
+```
+
+`FireAndForget` is thread safe, you can `Push` from any thread / context.  
+If any errors are thrown by the tasks, they will be sent to the `Try` container's error logger.  
+You can continue pushing new tasks to `FireAndForget`, even if you have called `WhenAll()`; and are waiting on it to finished.  
+The new tasks won't be included in the current `WhenAll()`'s awaiter.  
+
 # Credits
 * [Icon](https://www.flaticon.com/free-icon/bird_2630452) made by [Vitaly Gorbachev](https://www.flaticon.com/authors/vitaly-gorbachev) from [Flaticon]
 
@@ -1110,3 +1139,4 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * Created a new extension method for `Response<T>`: **Validate<T>**. Validate determines if the state for `T` is valid or not, returning a valid response container if it is.
 * Renamed `AsTask`, `AsValueTask`, and `AsResponse` to: `ToTask`, `ToValueTask`, and `ToResponse` respectively. The **As** convention is used for casting objects, and these methods are creating new ones.
 * Created a new extension method for `Response<T>`: **BindIf<T, TResult>**. BindIf will execute a function only if the Response is valid, and the boolean predicate is true.
+* Created a new container: `FireAndForget` - enables a place to push tasks to for background completion.

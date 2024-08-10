@@ -66,6 +66,7 @@ namespace ContainerExpressions.Containers
         /// <summary>Waits for all tasks that have been pushed to finish.</summary>
         public static async Task<CompletedTasks> WhenAll()
         {
+            if (_tasks.IsEmpty) return 0;
             var tasks = _tasks.ToArray();
 
             if (tasks.Length > 0)
