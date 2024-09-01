@@ -11,6 +11,8 @@ namespace ContainerExpressions.Containers
 {
     public static class GuardExtensions
     {
+        #region GetMessage
+
         private static string GetMessage(string message, string argument, string predicate, string caller, string path, int line, Format template)
         {
             var sb = new StringBuilder()
@@ -46,6 +48,10 @@ namespace ContainerExpressions.Containers
             return sb.ToString();
         }
 
+        #endregion
+
+        #region ThrowError
+
         public static T ThrowError<T>(
             this T ex,
             Format message = default,
@@ -73,6 +79,10 @@ namespace ContainerExpressions.Containers
             [CallerLineNumber] int line = 0
             ) { Throw.Exception(ex.SourceException.AddCallerAttributes(argument, caller, path, line, message)); return default; }
 
+        #endregion
+
+        #region ThrowIfNull
+
         public static T ThrowIfNull<T>(
             this T target,
             Format message = default,
@@ -82,9 +92,192 @@ namespace ContainerExpressions.Containers
             [CallerLineNumber] int line = 0
             ) where T : class
         {
-            if (target == null) Throw.ArgumentNullException(argument, GetMessage($"{argument} cannot be null.", argument, caller, path, line, message));
+            if (target is null) Throw.ArgumentNullException(argument, GetMessage($"{argument} cannot be null.", argument, caller, path, line, message));
             return target;
         }
+
+        public static T ThrowIfNull<T, R>(
+            this T target,
+            Func<T, R> guard,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(guard))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+            where T : class
+            where R : class
+        {
+            if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
+            if (guard(target) is null) Throw.ArgumentNullException(argument2, GetMessage($"{argument2} cannot be null.", argument2, caller, path, line, message));
+            return target;
+        }
+
+        public static T[] ThrowIfSequenceIsNull<T>(
+            this T[] target,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            ) where T : class
+        {
+            if (target is null) Throw.ArgumentNullException(argument, GetMessage($"{argument} cannot be null.", argument, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (t is null) Throw.ArgumentNullException(argument, GetMessage($"Element in collection {argument} cannot be null.", argument, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static T[] ThrowIfSequenceIsNull<T, R>(
+            this T[] target,
+            Func<T, R> guard,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(guard))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+            where T : class
+            where R : class
+        {
+            if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (t is null) Throw.ArgumentNullException(argument1, GetMessage($"Element in collection {argument1} cannot be null.", argument1, caller, path, line, message));
+                if (guard(t) is null) Throw.ArgumentNullException(argument2, GetMessage($"Element in collection {argument2} cannot be null.", argument2, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static IEnumerable<T> ThrowIfSequenceIsNull<T>(
+            this IEnumerable<T> target,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            ) where T : class
+        {
+            if (target is null) Throw.ArgumentNullException(argument, GetMessage($"{argument} cannot be null.", argument, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (t is null) Throw.ArgumentNullException(argument, GetMessage($"Element in collection {argument} cannot be null.", argument, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static IEnumerable<T> ThrowIfSequenceIsNull<T, R>(
+            this IEnumerable<T> target,
+            Func<T, R> guard,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(guard))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+            where T : class
+            where R : class
+        {
+            if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (t is null) Throw.ArgumentNullException(argument1, GetMessage($"Element in collection {argument1} cannot be null.", argument1, caller, path, line, message));
+                if (guard(t) is null) Throw.ArgumentNullException(argument2, GetMessage($"Element in collection {argument2} cannot be null.", argument2, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static List<T> ThrowIfSequenceIsNull<T>(
+            this List<T> target,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            ) where T : class
+        {
+            if (target is null) Throw.ArgumentNullException(argument, GetMessage($"{argument} cannot be null.", argument, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (t is null) Throw.ArgumentNullException(argument, GetMessage($"Element in collection {argument} cannot be null.", argument, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static List<T> ThrowIfSequenceIsNull<T, R>(
+            this List<T> target,
+            Func<T, R> guard,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(guard))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+            where T : class
+            where R : class
+        {
+            if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (t is null) Throw.ArgumentNullException(argument1, GetMessage($"Element in collection {argument1} cannot be null.", argument1, caller, path, line, message));
+                if (guard(t) is null) Throw.ArgumentNullException(argument2, GetMessage($"Element in collection {argument2} cannot be null.", argument2, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static Dictionary<K, V> ThrowIfSequenceIsNull<K, V>(
+            this Dictionary<K, V> target,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+            where K : class
+            where V : class
+        {
+            if (target is null) Throw.ArgumentNullException(argument, GetMessage($"{argument} cannot be null.", argument, caller, path, line, message));
+            foreach (var kv in target)
+            {
+                if (kv.Key is null) Throw.ArgumentNullException(argument, GetMessage($"Element in collection {argument} cannot be null.", argument, caller, path, line, message));
+                if (kv.Value is null) Throw.ArgumentNullException(argument, GetMessage($"Element in collection {argument} cannot be null.", argument, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static Dictionary<K, V> ThrowIfSequenceIsNull<K, V, R>(
+            this Dictionary<K, V> target,
+            Func<KeyValuePair<K, V>, R> guard,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(guard))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+            where K : class
+            where V : class
+            where R : class
+        {
+            if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
+            foreach (var kv in target)
+            {
+                if (kv.Key is null) Throw.ArgumentNullException(argument1, GetMessage($"Element in collection {argument1} cannot be null.", argument1, caller, path, line, message));
+                if (kv.Value is null) Throw.ArgumentNullException(argument1, GetMessage($"Element in collection {argument1} cannot be null.", argument1, caller, path, line, message));
+                if (guard(kv) is null) Throw.ArgumentNullException(argument2, GetMessage($"Element in collection {argument2} cannot be null.", argument2, caller, path, line, message));
+            }
+            return target;
+        }
+
+        #endregion
+
+        #region ThrowIfDefault
 
         public static T ThrowIfDefault<T>(
             this T target,
@@ -98,6 +291,184 @@ namespace ContainerExpressions.Containers
             if (EqualityComparer<T>.Default.Equals(target, default)) Throw.ArgumentOutOfRangeException(argument, GetMessage($"{argument} cannot be default.", argument, caller, path, line, message));
             return target;
         }
+
+        public static T ThrowIfDefault<T, R>(
+            this T target,
+            Func<T, R> guard,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(guard))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+            where T : struct
+            where R : struct
+        {
+            if (EqualityComparer<T>.Default.Equals(target, default)) Throw.ArgumentOutOfRangeException(argument1, GetMessage($"{argument1} cannot be default.", argument1, caller, path, line, message));
+            if (EqualityComparer<R>.Default.Equals(guard(target), default)) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"{argument2} cannot be default.", argument2, caller, path, line, message));
+            return target;
+        }
+
+        public static T[] ThrowIfSequenceIsDefault<T>(
+            this T[] target,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            ) where T : struct
+        {
+            if (EqualityComparer<T[]>.Default.Equals(target, default)) Throw.ArgumentOutOfRangeException(argument, GetMessage($"{argument} cannot be default.", argument, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (EqualityComparer<T>.Default.Equals(t, default)) Throw.ArgumentOutOfRangeException(argument, GetMessage($"Element in collection {argument} cannot be default.", argument, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static T[] ThrowIfSequenceIsDefault<T, R>(
+            this T[] target,
+            Func<T, R> guard,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(guard))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+            where T : struct
+            where R : struct
+        {
+            if (EqualityComparer<T[]>.Default.Equals(target, default)) Throw.ArgumentOutOfRangeException(argument1, GetMessage($"{argument1} cannot be default.", argument1, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (EqualityComparer<T>.Default.Equals(t, default)) Throw.ArgumentOutOfRangeException(argument1, GetMessage($"Element in collection {argument1} cannot be default.", argument1, caller, path, line, message));
+                if (EqualityComparer<R>.Default.Equals(guard(t), default)) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"Element in collection {argument2} cannot be default.", argument2, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static IEnumerable<T> ThrowIfSequenceIsDefault<T>(
+            this IEnumerable<T> target,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            ) where T : struct
+        {
+            if (EqualityComparer< IEnumerable<T>>.Default.Equals(target, default)) Throw.ArgumentOutOfRangeException(argument, GetMessage($"{argument} cannot be default.", argument, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (EqualityComparer<T>.Default.Equals(t, default)) Throw.ArgumentOutOfRangeException(argument, GetMessage($"Element in collection {argument} cannot be default.", argument, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static IEnumerable<T> ThrowIfSequenceIsDefault<T, R>(
+            this IEnumerable<T> target,
+            Func<T, R> guard,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(guard))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+            where T : struct
+            where R : struct
+        {
+            if (EqualityComparer<IEnumerable<T>>.Default.Equals(target, default)) Throw.ArgumentOutOfRangeException(argument1, GetMessage($"{argument1} cannot be default.", argument1, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (EqualityComparer<T>.Default.Equals(t, default)) Throw.ArgumentOutOfRangeException(argument1, GetMessage($"Element in collection {argument1} cannot be default.", argument1, caller, path, line, message));
+                if (EqualityComparer<R>.Default.Equals(guard(t), default)) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"Element in collection {argument2} cannot be default.", argument2, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static List<T> ThrowIfSequenceIsDefault<T>(
+            this List<T> target,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            ) where T : struct
+        {
+            if (EqualityComparer<List<T>>.Default.Equals(target, default)) Throw.ArgumentOutOfRangeException(argument, GetMessage($"{argument} cannot be default.", argument, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (EqualityComparer<T>.Default.Equals(t, default)) Throw.ArgumentOutOfRangeException(argument, GetMessage($"Element in collection {argument} cannot be default.", argument, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static List<T> ThrowIfSequenceIsDefault<T, R>(
+            this List<T> target,
+            Func<T, R> guard,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(guard))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+            where T : struct
+            where R : struct
+        {
+            if (EqualityComparer<List<T>>.Default.Equals(target, default)) Throw.ArgumentOutOfRangeException(argument1, GetMessage($"{argument1} cannot be default.", argument1, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (EqualityComparer<T>.Default.Equals(t, default)) Throw.ArgumentOutOfRangeException(argument1, GetMessage($"Element in collection {argument1} cannot be default.", argument1, caller, path, line, message));
+                if (EqualityComparer<R>.Default.Equals(guard(t), default)) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"Element in collection {argument2} cannot be default.", argument2, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static Dictionary<K, V> ThrowIfSequenceIsDefault<K, V>(
+            this Dictionary<K, V> target,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        {
+            if (EqualityComparer<Dictionary<K, V>>.Default.Equals(target, default)) Throw.ArgumentOutOfRangeException(argument, GetMessage($"{argument} cannot be default.", argument, caller, path, line, message));
+            foreach (var kv in target)
+            {
+                if (EqualityComparer<K>.Default.Equals(kv.Key, default)) Throw.ArgumentOutOfRangeException(argument, GetMessage($"Element in collection {argument} cannot be default.", argument, caller, path, line, message));
+                if (EqualityComparer<V>.Default.Equals(kv.Value, default)) Throw.ArgumentOutOfRangeException(argument, GetMessage($"Element in collection {argument} cannot be default.", argument, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static Dictionary<K, V> ThrowIfSequenceIsDefault<K, V, R>(
+            this Dictionary<K, V> target,
+            Func<KeyValuePair<K, V>, R> guard,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(guard))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        {
+            if (EqualityComparer<Dictionary<K, V>>.Default.Equals(target, default)) Throw.ArgumentOutOfRangeException(argument1, GetMessage($"{argument1} cannot be default.", argument1, caller, path, line, message));
+            foreach (var kv in target)
+            {
+                if (EqualityComparer<K>.Default.Equals(kv.Key, default)) Throw.ArgumentOutOfRangeException(argument1, GetMessage($"Element in collection {argument1} cannot be default.", argument1, caller, path, line, message));
+                if (EqualityComparer<V>.Default.Equals(kv.Value, default)) Throw.ArgumentOutOfRangeException(argument1, GetMessage($"Element in collection {argument1} cannot be default.", argument1, caller, path, line, message));
+                if (EqualityComparer<R>.Default.Equals(guard(kv), default)) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"Element in collection {argument2} cannot be default.", argument2, caller, path, line, message));
+            }
+            return target;
+        }
+
+        #endregion
+
+        #region ThrowIfNullOrEmpty
 
         public static string ThrowIfNullOrEmpty(
             this string target,
@@ -121,7 +492,7 @@ namespace ContainerExpressions.Containers
             [CallerLineNumber] int line = 0
             )
         {
-            if (target == null || target.Length == 0) Throw.ArgumentOutOfRangeException(argument, GetMessage($"{argument} cannot be null or empty.", argument, caller, path, line, message));
+            if (target is null || target.Length == 0) Throw.ArgumentOutOfRangeException(argument, GetMessage($"{argument} cannot be null or empty.", argument, caller, path, line, message));
             return target;
         }
 
@@ -134,7 +505,7 @@ namespace ContainerExpressions.Containers
             [CallerLineNumber] int line = 0
             )
         {
-            if (target == null || !target.Any()) Throw.ArgumentOutOfRangeException(argument, GetMessage($"{argument} cannot be null or empty.", argument, caller, path, line, message));
+            if (target is null || !target.Any()) Throw.ArgumentOutOfRangeException(argument, GetMessage($"{argument} cannot be null or empty.", argument, caller, path, line, message));
             return target;
         }
 
@@ -147,9 +518,277 @@ namespace ContainerExpressions.Containers
             [CallerLineNumber] int line = 0
             )
         {
-            if (target == null || target.Count == 0) Throw.ArgumentOutOfRangeException(argument, GetMessage($"{argument} cannot be null or empty.", argument, caller, path, line, message));
+            if (target is null || target.Count == 0) Throw.ArgumentOutOfRangeException(argument, GetMessage($"{argument} cannot be null or empty.", argument, caller, path, line, message));
             return target;
         }
+
+        public static Dictionary<K, V> ThrowIfNullOrEmpty<K, V>(
+            this Dictionary<K, V> target,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        {
+            if (target is null || target.Count == 0) Throw.ArgumentOutOfRangeException(argument, GetMessage($"{argument} cannot be null or empty.", argument, caller, path, line, message));
+            return target;
+        }
+
+        public static string[] ThrowIfSequenceIsNullOrEmpty(
+            this string[] target,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        {
+            if (target is null) Throw.ArgumentNullException(argument, GetMessage($"{argument} cannot be null.", argument, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (string.IsNullOrEmpty(t)) Throw.ArgumentOutOfRangeException(argument, GetMessage($"Element in collection {argument} cannot be null or empty.", argument, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static T[] ThrowIfSequenceIsNullOrEmpty<T>(
+            this T[] target,
+            Func<T, string> guard,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(guard))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+            where T : class
+        {
+            if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (t is null) Throw.ArgumentNullException(argument1, GetMessage($"Element in collection {argument1} cannot be null.", argument1, caller, path, line, message));
+                if (string.IsNullOrEmpty(guard(t))) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"Element in collection {argument2} cannot be null or empty.", argument2, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static IEnumerable<string> ThrowIfSequenceIsNullOrEmpty(
+            this IEnumerable<string> target,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        {
+            if (target is null) Throw.ArgumentNullException(argument, GetMessage($"{argument} cannot be null.", argument, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (string.IsNullOrEmpty(t)) Throw.ArgumentOutOfRangeException(argument, GetMessage($"Element in collection {argument} cannot be null or empty.", argument, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static IEnumerable<T> ThrowIfSequenceIsNullOrEmpty<T>(
+            this IEnumerable<T> target,
+            Func<T, string> guard,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(guard))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+            where T : class
+        {
+            if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (t is null) Throw.ArgumentNullException(argument1, GetMessage($"Element in collection {argument1} cannot be null.", argument1, caller, path, line, message));
+                if (string.IsNullOrEmpty(guard(t))) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"Element in collection {argument2} cannot be null or empty.", argument2, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static List<string> ThrowIfSequenceIsNullOrEmpty(
+            this List<string> target,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        {
+            if (target is null) Throw.ArgumentNullException(argument, GetMessage($"{argument} cannot be null.", argument, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (string.IsNullOrEmpty(t)) Throw.ArgumentOutOfRangeException(argument, GetMessage($"Element in collection {argument} cannot be null or empty.", argument, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static List<T> ThrowIfSequenceIsNullOrEmpty<T>(
+            this List<T> target,
+            Func<T, string> guard,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(guard))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+            where T : class
+        {
+            if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (t is null) Throw.ArgumentNullException(argument1, GetMessage($"Element in collection {argument1} cannot be null.", argument1, caller, path, line, message));
+                if (string.IsNullOrEmpty(guard(t))) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"Element in collection {argument2} cannot be null or empty.", argument2, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static Dictionary<string, string> ThrowIfSequenceIsNullOrEmpty(
+            this Dictionary<string, string> target,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        {
+            if (target is null) Throw.ArgumentNullException(argument, GetMessage($"{argument} cannot be null.", argument, caller, path, line, message));
+            foreach (var kv in target)
+            {
+                if (string.IsNullOrEmpty(kv.Key)) Throw.ArgumentOutOfRangeException(argument, GetMessage($"Element in collection {argument} cannot be null or empty.", argument, caller, path, line, message));
+                if (string.IsNullOrEmpty(kv.Value)) Throw.ArgumentOutOfRangeException(argument, GetMessage($"Element in collection {argument} cannot be null or empty.", argument, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static Dictionary<K, V> ThrowIfSequenceIsNullOrEmpty<K, V>(
+            this Dictionary<K, V> target,
+            Func<KeyValuePair<K, V>, string> guard,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(guard))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+            where K : class
+            where V : class
+        {
+            if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
+            foreach (var kv in target)
+            {
+                if (kv.Key is null) Throw.ArgumentNullException(argument1, GetMessage($"Element in collection {argument1} cannot be null.", argument1, caller, path, line, message));
+                if (kv.Value is null) Throw.ArgumentNullException(argument1, GetMessage($"Element in collection {argument1} cannot be null.", argument1, caller, path, line, message));
+                if (string.IsNullOrEmpty(guard(kv))) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"Element in collection {argument2} cannot be null or empty or empty.", argument2, caller, path, line, message));
+            }
+            return target;
+        }
+
+        #endregion
+
+        #region ThrowIf
+
+        public static T ThrowIf<T>(
+            this T target,
+            Func<T, bool> predicate,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(predicate))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        {
+            if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
+            if (predicate(target)) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"{predicate} failed conditional check for value: {target}.", argument2, caller, path, line, message));
+            return target;
+        }
+
+        public static T[] ThrowIfSequence<T>(
+            this T[] target,
+            Func<T, bool> predicate,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(predicate))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        {
+            if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (predicate(t)) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"{predicate} failed conditional check for value: {t}.", argument2, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static IEnumerable<T> ThrowIfSequence<T>(
+            this IEnumerable<T> target,
+            Func<T, bool> predicate,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(predicate))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        {
+            if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (predicate(t)) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"{predicate} failed conditional check for value: {t}.", argument2, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static List<T> ThrowIfSequence<T>(
+            this List<T> target,
+            Func<T, bool> predicate,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(predicate))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        {
+            if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (predicate(t)) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"{predicate} failed conditional check for value: {t}.", argument2, caller, path, line, message));
+            }
+            return target;
+        }
+
+        public static Dictionary<K, V> ThrowIfSequence<K, V>(
+            this Dictionary<K, V> target,
+            Func<KeyValuePair<K, V>, bool> predicate,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(predicate))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        {
+            if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
+            foreach (var t in target)
+            {
+                if (predicate(t)) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"{predicate} failed conditional check for value: {t}.", argument2, caller, path, line, message));
+            }
+            return target;
+        }
+
+        #endregion
+
+        #region ThrowIfLessThanGreaterThan
 
         public static T ThrowIfLessThan<T>(
             this T target,
@@ -181,6 +820,8 @@ namespace ContainerExpressions.Containers
             return target;
         }
 
+        #endregion
+
         #region ThrowIfFaultedOrCanceled
 
         /**
@@ -198,7 +839,7 @@ namespace ContainerExpressions.Containers
             [CallerLineNumber] int line = 0
             )
         {
-            if (target == null) return target;
+            if (target is null) return target;
             if (!target.IsCompleted) return target.ContinueWith(t => CheckStatus(t, argument, caller, path, line, message));
             CheckStatus(target, argument, caller, path, line, message);
             return target;
@@ -213,7 +854,7 @@ namespace ContainerExpressions.Containers
             [CallerLineNumber] int line = 0
             )
         {
-            if (target == null) return target;
+            if (target is null) return target;
             if (!target.IsCompleted) return target.ContinueWith(t => { CheckStatus(t, argument, caller, path, line, message); return t.Result; });
             CheckStatus(target, argument, caller, path, line, message);
             return target;

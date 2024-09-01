@@ -12,6 +12,16 @@ namespace Tests.ContainerExpressions.Containers.Extensions
     [TestClass]
     public class GuardExtensionsTests
     {
+        record class A(string Name);
+        private readonly A _a = new A(default);
+        private readonly A[] _aa = [default];
+        private readonly A[] _aaa = [new A(default)];
+
+        record struct B(int Age);
+        private readonly B _b = new B(default);
+        private readonly B[] _bb = [default];
+        private readonly B[] _bbb = [new B(default)];
+
         [TestMethod]
         [ExpectedException(typeof(Exception))]
         public void ThrowError_Exception()
@@ -129,6 +139,77 @@ namespace Tests.ContainerExpressions.Containers.Extensions
             var task = Task.FromCanceled(new CancellationToken(true));
 
             task.ThrowIfFaultedOrCanceled();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ThrowIfNull_Guard()
+        {
+            _a.ThrowIfNull(x => x.Name);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ThrowIfNull_Sequence()
+        {
+            _aa.ThrowIfSequenceIsNull();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ThrowIfNull_Sequence_Guard()
+        {
+            _aaa.ThrowIfSequenceIsNull(x => x.Name);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void ThrowIfDefault_Guard()
+        {
+            _b.ThrowIfDefault(x => x.Age);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void ThrowIfDefault_Sequence()
+        {
+            _bb.ThrowIfSequenceIsDefault();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void ThrowIfDefault_Sequence_Guard()
+        {
+            _bbb.ThrowIfSequenceIsDefault(x => x.Age);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void ThrowIfNullOrEmpty_Sequence()
+        {
+            var ss = new string[] { string.Empty };
+            ss.ThrowIfSequenceIsNullOrEmpty();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void ThrowIfNullOrEmpty_Sequence_Guard()
+        {
+            _aaa.ThrowIfSequenceIsNullOrEmpty(x => x.Name);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void ThrowIf()
+        {
+            _b.ThrowIf(x => x.Age <= 0);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void ThrowIf_Sequence()
+        {
+            _aaa.ThrowIfSequence(x => x.Name is null);
         }
     }
 }

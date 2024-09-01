@@ -26,11 +26,13 @@ namespace Tests.ContainerExpressions.Containers
             Assert.AreEqual(0, d.Count);
         }
 
+        class HS : Alias<HashSet<Task>> { public HS() : base(default) { } }
+
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void Instance_BaseTaskTValueMustBeSetFirst()
         {
-            var hashset = Instance.Of<HashSet<Task>>();
+            var hashset = Instance.Of<HS>();
         }
 
         [TestMethod]
@@ -79,11 +81,13 @@ namespace Tests.ContainerExpressions.Containers
             Assert.IsTrue(result == null || result == string.Empty);
         }
 
+        class S : Alias<string> { public S() : base(string.Empty) { } }
+
         [TestMethod]
         public async Task InstanceAsync_Task_CustomReference()
         {
-            InstanceAsync.Create(string.Empty);
-            var result = await InstanceAsync.Of<string>();
+            InstanceAsync.Create(new S());
+            var result = await InstanceAsync.Of<S>();
             Assert.AreEqual(string.Empty, result);
         }
 
