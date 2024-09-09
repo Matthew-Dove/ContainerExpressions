@@ -1048,6 +1048,58 @@ If any errors are thrown by the tasks, they will be sent to the `Try` container'
 You can continue pushing new tasks to `FireAndForget`, even if you have called `WhenAll()`; and are waiting on it to finished.  
 The new tasks won't be included in the current `WhenAll()`'s awaiter.  
 
+## SmartEnum`<T>`
+
+Like a normal `enum`, a `SmartEnum<T>` has string, and integer values; and can be parsed with either low level types.  
+What makes a smart enum different then is the fact you're able to add properties, and method to them (*since they are classes*).  
+Smart enums are a little more forgiving when it comes to parsing string values, and a little more explicit when it comes to dealing with flags (*opt-in behaviour*).  
+
+Smart enums don't look *too* different from standard enums.
+
+```cs
+// A smart enum without flags (i.e. only one value can be held at a time).
+class Weekend : SmartEnum
+{
+    // The string value is the same as the property name, the int value starts from 0, and increments 1 at a time from there.
+    public static readonly Weekend None = new();
+    public static readonly Weekend Saturday = new();
+    public static readonly Weekend Sunday = new();
+
+    private Weekend() { }
+}
+
+// A smart enum with flags (i.e. can hold many values at a time).
+class Colour : SmartEnum
+{
+    // The int value here is explicitly set, instead of relying on the defaults.
+    // If the int values are powers of 2, the smart enum will behave as a [flags] enum normally would.
+    public static readonly Colour None = new(0);
+    public static readonly Colour Purple = new(1);
+    public static readonly Colour Red = new(2);
+    public static readonly Colour Green = new(4);
+    public static readonly Colour Teal = new(8);
+
+    private Colour(int value) : base(value) { }
+}
+```
+
+You can set custom values for string, and int by overriding the appropriate base constructor.  
+You may also set aliases for the string name values, allowing more than one string value to map to a smart enum field.
+
+Usage of smart enums is as follows:
+
+```cs
+var smartEnum1 = SmartEnum<Colour>.FromObjects(Colour.Purple, Colour.Red); // Fields from the Colour smart enum.
+var smartEnum2 = SmartEnum<Colour>.FromNames("purple,red"); // Case-insensitive csv matching the smart enum names.
+var smartEnum3 = SmartEnum<Colour>.FromValues(3); // Integer value of Colour.Purple, and Colour.Red.
+var smartEnum4 = SmartEnum<Colour>.FromValues(Colour.Purple | Colour.Red); // Same as the "3" value above, but using the bitwise OR.
+
+var hasFlag = smartEnum1.HasFlag(Colour.Red); // True.
+var addGreen = smartEnum1 | Colour.Green; // Bitwise OR adds a target if it doesn't exist.
+var toggleGreen = addGreen ^ Colour.Green; // Bitwise XOR removes the target if it exists, otherwise adds it.
+
+```
+
 # Credits
 * [Icon](https://www.flaticon.com/free-icon/bird_2630452) made by [Vitaly Gorbachev](https://www.flaticon.com/authors/vitaly-gorbachev) from [Flaticon]
 
@@ -1140,3 +1192,4 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * Renamed `AsTask`, `AsValueTask`, and `AsResponse` to: `ToTask`, `ToValueTask`, and `ToResponse` respectively. The **As** convention is used for casting objects, and these methods are creating new ones.
 * Created a new extension method for `Response<T>`: **BindIf<T, TResult>**. BindIf will execute a function only if the Response is valid, and the boolean predicate is true.
 * Created a new container: `FireAndForget` - enables a place to push tasks to for background completion.
+* Created `SmartEnum<T>` - an alterative for enums, that can have methods, and properties.
