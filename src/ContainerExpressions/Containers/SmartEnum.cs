@@ -8,9 +8,8 @@ namespace ContainerExpressions.Containers
 {
     public static class SmartEnum<T> where T : SmartEnum
     {
-        private static readonly char[] _separator = new char[] { ',' };
-        private static readonly Dictionary<string, T> _smartEnumNames;
-        private static readonly Dictionary<int, T> _smartEnumValues;
+        private static readonly HybridDictionary _smartEnumNames;
+        private static readonly HybridDictionary _smartEnumValues;
         private static readonly HybridDictionary _smartEnumAliases;
 
         static SmartEnum()
@@ -38,7 +37,7 @@ namespace ContainerExpressions.Containers
 
                 _smartEnumNames = new(smartEnums.Count);
                 _smartEnumValues = new(smartEnums.Count);
-                _smartEnumAliases = new();
+                _smartEnumAliases = null;
 
                 foreach (var smartEnum in smartEnums)
                 {
@@ -47,10 +46,13 @@ namespace ContainerExpressions.Containers
 
                     foreach (var alias in smartEnum.Aliases)
                     {
+                        _smartEnumAliases ??= new(smartEnums.Count);
                         _smartEnumNames.Add(alias.ToLowerInvariant(), smartEnum);
                         _smartEnumAliases.Add(alias.ToLowerInvariant(), alias);
                     }
                 }
+
+                _smartEnumAliases ??= Cache.HybridDictionary;
             }
             catch (Exception ex)
             {
@@ -61,7 +63,33 @@ namespace ContainerExpressions.Containers
             }
         }
 
-        public static T[] GetObjects() => _smartEnumValues.Values.ToArray();
+        public static Dictionary<string, (int Value, string[] Aliases)> Init() => Init(FormatOptions.Lowercase);
+        public static Dictionary<string, (int Value, string[] Aliases)> Init(FormatOptions format)
+        {
+            var objs = GetObjects();
+            var init = new Dictionary<string, (int, string[])>(objs.Length);
+
+            foreach (var obj in objs)
+            {
+                var name = string.Empty;
+                var aliases = Array.Empty<string>();
+
+                if (format == FormatOptions.Lowercase) { name = obj.Name.ToLowerInvariant(); aliases = obj.Aliases.Select(x => x.ToLowerInvariant()).ToArray(); }
+                else if (format == FormatOptions.Uppercase) { name = obj.Name.ToUpperInvariant(); aliases = obj.Aliases.Select(x => x.ToUpperInvariant()).ToArray(); }
+                else if (format == FormatOptions.Original) { name = obj.Name; aliases = obj.Aliases; }
+
+                init.Add(name, (obj.Value, aliases));
+            }
+
+            return init;
+        }
+
+        public static T[] GetObjects()
+        {
+            var objs = new T[_smartEnumValues.Count];
+            _smartEnumValues.Values.CopyTo(objs, 0);
+            return objs;
+        }
 
         public static Response<EnumRange<T>> FromObject(T smartEnum) => Response.Create(new EnumRange<T>(new T[] { smartEnum }));
         public static Response<EnumRange<T>> FromObjects(params T[] smartEnums) => Response.Create(new EnumRange<T>(smartEnums));
@@ -73,13 +101,13 @@ namespace ContainerExpressions.Containers
             var names = new string[_smartEnumNames.Count - _smartEnumAliases.Count];
             int i = 0;
 
-            foreach (var name in _smartEnumNames.Keys)
+            foreach (string name in _smartEnumNames.Keys)
             {
                 if (!_smartEnumAliases.Contains(name))
                 {
                     if (format == FormatOptions.Lowercase) names[i++] = name;
                     else if (format == FormatOptions.Uppercase) names[i++] = name.ToUpperInvariant();
-                    else if (format == FormatOptions.Original) names[i++] = _smartEnumNames[name].Name;
+                    else if (format == FormatOptions.Original) names[i++] = ((T)_smartEnumNames[name]).Name;
                 }
             }
 
@@ -88,23 +116,28 @@ namespace ContainerExpressions.Containers
 
         public static Response<EnumRange<T>> FromName(string name)
         {
-            if (name != null && _smartEnumNames.TryGetValue(name.ToLowerInvariant(), out var smartEnum)) return Response.Create(new EnumRange<T>(new T[] { smartEnum }));
+            if (name is not null)
+            {
+                var smartEnum = (T)_smartEnumNames[name.ToLowerInvariant()];
+                if (smartEnum is not null) return Response.Create(new EnumRange<T>(new T[] { smartEnum }));
+            }
             return Response<EnumRange<T>>.Error;
         }
 
-        public static Response<EnumRange<T>> FromNames(string names) => FromNames(names, _separator);
+        public static Response<EnumRange<T>> FromNames(string names) => FromNames(names, Cache.CharSeparator);
         public static Response<EnumRange<T>> FromNames(string names, char separator) => FromNames(names, new char[] { separator.ThrowIfDefault() });
         private static Response<EnumRange<T>> FromNames(string names, char[] separator)
         {
             var splitNames = names?.ToLowerInvariant().Split(separator, StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
             var smartEnums = new List<T>(splitNames.Length);
 
-            foreach (var name in splitNames.Distinct())
+            foreach (var name in splitNames)
             {
-                if (_smartEnumNames.TryGetValue(name.Trim(), out var smartEnum)) smartEnums.Add(smartEnum);
+                var smartEnum = (T)_smartEnumNames[name.Trim()];
+                if (smartEnum is not null) smartEnums.Add(smartEnum);
             }
 
-            return smartEnums.Count > 0 ? Response.Create(new EnumRange<T>(smartEnums.ToArray())) : Response<EnumRange<T>>.Error;
+            return smartEnums.Count > 0 ? Response.Create(new EnumRange<T>(smartEnums)) : Response<EnumRange<T>>.Error;
         }
 
         public static string[] GetAliases() => GetAliasesWith(FormatOptions.Lowercase);
@@ -124,37 +157,49 @@ namespace ContainerExpressions.Containers
             return aliases;
         }
 
-        public static int[] GetValues() => _smartEnumValues.Keys.ToArray();
+        public static int[] GetValues()
+        {
+            var values = new int[_smartEnumValues.Count];
+            _smartEnumValues.Keys.CopyTo(values, 0);
+            return values;
+        }
 
         public static Response<EnumRange<T>> FromValue(int value)
         {
-            if (_smartEnumValues.TryGetValue(value, out var smartEnum)) return Response.Create(new EnumRange<T>(new T[] { smartEnum }));
+            var smartEnum = (T)_smartEnumValues[value];
+            if (smartEnum is not null) return Response.Create(new EnumRange<T>(new T[] { smartEnum }));
             return Response<EnumRange<T>>.Error;
         }
 
         public static Response<EnumRange<T>> FromValues(int values)
         {
-            var smartEnums = new List<T>();
-            if (values == 0 && _smartEnumValues.TryGetValue(0, out var se)) smartEnums.Add(se);
+            if (values == 0)
+            {
+                var smartEnum = (T)_smartEnumValues[0];
+                if (smartEnum is not null) return Response.Create(new EnumRange<T>(new T[] { smartEnum }));
+                return Response<EnumRange<T>>.Error;
+            };
 
+            var smartEnums = new List<T>();
             for (int i = 0, pow = 1; i < 32 && pow <= values; i++, pow = 1 << i)
             {
                 if ((values & pow) != 0)
                 {
-                    if (_smartEnumValues.TryGetValue(pow, out var smartEnum)) smartEnums.Add(smartEnum);
+                    var smartEnum = (T)_smartEnumValues[pow];
+                    if (smartEnum is not null) smartEnums.Add(smartEnum);
                 }
             }
-
-            return smartEnums.Count > 0 ? Response.Create(new EnumRange<T>(smartEnums.ToArray())) : Response<EnumRange<T>>.Error;
+            return smartEnums.Count > 0 ? Response.Create(new EnumRange<T>(smartEnums)) : Response<EnumRange<T>>.Error;
         }
 
-        public static Response<EnumRange<T>> Parse(Either<string, int, object> input) => Parse(input, _separator);
+        public static Response<EnumRange<T>> Parse(Either<string, int, object> input) => Parse(input, Cache.CharSeparator);
         public static Response<EnumRange<T>> Parse(Either<string, int, object> input, char separator) => Parse(input, new char[] { separator.ThrowIfDefault() });
         private static Response<EnumRange<T>> Parse(Either<string, int, object> input, char[] separator)
         {
             Response<EnumRange<T>> ParseName(string name, char[] sep)
             {
-                if (_smartEnumNames.TryGetValue(name, out var smartEnum)) return Response.Create(new EnumRange<T>(new T[] { smartEnum }));
+                var smartEnum = (T)_smartEnumNames[name.ToLowerInvariant()];
+                if (smartEnum is not null) return Response.Create(new EnumRange<T>(new T[] { smartEnum }));
 
                 var names = FromNames(name, sep);
                 if (names) return names;
@@ -166,7 +211,8 @@ namespace ContainerExpressions.Containers
 
             Response<EnumRange<T>> ParseValue(int value)
             {
-                if (_smartEnumValues.TryGetValue(value, out var smartEnum)) return Response.Create(new EnumRange<T>(new T[] { smartEnum }));
+                var smartEnum = (T)_smartEnumValues[value];
+                if (smartEnum is not null) return Response.Create(new EnumRange<T>(new T[] { smartEnum }));
 
                 var values = FromValues(value);
                 if (values) return values;
@@ -182,6 +228,10 @@ namespace ContainerExpressions.Containers
 
                 if (obj is T t && t is not null) return Response.Create(new EnumRange<T>(new[] { t }));
 
+                if (obj is ICollection<T> tc && tc is not null) return Response.Create(new EnumRange<T>(tc));
+
+                if (obj is EnumRange<T> tr && tr.Objects is not null) return Response.Create(tr);
+
                 return Response<EnumRange<T>>.Error;
             }
 
@@ -192,7 +242,7 @@ namespace ContainerExpressions.Containers
             );
         }
 
-        public static bool TryParse(Either<string, int, object> input, out EnumRange<T> enumRange) => TryParse(input, _separator, out enumRange);
+        public static bool TryParse(Either<string, int, object> input, out EnumRange<T> enumRange) => TryParse(input, Cache.CharSeparator, out enumRange);
         public static bool TryParse(Either<string, int, object> input, char separator, out EnumRange<T> enumRange) => TryParse(input, new char[] { separator.ThrowIfDefault() }, out enumRange);
         private static bool TryParse(Either<string, int, object> input, char[] separator, out EnumRange<T> enumRange)
         {
@@ -224,9 +274,7 @@ namespace ContainerExpressions.Containers
         {
             Name = name ?? string.Empty;
             Value = value >= 0 ? value : -1;
-            Aliases = aliases ?? Array.Empty<string>();
-
-            Aliases.ThrowIfSequenceIsNullOrEmpty("Alias must have a name.");
+            Aliases = (aliases ?? Array.Empty<string>()).ThrowIfSequenceIsNullOrEmpty("Alias must have a name.");
         }
 
         protected SmartEnum() { }
@@ -248,22 +296,32 @@ namespace ContainerExpressions.Containers
         public static implicit operator int(SmartEnum smartEnum) => smartEnum.Value;
     }
 
+    file abstract class Cache
+    {
+        internal static readonly HybridDictionary HybridDictionary = new(0);
+        internal static readonly string StringSeparator = ",";
+        internal static readonly char[] CharSeparator = new char[] { ',' };
+    }
+
     public enum FormatOptions { Lowercase, Uppercase, Original }
 
     public readonly struct EnumRange<T> where T : SmartEnum
     {
-        private static readonly string _separator = ",";
-
         public T[] Objects { get; }
 
         public EnumRange() : this(Array.Empty<T>()) { }
         internal EnumRange(T[] objects)
         {
-            Objects = objects.OrderBy(x => x.Value).ToArray();
+            if (objects.Length < 2) Objects = objects;
+            else Objects = objects.Distinct().OrderBy(x => x.Value).ToArray();
+        }
+        internal EnumRange(IEnumerable<T> objects)
+        {
+            Objects = objects.Distinct().OrderBy(x => x.Value).ToArray();
         }
 
-        public override string ToString() => ToStringWith(FormatOptions.Lowercase, _separator);
-        public string ToString(FormatOptions format) => ToStringWith(format, _separator);
+        public override string ToString() => ToStringWith(FormatOptions.Lowercase, Cache.StringSeparator);
+        public string ToString(FormatOptions format) => ToStringWith(format, Cache.StringSeparator);
         public string ToString(char separator) => ToStringWith(FormatOptions.Lowercase, char.ToString(separator));
         public string ToString(FormatOptions format, char separator) => ToStringWith(format, char.ToString(separator));
         private string ToStringWith(FormatOptions format, string separator)
@@ -288,9 +346,8 @@ namespace ContainerExpressions.Containers
 
             unchecked
             {
-                var objs = Objects.OrderBy(x => x.Name);
                 var hash = Objects[0].GetHashCode();
-                foreach (var obj in objs.Skip(1))
+                foreach (var obj in Objects.Skip(1))
                 {
                     hash = (hash * 397) ^ obj.GetHashCode();
                 }
@@ -299,8 +356,13 @@ namespace ContainerExpressions.Containers
         }
 
         public override bool Equals(object obj) => obj is EnumRange<T> er && Equals(er) || obj is T se && Equals(se);
-        public bool Equals(EnumRange<T> range) => Objects.Length == range.Objects.Length && Objects.SequenceEqual(range.Objects);
         public bool Equals(T smartEnum) => Objects.Length == 1 && Objects[0].Equals(smartEnum);
+        public bool Equals(EnumRange<T> range)
+        {
+            if (Objects.Length == 0 && range.Objects.Length == 0) return true;
+            if (Objects.Length == 1 && range.Objects.Length == 1) return Objects[0].Equals(range.Objects[0]);
+            return Objects.Length == range.Objects.Length && Objects.SequenceEqual(range.Objects);
+        }
 
         public static bool operator !=(EnumRange<T> x, EnumRange<T> y) => !(x == y);
         public static bool operator ==(EnumRange<T> x, EnumRange<T> y) => x.Equals(y);
@@ -315,7 +377,7 @@ namespace ContainerExpressions.Containers
         // Bitwise OR: add target if it doesn't exist.
         public static EnumRange<T> operator |(EnumRange<T> x, EnumRange<T> y)
         {
-            if (x.Equals(y)) return x;
+            if (x.Equals(y)) return y;
 
             var addFlags = SmartEnum<T>.FromValues((int)x | y);
             if (addFlags) return addFlags;
@@ -348,7 +410,7 @@ namespace ContainerExpressions.Containers
         // Bitwise AND: check if the target exists.
         public static EnumRange<T> operator &(EnumRange<T> x, EnumRange<T> y)
         {
-            if (x.Equals(y)) return x;
+            if (x.Equals(y)) return y;
 
             var hasFlags = SmartEnum<T>.FromValues((int)x & y);
             if (hasFlags) return hasFlags;
@@ -395,7 +457,7 @@ namespace ContainerExpressions.Containers
 
         public static EnumRange<T> RemoveFlag<T>(this EnumRange<T> range, T flag) where T : SmartEnum
         {
-            var removeFlag = SmartEnum<T>.FromValues(range & ~flag);
+            var removeFlag = SmartEnum<T>.FromValues(range & (~flag));
             if (removeFlag) return removeFlag;
 
             var none = SmartEnum<T>.FromValue(0);
@@ -406,7 +468,7 @@ namespace ContainerExpressions.Containers
         public static EnumRange<T> RemoveFlags<T>(this EnumRange<T> range, params T[] flags) where T : SmartEnum => RemoveFlags(range, new EnumRange<T>(flags));
         public static EnumRange<T> RemoveFlags<T>(this EnumRange<T> range, EnumRange<T> flags) where T : SmartEnum
         {
-            var removeFlags = SmartEnum<T>.FromValues(range & ~flags);
+            var removeFlags = SmartEnum<T>.FromValues(range & (~flags));
             if (removeFlags) return removeFlags;
 
             var none = SmartEnum<T>.FromValue(0);
@@ -418,44 +480,5 @@ namespace ContainerExpressions.Containers
         public static EnumRange<T> ToggleFlag<T>(this EnumRange<T> range, T flag) where T : SmartEnum => range ^ flag;
         public static EnumRange<T> ToggleFlags<T>(this EnumRange<T> range, params T[] flags) where T : SmartEnum => ToggleFlags(range, new EnumRange<T>(flags));
         public static EnumRange<T> ToggleFlags<T>(this EnumRange<T> range, EnumRange<T> flags) where T : SmartEnum => range ^ flags;
-    }
-
-    public sealed class Colour : SmartEnum
-    {
-        public static readonly Colour None = new(0);
-        public static readonly Colour Purple = new(1);
-        public static readonly Colour Red = new(2);
-        public static readonly Colour Green = new(4);
-        public static readonly Colour Teal = new(8);
-
-        private Colour(int value) : base(value) { }
-    }
-
-    [Flags] enum T { One = 1, Two = 2, Four = 4 }
-
-    public class TestMe
-    {
-        public void Ok()
-        {
-            try
-            {
-                var colour1 = SmartEnum<Colour>.FromObjects(Colour.Purple, Colour.Teal).Value;
-                var colour2 = SmartEnum<Colour>.FromObjects(Colour.Green, Colour.Red).Value;
-
-                var ccc = colour1.ToggleFlag(Colour.Green);
-                var cc = ccc.ToggleFlag(Colour.Green);
-                var c = cc.ToggleFlag(Colour.Purple);
-
-                var xxx = T.One | T.Two; // Add value if it doesn't exist.
-                var yyy = xxx & T.Four; // Check if value exists (get value back, or 0 if not exists).
-                var ppp = xxx & ~T.Two; // Remove value if it exists.
-                var zzz = xxx ^ T.Four; // Remove value if it exists, otherwise add it.
-
-            }
-            catch (Exception ex)
-            {
-
-            }
-        }
     }
 }

@@ -26,13 +26,13 @@ namespace Tests.ContainerExpressions.Containers
             Assert.AreEqual(0, d.Count);
         }
 
-        class HS : Alias<HashSet<Task>> { public HS() : base(default) { } }
+        class HS1 : Alias<HashSet<Task>> { public HS1() : base(default) { } }
 
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void Instance_BaseTaskTValueMustBeSetFirst()
         {
-            var hashset = Instance.Of<HS>();
+            var hashset = Instance.Of<HS1>();
         }
 
         [TestMethod]
@@ -42,15 +42,17 @@ namespace Tests.ContainerExpressions.Containers
             Instance.Create<HashSet<Task>>(null);
         }
 
+        class HS2 : Alias<HashSet<Task>> { public HS2() : base(new HashSet<Task>()) { } }
+
         [TestMethod]
         public void Instance_CanSetTValueOnce()
         {
-            Instance.Create(new HashSet<Task>());
+            Instance.Create(new HS2());
 
-            var hashset = Instance.Of<HashSet<Task>>();
+            var hashset = Instance.Of<HS2>();
 
             Assert.IsNotNull(hashset);
-            Assert.AreEqual(0, hashset.Count);
+            Assert.AreEqual(0, hashset.Value.Count);
         }
 
         [TestMethod]
@@ -124,11 +126,13 @@ namespace Tests.ContainerExpressions.Containers
             Assert.IsTrue(result == null || result == string.Empty);
         }
 
+        class SS : Alias<string> { public SS() : base(string.Empty) { } }
+
         [TestMethod]
         public async Task InstanceAsync_ValueTask_CustomReference()
         {
-            InstanceAsync.CreateValue(string.Empty);
-            var result = await InstanceAsync.ValueOf<string>();
+            InstanceAsync.CreateValue(new SS());
+            var result = await InstanceAsync.ValueOf<SS>();
             Assert.AreEqual(string.Empty, result);
         }
 
@@ -165,12 +169,14 @@ namespace Tests.ContainerExpressions.Containers
             Assert.IsTrue(result.Value == null || result.Value == string.Empty);
         }
 
+        class SS1 : Alias<string> { public SS1() : base(string.Empty) { } }
+
         [TestMethod]
         public async Task InstanceAsync_ResponseAsync_CustomReference()
         {
-            InstanceAsync.CreateResponse(string.Empty);
-            var result = await InstanceAsync.ResponseOf<string>();
-            Assert.AreEqual(string.Empty, result);
+            InstanceAsync.CreateResponse(new SS1());
+            var result = await InstanceAsync.ResponseOf<SS1>();
+            Assert.AreEqual(string.Empty, result.Value);
         }
 
         [TestMethod]
