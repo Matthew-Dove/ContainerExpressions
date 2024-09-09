@@ -6,6 +6,7 @@ using System.Reflection;
 
 namespace ContainerExpressions.Containers
 {
+    /// <summary>Add enum like behaviour to custom classes.</summary>
     public static class SmartEnum<T> where T : SmartEnum
     {
         private static readonly HybridDictionary _smartEnumNames;
@@ -63,7 +64,10 @@ namespace ContainerExpressions.Containers
             }
         }
 
+        /// <summary>Useful for "priming the pump" at program startup. Returns a data structure representing the smart enum's values.</summary>
         public static Dictionary<string, (int Value, string[] Aliases)> Init() => Init(FormatOptions.Lowercase);
+
+        /// <summary>Useful for "priming the pump" at program startup. Returns a data structure representing the smart enum's values.</summary>
         public static Dictionary<string, (int Value, string[] Aliases)> Init(FormatOptions format)
         {
             var objs = GetObjects();
@@ -84,6 +88,7 @@ namespace ContainerExpressions.Containers
             return init;
         }
 
+        /// <summary>Get all smart enum fields, and their underlying string / int values.</summary>
         public static T[] GetObjects()
         {
             var objs = new T[_smartEnumValues.Count];
@@ -91,11 +96,18 @@ namespace ContainerExpressions.Containers
             return objs;
         }
 
+        /// <summary>Create an enum range a smart enum field.</summary>
         public static Response<EnumRange<T>> FromObject(T smartEnum) => Response.Create(new EnumRange<T>(new T[] { smartEnum }));
+
+        /// <summary>Create an enum range from smart enum fields.</summary>
         public static Response<EnumRange<T>> FromObjects(params T[] smartEnums) => Response.Create(new EnumRange<T>(smartEnums));
 
+        /// <summary>Get the names for a smart enum's fields, aliases are not returned.</summary>
         public static string[] GetNames() => GetNamesWith(FormatOptions.Lowercase);
+
+        /// <summary>Get the names for a smart enum's fields, aliases are not returned.</summary>
         public static string[] GetNames(FormatOptions format) => GetNamesWith(format);
+
         private static string[] GetNamesWith(FormatOptions format)
         {
             var names = new string[_smartEnumNames.Count - _smartEnumAliases.Count];
@@ -114,6 +126,7 @@ namespace ContainerExpressions.Containers
             return names;
         }
 
+        /// <summary>Create an enum range from a smart enum name.</summary>
         public static Response<EnumRange<T>> FromName(string name)
         {
             if (name is not null)
@@ -124,8 +137,12 @@ namespace ContainerExpressions.Containers
             return Response<EnumRange<T>>.Error;
         }
 
+        /// <summary>Create an enum range from smart enum names, separated by a character.</summary>
         public static Response<EnumRange<T>> FromNames(string names) => FromNames(names, Cache.CharSeparator);
+
+        /// <summary>Create an enum range from smart enum names, separated by a character.</summary>
         public static Response<EnumRange<T>> FromNames(string names, char separator) => FromNames(names, new char[] { separator.ThrowIfDefault() });
+
         private static Response<EnumRange<T>> FromNames(string names, char[] separator)
         {
             var splitNames = names?.ToLowerInvariant().Split(separator, StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
@@ -140,8 +157,12 @@ namespace ContainerExpressions.Containers
             return smartEnums.Count > 0 ? Response.Create(new EnumRange<T>(smartEnums)) : Response<EnumRange<T>>.Error;
         }
 
+        /// <summary>Get the aliases for a smart enum's fields, names are not returned.</summary>
         public static string[] GetAliases() => GetAliasesWith(FormatOptions.Lowercase);
+
+        /// <summary>Get the aliases for a smart enum's fields, names are not returned.</summary>
         public static string[] GetAliases(FormatOptions format) => GetAliasesWith(format);
+
         private static string[] GetAliasesWith(FormatOptions format)
         {
             var aliases = new string[_smartEnumAliases.Count];
@@ -157,6 +178,7 @@ namespace ContainerExpressions.Containers
             return aliases;
         }
 
+        /// <summary>Get the values for a smart enum's fields.</summary>
         public static int[] GetValues()
         {
             var values = new int[_smartEnumValues.Count];
@@ -164,6 +186,7 @@ namespace ContainerExpressions.Containers
             return values;
         }
 
+        /// <summary>Create an enum range from a smart enum value.</summary>
         public static Response<EnumRange<T>> FromValue(int value)
         {
             var smartEnum = (T)_smartEnumValues[value];
@@ -171,6 +194,7 @@ namespace ContainerExpressions.Containers
             return Response<EnumRange<T>>.Error;
         }
 
+        /// <summary>Create an enum range from smart enum values.</summary>
         public static Response<EnumRange<T>> FromValues(int values)
         {
             if (values == 0)
@@ -192,8 +216,12 @@ namespace ContainerExpressions.Containers
             return smartEnums.Count > 0 ? Response.Create(new EnumRange<T>(smartEnums)) : Response<EnumRange<T>>.Error;
         }
 
+        /// <summary>Create an enum range from either smart enum value(s), name(s), or field(s).</summary>
         public static Response<EnumRange<T>> Parse(Either<string, int, object> input) => Parse(input, Cache.CharSeparator);
+
+        /// <summary>Create an enum range from either smart enum value(s), name(s), or field(s).</summary>
         public static Response<EnumRange<T>> Parse(Either<string, int, object> input, char separator) => Parse(input, new char[] { separator.ThrowIfDefault() });
+
         private static Response<EnumRange<T>> Parse(Either<string, int, object> input, char[] separator)
         {
             Response<EnumRange<T>> ParseName(string name, char[] sep)
@@ -242,8 +270,12 @@ namespace ContainerExpressions.Containers
             );
         }
 
+        /// <summary>Create an enum range from either smart enum value(s), name(s), or field(s).</summary>
         public static bool TryParse(Either<string, int, object> input, out EnumRange<T> enumRange) => TryParse(input, Cache.CharSeparator, out enumRange);
+
+        /// <summary>Create an enum range from either smart enum value(s), name(s), or field(s).</summary>
         public static bool TryParse(Either<string, int, object> input, char separator, out EnumRange<T> enumRange) => TryParse(input, new char[] { separator.ThrowIfDefault() }, out enumRange);
+
         private static bool TryParse(Either<string, int, object> input, char[] separator, out EnumRange<T> enumRange)
         {
             enumRange = new EnumRange<T>(Array.Empty<T>());
@@ -255,6 +287,7 @@ namespace ContainerExpressions.Containers
         }
     }
 
+    /// <summary>Holds a smart enum's name, value, and optional aliases.</summary>
     public abstract class SmartEnum : IEquatable<SmartEnum>
     {
         public string Name { get; internal set; }
@@ -303,8 +336,10 @@ namespace ContainerExpressions.Containers
         internal static readonly char[] CharSeparator = new char[] { ',' };
     }
 
+    /// <summary>Determines how the smart enum's names, and aliases will be printed out.</summary>
     public enum FormatOptions { Lowercase, Uppercase, Original }
 
+    /// <summary>A collection of 0 or more smart enum values, that resulted from parsing, or executing some operator / method.</summary>
     public readonly struct EnumRange<T> where T : SmartEnum
     {
         public T[] Objects { get; }
@@ -447,14 +482,25 @@ namespace ContainerExpressions.Containers
 
     public static class EnumRangeExtensions
     {
+        /// <summary>Adds the target if it doesn't exist.</summary>
         public static EnumRange<T> AddFlag<T>(this EnumRange<T> range, T flag) where T : SmartEnum => range | flag;
+
+        /// <summary>Adds the target if it doesn't exist.</summary>
         public static EnumRange<T> AddFlags<T>(this EnumRange<T> range, params T[] flags) where T : SmartEnum => AddFlags(range, new EnumRange<T>(flags));
+
+        /// <summary>Adds the target if it doesn't exist.</summary>
         public static EnumRange<T> AddFlags<T>(this EnumRange<T> range, EnumRange<T> flags) where T : SmartEnum => range | flags;
 
+        /// <summary>Checks if the target exists.</summary>
         public static bool HasFlag<T>(this EnumRange<T> range, T flag) where T : SmartEnum => flag.Equals(range & flag);
+
+        /// <summary>Checks if the target exists.</summary>
         public static bool HasFlags<T>(this EnumRange<T> range, params T[] flags) where T : SmartEnum => HasFlags(range, new EnumRange<T>(flags));
+
+        /// <summary>Checks if the target exists.</summary>
         public static bool HasFlags<T>(this EnumRange<T> range, EnumRange<T> flags) where T : SmartEnum => flags.Equals(range & flags);
 
+        /// <summary>Removes the target if it exists.</summary>
         public static EnumRange<T> RemoveFlag<T>(this EnumRange<T> range, T flag) where T : SmartEnum
         {
             var removeFlag = SmartEnum<T>.FromValues(range & (~flag));
@@ -465,7 +511,11 @@ namespace ContainerExpressions.Containers
 
             return new EnumRange<T>();
         }
+
+        /// <summary>Removes the target if it exists.</summary>
         public static EnumRange<T> RemoveFlags<T>(this EnumRange<T> range, params T[] flags) where T : SmartEnum => RemoveFlags(range, new EnumRange<T>(flags));
+
+        /// <summary>Removes the target if it exists.</summary>
         public static EnumRange<T> RemoveFlags<T>(this EnumRange<T> range, EnumRange<T> flags) where T : SmartEnum
         {
             var removeFlags = SmartEnum<T>.FromValues(range & (~flags));
@@ -477,8 +527,13 @@ namespace ContainerExpressions.Containers
             return new EnumRange<T>();
         }
 
+        /// <summary>Removes the target if it exists, otherwise adds it.</summary>
         public static EnumRange<T> ToggleFlag<T>(this EnumRange<T> range, T flag) where T : SmartEnum => range ^ flag;
+
+        /// <summary>Removes the target if it exists, otherwise adds it.</summary>
         public static EnumRange<T> ToggleFlags<T>(this EnumRange<T> range, params T[] flags) where T : SmartEnum => ToggleFlags(range, new EnumRange<T>(flags));
+
+        /// <summary>Removes the target if it exists, otherwise adds it.</summary>
         public static EnumRange<T> ToggleFlags<T>(this EnumRange<T> range, EnumRange<T> flags) where T : SmartEnum => range ^ flags;
     }
 }
