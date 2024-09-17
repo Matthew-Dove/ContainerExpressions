@@ -589,5 +589,86 @@ namespace Tests.ContainerExpressions.Containers
             Assert.IsTrue(manyToggles == Colour.Purple);
             Assert.IsTrue(none == Colour.None);
         }
+
+        #region Default Tests
+
+        /**
+         * While SmartEnum{T} will never produce a default value for the struct EnumRange{T}, neverless it can still happen in user code.
+         * When this happens, the underlying T[] Objects array will be null i.e. "default(EnumRange{T})".
+         * Since any uninitialized EnumRange{T} will have a null Objects property, all internal usage must guard against it being null.
+         * These tests assert that default values for EnumRange{T} are safe to interact with, without requiring defensive coding practices.
+        **/
+
+        [TestMethod]
+        public void Default_BitwiseAndOperator()
+        {
+            EnumRange<Colour> range = default;
+
+            Colour hasGreen = range & Colour.Green;
+
+            Assert.AreEqual(Colour.None, hasGreen);
+        }
+
+        [TestMethod]
+        public void Default_BitwiseOrOperator()
+        {
+            EnumRange<Colour> range = default;
+
+            EnumRange<Colour> addGreen = range | Colour.Green;
+
+            Assert.AreEqual(range, addGreen);
+        }
+
+        [TestMethod]
+        public void Default_ImplicitIntOperator()
+        {
+            EnumRange<Colour> range = default;
+
+            int values = range;
+
+            Assert.AreEqual(0, values);
+        }
+
+        [TestMethod]
+        public void Default_Equals_SmartEnum()
+        {
+            EnumRange<Colour> range = default;
+
+            bool areEqual = range.Equals(Colour.Green);
+
+            Assert.IsFalse(areEqual);
+        }
+
+        [TestMethod]
+        public void Default_Equals_EnumRange()
+        {
+            EnumRange<Colour> range = default;
+
+            bool areEqual = range.Equals(SmartEnum<Colour>.FromObject(Colour.Green));
+
+            Assert.IsFalse(areEqual);
+        }
+
+        [TestMethod]
+        public void Default_GetHashCode()
+        {
+            EnumRange<Colour> range = default;
+
+            int hash = range.GetHashCode();
+
+            Assert.AreEqual(0, hash);
+        }
+
+        [TestMethod]
+        public void Default_ToString()
+        {
+            EnumRange<Colour> range = default;
+
+            string names = range.ToString(FormatOptions.Original);
+
+            Assert.AreEqual(nameof(Colour.None), names);
+        }
+
+        #endregion
     }
 }

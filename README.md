@@ -1193,3 +1193,7 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * Created a new extension method for `Response<T>`: **BindIf<T, TResult>**. BindIf will execute a function only if the Response is valid, and the boolean predicate is true.
 * Created a new container: `FireAndForget` - enables a place to push tasks to for background completion.
 * Created `SmartEnum<T>` - an alterative for enums, that can have methods, and properties.
+
+## 12.0.1
+
+* Added protections to the `SmartEnum<T>` container, when interacting on a default `EnumRange<T>` collection; making it safe to use even when not initialized.

@@ -13,7 +13,7 @@
     <PackageOutputPath>..//../nupkg</PackageOutputPath>
     <id>ContainerExpressions</id>
     <Authors>Matthew Dove</Authors>
-    <Version>12.0.0</Version>
+    <Version>12.0.1</Version>
     <Copyright>Matthew Dove. All rights reserved.</Copyright>
     <PackageLicenseExpression></PackageLicenseExpression>
     <RepositoryUrl>https://github.com/Matthew-Dove/ContainerExpressions</RepositoryUrl>
@@ -27,17 +27,7 @@ Expressions are designed to work on top of containers, helping in common use cas
 
 For example the Response container's "utility" is to let the caller know if some T value was generated without error.
 The expression Retry will attempt to get the T value after x time delay for n attempts, a good combo for intermittent networking errors.</Description>
-    <PackageReleaseNotes>* Changed exception throwing function from `void ThrowError&lt;T&gt;` to `T ThrowError&lt;T&gt;`, allowing it to be used in more places that need a result (*such as switch pattern matching*).
-* Removed `WhenT1Async`, due to the use of generics there was no difference between that, and `WhenT1` (*i.e. the non-async version*).
-* Removed the string alias `Message` used in logging, and replaced it with a `Format` type; which has the message template, as well as the args.
-* Added a new formatted logger for trace messages (`Trace.SetFormattedLogger`), and error logs (`Try.SetFormattedExceptionLogger`).
-* Created a `Tag` extension method to set, and get messages on objects.
-* Added a function overload to the extension method `Pivot`, to include the previous result as part of the `boolean` condition: `Func&lt;T, bool&gt; condition`.
-* Created a new extension method for `Response&lt;T&gt;`: **Validate&lt;T&gt;**. Validate determines if the state for `T` is valid or not, returning a valid response container if it is.
-* Renamed `AsTask`, `AsValueTask`, and `AsResponse` to: `ToTask`, `ToValueTask`, and `ToResponse` respectively. The **As** convention is used for casting objects, and these methods are creating new ones.
-* Created a new extension method for `Response&lt;T&gt;`: **BindIf&lt;T, TResult&gt;**. BindIf will execute a function only if the Response is valid, and the boolean predicate is true.
-* Created a new container: `FireAndForget` - enables a place to push tasks to for background completion.
-* Created `SmartEnum&lt;T&gt;` - an alterative for enums, that can have methods, and properties.</PackageReleaseNotes>
+    <PackageReleaseNotes>* Added protections to the `SmartEnum&lt;T&gt;` container, when interacting on a default `EnumRange&lt;T&gt;` collection; making it safe to use even when not initialized.</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageIcon>dove.png</PackageIcon>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>

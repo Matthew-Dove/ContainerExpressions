@@ -64,10 +64,10 @@ namespace ContainerExpressions.Containers
             }
         }
 
-        /// <summary>Useful for "priming the pump" at program startup. Returns a data structure representing the smart enum's values.</summary>
+        /// <summary>Useful for "priming the pump" at program startup. Returns a data structure representing the smart enum.</summary>
         public static Dictionary<string, (int Value, string[] Aliases)> Init() => Init(FormatOptions.Lowercase);
 
-        /// <summary>Useful for "priming the pump" at program startup. Returns a data structure representing the smart enum's values.</summary>
+        /// <summary>Useful for "priming the pump" at program startup. Returns a data structure representing the smart enum.</summary>
         public static Dictionary<string, (int Value, string[] Aliases)> Init(FormatOptions format)
         {
             var objs = GetObjects();
@@ -361,14 +361,31 @@ namespace ContainerExpressions.Containers
         public string ToString(FormatOptions format, char separator) => ToStringWith(format, char.ToString(separator));
         private string ToStringWith(FormatOptions format, string separator)
         {
-            var names = new string[Objects.Length];
-            var i = 0;
+            string[] names = null;
 
-            foreach (var obj in Objects)
+            if (Objects != null && Objects.Length != 0)
             {
-                if (format == FormatOptions.Lowercase) names[i++] = obj.Name.ToLowerInvariant();
-                else if (format == FormatOptions.Uppercase) names[i++] = obj.Name.ToUpperInvariant();
-                else if (format == FormatOptions.Original) names[i++] = obj.Name;
+                names = new string[Objects.Length];
+                var i = 0;
+
+                foreach (var obj in Objects)
+                {
+                    if (format == FormatOptions.Lowercase) names[i++] = obj.Name.ToLowerInvariant();
+                    else if (format == FormatOptions.Uppercase) names[i++] = obj.Name.ToUpperInvariant();
+                    else if (format == FormatOptions.Original) names[i++] = obj.Name;
+                }
+            }
+            else
+            {
+                var none = SmartEnum<T>.FromValue(0);
+                if (!none) return string.Empty;
+
+                names = new string[1];
+                var name = none.Value.Objects[0].Name;
+
+                if (format == FormatOptions.Lowercase) names[0] = name.ToLowerInvariant();
+                else if (format == FormatOptions.Uppercase) names[0] = name.ToUpperInvariant();
+                else if (format == FormatOptions.Original) names[0] = name;
             }
 
             return string.Join(separator, names);
@@ -376,6 +393,7 @@ namespace ContainerExpressions.Containers
 
         public override int GetHashCode()
         {
+            if (Objects == null) return 0;
             if (Objects.Length == 0) return 0;
             if (Objects.Length == 1) return Objects[0].GetHashCode();
 
@@ -391,9 +409,11 @@ namespace ContainerExpressions.Containers
         }
 
         public override bool Equals(object obj) => obj is EnumRange<T> er && Equals(er) || obj is T se && Equals(se);
-        public bool Equals(T smartEnum) => Objects.Length == 1 && Objects[0].Equals(smartEnum);
+        public bool Equals(T smartEnum) => Objects != null && Objects.Length == 1 && Objects[0].Equals(smartEnum);
         public bool Equals(EnumRange<T> range)
         {
+            if (Objects == null) return range.Objects == null;
+            if (range.Objects == null) return Objects == null;
             if (Objects.Length == 0 && range.Objects.Length == 0) return true;
             if (Objects.Length == 1 && range.Objects.Length == 1) return Objects[0].Equals(range.Objects[0]);
             return Objects.Length == range.Objects.Length && Objects.SequenceEqual(range.Objects);
@@ -407,7 +427,7 @@ namespace ContainerExpressions.Containers
         public static bool operator ==(T x, EnumRange<T> y) => y.Equals(x);
 
         public static implicit operator string(EnumRange<T> range) => range.ToString();
-        public static implicit operator int(EnumRange<T> range) => range.Objects.Sum(x => x.Value);
+        public static implicit operator int(EnumRange<T> range) => range.Objects == null ? 0 : range.Objects.Sum(x => x.Value);
 
         // Bitwise OR: add target if it doesn't exist.
         public static EnumRange<T> operator |(EnumRange<T> x, EnumRange<T> y)
@@ -424,6 +444,8 @@ namespace ContainerExpressions.Containers
         }
         public static EnumRange<T> operator |(EnumRange<T> x, T y)
         {
+            if (x.Objects == null) return x;
+
             var hasFlag = false;
 
             for (int i = 0; i < x.Objects.Length; i++)
@@ -457,9 +479,12 @@ namespace ContainerExpressions.Containers
         }
         public static T operator &(EnumRange<T> x, T y)
         {
-            for (int i = 0; i < x.Objects.Length; i++)
+            if (x.Objects != null)
             {
-                if (x.Objects[i].Equals(y)) return y;
+                for (int i = 0; i < x.Objects.Length; i++)
+                {
+                    if (x.Objects[i].Equals(y)) return y;
+                }
             }
 
             var none = SmartEnum<T>.FromValue(0);
