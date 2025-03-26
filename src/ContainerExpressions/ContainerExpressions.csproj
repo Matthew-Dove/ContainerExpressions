@@ -71,7 +71,7 @@ The expression Retry will attempt to get the T value after x time delay for n at
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.2" />
   </ItemGroup>
 
 </Project>
