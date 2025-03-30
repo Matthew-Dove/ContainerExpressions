@@ -217,11 +217,27 @@ namespace ContainerExpressions.Containers
         // Static helper for the public constructor to set an error.
         public static ResponseAsync<T> FromException<T>(Exception ex) => new ResponseAsync<T>(ex);
 
+        // Let a ResponseAsync{T} task type run, then convert it into a Task{Response{T}}; so it can be used with extension methods targeting that type.
+        public static async Task<Response<T>> AsResponse<T>(
+            this ResponseAsync<T> response,
+            Format message = default,
+            [CallerArgumentExpression(nameof(response))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        {
+            var result = await response;
+            if (!result) string.Empty.LogErrorValue(message, argument, caller, path, line);
+            return result;
+        }
+
         #region Task Converters
 
         // Safely run the ValueTask, and convert the result into a Response.
         public static ValueTask<Response> AsResponse(
             this ValueTask task,
+            Format message = default,
             [CallerArgumentExpression(nameof(task))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -231,14 +247,14 @@ namespace ContainerExpressions.Containers
             if (task.IsCompleted)
             {
                 if (task.IsCompletedSuccessfully) return new ValueTask<Response>(Response.Success);
-                if (task.IsFaulted) task.AsTask().Exception.LogError(Format.Default, argument, caller, path, line);
+                if (task.IsFaulted) task.AsTask().Exception.LogError(message, argument, caller, path, line);
                 return new ValueTask<Response>(Response.Error);
             }
 
             return new ValueTask<Response>(task.AsTask().ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.RanToCompletion) return Response.Success;
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(message, argument, caller, path, line);
                 return Response.Error;
             }));
         }
@@ -246,6 +262,7 @@ namespace ContainerExpressions.Containers
         // Safely run the ValueTask{T}, and convert the T, into a Response{T}.
         public static ValueTask<Response<T>> AsResponse<T>(
             this ValueTask<T> task,
+            Format message = default,
             [CallerArgumentExpression(nameof(task))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -255,13 +272,13 @@ namespace ContainerExpressions.Containers
             if (task.IsCompleted)
             {
                 if (task.IsCompletedSuccessfully) return new ValueTask<Response<T>>(Response.Create(task.Result));
-                if (task.IsFaulted) task.AsTask().Exception.LogError(Format.Default, argument, caller, path, line);
+                if (task.IsFaulted) task.AsTask().Exception.LogError(message, argument, caller, path, line);
                 return new ValueTask<Response<T>>(Response.Create<T>());
             }
 
             return new ValueTask<Response<T>>(task.AsTask().ContinueWith(t =>
             {
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(message, argument, caller, path, line);
                 if (t.Status == TaskStatus.RanToCompletion) return Response.Create(t.Result);
                 return Response.Create<T>();
             }));
@@ -270,6 +287,7 @@ namespace ContainerExpressions.Containers
         // Safely run the Task, and convert the result into a Response.
         public static Task<Response> AsResponse(
             this Task task,
+            Format message = default,
             [CallerArgumentExpression(nameof(task))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -279,7 +297,7 @@ namespace ContainerExpressions.Containers
             return task.ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.RanToCompletion) return new Response(true);
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(message, argument, caller, path, line);
                 return new Response();
             });
         }
@@ -287,6 +305,7 @@ namespace ContainerExpressions.Containers
         // Safely run the Task{T}, and convert the T, into a Response{T}.
         public static Task<Response<T>> AsResponse<T>(
             this Task<T> task,
+            Format message = default,
             [CallerArgumentExpression(nameof(task))] string argument = "",
             [CallerMemberName] string caller = "",
             [CallerFilePath] string path = "",
@@ -296,7 +315,7 @@ namespace ContainerExpressions.Containers
             return task.ContinueWith(t =>
             {
                 if (t.Status == TaskStatus.RanToCompletion) return new Response<T>(t.Result);
-                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(Format.Default, argument, caller, path, line);
+                if (t.Status == TaskStatus.Faulted) t.Exception.LogError(message, argument, caller, path, line);
                 return new Response<T>();
             });
         }

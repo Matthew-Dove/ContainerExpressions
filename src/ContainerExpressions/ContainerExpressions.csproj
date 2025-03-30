@@ -13,7 +13,7 @@
     <PackageOutputPath>..//../nupkg</PackageOutputPath>
     <id>ContainerExpressions</id>
     <Authors>Matthew Dove</Authors>
-    <Version>12.1.0</Version>
+    <Version>13.0.0</Version>
     <Copyright>Matthew Dove. All rights reserved.</Copyright>
     <PackageLicenseExpression></PackageLicenseExpression>
     <RepositoryUrl>https://github.com/Matthew-Dove/ContainerExpressions</RepositoryUrl>
@@ -27,7 +27,12 @@ Expressions are designed to work on top of containers, helping in common use cas
 
 For example the Response container's "utility" is to let the caller know if some T value was generated without error.
 The expression Retry will attempt to get the T value after x time delay for n attempts, a good combo for intermittent networking errors.</Description>
-    <PackageReleaseNotes>Small QOL fixes on some of the container types.</PackageReleaseNotes>
+    <PackageReleaseNotes>Small QOL fixes on some of the container types.
+
+* Removed default types being added in `Instance`'s static ctor, leaving the allocations up to the user in program start up.
+* Renamed `Lambda.Identity&lt;T&gt;` to `Lambda.Throw&lt;T&gt;`, as the method throws exceptions, it does not return the type's identity as the original name implied.
+* Added `ThrowIfAsync&lt;T&gt;` overloads to `GuardExtensions`, so you can run predicates on `Task&lt;T&gt;` method arguments.
+* Added `AsResponse()` overload for `ResponseAsync&lt;T&gt;`, such that you can cast to a `Task&lt;Response&lt;T&gt;&gt;`, and use all existing extension methods for that type.</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageIcon>dove.png</PackageIcon>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
