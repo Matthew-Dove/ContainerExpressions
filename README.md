@@ -1197,3 +1197,7 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 ## 12.0.1
 
 * Added protections to the `SmartEnum<T>` container, when interacting on a default `EnumRange<T>` collection; making it safe to use even when not initialized.
+
+## 12.1.0
+
+* Removed default types being added in `Instance`'s static ctor, leaving the allocations up to the user in program start up.

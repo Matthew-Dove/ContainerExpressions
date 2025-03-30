@@ -15,6 +15,11 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public void Instance_CanGetBaseTask()
         {
+            Instance.Create(Task.CompletedTask);
+            Instance.Create(Array.Empty<Task>());
+            Instance.Create(Enumerable.Empty<Task>());
+            Instance.Create(new List<Task>(0));
+
             var a = Instance.Of<Task>();
             var b = Instance.Of<Task[]>();
             var c = Instance.Of<IEnumerable<Task>>();
