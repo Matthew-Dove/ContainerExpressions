@@ -13,11 +13,17 @@ namespace ContainerExpressions.Containers
         /// <summary>Maps the input to the output, after wrapping it in a task.</summary>
         public static Task<T> IdentityAsync<T>(T x) => Task.FromResult(x);
 
+        /// <summary>Pretends to return void (i.e. to compile), but will really throw the passed exception.</summary>
+        public static void Throw(Exception ex) => throw ex;
+
         /// <summary>Pretends to return a T (i.e. to compile), but will really throw the passed exception.</summary>
-        public static T Identity<T>(Exception ex) => throw ex;
+        public static T Throw<T>(Exception ex) => throw ex;
+
+        /// <summary>Pretends to return task (i.e. to compile), but will really throw the passed exception.</summary>
+        public static Task ThrowAsync(Exception ex) => throw ex;
 
         /// <summary>Pretends to return a Task{T} (i.e. to compile), but will really throw the passed exception.</summary>
-        public static Task<T> IdentityAsync<T>(Exception ex) => throw ex;
+        public static Task<T> ThrowAsync<T>(Exception ex) => throw ex;
 
         /// <summary>Discards the function input, and returns the specified result.</summary>
         public static Func<T, T> Default<T>(T result = default) => _ => result;

@@ -1198,6 +1198,8 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 
 * Added protections to the `SmartEnum<T>` container, when interacting on a default `EnumRange<T>` collection; making it safe to use even when not initialized.
 
-## 12.1.0
+## 13.0.0
 
 * Removed default types being added in `Instance`'s static ctor, leaving the allocations up to the user in program start up.
+* Renamed `Lambda.Identity<T>` to `Lambda.Throw<T>`, as the method throws exceptions, it does not return the type's identity as the original name implied.
+* Added `ThrowIfAsync<T>` overloads to `GuardExtensions`, so you can run predicates on `Task<T>` method arguments.

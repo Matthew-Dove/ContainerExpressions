@@ -52,6 +52,16 @@ namespace ContainerExpressions.Containers
 
         #region ThrowError
 
+        public static void ThrowError(
+            this Exception ex,
+            Format message = default,
+            [CallerArgumentExpression(nameof(ex))] string argument = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        { Throw.Exception(ex.AddCallerAttributes(argument, caller, path, line, message)); }
+
         public static T ThrowError<T>(
             this T ex,
             Format message = default,
@@ -706,8 +716,78 @@ namespace ContainerExpressions.Containers
             )
         {
             if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
-            if (predicate(target)) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"{predicate} failed conditional check for value: {target}.", argument2, caller, path, line, message));
+            if (predicate(target)) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"Predicate failed conditional check for value: {target}.", argument2, caller, path, line, message));
             return target;
+        }
+
+        public static Task<T> ThrowIfAsync<T>(
+            this Task<T> target,
+            Func<T, bool> predicate,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(predicate))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        {
+            if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
+            if (target.IsCompleted) {
+                if (predicate(target.ThrowIfFaultedOrCanceled().Result)) { Throw.ArgumentOutOfRangeException(argument2, GetMessage($"Predicate failed conditional check for value: {target.Result}.", argument2, caller, path, line, message)); }
+                return target;
+            }
+            return target.ContinueWith(t => {
+                if (predicate(t.ThrowIfFaultedOrCanceled().Result)) { Throw.ArgumentOutOfRangeException(argument2, GetMessage($"Predicate failed conditional check for value: {t.Result}.", argument2, caller, path, line, message)); }
+                return t.Result;
+            });
+        }
+
+        public static Task<T> ThrowIfAsync<T>(
+            this Task<T> target,
+            Func<T, Task<bool>> predicate,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(predicate))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        {
+            if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
+            if (target.IsCompleted)
+            {
+                var result = predicate(target.ThrowIfFaultedOrCanceled().Result);
+                if (result.ThrowIfFaultedOrCanceled().Result) { Throw.ArgumentOutOfRangeException(argument2, GetMessage($"Predicate failed conditional check for value: {target.Result}.", argument2, caller, path, line, message)); }
+                return target;
+            }
+            return target.ContinueWith(t => {
+                var r = predicate(t.ThrowIfFaultedOrCanceled().Result);
+                if (r.ThrowIfFaultedOrCanceled().Result) { Throw.ArgumentOutOfRangeException(argument2, GetMessage($"Predicate failed conditional check for value: {t.Result}.", argument2, caller, path, line, message)); }
+                return t.Result;
+            });
+        }
+
+        public static Task<T> ThrowIfAsync<T>(
+            this T target,
+            Func<T, Task<bool>> predicate,
+            Format message = default,
+            [CallerArgumentExpression(nameof(target))] string argument1 = "",
+            [CallerArgumentExpression(nameof(predicate))] string argument2 = "",
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0
+            )
+        {
+            if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
+            var result = predicate(target);
+            if (result.IsCompleted) {
+                if (result.ThrowIfFaultedOrCanceled().Result) { Throw.ArgumentOutOfRangeException(argument2, GetMessage($"Predicate failed conditional check for value: {target}.", argument2, caller, path, line, message)); }
+                return Task.FromResult(target);
+            }
+            return result.ContinueWith(t => {
+                if (t.ThrowIfFaultedOrCanceled().Result) { Throw.ArgumentOutOfRangeException(argument2, GetMessage($"Predicate failed conditional check for value: {target}.", argument2, caller, path, line, message)); }
+                return target;
+            });
         }
 
         public static T[] ThrowIfSequence<T>(
@@ -724,7 +804,7 @@ namespace ContainerExpressions.Containers
             if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
             foreach (var t in target)
             {
-                if (predicate(t)) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"{predicate} failed conditional check for value: {t}.", argument2, caller, path, line, message));
+                if (predicate(t)) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"Predicate failed conditional check for value: {t}.", argument2, caller, path, line, message));
             }
             return target;
         }
@@ -743,7 +823,7 @@ namespace ContainerExpressions.Containers
             if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
             foreach (var t in target)
             {
-                if (predicate(t)) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"{predicate} failed conditional check for value: {t}.", argument2, caller, path, line, message));
+                if (predicate(t)) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"Predicate failed conditional check for value: {t}.", argument2, caller, path, line, message));
             }
             return target;
         }
@@ -762,7 +842,7 @@ namespace ContainerExpressions.Containers
             if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
             foreach (var t in target)
             {
-                if (predicate(t)) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"{predicate} failed conditional check for value: {t}.", argument2, caller, path, line, message));
+                if (predicate(t)) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"Predicate failed conditional check for value: {t}.", argument2, caller, path, line, message));
             }
             return target;
         }
@@ -781,7 +861,7 @@ namespace ContainerExpressions.Containers
             if (target is null) Throw.ArgumentNullException(argument1, GetMessage($"{argument1} cannot be null.", argument1, caller, path, line, message));
             foreach (var t in target)
             {
-                if (predicate(t)) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"{predicate} failed conditional check for value: {t}.", argument2, caller, path, line, message));
+                if (predicate(t)) Throw.ArgumentOutOfRangeException(argument2, GetMessage($"Predicate failed conditional check for value: {t}.", argument2, caller, path, line, message));
             }
             return target;
         }
@@ -839,7 +919,7 @@ namespace ContainerExpressions.Containers
             [CallerLineNumber] int line = 0
             )
         {
-            if (target is null) return target;
+            if (target is null) Throw.ArgumentNullException(argument, GetMessage($"{argument} cannot be null.", argument, caller, path, line, message));
             if (!target.IsCompleted) return target.ContinueWith(t => CheckStatus(t, argument, caller, path, line, message));
             CheckStatus(target, argument, caller, path, line, message);
             return target;
@@ -854,7 +934,7 @@ namespace ContainerExpressions.Containers
             [CallerLineNumber] int line = 0
             )
         {
-            if (target is null) return target;
+            if (target is null) Throw.ArgumentNullException(argument, GetMessage($"{argument} cannot be null.", argument, caller, path, line, message));
             if (!target.IsCompleted) return target.ContinueWith(t => { CheckStatus(t, argument, caller, path, line, message); return t.Result; });
             CheckStatus(target, argument, caller, path, line, message);
             return target;

@@ -207,6 +207,27 @@ namespace Tests.ContainerExpressions.Containers.Extensions
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public async Task ThrowIfAsync1()
+        {
+            _ = await Task.FromResult(_b).ThrowIfAsync(x => x.Age <= 0);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public async Task ThrowIfAsync2()
+        {
+            _ = await Task.FromResult(_b).ThrowIfAsync(x => Task.FromResult(x.Age <= 0));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public async Task ThrowIfAsync3()
+        {
+            _ = await _b.ThrowIfAsync(x => Task.FromResult(x.Age <= 0));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ThrowIf_Sequence()
         {
             _aaa.ThrowIfSequence(x => x.Name is null);
