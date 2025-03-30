@@ -228,7 +228,7 @@ namespace ContainerExpressions.Containers
             )
         {
             var result = await response;
-            if (!result) string.Empty.LogErrorValue(message, argument, caller, path, line);
+            if (!result && !message.Equals(default(Format))) string.Empty.LogErrorValue(message, argument, caller, path, line);
             return result;
         }
 
