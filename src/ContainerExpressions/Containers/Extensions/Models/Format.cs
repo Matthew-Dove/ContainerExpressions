@@ -47,6 +47,9 @@ namespace ContainerExpressions.Containers
         }
 
         public static implicit operator Format(string message) => new Format(message, Array.Empty<string>());
+
+        public static bool operator !=(Format x, Format y) => !(x == y);
+        public static bool operator ==(Format x, Format y) => x.Equals(y);
     }
 
     public static class FormatExtensions
