@@ -22,7 +22,7 @@ namespace ContainerExpressions.Containers
 
         public bool Equals(T value) => EqualityComparer<T>.Default.Equals(Value, value);
 
-        public override bool Equals(object obj) => obj != null && obj is Alias<T> alias && Equals(alias);
+        public override bool Equals(object obj) => obj != null && ((obj is Alias<T> alias && Equals(alias)) || (obj is T t && Equals(t)));
 
         public static bool operator !=(Alias<T> x, Alias<T> y) => !(x == y);
         public static bool operator ==(Alias<T> x, Alias<T> y)
