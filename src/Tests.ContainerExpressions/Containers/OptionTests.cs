@@ -106,5 +106,31 @@ namespace Tests.ContainerExpressions.Containers
             Assert.IsFalse(Card.Visa == null);
             Assert.IsFalse(null == Card.Visa);
         }
+
+        public sealed class StatusCode : Option<int>
+        {
+            public static readonly StatusCode Ok = new(200);
+            public static readonly StatusCode NotFound = new(404);
+            public static readonly StatusCode InternalServerError = new(500);
+
+            private StatusCode(int value) : base(value) { }
+
+            public static IEnumerable<int> GetValues() => GetValues<StatusCode>();
+        }
+
+        [TestMethod]
+        public void GenericOption_StatusCode()
+        {
+            var areEqual = 200 == StatusCode.Ok;
+            var areNotEqual = 201 == StatusCode.Ok;
+            var areAlsoNotEqual = StatusCode.NotFound == StatusCode.Ok;
+
+            Assert.IsTrue(areEqual);
+            Assert.IsFalse(areNotEqual);
+            Assert.IsFalse(areAlsoNotEqual);
+
+            var codes = StatusCode.GetValues().ToArray();
+            CollectionAssert.AreEqual(new[] { 200, 404, 500 }, codes);
+        }
     }
 }
