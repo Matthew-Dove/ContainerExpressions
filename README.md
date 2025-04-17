@@ -1260,3 +1260,4 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 ## 14.0.0
 
 * Added `Option` container, a collection of strongly types values; to be used in simular senarios as `enums`.
+* Bumped supported dotnet framework from **netstandard2.0**, to **netstandard2.1**.
