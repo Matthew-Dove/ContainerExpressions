@@ -1,21 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-	<LangVersion>latestMajor</LangVersion>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>latestMajor</LangVersion>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
-
   <PropertyGroup>
     <PackageOutputPath>..//../nupkg</PackageOutputPath>
     <id>ContainerExpressions</id>
     <Authors>Matthew Dove</Authors>
     <Version>14.0.0</Version>
     <Copyright>Matthew Dove. All rights reserved.</Copyright>
-    <PackageLicenseExpression></PackageLicenseExpression>
+    <PackageLicenseExpression>
+    </PackageLicenseExpression>
     <RepositoryUrl>https://github.com/Matthew-Dove/ContainerExpressions</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/Matthew-Dove/ContainerExpressions</PackageProjectUrl>
@@ -45,36 +43,29 @@ The expression Retry will attempt to get the T value after x time delay for n at
     <Nullable>disable</Nullable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;1591;1573;1587</NoWarn>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <NoWarn>1701;1702;1591;1573;1587</NoWarn>
   </PropertyGroup>
-
   <ItemGroup>
     <Folder Include="Expressions\Core\" />
   </ItemGroup>
-
   <ItemGroup>
     <None Include="..\..\images\dove.png">
       <Pack>True</Pack>
-      <PackagePath></PackagePath>
+      <PackagePath>
+      </PackagePath>
     </None>
     <None Include="..\..\LICENSE.txt">
       <Pack>True</Pack>
-      <PackagePath></PackagePath>
+      <PackagePath>
+      </PackagePath>
     </None>
     <None Include="..\..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.2" />
-  </ItemGroup>
-
 </Project>
