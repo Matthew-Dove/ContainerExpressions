@@ -1100,6 +1100,58 @@ var toggleGreen = addGreen ^ Colour.Green; // Bitwise XOR removes the target if 
 
 ```
 
+## Option
+
+`Option` is a collection of strongly types values; used in simular senarios as `enums`; without any of the bitwise operators, or underlying integer trimmings.  
+`Option` has a lot in common with `SmartEnum`, the main difference is `Option` only cares about well known, non-dynamic values.  
+For example, a good use case for `Options` would be representing http methods.  
+
+```cs
+// Basic implementation.
+class HttpMethod : Option
+{
+    public static readonly HttpMethod Get = new("GET");
+    public static readonly HttpMethod Put = new("PUT");
+    public static readonly HttpMethod Post = new("POST");
+    public static readonly HttpMethod Delete = new("DELETE");
+
+    private HttpMethod(string value) : base(value) { }
+}
+
+// Advanced implementation.
+class HttpMethod : Option, IEquatable<HttpMethod>
+{
+    // Fields.
+    public static readonly HttpMethod Get = new("GET");
+    public static readonly HttpMethod Put = new("PUT");
+    public static readonly HttpMethod Post = new("POST");
+    public static readonly HttpMethod Delete = new("DELETE");
+
+    // Properties.
+    public static HttpMethod Patch { get; } = new("PATCH");
+
+    // Private constructor controls allowed instances.
+    private HttpMethod(string value) : base(value) { }
+
+    // Typed equals.
+    public bool Equals(HttpMethod other) => other is not null && ReferenceEquals(this, other);
+
+    // Shareable utility methods, implemented by the base Option class.
+    public static HttpMethod Parse(string value) => Option.Parse<HttpMethod>(value);
+    public static bool TryParse(string value, out HttpMethod method) => Option.TryParse<HttpMethod>(value, out method);
+    public static IEnumerable<string> GetValues() => Option.GetValues<HttpMethod>();
+}
+
+// Usage.
+var method = HttpMethod.Post;
+
+if (method == HttpMethod.Get) Console.WriteLine("Retrieving resource.");
+if (method == HttpMethod.Put) Console.WriteLine("Upserting resource.");
+if (method == HttpMethod.Patch) Console.WriteLine("Updating resource.");
+if (method == HttpMethod.Post) Console.WriteLine("Creating resource.");
+if (method == HttpMethod.Delete) Console.WriteLine("Removing resource.");
+```
+
 # Credits
 * [Icon](https://www.flaticon.com/free-icon/bird_2630452) made by [Vitaly Gorbachev](https://www.flaticon.com/authors/vitaly-gorbachev) from [Flaticon]
 
@@ -1204,3 +1256,7 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 * Renamed `Lambda.Identity<T>` to `Lambda.Throw<T>`, as the method throws exceptions, it does not return the type's identity as the original name implied.
 * Added `ThrowIfAsync<T>` overloads to `GuardExtensions`, so you can run predicates on `Task<T>` method arguments.
 * Added `AsResponse()` overload for `ResponseAsync<T>`, such that you can cast to a `Task<Response<T>>`, and use all existing extension methods for that type.
+
+## 14.0.0
+
+* Added `Option` container, a collection of strongly types values; to be used in simular senarios as `enums`.
