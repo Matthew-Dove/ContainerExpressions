@@ -47,7 +47,7 @@ namespace ContainerExpressions.Containers
             var response = func(arg);
             var retries = options.Retries;
 
-            while (!response && retries-- > 0)
+            while (!response && retries --> 0)
             {
                 Thread.Sleep(options.GetMillisecondsDelay(options.Retries - retries));
                 response = func(arg);
@@ -72,7 +72,7 @@ namespace ContainerExpressions.Containers
             var response = await func();
             var retries = options.Retries;
 
-            while (!response && retries-- > 0)
+            while (!response && retries --> 0)
             {
                 await Task.Delay(options.GetMillisecondsDelay(options.Retries - retries));
                 response = await func();
@@ -97,7 +97,7 @@ namespace ContainerExpressions.Containers
             var response = await func(arg);
             var retries = options.Retries;
 
-            while (!response && retries-- > 0)
+            while (!response && retries --> 0)
             {
                 await Task.Delay(options.GetMillisecondsDelay(options.Retries - retries));
                 response = await func(arg);
@@ -222,7 +222,7 @@ namespace ContainerExpressions.Containers
             var response = await func(arg1, arg2);
             var retries = options.Retries;
 
-            while (!response && retries-- > 0)
+            while (!response && retries --> 0)
             {
                 await Task.Delay(options.GetMillisecondsDelay(options.Retries - retries));
                 response = await func(arg1, arg2);
@@ -245,7 +245,7 @@ namespace ContainerExpressions.Containers
             var response = await func(arg1, arg2, arg3);
             var retries = options.Retries;
 
-            while (!response && retries-- > 0)
+            while (!response && retries --> 0)
             {
                 await Task.Delay(options.GetMillisecondsDelay(options.Retries - retries));
                 response = await func(arg1, arg2, arg3);
@@ -268,7 +268,7 @@ namespace ContainerExpressions.Containers
             var response = await func(arg1, arg2, arg3, arg4);
             var retries = options.Retries;
 
-            while (!response && retries-- > 0)
+            while (!response && retries --> 0)
             {
                 await Task.Delay(options.GetMillisecondsDelay(options.Retries - retries));
                 response = await func(arg1, arg2, arg3, arg4);
@@ -291,7 +291,7 @@ namespace ContainerExpressions.Containers
             var response = await func(arg1, arg2, arg3, arg4, arg5);
             var retries = options.Retries;
 
-            while (!response && retries-- > 0)
+            while (!response && retries --> 0)
             {
                 await Task.Delay(options.GetMillisecondsDelay(options.Retries - retries));
                 response = await func(arg1, arg2, arg3, arg4, arg5);
@@ -314,7 +314,7 @@ namespace ContainerExpressions.Containers
             var response = await func(arg1, arg2, arg3, arg4, arg5, arg6);
             var retries = options.Retries;
 
-            while (!response && retries-- > 0)
+            while (!response && retries --> 0)
             {
                 await Task.Delay(options.GetMillisecondsDelay(options.Retries - retries));
                 response = await func(arg1, arg2, arg3, arg4, arg5, arg6);
@@ -337,7 +337,7 @@ namespace ContainerExpressions.Containers
             var response = await func(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
             var retries = options.Retries;
 
-            while (!response && retries-- > 0)
+            while (!response && retries --> 0)
             {
                 await Task.Delay(options.GetMillisecondsDelay(options.Retries - retries));
                 response = await func(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
@@ -360,7 +360,7 @@ namespace ContainerExpressions.Containers
             var response = await func(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
             var retries = options.Retries;
 
-            while (!response && retries-- > 0)
+            while (!response && retries --> 0)
             {
                 await Task.Delay(options.GetMillisecondsDelay(options.Retries - retries));
                 response = await func(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
@@ -435,7 +435,7 @@ namespace ContainerExpressions.Containers
             var response = await func(arg1, arg2);
             var retries = options.Retries;
 
-            while (!response && retries-- > 0)
+            while (!response && retries --> 0)
             {
                 await Task.Delay(options.GetMillisecondsDelay(options.Retries - retries));
                 response = await func(arg1, arg2);
@@ -458,7 +458,7 @@ namespace ContainerExpressions.Containers
             var response = await func(arg1, arg2, arg3);
             var retries = options.Retries;
 
-            while (!response && retries-- > 0)
+            while (!response && retries --> 0)
             {
                 await Task.Delay(options.GetMillisecondsDelay(options.Retries - retries));
                 response = await func(arg1, arg2, arg3);
@@ -481,7 +481,7 @@ namespace ContainerExpressions.Containers
             var response = await func(arg1, arg2, arg3, arg4);
             var retries = options.Retries;
 
-            while (!response && retries-- > 0)
+            while (!response && retries --> 0)
             {
                 await Task.Delay(options.GetMillisecondsDelay(options.Retries - retries));
                 response = await func(arg1, arg2, arg3, arg4);
@@ -504,7 +504,7 @@ namespace ContainerExpressions.Containers
             var response = await func(arg1, arg2, arg3, arg4, arg5);
             var retries = options.Retries;
 
-            while (!response && retries-- > 0)
+            while (!response && retries --> 0)
             {
                 await Task.Delay(options.GetMillisecondsDelay(options.Retries - retries));
                 response = await func(arg1, arg2, arg3, arg4, arg5);
@@ -527,7 +527,7 @@ namespace ContainerExpressions.Containers
             var response = await func(arg1, arg2, arg3, arg4, arg5, arg6);
             var retries = options.Retries;
 
-            while (!response && retries-- > 0)
+            while (!response && retries --> 0)
             {
                 await Task.Delay(options.GetMillisecondsDelay(options.Retries - retries));
                 response = await func(arg1, arg2, arg3, arg4, arg5, arg6);
@@ -550,7 +550,7 @@ namespace ContainerExpressions.Containers
             var response = await func(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
             var retries = options.Retries;
 
-            while (!response && retries-- > 0)
+            while (!response && retries --> 0)
             {
                 await Task.Delay(options.GetMillisecondsDelay(options.Retries - retries));
                 response = await func(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
@@ -573,7 +573,7 @@ namespace ContainerExpressions.Containers
             var response = await func(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
             var retries = options.Retries;
 
-            while (!response && retries-- > 0)
+            while (!response && retries --> 0)
             {
                 await Task.Delay(options.GetMillisecondsDelay(options.Retries - retries));
                 response = await func(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);

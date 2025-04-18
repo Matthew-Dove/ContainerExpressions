@@ -124,42 +124,42 @@ namespace ContainerExpressions.Containers
     /// A strongly typed collection of T that represents choices.
     /// <para>Simular to using values from an enum.</para>
     /// </summary>
-    public abstract class Option<T> : IEquatable<T>, IEquatable<Option<T>>
+    public abstract class Option<TValue> : IEquatable<TValue>, IEquatable<Option<TValue>>
     {
         /// <summary>The option's value.</summary>
-        public T Value { get; }
+        public TValue Value { get; }
 
         protected Option() { Value = default; }
 
         /// <summary>Set an option value, cannot be null.</summary>
-        protected Option(T value) { Value = value is null ? (T)((object)value).ThrowIfNull() : value; }
+        protected Option(TValue value) { Value = value is null ? (TValue)((object)value).ThrowIfNull() : value; }
 
-        public static implicit operator T(Option<T> option) => option.Value;
+        public static implicit operator TValue(Option<TValue> option) => option.Value;
 
         public override string ToString() => Value?.ToString() ?? string.Empty;
 
-        public override int GetHashCode() => Value is null ? 0 : EqualityComparer<T>.Default.GetHashCode(Value);
+        public override int GetHashCode() => Value is null ? 0 : EqualityComparer<TValue>.Default.GetHashCode(Value);
 
-        public bool Equals(Option<T> other) => other is not null && other.Equals(Value);
+        public bool Equals(Option<TValue> other) => other is not null && other.Equals(Value);
 
-        public bool Equals(T value) => EqualityComparer<T>.Default.Equals(Value, value);
+        public bool Equals(TValue value) => EqualityComparer<TValue>.Default.Equals(Value, value);
 
-        public override bool Equals(object obj) => obj is not null && ((obj is Option<T> option && Equals(option)) || (obj is T value && Equals(value)));
+        public override bool Equals(object obj) => obj is not null && ((obj is Option<TValue> option && Equals(option)) || (obj is TValue value && Equals(value)));
 
-        protected static TOption Parse<TOption>(T value) where TOption : Option<T>
+        protected static TOption Parse<TOption>(TValue value) where TOption : Option<TValue>
         {
             if (TryParse<TOption>(value, out var option)) return option;
             Throw.ArgumentOutOfRangeException(nameof(value), $"Invalid value for {typeof(TOption).Name} Option: {value}.");
             return null;
         }
 
-        protected static bool TryParse<TOption>(T value, out TOption option) where TOption : Option<T>
+        protected static bool TryParse<TOption>(TValue value, out TOption option) where TOption : Option<TValue>
         {
-            var options = GenericOptionHelper<TOption, T>.GetOptions();
+            var options = GenericOptionHelper<TOption, TValue>.GetOptions();
 
             foreach (var opt in options)
             {
-                if (EqualityComparer<T>.Default.Equals(opt.Value, value))
+                if (EqualityComparer<TValue>.Default.Equals(opt.Value, value))
                 {
                     option = opt;
                     return true;
@@ -170,24 +170,24 @@ namespace ContainerExpressions.Containers
             return false;
         }
 
-        protected static IEnumerable<T> GetValues<TOption>() where TOption : Option<T> => GenericOptionHelper<TOption, T>.GetOptions().Select(x => x.Value);
+        protected static IEnumerable<TValue> GetValues<TOption>() where TOption : Option<TValue> => GenericOptionHelper<TOption, TValue>.GetOptions().Select(x => x.Value);
 
-        public static bool operator !=(Option<T> x, Option<T> y) => !(x == y);
-        public static bool operator ==(Option<T> x, Option<T> y)
+        public static bool operator !=(Option<TValue> x, Option<TValue> y) => !(x == y);
+        public static bool operator ==(Option<TValue> x, Option<TValue> y)
         {
             if (x is null) return y is null;
             if (y is null) return x is null;
             return x.Equals(y);
         }
 
-        public static bool operator !=(Option<T> x, T y) => !(x == y);
-        public static bool operator ==(Option<T> x, T y) => x is not null && x.Equals(y);
+        public static bool operator !=(Option<TValue> x, TValue y) => !(x == y);
+        public static bool operator ==(Option<TValue> x, TValue y) => x is not null && x.Equals(y);
 
-        public static bool operator !=(T x, Option<T> y) => !(x == y);
-        public static bool operator ==(T x, Option<T> y) => y is not null && y.Equals(x);
+        public static bool operator !=(TValue x, Option<TValue> y) => !(x == y);
+        public static bool operator ==(TValue x, Option<TValue> y) => y is not null && y.Equals(x);
     }
 
-    file static class GenericOptionHelper<TOption, T> where TOption : Option<T>
+    file static class GenericOptionHelper<TOption, TValue> where TOption : Option<TValue>
     {
         private static TOption[] _options;
 
@@ -214,7 +214,7 @@ namespace ContainerExpressions.Containers
                 .Select(p => (TOption)p.GetValue(null))
                 .Where(p => p != null);
 
-            var ctor = optionType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, [typeof(T)], null);
+            var ctor = optionType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, [typeof(TValue)], null);
 
             if (ctor != null)
             {

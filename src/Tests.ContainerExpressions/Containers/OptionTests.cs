@@ -112,7 +112,6 @@ namespace Tests.ContainerExpressions.Containers
             public static readonly StatusCode Ok = new(200);
             public static readonly StatusCode NotFound = new(404);
             public static readonly StatusCode InternalServerError = new(500);
-
             private StatusCode(int value) : base(value) { }
 
             public static IEnumerable<int> GetValues() => GetValues<StatusCode>();
