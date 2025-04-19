@@ -1,5 +1,6 @@
 ﻿using ContainerExpressions.Containers.Internal;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -156,7 +157,29 @@ namespace ContainerExpressions.Containers
         protected static bool TryParse<TOption>(TValue value, out TOption option) where TOption : Option<TValue>
         {
             var options = GenericOptionHelper<TOption, TValue>.GetOptions();
+            if (value is null)
+            {
+                option = null;
+                return false;
+            }
 
+            // Arrays, tuples, and other structural types.
+            if (TypeHelper<TValue>.IsStructural)
+            {
+                if (value is IStructuralEquatable se)
+                {
+                    foreach (var opt in options)
+                    {
+                        if (se.Equals(opt.Value, StructuralComparisons.StructuralEqualityComparer))
+                        {
+                            option = opt;
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            // Standard equality check.
             foreach (var opt in options)
             {
                 if (EqualityComparer<TValue>.Default.Equals(opt.Value, value))
@@ -166,7 +189,41 @@ namespace ContainerExpressions.Containers
                 }
             }
 
-            option = null!;
+            // Structural equality check, for types that don't explicitly callout they are structural.
+            foreach (var opt in options)
+            {
+                if (StructuralComparisons.StructuralEqualityComparer.Equals(opt.Value, value))
+                {
+                    option = opt;
+                    return true;
+                }
+            }
+
+            // Enumerable sequence equality check, for most collection types.
+            if (TypeHelper<TValue>.IsEnumerable)
+            {
+                foreach (var opt in options)
+                {
+                    if (TypeHelper<TValue>.SequenceComparer != null)
+                    {
+                        if (TypeHelper<TValue>.SequenceComparer(opt.Value, value)) // Strongly typed sequence equality check.
+                        {
+                            option = opt;
+                            return true;
+                        }
+                    }
+                    else if (opt.Value is IEnumerable enumerable1 && value is IEnumerable enumerable2)
+                    {
+                        if (Enumerable.SequenceEqual(enumerable1.Cast<object>(), enumerable2.Cast<object>())) // Weakly typed sequence equality check.
+                        {
+                            option = opt;
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            option = null;
             return false;
         }
 
@@ -225,6 +282,54 @@ namespace ContainerExpressions.Containers
             }
 
             return instances.ToArray();
+        }
+    }
+
+    file static class TypeHelper<TValue>
+    {
+        public static readonly bool IsStructural = typeof(IStructuralEquatable).IsAssignableFrom(typeof(TValue));
+        public static readonly bool IsEnumerable = false;
+        public static readonly Func<TValue, TValue, bool> SequenceComparer = null;
+
+        static TypeHelper()
+        {
+            try
+            {
+                var type = typeof(TValue);
+                Type elementType = null;
+
+                // Is the type IEnumerable{T}, or does it implement IEnumerable{T}?
+                if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>)) elementType = type.GetGenericArguments()[0];
+                else
+                {
+                    var ienumerable = type.GetInterfaces().FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+                    if (ienumerable != null) elementType = ienumerable.GetGenericArguments()[0];
+                }
+
+                if (elementType != null)
+                {
+                    IsEnumerable = true;
+                    var genericMethod = typeof(TypeHelper<TValue>).GetMethod(nameof(GenericSequenceEqual), BindingFlags.Static | BindingFlags.NonPublic);
+                    var instanceMethod = genericMethod.MakeGenericMethod(elementType);
+                    SequenceComparer = (Func<TValue, TValue, bool>)Delegate.CreateDelegate(typeof(Func<TValue, TValue, bool>), instanceMethod);
+                }
+            }
+            catch { /* We don't want a runtime reflection exception to take down the whole class. */ }
+        }
+
+        private static bool GenericSequenceEqual<TElement>(TValue sequence1, TValue sequence2)
+        {
+            if (sequence1 is IEnumerable<TElement> enumerable1 && sequence2 is IEnumerable<TElement> enumerable2)
+            {
+                return Enumerable.SequenceEqual(enumerable1, enumerable2);
+            }
+
+            if (sequence1 is IEnumerable objEnumerable1 && sequence2 is IEnumerable objEnumerable2)
+            {
+                return Enumerable.SequenceEqual(objEnumerable1.Cast<object>(), objEnumerable2.Cast<object>());
+            }
+
+            return false;
         }
     }
 

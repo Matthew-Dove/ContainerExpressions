@@ -1265,3 +1265,7 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 ## 15.0.0
 
 * Bumped supported dotnet framework from **netstandard2.1** to **dotnet8**.
+
+## 15.0.1
+
+* Improved the generic `Option<TValue>`'s parsing method, to handle more types.

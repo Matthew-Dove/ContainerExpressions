@@ -9,6 +9,8 @@ namespace Tests.ContainerExpressions.Containers
     [TestClass]
     public class OptionTests
     {
+        #region Option
+
         public sealed class Card : Option, IEquatable<Card>
         {
             public static readonly Card Visa = new("VI");
@@ -107,6 +109,10 @@ namespace Tests.ContainerExpressions.Containers
             Assert.IsFalse(null == Card.Visa);
         }
 
+        #endregion
+
+        #region Generic Option
+
         public sealed class StatusCode : Option<int>
         {
             public static readonly StatusCode Ok = new(200);
@@ -115,6 +121,88 @@ namespace Tests.ContainerExpressions.Containers
             private StatusCode(int value) : base(value) { }
 
             public static IEnumerable<int> GetValues() => GetValues<StatusCode>();
+            public static StatusCode Parse(int value) => Parse<StatusCode>(value);
+        }
+
+        public sealed class OptionArray : Option<int[]>
+        {
+            public static readonly OptionArray Field = new([24, 42]);
+            private OptionArray(int[] value) : base(value) { }
+            public static OptionArray Parse(int[] value) => Parse<OptionArray>(value);
+        }
+
+        public sealed class OptionArrayEmpty : Option<int[]>
+        {
+            public static readonly OptionArrayEmpty Field = new([]);
+            private OptionArrayEmpty(int[] value) : base(value) { }
+            public static OptionArrayEmpty Parse(int[] value) => Parse<OptionArrayEmpty>(value);
+        }
+
+        public sealed class OptionString : Option<string>
+        {
+            public static readonly OptionString Field = new("hi");
+            private OptionString(string value) : base(value) { }
+            public static OptionString Parse(string value) => Parse<OptionString>(value);
+        }
+
+        public sealed class OptionEnumerable : Option<IEnumerable<int>>
+        {
+            public static readonly OptionEnumerable Field = new(Enumerable.Range(1, 2));
+            private OptionEnumerable(IEnumerable<int> value) : base(value) { }
+            public static OptionEnumerable Parse(IEnumerable<int> value) => Parse<OptionEnumerable>(value);
+        }
+
+        public sealed class OptionTuple : Option<Tuple<int, int>>
+        {
+            public static readonly OptionTuple Field = new(Tuple.Create(24, 42));
+            private OptionTuple(Tuple<int, int> value) : base(value) { }
+            public static OptionTuple Parse(Tuple<int, int> value) => Parse<OptionTuple>(value);
+        }
+
+        public sealed class OptionValueTuple : Option<(int, int)>
+        {
+            public static readonly OptionValueTuple Field = new((24, 42));
+            private OptionValueTuple((int, int) value) : base(value) { }
+            public static OptionValueTuple Parse((int, int) value) => Parse<OptionValueTuple>(value);
+        }
+
+        public sealed class OptionList : Option<List<int>>
+        {
+            public static readonly OptionList Field = new([24, 42]);
+            private OptionList(List<int> value) : base(value) { }
+            public static OptionList Parse(List<int> value) => Parse<OptionList>(value);
+        }
+
+        public sealed class OptionDictionary : Option<Dictionary<int, int>>
+        {
+            public static readonly OptionDictionary Field = new(new Dictionary<int, int> { { 24, 42 }, { 42, 24 } });
+            private OptionDictionary(Dictionary<int, int> value) : base(value) { }
+            public static OptionDictionary Parse(Dictionary<int, int> value) => Parse<OptionDictionary>(value);
+        }
+
+        public class MyClass : IEquatable<MyClass>
+        {
+            public int Property { get; set; }
+            public bool Equals(MyClass other) => other is not null && Property.Equals(other.Property);
+        }
+
+        public sealed class OptionClass : Option<MyClass>
+        {
+            public static readonly OptionClass Field = new(new MyClass { Property = 42 });
+            private OptionClass(MyClass value) : base(value) { }
+            public static OptionClass Parse(MyClass value) => Parse<OptionClass>(value);
+        }
+
+        public readonly struct MyStruct
+        {
+            public int Property { get; init; }
+        }
+
+        public sealed class OptionStruct : Option<MyStruct>
+        {
+            public static readonly OptionStruct Field = new(new MyStruct { Property = 42 });
+            private OptionStruct(MyStruct value) : base(value) { }
+            public static OptionStruct Parse(MyStruct value) => Parse<OptionStruct>(value);
         }
 
         [TestMethod]
@@ -131,5 +219,95 @@ namespace Tests.ContainerExpressions.Containers
             var codes = StatusCode.GetValues().ToArray();
             CollectionAssert.AreEqual(new[] { 200, 404, 500 }, codes);
         }
+
+        [TestMethod]
+        public void GenericOption_Parse_Array()
+        {
+            var target = new[] { 24, 42 };
+            var option = OptionArray.Parse(target);
+            Assert.IsTrue(target.SequenceEqual(option.Value));
+        }
+
+        [TestMethod]
+        public void GenericOption_Parse_Array_Empty()
+        {
+            var target = new int[] { };
+            var option = OptionArrayEmpty.Parse(target);
+            Assert.IsTrue(target.SequenceEqual(option.Value));
+        }
+
+        [TestMethod]
+        public void GenericOption_Parse_Int()
+        {
+            var target = 200;
+            var option = StatusCode.Parse(target);
+            Assert.AreEqual(target, option);
+        }
+
+        [TestMethod]
+        public void GenericOption_Parse_String()
+        {
+            var target = "hi";
+            var option = OptionString.Parse(target);
+            Assert.AreEqual(target, option);
+        }
+
+        [TestMethod]
+        public void GenericOption_Parse_Enumerable()
+        {
+            IEnumerable<int> target = Enumerable.Range(1, 2);
+            var option = OptionEnumerable.Parse(target);
+            Assert.IsTrue(target.SequenceEqual(option.Value));
+        }
+
+        [TestMethod]
+        public void GenericOption_Parse_Tuple()
+        {
+            var target = Tuple.Create(24, 42);
+            var option = OptionTuple.Parse(target);
+            Assert.AreEqual(target, option);
+        }
+
+        [TestMethod]
+        public void GenericOption_Parse_ValueTuple()
+        {
+            var target = (24, 42);
+            var option = OptionValueTuple.Parse(target);
+            Assert.AreEqual(target, option);
+        }
+
+        [TestMethod]
+        public void GenericOption_Parse_List()
+        {
+            var target = new List<int> { 24, 42 };
+            var option = OptionList.Parse(target);
+            Assert.IsTrue(target.SequenceEqual(option.Value));
+        }
+
+        [TestMethod]
+        public void GenericOption_Parse_Dictionary()
+        {
+            var target = new Dictionary<int, int> { { 24, 42 }, { 42, 24 } };
+            var option = OptionDictionary.Parse(target);
+            Assert.IsTrue(target.SequenceEqual(option.Value));
+        }
+
+        [TestMethod]
+        public void GenericOption_Parse_Class()
+        {
+            var target = new MyClass { Property = 42 };
+            var option = OptionClass.Parse(target);
+            Assert.AreEqual(target.Property, option.Value.Property);
+        }
+
+        [TestMethod]
+        public void GenericOption_Parse_Struct()
+        {
+            var target = new MyStruct { Property = 42 };
+            var option = OptionStruct.Parse(target);
+            Assert.AreEqual(target.Property, option.Value.Property);
+        }
+
+        #endregion
     }
 }
