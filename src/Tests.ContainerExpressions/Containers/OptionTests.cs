@@ -186,11 +186,23 @@ namespace Tests.ContainerExpressions.Containers
             public bool Equals(MyClass other) => other is not null && Property.Equals(other.Property);
         }
 
+        public class MyClassValueEquals
+        {
+            public int Property { get; set; }
+        }
+
         public sealed class OptionClass : Option<MyClass>
         {
             public static readonly OptionClass Field = new(new MyClass { Property = 42 });
             private OptionClass(MyClass value) : base(value) { }
             public static OptionClass Parse(MyClass value) => Parse<OptionClass>(value);
+        }
+
+        public sealed class OptionClassValueEquals : Option<MyClassValueEquals>
+        {
+            public static readonly OptionClassValueEquals Field = new(new MyClassValueEquals { Property = 42 });
+            private OptionClassValueEquals(MyClassValueEquals value) : base(value) { }
+            public static OptionClassValueEquals Parse(MyClassValueEquals value) => Parse<OptionClassValueEquals>(value, static (x, y) => x.Property == y.Property);
         }
 
         public readonly struct MyStruct
@@ -297,6 +309,14 @@ namespace Tests.ContainerExpressions.Containers
         {
             var target = new MyClass { Property = 42 };
             var option = OptionClass.Parse(target);
+            Assert.AreEqual(target.Property, option.Value.Property);
+        }
+
+        [TestMethod]
+        public void GenericOption_Parse_ClassValueEquals()
+        {
+            var target = new MyClassValueEquals { Property = 42 };
+            var option = OptionClassValueEquals.Parse(target);
             Assert.AreEqual(target.Property, option.Value.Property);
         }
 
