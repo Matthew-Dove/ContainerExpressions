@@ -35,16 +35,32 @@ namespace ContainerExpressions.Containers
 
         public override bool Equals(object obj) => obj != null && ((obj is Option option && Equals(option)) || (obj is string @string && Equals(@string)));
 
-        protected static TOption Parse<TOption>(string value) where TOption : Option
+        protected static TOption Parse<TOption>(string value, Func<string, string, bool> valueEquals = null) where TOption : Option
         {
-            if (TryParse<TOption>(value, out var option)) return option;
+            if (TryParse<TOption>(value, out var option, valueEquals)) return option;
             Throw.ArgumentOutOfRangeException(nameof(value), $"Invalid value for {typeof(TOption).Name} Option: {value}.");
             return null;
         }
 
-        protected static bool TryParse<TOption>(string value, out TOption option) where TOption : Option
+        protected static bool TryParse<TOption>(string value, out TOption option, Func<string, string, bool> valueEquals = null) where TOption : Option
         {
             var options = StringOptionHelper<TOption>.GetOptions();
+
+            if (valueEquals != null)
+            {
+                foreach (var opt in options)
+                {
+                    if (valueEquals(opt.Value, value))
+                    {
+                        option = opt;
+                        return true;
+                    }
+                }
+
+                // If the custom valueEquals check fails, we don't want to continue with the default equality checks.
+                option = null;
+                return false;
+            }
 
             foreach (var opt in options)
             {
