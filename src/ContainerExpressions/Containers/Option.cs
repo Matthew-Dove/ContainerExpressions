@@ -45,6 +45,11 @@ namespace ContainerExpressions.Containers
         protected static bool TryParse<TOption>(string value, out TOption option, Func<string, string, bool> valueEquals = null) where TOption : Option
         {
             var options = StringOptionHelper<TOption>.GetOptions();
+            if (value is null)
+            {
+                option = null;
+                return false;
+            }
 
             if (valueEquals != null)
             {
