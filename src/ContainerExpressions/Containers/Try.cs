@@ -20,7 +20,7 @@ namespace ContainerExpressions.Containers
         {
             TaskScheduler.UnobservedTaskException += (_, e) =>
             {
-                if (Run(() => e.Exception.LogError("UnobservedTaskException: {exception}, inner exception {innerException}".WithArgs(e.Exception.Message, e.Exception.InnerException?.Message))))
+                if (Run(() => e.Exception.LogError("UnobservedTaskException: {exception} Inner exception: {innerException}".WithArgs(e.Exception.Message, e.Exception.InnerException?.Message))))
                 {
                     e.SetObserved();
                 }
@@ -28,7 +28,7 @@ namespace ContainerExpressions.Containers
 
             AppDomain.CurrentDomain.UnhandledException += (_, e) =>
             {
-                _ = Run(() => ((Exception)e.ExceptionObject).LogError("UnhandledException: {exception}, inner exception: {innerException}.".WithArgs(((Exception)e.ExceptionObject).Message, ((Exception)e.ExceptionObject).InnerException?.Message)));
+                _ = Run(() => ((Exception)e.ExceptionObject).LogError("UnhandledException: {exception} Inner exception: {innerException}".WithArgs(((Exception)e.ExceptionObject).Message, ((Exception)e.ExceptionObject).InnerException?.Message)));
             };
         }
 
