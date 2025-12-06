@@ -11,30 +11,27 @@ namespace Tests.ContainerExpressions.Containers
     public class FireAndForgetTests
     {
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void Push_TaskIsNull()
         {
             Task task = null;
 
-            FireAndForget.Push(task);
+            Assert.ThrowsExactly<ArgumentNullException>(() => FireAndForget.Push(task));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void Push_ManyTasksIsNull()
         {
             Task[] tasks = null;
 
-            FireAndForget.Push(tasks);
+            Assert.ThrowsExactly<ArgumentNullException>(() => { FireAndForget.Push(tasks); });
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void Push_ManyTasksOneIsNull()
         {
             Task[] tasks = new Task[] { Task.CompletedTask, null, Task.CompletedTask };
 
-            FireAndForget.Push(tasks);
+            Assert.ThrowsExactly<ArgumentNullException>(() => { FireAndForget.Push(tasks); });
         }
 
         [TestMethod]

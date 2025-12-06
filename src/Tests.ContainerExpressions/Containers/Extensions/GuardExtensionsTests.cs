@@ -23,105 +23,93 @@ namespace Tests.ContainerExpressions.Containers.Extensions
         private readonly B[] _bbb = [new B(default)];
 
         [TestMethod]
-        [ExpectedException(typeof(Exception))]
         public void ThrowError_Exception()
         {
             var ex = new Exception("error");
 
-            ex.ThrowError();
+            Assert.ThrowsExactly<Exception>(() => ex.ThrowError());
         }
 
         [TestMethod]
-        [ExpectedException(typeof(Exception))]
         public void ThrowError_ExceptionDispatchInfo()
         {
             var ex = new Exception("error");
             var di = ExceptionDispatchInfo.Capture(ex);
 
-            di.ThrowDispatchError();
+            Assert.ThrowsExactly<Exception>(() => di.ThrowDispatchError());
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ThrowIfNull()
         {
             object obj = null;
 
-            obj.ThrowIfNull();
+            Assert.ThrowsExactly<ArgumentNullException>(() => obj.ThrowIfNull());
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ThrowIfDefault()
         {
-            0.ThrowIfDefault();
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => 0.ThrowIfDefault());
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ThrowIfNullOrEmpty_String()
         {
             var @string = string.Empty;
 
-            @string.ThrowIfNullOrEmpty();
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => @string.ThrowIfNullOrEmpty());
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ThrowIfNullOrEmpty_Array()
         {
             var array = new int[] { };
 
-            array.ThrowIfNullOrEmpty();
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => array.ThrowIfNullOrEmpty());
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ThrowIfNullOrEmpty_IEnumerable()
         {
             var enumerable = Enumerable.Empty<int>();
 
-            enumerable.ThrowIfNullOrEmpty();
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => enumerable.ThrowIfNullOrEmpty());
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ThrowIfNullOrEmpty_List()
         {
             var list = new List<int>();
 
-            list.ThrowIfNullOrEmpty();
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => list.ThrowIfNullOrEmpty());
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ThrowIfLessThan()
         {
             int age = 1, adult = 18;
 
-            age.ThrowIfLessThan(adult);
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => age.ThrowIfLessThan(adult));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ThrowIfGreaterThan()
         {
             int age = 18, child = 17;
 
-            age.ThrowIfGreaterThan(child);
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => age.ThrowIfGreaterThan(child));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(Exception))]
         public void ThrowIfFaultedOrCanceled_Faulted()
         {
             var task = Task.FromException<int>(new Exception("error"));
 
-            task.ThrowIfFaultedOrCanceled();
+            Assert.ThrowsExactly<Exception>(() => task.ThrowIfFaultedOrCanceled());
         }
 
         [TestMethod]
-        [ExpectedException(typeof(AggregateException))]
         public void ThrowIfFaultedOrCanceled_ManyFaulted()
         {
             var task1 = Task.FromException<int>(new Exception("error1"));
@@ -129,108 +117,100 @@ namespace Tests.ContainerExpressions.Containers.Extensions
 
             var task = Task.WhenAll(task1, task2);
 
-            task.ThrowIfFaultedOrCanceled();
+            Assert.ThrowsExactly<AggregateException>(() => task.ThrowIfFaultedOrCanceled());
         }
 
         [TestMethod]
-        [ExpectedException(typeof(TaskCanceledException))]
         public void ThrowIfFaultedOrCanceled_Canceled()
         {
             var task = Task.FromCanceled(new CancellationToken(true));
 
-            task.ThrowIfFaultedOrCanceled();
+            Assert.ThrowsExactly<TaskCanceledException>(() => task.ThrowIfFaultedOrCanceled());
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ThrowIfNull_Guard()
         {
-            _a.ThrowIfNull(x => x.Name);
+            Assert.ThrowsExactly<ArgumentNullException>(() => _a.ThrowIfNull(x => x.Name));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ThrowIfNull_Sequence()
         {
-            _aa.ThrowIfSequenceIsNull();
+            Assert.ThrowsExactly<ArgumentNullException>(() => _aa.ThrowIfSequenceIsNull());
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ThrowIfNull_Sequence_Guard()
         {
-            _aaa.ThrowIfSequenceIsNull(x => x.Name);
+            Assert.ThrowsExactly<ArgumentNullException>(() => _aaa.ThrowIfSequenceIsNull(x => x.Name));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ThrowIfDefault_Guard()
         {
-            _b.ThrowIfDefault(x => x.Age);
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _b.ThrowIfDefault(x => x.Age));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ThrowIfDefault_Sequence()
         {
-            _bb.ThrowIfSequenceIsDefault();
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _bb.ThrowIfSequenceIsDefault());
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ThrowIfDefault_Sequence_Guard()
         {
-            _bbb.ThrowIfSequenceIsDefault(x => x.Age);
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _bbb.ThrowIfSequenceIsDefault(x => x.Age));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ThrowIfNullOrEmpty_Sequence()
         {
             var ss = new string[] { string.Empty };
-            ss.ThrowIfSequenceIsNullOrEmpty();
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => ss.ThrowIfSequenceIsNullOrEmpty());
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ThrowIfNullOrEmpty_Sequence_Guard()
         {
-            _aaa.ThrowIfSequenceIsNullOrEmpty(x => x.Name);
-        }
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _aaa.ThrowIfSequenceIsNullOrEmpty(x => x.Name));
+        }                                                                                       
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ThrowIf()
         {
-            _b.ThrowIf(x => x.Age <= 0);
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _b.ThrowIf(x => x.Age <= 0));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public async Task ThrowIfAsync1()
         {
-            _ = await Task.FromResult(_b).ThrowIfAsync(x => x.Age <= 0);
+            await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(() =>
+                Task.FromResult(_b).ThrowIfAsync(x => x.Age <= 0)
+            );
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public async Task ThrowIfAsync2()
         {
-            _ = await Task.FromResult(_b).ThrowIfAsync(x => Task.FromResult(x.Age <= 0));
+            await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(() =>
+                Task.FromResult(_b).ThrowIfAsync(x => Task.FromResult(x.Age <= 0))
+            );
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public async Task ThrowIfAsync3()
         {
-            _ = await _b.ThrowIfAsync(x => Task.FromResult(x.Age <= 0));
+            await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(() =>
+                _b.ThrowIfAsync(x => Task.FromResult(x.Age <= 0))
+            );
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ThrowIf_Sequence()
         {
-            _aaa.ThrowIfSequence(x => x.Name is null);
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _aaa.ThrowIfSequence(x => x.Name is null));
         }
     }
 }

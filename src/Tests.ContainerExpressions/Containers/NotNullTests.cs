@@ -127,12 +127,11 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void Equatable_NN_ImplicitCast_ThrowswhenNull()
         {
             void SaveUser(NN<string> id) { }
 
-            SaveUser(null);
+            Assert.ThrowsExactly<ArgumentNullException>(() => SaveUser(null));
         }
 
         [TestMethod]
@@ -177,32 +176,29 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void Rejects_NullReference_ExplicitCast()
         {
             string name = null;
 
-            var result = (NotNull<string>)name;
+            Assert.ThrowsExactly<ArgumentNullException>(() => { var result = (NotNull<string>)name; });
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void Rejects_NullReference_ImplicitCast()
         {
             string name = null;
             NotNull<string> result;
 
-            result = name;
+            Assert.ThrowsExactly<ArgumentNullException>(() => result = name);
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void Rejects_NullReference_FunctionParameter()
         {
             string name = null;
             string ToUpper(NotNull<string> x) => x.Value.ToUpper();
 
-            var result = ToUpper(name);
+            Assert.ThrowsExactly<ArgumentNullException>(() => { var result = ToUpper(name); });
         }
 
         [TestMethod]
@@ -352,7 +348,7 @@ namespace Tests.ContainerExpressions.Containers
             NotNull<string> x = name;
             NotNull<string> y = null;
 
-            var result = x  == y;
+            var result = x == y;
 
             Assert.IsFalse(result);
         }

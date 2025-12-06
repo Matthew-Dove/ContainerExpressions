@@ -9,12 +9,11 @@ namespace Tests.ContainerExpressions.Containers
     public class EitherTests
     {
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void DefaultConstructor_ThrowsError()
         {
             var either = new Either<Guid, int>();
 
-            var result = either.Match(x => x.ToString(), x => x.ToString());
+            Assert.ThrowsExactly<InvalidOperationException>(() => either.Match(x => x.ToString(), x => x.ToString()));
         }
 
         [TestMethod]

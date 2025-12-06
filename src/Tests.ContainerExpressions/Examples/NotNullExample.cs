@@ -16,12 +16,11 @@ namespace Tests.ContainerExpressions.Examples
 
         /// <summary>https://github.com/Matthew-Dove/ContainerExpressions#notnullt</summary>
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void NotNull_Null_Example()
         {
             string userId = null;
 
-            var username = GetUserName(userId);
+            Assert.ThrowsExactly<ArgumentNullException>(() => { var username = GetUserName(userId); });
         }
 
         [TestMethod]

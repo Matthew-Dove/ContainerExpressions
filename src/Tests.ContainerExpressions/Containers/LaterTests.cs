@@ -48,10 +48,9 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void Later_NullGeneratingFunction_ThrowsError()
         {
-            Later.Create<object>(null);
+            Assert.ThrowsExactly<ArgumentNullException>(() => Later.Create<object>(null));
         }
 
         #endregion
@@ -126,10 +125,9 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void LaterAsync_NullGeneratingFunction_ThrowsError()
         {
-            Later.CreateAsync<object>(null);
+            Assert.ThrowsExactly<ArgumentNullException>(() => Later.CreateAsync<object>(null));
         }
 
         #endregion

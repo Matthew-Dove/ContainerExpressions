@@ -86,12 +86,11 @@ namespace Tests.ContainerExpressions.Containters
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void Response_GetValueWithInValidState_Error()
         {
             var response = new Response<int>();
 
-            int value = response;
+            Assert.ThrowsExactly<InvalidOperationException>(() => { int value = response; });
         }
 
         [TestMethod]

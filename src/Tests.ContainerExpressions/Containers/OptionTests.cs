@@ -74,10 +74,9 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void Option_ParseError()
         {
-            var card = Card.Parse("invalid");
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => { var card = Card.Parse("invalid"); });
         }
 
         [TestMethod]

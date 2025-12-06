@@ -34,17 +34,15 @@ namespace Tests.ContainerExpressions.Containers
         class HS1 : Alias<HashSet<Task>> { public HS1() : base(default) { } }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void Instance_BaseTaskTValueMustBeSetFirst()
         {
-            var hashset = Instance.Of<HS1>();
+            Assert.ThrowsExactly<InvalidOperationException>(() => { var hashset = Instance.Of<HS1>(); });
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void Instance_CannotSetNull()
         {
-            Instance.Create<HashSet<Task>>(null);
+            Assert.ThrowsExactly<ArgumentNullException>(() => Instance.Create<HashSet<Task>>(null));
         }
 
         class HS2 : Alias<HashSet<Task>> { public HS2() : base(new HashSet<Task>()) { } }
@@ -61,11 +59,10 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void Instance_CannotSetTValueTwice()
         {
             Instance.Create(new HashSet<Task>());
-            Instance.Create(new HashSet<Task>());
+            Assert.ThrowsExactly<InvalidOperationException>(() => Instance.Create(new HashSet<Task>()));
         }
 
         #endregion
@@ -99,18 +96,16 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void InstanceAsync_Task_CustomReference_CannotSetDefault()
         {
-            InstanceAsync.Create(default(string));
+            Assert.ThrowsExactly<ArgumentNullException>(() => InstanceAsync.Create(default(string)));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void InstanceAsync_Task_CustomReference_CannotSetTwice()
         {
             InstanceAsync.Create(string.Empty);
-            InstanceAsync.Create(string.Empty);
+            Assert.ThrowsExactly<InvalidOperationException>(() => InstanceAsync.Create(string.Empty));
         }
 
         #endregion
@@ -142,18 +137,16 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void InstanceAsync_ValueTask_CustomReference_CannotSetDefault()
         {
-            InstanceAsync.CreateValue(default(string));
+            Assert.ThrowsExactly<ArgumentNullException>(() => InstanceAsync.CreateValue(default(string)));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void InstanceAsync_ValueTask_CustomReference_CannotSetTwice()
         {
             InstanceAsync.CreateValue(string.Empty);
-            InstanceAsync.CreateValue(string.Empty);
+            Assert.ThrowsExactly<InvalidOperationException>(() => InstanceAsync.CreateValue(string.Empty));
         }
 
         #endregion
@@ -185,18 +178,16 @@ namespace Tests.ContainerExpressions.Containers
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void InstanceAsync_ResponseAsync_CustomReference_CannotSetDefault()
         {
-            InstanceAsync.CreateResponse(default(string));
+            Assert.ThrowsExactly<ArgumentNullException>(() => InstanceAsync.CreateResponse(default(string)));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void InstanceAsync_ResponseAsync_CustomReference_CannotSetTwice()
         {
             InstanceAsync.CreateResponse(string.Empty);
-            InstanceAsync.CreateResponse(string.Empty);
+            Assert.ThrowsExactly<InvalidOperationException>(() => InstanceAsync.CreateResponse(string.Empty));
         }
 
         #endregion
