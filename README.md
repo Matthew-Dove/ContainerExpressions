@@ -1269,3 +1269,7 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 ## 15.0.1
 
 * Improved the generic `Option<TValue>`'s parsing method, to handle more types.
+
+## 16.0.0
+
+* Updated framework to dotnet 10.
