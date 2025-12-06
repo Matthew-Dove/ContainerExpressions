@@ -1699,7 +1699,7 @@ namespace Tests.ContainerExpressions.Containers
             bool result = maybe.TryGetError(out Exception ex);
 
             Assert.IsTrue(result);
-            Assert.ReferenceEquals(error, ex);
+            Assert.AreSame(error, ex);
         }
 
         [TestMethod]
@@ -1836,8 +1836,8 @@ namespace Tests.ContainerExpressions.Containers
             Assert.IsTrue(result);
             Assert.AreEqual(2, errors.Length);
 
-            Assert.ReferenceEquals(error1, errors[0]);
-            Assert.ReferenceEquals(error2, errors[1]);
+            Assert.AreSame(error1, errors[0]);
+            Assert.AreSame(error2, errors[1]);
         }
 
         [TestMethod]
@@ -1853,7 +1853,7 @@ namespace Tests.ContainerExpressions.Containers
             Assert.IsTrue(result);
             Assert.AreEqual(1, errors.Length);
 
-            Assert.ReferenceEquals(error, errors[0]);
+            Assert.AreSame(error, errors[0]);
         }
 
         [TestMethod]
@@ -1869,7 +1869,7 @@ namespace Tests.ContainerExpressions.Containers
             Assert.IsTrue(result);
             Assert.AreEqual(1, errors.Length);
 
-            Assert.ReferenceEquals(error, errors[0]);
+            Assert.AreSame(error, errors[0]);
         }
 
         [TestMethod]
@@ -1897,9 +1897,9 @@ namespace Tests.ContainerExpressions.Containers
 
             Assert.IsTrue(result);
             Assert.AreEqual(1, errors.Length);
-            Assert.ReferenceEquals(error1, errors[0]);
+            Assert.AreSame(error1, errors[0]);
             Assert.IsTrue(maybe.TryGetError(out Exception err));
-            Assert.ReferenceEquals(error2, err);
+            Assert.AreSame(error2, err);
         }
 
         [TestMethod]
@@ -1915,7 +1915,7 @@ namespace Tests.ContainerExpressions.Containers
             Assert.IsFalse(result); // False, as one error does not lead to an aggregate.
             Assert.AreEqual(0, errors.Length);
             Assert.IsTrue(maybe.TryGetError(out Exception err));
-            Assert.ReferenceEquals(err, error);
+            Assert.AreSame(err, error);
         }
 
         [TestMethod]

@@ -111,7 +111,7 @@ namespace Tests.ContainerExpressions.Containers
             Assert.IsTrue(3.Equals(completed));
             Assert.IsTrue(completed.Equals(3));
             Assert.IsTrue(3 == completed);
-            Assert.AreEqual(3, completed);
+            Assert.AreEqual<int>(3, completed);
             Assert.AreEqual<int>(3, completed);
             Assert.AreEqual<CompletedTasks>(3, completed);
         }
@@ -149,7 +149,7 @@ namespace Tests.ContainerExpressions.Containers
             // All the background jobs that were added while the first task ran, should all be cleaned up by the second WhenAll() call above.
             var zeroNewJobs = await FireAndForget.WhenAll(); // Expecting no more jobs to be found.
 
-            Assert.AreEqual(0, zeroNewJobs);
+            Assert.AreEqual<int>(0, zeroNewJobs);
         }
 
         [TestMethod]
