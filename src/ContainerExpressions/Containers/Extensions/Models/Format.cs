@@ -13,6 +13,13 @@ namespace ContainerExpressions.Containers
 
         public Format(string message, params object[] args) { Message = message; Args = args; }
 
+        public override bool Equals(object obj)
+        {
+            if (obj is Format format) return Equals(format);
+            if (obj is string str) return Equals(str);
+            return false;
+        }
+
         public bool Equals(string other)
         {
             if (other is null) return Message is null;
@@ -50,6 +57,23 @@ namespace ContainerExpressions.Containers
 
         public static bool operator !=(Format x, Format y) => !(x == y);
         public static bool operator ==(Format x, Format y) => x.Equals(y);
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hash = 17;
+                hash = hash * 23 + (Message?.GetHashCode() ?? 0);
+                if (Args != null)
+                {
+                    foreach (var arg in Args)
+                    {
+                        hash = hash * 23 + (arg?.GetHashCode() ?? 0);
+                    }
+                }
+                return hash;
+            }
+        }
     }
 
     public static class FormatExtensions
