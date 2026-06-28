@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -130,6 +131,12 @@ namespace ContainerExpressions.Containers
 
         /// <summary>Turn a function that returns a Response, into one that returns a Response Unit.</summary>
         public static Func<Response<Unit>> ToUnit(this Func<Response> func) => () => func().ToUnit();
+
+        /// <summary>Returns true when the Response is valid, and the value of T is not null, otherwise false is returned.</summary>
+        public static bool IsNotNull<T>(this Response<T> response) => response.IsValid && response.Value is not null;
+
+        /// <summary>Returns true when the Response is valid, and the value of T is not default, otherwise false is returned.</summary>
+        public static bool IsNotDefault<T>(this Response<T> response) => response.IsValid && !EqualityComparer<T>.Default.Equals(response.Value, default!);
 
         #endregion
 

@@ -10,7 +10,7 @@
     <PackageOutputPath>..//../nupkg</PackageOutputPath>
     <id>ContainerExpressions</id>
     <Authors>Matthew Dove</Authors>
-    <Version>16.0.0</Version>
+    <Version>16.0.1</Version>
     <Copyright>Matthew Dove. All rights reserved.</Copyright>
     <PackageLicenseExpression>
     </PackageLicenseExpression>
@@ -25,9 +25,10 @@ Expressions are designed to work on top of containers, helping in common use cas
 
 For example the Response container's "utility" is to let the caller know if some T value was generated without error.
 The expression Retry will attempt to get the T value after x time delay for n attempts, a good combo for intermittent networking errors.</Description>
-    <PackageReleaseNotes>## 16.0.0
+    <PackageReleaseNotes>## 16.0.1
 
-* Updated framework to dotnet 10.</PackageReleaseNotes>
+* Added new extension method on `Response&lt;T&gt;` - `bool IsNotNull&lt;T&gt;`, used to check the response is valid, and the value is not null.  
+* Added new extension method on `Response&lt;T&gt;` - `bool IsNotDefault&lt;T&gt;`, used to check the response is valid, and the value is not default.  </PackageReleaseNotes>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageIcon>dove.png</PackageIcon>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>

@@ -662,6 +662,50 @@ namespace Tests.ContainerExpressions.Containters
             Assert.IsTrue(isCalled);
         }
 
+        [TestMethod]
+        public void Response_IsValid_IsNotNull_ResultTrue()
+        {
+            object value = new();
+            var response = new Response<object>(value);
+
+            var result = response.IsNotNull();
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void Response_IsValid_IsNull_ResultFalse()
+        {
+            object value = null;
+            var response = new Response<object>(value);
+
+            var result = response.IsNotNull();
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void Response_IsValid_IsNotDefault_ResultTrue()
+        {
+            int value = 1;
+            var response = new Response<int>(value);
+
+            var result = response.IsNotDefault();
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void Response_IsValid_IsDefault_ResultFalse()
+        {
+            int value = default;
+            var response = new Response<int>(value);
+
+            var result = response.IsNotDefault();
+
+            Assert.IsFalse(result);
+        }
+
         #endregion
 
         #region Response IEquatable

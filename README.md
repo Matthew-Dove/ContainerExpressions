@@ -62,6 +62,8 @@ Useful utilities for the `Response<T>` type:
 * `Response<T> Unpack<T>` Converts `Response<Response<T>>` to `Response<T>`, which works much like `Task`'s `Unwrap` extension to flatten `Task<Task<T>>` to `Task<T>`.  
 * `Response<T> Validate<T>` Determines if `T` is in a valid state or not, and returns a valid response container if it is.   
 * `Response<TResult> BindIf<T, TResult>` BindIf will execute a function only if the Response is valid, and the boolean predicate is true.  
+* `bool IsNotNull<T>` IsNotNull returns true when the Response is valid, and the value of T is __not null__, otherwise false is returned.  
+* `bool IsNotDefault<T>` IsNotDefault returns true when the Response is valid, and the value of T is __not default__, otherwise false is returned.  
 
 In general you will find various overloads for these extension methods.  
 They target `T`, `Response`, and `Response<T>`; with options for both sync, and async types.  
@@ -1273,3 +1275,8 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 ## 16.0.0
 
 * Updated framework to dotnet 10.
+
+## 16.0.1
+
+* Added new extension method on `Response<T>` - `bool IsNotNull<T>`, used to check the response is valid, and the value is not null.  
+* Added new extension method on `Response<T>` - `bool IsNotDefault<T>`, used to check the response is valid, and the value is not default.  
