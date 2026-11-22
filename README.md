@@ -1280,3 +1280,7 @@ The major version was bumped (*MAJOR.MINOR.PATCH*), as we've introduced backward
 
 * Added new extension method on `Response<T>` - `bool IsNotNull<T>`, used to check the response is valid, and the value is not null.  
 * Added new extension method on `Response<T>` - `bool IsNotDefault<T>`, used to check the response is valid, and the value is not default.  
+
+## 16.0.2
+
+* Improved thread safety on `ResponseAsync<T>`.
