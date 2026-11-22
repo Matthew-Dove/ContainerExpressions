@@ -892,49 +892,49 @@ namespace Tests.ContainerExpressions.Containers
         [TestMethod]
         public async Task MaybeValue_Bind_FirstAndSecondMaybeIsTask_SyncFunc()
         {
-            var first = Task.FromResult(new Maybe<int, string>(2));
-            var second = Task.FromResult(new Maybe<decimal, string>(3.0M));
+            var first = Task.FromResult(new Maybe<int, string>(3));
+            var second = Task.FromResult(new Maybe<decimal, string>(2.0M));
             Func<int, decimal, Maybe<double, string>> func = (x, y) => new Maybe<double, string>((double)(x / y));
 
             var result = await first.BindAsync(second, func);
 
-            Assert.AreEqual((double)(2 / 3M), result.Match(x => x, _ => 0D));
+            Assert.AreEqual((double)(3 / 2M), result.Match(x => x, _ => 0D));
         }
 
         [TestMethod]
         public async Task MaybeValue_BindT_FirstAndSecondMaybeIsTask_SyncFunc()
         {
-            var first = Task.FromResult(new Maybe<int, string>(2));
-            var second = Task.FromResult(new Maybe<decimal, string>(3.0M));
+            var first = Task.FromResult(new Maybe<int, string>(3));
+            var second = Task.FromResult(new Maybe<decimal, string>(2.0M));
             Func<int, decimal, double> func = (x, y) => (double)(x / y);
 
             var result = await first.BindAsync(second, func);
 
-            Assert.AreEqual((double)(2 / 3M), result.Match(x => x, _ => 0D));
+            Assert.AreEqual((double)(3 / 2M), result.Match(x => x, _ => 0D));
         }
 
         [TestMethod]
         public async Task MaybeValue_Bind_FirstAndSecondMaybeIsTask()
         {
-            var first = Task.FromResult(new Maybe<int, string>(2));
-            var second = Task.FromResult(new Maybe<decimal, string>(3.0M));
+            var first = Task.FromResult(new Maybe<int, string>(3));
+            var second = Task.FromResult(new Maybe<decimal, string>(2.0M));
             Func<int, decimal, Task<Maybe<double, string>>> func = (x, y) => Task.FromResult(new Maybe<double, string>((double)(x / y)));
 
             var result = await first.BindAsync(second, func);
 
-            Assert.AreEqual((double)(2 / 3M), result.Match(x => x, _ => 0D));
+            Assert.AreEqual((double)(3 / 2M), result.Match(x => x, _ => 0D));
         }
 
         [TestMethod]
         public async Task MaybeValue_BindT_FirstAndSecondMaybeIsTask()
         {
-            var first = Task.FromResult(new Maybe<int, string>(2));
-            var second = Task.FromResult(new Maybe<decimal, string>(3.0M));
+            var first = Task.FromResult(new Maybe<int, string>(3));
+            var second = Task.FromResult(new Maybe<decimal, string>(2.0M));
             Func<int, decimal, Task<double>> func = (x, y) => Task.FromResult((double)(x / y));
 
             var result = await first.BindAsync(second, func);
 
-            Assert.AreEqual((double)(2 / 3M), result.Match(x => x, _ => 0D));
+            Assert.AreEqual((double)(3 / 2M), result.Match(x => x, _ => 0D));
         }
 
         [TestMethod]
